@@ -40,13 +40,6 @@ mp4h.1: mp4h.pod
             --release="HTML Tools" \
         mp4h.pod > $@
 
-mp4h.texinfo: mp4h.mp4h $(INCDIR)/texinfo.out $(PROGRAM) $(DEPS)
-	$(PROGRAM) -D format=texinfo -I $(INCDIR) mp4h.mp4h \
-	| sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
-
-mp4h.info: mp4h.texinfo
-	makeinfo mp4h.texinfo
-
 # ------------------------------------------------
 #   PROGRAM
 # ------------------------------------------------

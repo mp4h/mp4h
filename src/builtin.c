@@ -888,7 +888,7 @@ void
 locale_init (void)
 {
 #ifdef HAVE_LOCALE_H
-  setlocale (LC_ALL, "C");
+  setlocale (LC_ALL, "");
   my_locale = localeconv ();
   decimal_point = my_locale->decimal_point;
 #endif
@@ -1737,6 +1737,7 @@ mp4h_define_tag (MP4H_BUILTIN_ARGS)
 {
   const builtin *bp;
   const char *attributes, *endtag, *whitespace;
+  symbol *sym;
   boolean expand_args = TRUE;
   boolean container = FALSE;
   boolean space_delete = FALSE;
@@ -1784,6 +1785,14 @@ mp4h_define_tag (MP4H_BUILTIN_ARGS)
         _("INTERNAL ERROR: Bad token data type in mp4h_define_tag ()")));
       abort ();
     }
+
+  /*  Clear hooks  */
+  sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
+  if (!sym)
+    return;
+
+  xfree (SYMBOL_HOOK_BEGIN (sym));
+  xfree (SYMBOL_HOOK_END (sym));
 }
 
 /*-------------------------------------.
@@ -1808,36 +1817,49 @@ mp4h_let (MP4H_BUILTIN_ARGS)
 {
   const builtin *bp;
   symbol *s;
+  char *cp;
+  int i;
 
-  if (bad_argc (argv[0], argc, 3, 3))
-    return;
-
-  s = lookup_symbol (ARG (2), SYMBOL_LOOKUP);
-  if (s == NULL)
+  for (i = 1; i < argc; i++)
     {
-      MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Macro `%s' not defined in <let>"),
-             CURRENT_FILE_LINE, ARG (2)));
-      return;
-    }
+      cp = strchr (ARG (i), '=');
+      if (cp)
+        {
+          *cp = '\0';
+          cp++;
+          s = lookup_symbol (cp, SYMBOL_LOOKUP);
+          if (s == NULL)
+            {
+              MP4HERROR ((warning_status, 0,
+                _("Warning:%s:%d: Macro `%s' not defined in <let>"),
+                     CURRENT_FILE_LINE, cp));
+              continue;
+            }
 
-  switch (SYMBOL_TYPE (s))
-    {
-    case TOKEN_FUNC:
-      bp = find_builtin_by_addr (SYMBOL_FUNC (s));
-      if (bp == NULL)
-        return;
-      define_builtin (ARG (1), bp, SYMBOL_TRACED (s));
-      break;
-    case TOKEN_TEXT:
-      define_user_macro (ARG (1), SYMBOL_TEXT (s), SYMBOL_INSERT,
-            SYMBOL_CONTAINER (s), SYMBOL_EXPAND_ARGS (s), FALSE);
-      break;
+          switch (SYMBOL_TYPE (s))
+            {
+            case TOKEN_FUNC:
+              bp = find_builtin_by_addr (SYMBOL_FUNC (s));
+              if (bp)
+                define_builtin (ARG (i), bp, SYMBOL_TRACED (s));
+              break;
+            case TOKEN_TEXT:
+              define_user_macro (ARG (i), SYMBOL_TEXT (s), SYMBOL_INSERT,
+                    SYMBOL_CONTAINER (s), SYMBOL_EXPAND_ARGS (s), FALSE);
+              break;
 
-    default:
-      MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Bad token data type in mp4h_let ()")));
-      abort ();
+            default:
+              MP4HERROR ((warning_status, 0,
+                _("INTERNAL ERROR: Bad token data type in mp4h_let ()")));
+              abort ();
+            }
+        }
+      else
+        {
+          MP4HERROR ((warning_status, 0,
+            _("Warning:%s:%d: unknown syntax `%s' in <let>"),
+                 CURRENT_FILE_LINE, ARG (i)));
+        }
     }
 }
 

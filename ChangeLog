@@ -8,7 +8,25 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.9.3 and 0.9.4:
+
+    *) Changes in l10n (03-May-2000):
+       I do not know how to deal with locales in a portable way, so
+       examples are removed from documentation.  Only English
+       documentation is build, but you may continue to compile the
+       French one if your environment variables are rightly set.
+       [Denis Barbier]
+
+    *) Syntax change in the <let> tag (03-May-2000):
+       New syntax is <let cmd1=cmd2>, similar to TeX and more
+       user friendly.
+       [Denis Barbier]
+
   Changes between 0.9.2 and 0.9.3:
+
+    *) Ease building of Debian package (20-Apr-2000):
+       I added a new `deb' target to build Debian packages
+       [Denis Barbier]
 
     *) Do not invoke tidy on HTML documentation (20-Apr-2000):
        By default HTML documentation is no more post-processed by

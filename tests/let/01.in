@@ -1,8 +1,8 @@
-<let foo define-tag>
+<let foo=define-tag>
 <foo quux>
 bar
 %attributes
 baz
 </foo>
-<let baz quux>
+<let baz=quux>
 <baz 1 2 3>

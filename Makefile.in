@@ -163,6 +163,12 @@ snap: distclean fixperm
     echo "Snap of whole source tree: mp4h Version $$_version as of $$_date"; \
     $(_BUILDDIST)
 
+deb: release
+	set -e; $(_GETDISTINFO) \
+    mv mp4h-$${_version}.tar.gz ../mp4h_$${_version}.orig.tar.gz
+	dpkg-buildpackage -i'.*CVS.*|.*\.cvsignore' -rfakeroot
+	./debian/rules clean
+
 new-version:
 	OPT=-iv; $(NEWVERS)
 

@@ -3,9 +3,13 @@
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
-<mp4h-l10n LC_CTYPE=fr_FR>
+;;;   There is no solution to define French locales in a portable way.
+;;;   Before compiling this documentation, ensure that your environment
+;;;   variables LC_CTYPE or LC_ALL match a French l10n.
+<mp4h-l10n LC_NUMERIC=C>
+
 <set-var package=mp4h>
-<set-var version=0.9.3>
+<set-var version=0.9.4>
 <set-var title="mp4h - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -286,7 +290,7 @@ sauvegarder une commande avant de la redéfinir.
 
 <example>
 <define-tag foo>un</define-tag>
-<let bar foo>
+<let bar=foo>
 <define-tag foo>deux</define-tag>
 <foo><bar>
 </example>
@@ -318,7 +322,7 @@ est complexe ou non.
 </para>
 
 <example>
-<let foo add>
+<let foo=add>
 <set-hook foo position=before>
 Avant</set-hook>
 <set-hook foo position=after>
@@ -1760,13 +1764,10 @@ voici le nombre de cycles d'horloge écoulés:
 
 <para>
 Redéfinit la localisation courante. Par défaut, le programme est lancé
-avec la localisation «C».
+avec la localisation «C». Mais comme les noms de localisation sont
+différents d'une machine à l'autre, vous devez vous référer à la
+documentation de votre système pour connaitre les valeurs à employer.
 </para>
-
-<example>
-<mp4h-l10n LC_NUMERIC=fr_FR>
-<add 1,2 3,4>
-</example>
 
 <tag:description mp4h-output-radix>
 <var number>
@@ -1779,7 +1780,6 @@ après la virgule.
 </para>
 
 <example>
-<mp4h-l10n LC_NUMERIC=C>
 <add 1.2 3.4>
 <mp4h-output-radix 2>
 <add 1.2 3.4>

@@ -3,5 +3,5 @@ bar
 %attributes
 baz
 </define-tag>
-<let quux foo>
+<let quux=foo>
 <quux 1 2 3>

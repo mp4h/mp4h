@@ -3,8 +3,9 @@
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
+<mp4h-l10n LC_ALL=C>
 <set-var package=mp4h>
-<set-var version=0.9.3>
+<set-var version=0.9.4>
 <set-var title="mp4h - A Macro Processeur for HTML Documents">
 
 <include <get-var format>.out
@@ -264,7 +265,7 @@ before redefining it.
 
 <example>
 <define-tag foo>one</define-tag>
-<let bar foo>
+<let bar=foo>
 <define-tag foo>two</define-tag>
 <foo><bar>
 </example>
@@ -296,7 +297,7 @@ complex or not.
 </para>
 
 <example>
-<let foo add>
+<let foo=add>
 <set-hook foo position=before>
 Before</set-hook>
 <set-hook foo position=after>
@@ -1676,14 +1677,10 @@ this documentation by <mp4h> is:
 
 <para>
 Set locale-specific variables.  By default, the portable "C" locale is
-selected.
+selected. As locales have different names on different platforms, you
+must refer to your system documentation to find which values are adapted
+to your system.
 </para>
-
-<example>
-<mp4h-l10n LC_NUMERIC=fr_FR>
-<add 1,2 3,4>
-</example>
-<mp4h-l10n LC_ALL=C>
 
 <tag:description mp4h-output-radix>
 <var number>
