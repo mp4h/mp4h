@@ -44,10 +44,10 @@ LOBJ        = $(SOURCES:.c=.lo)
 .SUFFIXES: .c .o .lo .la
 
 .c.o:
-	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` $(DEFS) $(INCLUDES) -c $<
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --cc` `$(mp4h_config) --cflags` $(DEFS) $(INCLUDES) -I`$(mp4h_config) --includedir` -c $<
 
 .c.lo:
-	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` $(DEFS) $(INCLUDES) -c $<
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --cc` `$(mp4h_config) --cflags` $(DEFS) $(INCLUDES) -I`$(mp4h_config) --includedir` -c $<
 
 .lo.la:
 	$(LIBTOOL) --quiet --mode=link `$(mp4h_config) --cc` -o $@ $< \
