@@ -37,8 +37,8 @@
 
 #include "ltdl.h"
 
-#undef DEBUG_MODULES
 #define DEBUG_MODULES
+#undef DEBUG_MODULES
 
 /* 
  * This file implements dynamic modules in GNU m4.  A module is a
