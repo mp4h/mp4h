@@ -174,7 +174,7 @@
    defined. */
 #undef _POSIX_1_SOURCE
 
-/* Define if you need to in order for stat and other things to work. */
+/* Define if you need to in order for `stat' and other things to work. */
 #undef _POSIX_SOURCE
 
 /* Define to empty if `const' does not conform to ANSI C. */

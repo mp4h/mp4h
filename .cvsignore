@@ -1,5 +1,4 @@
 config.log config.cache config.h config.status
-configure
 Makefile
 libtool
 mp4h-config

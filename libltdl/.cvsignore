@@ -1,5 +1,4 @@
-config.log config.cache config.h config.h.in config.status
-configure
+config.log config.cache config.h config.status
 Makefile
 libtool
 stamp-h
