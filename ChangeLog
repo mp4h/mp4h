@@ -10,6 +10,13 @@
 
   Changes between 0.8.2 and 0.8.1:
 
+    *) Fix build failure on FreeBSD (15-Mar-2000):
+       There was a bug in lib/xmalloc.c which causes a build failure
+       on FreeBSD.
+       [Ralf S. Engelschall <rse@engelschall.com>]
+
+  Changes between 0.8.2 and 0.8.1:
+
     *) Cosmetic changes in documentation (11-Mar-2000):
        These changes are made to allow automatic generation of
        http://www.engelschall.com/sw/mp4h/docs/index.html

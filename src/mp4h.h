@@ -517,15 +517,7 @@ struct builtin
   builtin_func *func;
 };
 
-struct predefined
-{
-  const char *unix_name;
-  const char *gnu_name;
-  const char *func;
-};
-
 typedef struct builtin builtin;
-typedef struct predefined predefined;
 
 void builtin_init __P ((void));
 void define_builtin __P ((const char *, const builtin *, symbol_lookup,

@@ -1,7 +1,3 @@
-/*
-   This version implements a new routine re_compile_pattern_nl
-   Denis Barbier
-*/
 /* Definitions for data structures and routines for the regular
    expression library, version 0.12.
    Copyright (C) 1985,89,90,91,92,93,95,96,97,98 Free Software Foundation, Inc.
