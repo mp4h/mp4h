@@ -8,6 +8,14 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.2.3 and ???:
+
+    *) Upgrade to PCRE 3.7 (08-Nov-2001):
+       Upstream do allow various definitions of newline char, I keep
+       stuck with `\n' in internal.h since I know exactly how to
+       incorporate this option.
+       [Denis Barbier]
+
   Changes between 1.2.2 and 1.2.3:
 
     *) Fix leading space added by <attributes-quote> (25-Oct-2001):
