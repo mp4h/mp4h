@@ -467,6 +467,8 @@ expand_macro (symbol *sym, read_type expansion)
     attr_expansion = READ_ATTR_BODY;
   else if (expansion == READ_ATTR_VERB || ! SYMBOL_EXPAND_ARGS (sym))
     attr_expansion = READ_ATTR_VERB;
+  else if (expansion == READ_ATTR_ASIS)
+    attr_expansion = READ_ATTR_ASIS;
   else
     attr_expansion = READ_ATTRIBUTE;
 
@@ -509,19 +511,24 @@ expand_macro (symbol *sym, read_type expansion)
       for (i = 1; i < argc; i++)
         {
           obstack_1grow (obs_expansion, ' ');
-          if (strlen (TOKEN_DATA_TEXT (argv[i])) == 0)
-            {
-              obstack_1grow (obs_expansion, CHAR_BGROUP);
-              obstack_1grow (obs_expansion, CHAR_EGROUP);
-            }
-          else if (strchr (TOKEN_DATA_TEXT (argv[i]), ' '))
-            {
-              obstack_1grow (obs_expansion, CHAR_BGROUP);
-              shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-              obstack_1grow (obs_expansion, CHAR_EGROUP);
-            }
-          else
+          if (expansion == READ_ATTR_ASIS)
             shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+          else
+            {
+              if (strlen (TOKEN_DATA_TEXT (argv[i])) == 0)
+                {
+                  obstack_1grow (obs_expansion, CHAR_BGROUP);
+                  obstack_1grow (obs_expansion, CHAR_EGROUP);
+                }
+              else if (strchr (TOKEN_DATA_TEXT (argv[i]), ' '))
+                {
+                  obstack_1grow (obs_expansion, CHAR_BGROUP);
+                  shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+                  obstack_1grow (obs_expansion, CHAR_EGROUP);
+                }
+              else
+                shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+            }
         }
       obstack_1grow (obs_expansion, '>');
       if (SYMBOL_CONTAINER (sym))

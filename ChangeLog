@@ -8,6 +8,19 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.9.0 and 0.9.1:
+
+    *) Fix bugs with extra quotes in attributes (03-Apr-2000):
+       [Denis Barbier]
+
+    *) Fix bugs in grouping (03-Apr-2000):
+       [Denis Barbier]
+
+    *) Remove a trailing slash in attributes (01-Apr-2000):
+       When reading attributes of single tags, a trailing slash is
+       ignored.
+       [Denis Barbier]
+
   Changes between 0.8.5 and 0.9.0:
 
     *) Customization of number output format (01-Apr-2000):

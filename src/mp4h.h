@@ -334,8 +334,10 @@ struct token_data
 /* The status of processing. */
 #define READ_NORMAL    (1 << 0)  /* normal expansion of macros */
 #define READ_ATTRIBUTE (1 << 1)  /* when reading macro arguments */
-#define READ_ATTR_VERB (1 << 2)  /* attributes are not expanded */
-#define READ_ATTR_ASIS (1 << 3)  /* attributes are printed as is */
+#define READ_ATTR_VERB (1 << 2)  /* inside macros with attributes=verbatim */
+#define READ_ATTR_ASIS (1 << 3)  /* attributes are read without any
+           modification, main difference with READ_ATTR_VERB is that quotes
+           are not removed and are part of this attribute  */
 #define READ_BODY      (1 << 4)  /* when reading body function */
 #define READ_ATTR_BODY (1 << 5)  /* when reading attributes of tags
                                     within another body function  */
