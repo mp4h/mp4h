@@ -22,6 +22,11 @@
        They have now no effect, they did formerly reset variable.
        [Denis Barbier]
 
+    *) Checks added for preserve/restore pairs (17-Oct-2001):
+       A warning is raised at end of processing when some material
+       remains on this stack.
+       [Denis Barbier]
+
     *) Fix memory leaks (15-Oct-2001):
        [Denis Barbier]
 
