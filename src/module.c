@@ -147,6 +147,30 @@ module_init (void)
  */
 
 void
+library_load (const char *libname, struct obstack *obs)
+{
+  lt_dlhandle library;
+  module_list *list;
+  builtin *bp;
+
+  /* Dynamically load the named module. */
+  library = lt_dlopenext(libname);
+
+  if (library != NULL)
+    {
+      for (list = modules; list != NULL; list = list->next)
+	if (list->handle == library)
+	  {
+#ifdef DEBUG_MODULES
+	    DEBUG_MESSAGE1("library %s handle already seen", libname);
+#endif /* DEBUG_MODULES */
+	    lt_dlclose(library); /* close the duplicate copy */
+	    return;
+	  }
+    }
+}
+
+void
 module_load (const char *modname, struct obstack *obs)
 {
   module_init_t *init_func;

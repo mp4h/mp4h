@@ -130,7 +130,7 @@ DECLARE (mp4h_include);
 DECLARE (mp4h___include);
 DECLARE (mp4h_use);
 #ifdef WITH_MODULES
-DECLARE (mp4h_loadmodule);
+DECLARE (mp4h_load);
 #endif
 DECLARE (mp4h_comment);
 DECLARE (mp4h_set_eol_comment);
@@ -285,9 +285,9 @@ builtin_tab[] =
   { "__include",        TRUE,     TRUE,   mp4h___include },
   { "use",              FALSE,    TRUE,   mp4h_use },
 #ifdef WITH_MODULES
-  { "loadmodule",       FALSE,    TRUE,   mp4h_loadmodule },
+  { "load",             FALSE,    TRUE,   mp4h_load },
 #else
-  { "loadmodule",       FALSE,    TRUE,   mp4h_unsupported },
+  { "load",             FALSE,    TRUE,   mp4h_unsupported },
 #endif
   { "comment",          TRUE,     TRUE,   mp4h_comment },
   { "set-eol-comment",  FALSE,    TRUE,   mp4h_set_eol_comment },
@@ -2721,12 +2721,22 @@ mp4h_use (MP4H_BUILTIN_ARGS)
 #ifdef WITH_MODULES
 
 static void
-mp4h_loadmodule (MP4H_BUILTIN_ARGS)
+mp4h_load (MP4H_BUILTIN_ARGS)
 {
-  if (bad_argc (argv[0], argc, 2, 2))
-    return;
-
-  module_load (ARG(1), obs);
+  const char *module, *library;
+  library = predefined_attribute ("library", &argc, argv, FALSE);
+  module = predefined_attribute ("module", &argc, argv, FALSE);
+  if (!library && !module)
+    {
+      MP4HERROR ((warning_status, 0,
+        _("Error:%s:%d: Required attribute `pathname' is not specified"),
+           CURRENT_FILE_LINE));
+      return;
+    }
+  if (library)
+    library_load (library, obs);
+  if (module)
+    module_load (module, obs);
 }
 
 #endif

@@ -651,6 +651,7 @@ typedef void module_finish_t __P ((void));
 
 typedef voidstar module_func __P ((const char *));
 
+void library_load __P ((const char *, struct obstack *));
 void module_load __P ((const char *, struct obstack *));
 void module_unload_all __P ((void));
 
