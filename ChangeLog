@@ -8,7 +8,14 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 1.2.0 and ???:
+  Changes between 1.2.0 and 1.2.1:
+
+    *) Add support for case sensitiveness (30-Sep-2001):
+       In HTML, tags are case insensitive unlike entities.  Moreover in
+       XHTML, tags have also become case sensitive.  For these reasons,
+       it is important to be able to decide at run time whether symbols
+       are case sensitive or not.  A new -c flag does the job.
+       [Denis Barbier]
 
     *) Improve documentation (29-Sep-2001):
        Entities are now used in place of some tags, and some typos
