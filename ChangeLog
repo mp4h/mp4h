@@ -8,7 +8,10 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 0.5.7 and SNAP:
+  Changes between 0.5.7 and 0.6.0:
+
+    *) Documentation improved, but still in French (10-Feb-2000):
+       [Denis Barbier]
 
     *) Fix how comments are handled (10-Feb-2000):
        I did not understand what was called ``comment'' in m4 syntax,

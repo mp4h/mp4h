@@ -65,7 +65,7 @@ argument, l'option courte doit l'accepter aussi.
 La syntaxe générale d'appel de <mp4h> est
 <code>mp4h [options] [fichier]</code>
 Les options sont décrites ci-dessous. Si aucun fichier n'est spécifié
-sur la ligne de commande, ou s'il a pour nom <commande ->, alors les
+sur la ligne de commande, ou s'il a pour nom <comman ->, alors les
 caractères sont lus sur l'entrée standard.
 </para>
 
@@ -90,7 +90,7 @@ inclure sont cherchés</option>
 <option -D --define=<optmand NOM<optopt =VALEUR>>>###
 Affecte une valeur à la variable de nom <var NOM></option>
 <option -U --undefine=<optmand COMMANDE>>###
-Supprime la primitive de nom <commande COMMANDE></option>
+Supprime la primitive de nom <command COMMANDE></option>
 </option-list>
 
 <subsection "Limites des ressources">
@@ -109,7 +109,7 @@ Fixe la limite arbitraire du nombre d'appels récursifs (défaut: 250)</option>
 <option -d --debug=<optmand FLAGS>>###
 Détermine quelles sont les informations affichées (voir ci-dessous)</option>
 <option -t --trace=<optmand NOM>>###
-La commande <commande NOM> sera tracée dès qu'elle est définie</option>
+La commande <command NOM> sera tracée dès qu'elle est définie</option>
 <option -l --arglength=<optmand NOMBRE>>###
 Limite le nombre de caractères affichés dans les messages de
 déboguage</option>
@@ -123,7 +123,7 @@ Les drapeuax pour l'option <optmand -d> sont les suivantes:
 <option-list>
 <option t>###
 trace tous les appels de macros, pas seulement
-ceux déclarés avec <commande traceon></option>
+ceux déclarés avec <command traceon></option>
 <option a>affiche les arguments</option>
 <option e>affiche le texte de remplacement</option>
 <option c>affiche la commande avant la collecte des arguments, après et
@@ -173,7 +173,7 @@ texte
 <para>
 <anchor name="noteattr">
 Dans les descriptions de commandes, une barre oblique <slash> indique
-que la balise est complexe, et la lettre <commande V> que les attributs
+que la balise est complexe, et la lettre <command V> que les attributs
 de la balise sont lus sans être développés (voir le chapitre sur le
 mécanisme de développement des macros pour plus de détails).
 </para>
@@ -482,11 +482,11 @@ contraire, aucune opération n'est effectuée.
 
 <para>
 Affiche des informations sur le symbole passé en argument. S'il s'agit
-d'une variable, le mot <commande STRING> est affiché, ainsi que le
+d'une variable, le mot <command STRING> est affiché, ainsi que le
 nombre de lignes de cette variable. S'il s'agit d'une commande ou
 primitive, un message indique de quel type de symbole il s'agit :
-<commande PRIM COMPLEX>, <commande PRIM TAG>,
-<commande USER COMPLEX> et <commande USER TAG>
+<command PRIM COMPLEX>, <command PRIM TAG>,
+<command USER COMPLEX> et <command USER TAG>
 </para>
 
 <example>
@@ -1244,7 +1244,7 @@ de cette fonction est exécuté.
 </tag:description>
 
 <para>
-Cette commande est similaire à la commande <commande foreach> de Perl ; 
+Cette commande est similaire à la commande <command foreach> de Perl ; 
 une variable prend successivement toutes les valeurs stockées dans un
 tableau, et le corps de la fonction est exécuté pour chacune de ces
 valeurs.
@@ -1312,7 +1312,7 @@ Cette commande permet de faire plusieurs tests en une seule instruction.
 </tag:description>
 
 <para>
-Cette commande fait sortir de la boucle <commande while>
+Cette commande fait sortir de la boucle <command while>
 la plus interne.
 </para>
 
@@ -1450,7 +1450,7 @@ document post-traité.
 <para>
 Les commandes dont les noms sont passés en argument sont «tracées»,
 c'est-à-diree que les informations demandées au travers de l'option <optflag d>
-et de la commande <commande debugmode> sont affichées lors de chaque appel de
+et de la commande <command debugmode> sont affichées lors de chaque appel de
 la fonction.
 </para>
 
@@ -1566,13 +1566,13 @@ Les commandes ainsi définies peuvent avoir des attributs, comme toute
 balise HTML. Ces attributs sont séparés par un ou plusieurs espaces,
 tabulations ou sauts de lignes, et chaque attribut doit être une entité
 complète de <mp4h>. Par exemple, avec les définitionsa ci-dessus,
-<left-angle><commande bar><right-angle> ne peut pas être un attribut,
-parce que la commande <commande bar> est complexe.
+<full-command bar> ne peut pas être un attribut,
+parce que la commande <full-command bar> est complexe.
 En revanche, il est possible d'écrire
 <code><foo <foo>></code>
 ou même
 <code><foo <foo name=src url=ici>></code>
-Dans les deux exemples ci-dessus, la commande <commande foo> a un seul
+Dans les deux exemples ci-dessus, la commande <command foo> a un seul
 attribut.
 </para>
 
@@ -1580,36 +1580,93 @@ attribut.
 <para>
 Dans certains cas, il est nécessaire de regrouper ensemble plusieurs
 chaînes de caractères pour en faire un seul attribut. Cela peut être
-fait soit avec des guillements, soit avec la commande <commande group>.
+fait soit avec des guillements, soit avec la commande <command group>.
 Par exemple,
 <code><foo "Ceci est le 1er attribut"
            <group et le second>></code>
 </para>
 
+<undef href mail1 mail2 show-attributes show1 show2 bar>
 <para>
 Pour que ces attributs se retrouvent dans le texte de
-remplacement, les conventions suivantes ontété adoptées:
+remplacement, les conventions suivantes ont été adoptées:
 <list>
 <item>Les attributs sont numérotés à partir de 0. Dans le texte de
 remplacement, <value %0> sera remplacé par le 1er attribut, <value %1>
 par le 2e attribut, etc. Comme le nombre d'attribut n'est pas limité,
 les lettres <value %20> seront remplacés par le vingt-et-unième
 argument, et pas par le 3e argument suivi d'un 0.
+<example>
+<define-tag href>;;;
+<a href="%0">%1</a>;;;
+</define-tag>;;;
+<href http://www.gimp.org "The Gimp">
+</example>
 
 <item>Les caractères <value %attributes> sont remplacés par la liste 
 des arguments, séparés par un espace.
+<example>
+<define-tag mail1>;;;
+<set-var %attributes>;;;
+<get-var name>
+<get-var mail>
+</define-tag>;;;
+<set-var name="" mail="">
+<mail1 name="Dr. Foo" mail="hello@foo.com">
+</example>
 
 <item>Les caractères <value %body> sont remplacés par le corps de la
 commande, dans le cas d'une balise complexe.
+<example>
+<define-tag mail2 endtag=required>;;;
+<set-var %attributes>;;;
+<a href="mailto:<get-var mail>">%body</a>
+</define-tag>;;;
+<mail2 mail="hello@foo.com">;;;
+<img src="photo.png" alt="Dr. Foo" border=0>;;;
+</mail2>
+</example>
 
 <item>Les deux formes ci-dessus possèdent une forme alternative, où la
 liste est séparée par des sauts de lignes au lieu d'espaces. Il s'agit
 des formes <value %Aattributes> et <value %Abody>, le <value A> voulant
 dire array (tableau en français).
-commande, dans le cas d'une balise complexe.
+<example>
+<define-tag show-attributes>;;;
+<set-var list="%Aattributes" i=0>;;;
+<foreach attr list>;;;
+%<get-var i>: <get-var attr>
+<increment i>;;;
+</foreach>;;;
+</define-tag>;;;
+<show-attributes name="Dr. Foo" mail="hello@foo.com">
+</example>
 
+<item>Une autre forme alternative est obtenue en remoplaçant le <value
+A> par <value U>, auquel cas le texte est remplacé mais n'est lui-même
+pas évalué. Cela n'a de sens que si la commande a été déclarée avec
+l'attribut <attribute attributes=verbatim>, parce que dans le cas
+contraire les arguments sont développés avant que ces substitutions
+n'aient lieu.
+<example>
+<define-tag show1>;;;
+Avant développement: %Uattributes
+Après développement: %attributes
+</define-tag>;;;
+<define-tag show2 attributes=verbatim>;;;
+Avant développement: %Uattributes
+Après développement: %attributes
+</define-tag>;;;
+<define-tag bar>et hop %attributes</define-tag>;;;
+<show1 <bar la boum>>
+<show2 <bar la boum>>
+</example>
+
+<item>Les modificateurs <value A> et <value U> peuvent être combinés.
 </list>
 </para>
+
+<subsection "Mécanisme d'expansion des commandes">
 
 <section "Problèmes connus">
 

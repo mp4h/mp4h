@@ -22,7 +22,8 @@
 <check-tag code>
 <check-tag var>
 <check-tag value>
-<check-tag commande>
+<check-tag command>
+<check-tag full-command>
 <check-tag left-angle>
 <check-tag right-angle>
 <check-tag true>

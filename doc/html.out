@@ -16,7 +16,8 @@
 
 <define-tag var><em>%attributes</em></define-tag>
 <define-tag value><tt>%attributes</tt></define-tag>
-<define-tag commande><tt>%attributes</tt></define-tag>
+<define-tag command><tt>%attributes</tt></define-tag>
+<define-tag full-command><tt>&lt;%attributes&gt;</tt></define-tag>
 <define-tag left-angle>&lt;</define-tag>
 <define-tag right-angle>&gt;</define-tag>
 <define-tag slash><tt>/</tt></define-tag>
