@@ -10,6 +10,10 @@
 
   Changes between 1.2.3 and ???:
 
+    *) Fix <attributes-extract> and <attributes-remove> tags (11-Jan-2002):
+       Valueless attributes in these tags crashed mp4h.
+       [Anders Dinsen]
+
     *) Do not abort with missing input files (05-Jan-2002):
        Just print a warning and skip this file.
        [Anders Dinsen]

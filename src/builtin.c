@@ -904,8 +904,11 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
                         match_ptr[j*2+1] - match_ptr[j*2]);
             }
 
-          obstack_1grow (obs, '=');
-          obstack_grow (obs, cp+1, strlen (cp+1));
+          if (cp)
+            {
+              obstack_1grow (obs, '=');
+              obstack_grow (obs, cp+1, strlen (cp+1));
+            }
           obstack_1grow (obs, CHAR_EGROUP);
         }
       else if (rc == PCRE_ERROR_NOMATCH && !match)
