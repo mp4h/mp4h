@@ -17,6 +17,8 @@ doc/Makefile.in
 doc/html.out
 doc/list-tags
 doc/mp4h.mp4h
+doc/mp4h.mp4h.orig
+doc/mp4h.mp4h.rej
 doc/pod.out
 doc/texinfo.out
 install-sh
@@ -68,6 +70,7 @@ pcre/pcre.c
 pcre/pcre.h
 pcre/study.c
 shtool
+src/.#builtin.c.1.86
 src/Makefile.in
 src/builtin.c
 src/builtin.h
@@ -162,6 +165,8 @@ tests/define-tag/06.in
 tests/define-tag/06.ok
 tests/directory-contents/01.in
 tests/directory-contents/01.ok
+tests/divert/01.in
+tests/divert/01.ok
 tests/downcase/01.in
 tests/downcase/01.ok
 tests/downcase/02.in
@@ -193,6 +198,8 @@ tests/ifneq/03.ok
 tests/include/01.in
 tests/include/01.inc
 tests/include/01.ok
+tests/include/02.in
+tests/include/02.ok
 tests/increment/01.in
 tests/increment/01.ok
 tests/let/01.in
@@ -213,6 +220,8 @@ tests/match/05.in
 tests/match/05.ok
 tests/match/06.in
 tests/match/06.ok
+tests/real-path/01.in
+tests/real-path/01.ok
 tests/set-var/01.in
 tests/set-var/01.ok
 tests/set-var/02.in
@@ -223,6 +232,8 @@ tests/set-var/04.in
 tests/set-var/04.ok
 tests/set-var/05.in
 tests/set-var/05.ok
+tests/set-var/06.in
+tests/set-var/06.ok
 tests/sort/01.in
 tests/sort/01.ok
 tests/sort/02.in

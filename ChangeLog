@@ -10,7 +10,11 @@
 
   Changes between 1.1.2 and 1.1.3:
 
-    *) New `real-path' tag  (24-Mar-2001):
+    *) New <set-var-x> tag  (24-Mar-2001):
+       Like <set-var>, but this is a complex tag.
+       [Anders Dinsen]
+
+    *) New <real-path> tag  (24-Mar-2001):
        Returns absolute pathname of a file.
        [Anders Dinsen]
 
