@@ -94,7 +94,7 @@ free_symbol (symbol *sym)
   xfree ((voidstar) sym);
 }
 
-void
+static void
 hash_table_free (symbol **s)
 {
   int h;
