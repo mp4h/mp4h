@@ -1062,7 +1062,8 @@ next_token (token_data *td, read_type expansion, boolean in_string)
       else if (expansion == READ_BODY)
         {
           obstack_1grow (&token_stack, ch);
-          while ((ch = next_char ()) != CHAR_EOF && ! IS_ESCAPE(ch))
+          while ((ch = next_char ()) != CHAR_EOF
+                  && ! IS_ESCAPE(ch) && ! IS_CLOSE (ch))
             {
               if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
                 {
@@ -1070,7 +1071,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                   ch = CHAR_EOF;
                   break;
                 }
-                obstack_1grow (&token_stack, ch);
+              obstack_1grow (&token_stack, ch);
             }
           unget_input(ch);
 

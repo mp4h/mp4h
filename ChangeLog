@@ -8,6 +8,14 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.0.2 and SNAP:
+
+    *) Parse bad formed closing tags (24-Jun-2000):
+       With previous versions, closing tags with attributes confuse
+       mp4h.  They are now accepted, even if not desirable in input
+       files.
+       [Fritz Zaucker <zaucker@ee.ethz.ch>]
+
   Changes between 1.0.1 and 1.0.2:
 
     *) Improve output routines (22-Jun-2000):
