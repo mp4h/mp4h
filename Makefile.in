@@ -209,10 +209,11 @@ snap: distclean fixperm
     $(_BUILDDIST)
 
 deb: release
+	fakeroot ./debian/rules clean
 	set -e; $(_GETDISTINFO) \
     mv mp4h-$${_version}.tar.gz ../mp4h_$${_version}.orig.tar.gz
 	dpkg-buildpackage -i'.*CVS.*|.*\.cvsignore' -rfakeroot
-	./debian/rules clean
+	fakeroot ./debian/rules clean
 
 new-version:
 	@V="$(VERSION)"; \

@@ -37,6 +37,9 @@ all install clean:
    done && test -z "$$fail"
 
 distclean:
+	@for dir in $(SUBDIRS); do \
+      target='$@'; $(RECURS_TARGET); \
+   done
 	$(RM) Makefile
 
 ##EOF##

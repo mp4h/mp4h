@@ -47,13 +47,13 @@ libltdl/ltdl.h
 libltdl/stamp-h.in
 ltconfig
 ltmain.sh
+modules/Makefile
 modules/Makefile.in
 modules/test.c
 modules/test.mp4h
 modules/test.ok
 mp4h-config.src
 packages/Makefile.in
-packages/WML/Makefile
 packages/WML/Makefile.in
 packages/WML/href.src
 packages/WML/isolatin.src
