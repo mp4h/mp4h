@@ -1127,14 +1127,13 @@ next_token (token_data *td, read_type expansion)
 
             case READ_ATTR_QUOT:
               ch = next_char();
-              if (ch == 'n')
-                obstack_1grow (&token_stack, '\n');
-              else if (ch == 't')
-                obstack_1grow (&token_stack, '\t');
-              else if (ch == 'r')
-                obstack_1grow (&token_stack, '\r');
+              if (ch == '"')
+                obstack_1grow (&token_stack, CHAR_QUOTE);
               else
-                obstack_1grow (&token_stack, ch);
+                {
+                  obstack_1grow (&token_stack, '\\');
+                  obstack_1grow (&token_stack, ch);
+                }
 
               type = TOKEN_STRING;
               break;
