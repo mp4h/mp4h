@@ -35,31 +35,13 @@ tmpdir          = @tmpdir@
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
 
-all: shtool lib/libmp4h.a src/mp4h doc/mp4h.1
-
-# ------------------------------------------------
-#   THE PROGRAM
-# ------------------------------------------------
-
-src/mp4h: lib/libmp4h.a
-	@echo "==> src (all)"; \
-	cd src && $(MAKE) all; \
-	echo "<== src"
-
-# ------------------------------------------------
-#   THE LIBRARY
-# ------------------------------------------------
-
-lib/libmp4h.a:
+all: $(SHTOOL)
 	@echo "==> lib (all)"; \
 	cd lib && $(MAKE) all; \
 	echo "<== lib"
-
-# ------------------------------------------------
-#   THE DOCUMENTATION
-# ------------------------------------------------
-
-doc/mp4h.1:
+	@echo "==> src (all)"; \
+	cd src && $(MAKE) all; \
+	echo "<== src"
 	@echo "==> doc (all)"; \
 	cd doc && $(MAKE) all; \
 	echo "<== doc"
@@ -133,7 +115,7 @@ configure: configure.in
 	autoconf
 	chmod 770 configure
 
-shtool:
+$(SHTOOL):
 	shtoolize -o $@ install mkdir version echo fixperm tarball
 
 # ------------------------------------------------

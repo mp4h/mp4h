@@ -34,19 +34,6 @@
 #include "mp4h.h"
 #include "builtin.h"
 
-extern FILE *popen ();
-
-#include "regex.h"
-#include <pwd.h>
-#include <grp.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/times.h>
-
-#define _AS_HEADER
-#include "version.c"
-
 /* Initialisation of builtin and predefined macros.  The table
    "builtin_tab" is both used for initialisation, and by the "builtin"
    builtin.  */
@@ -664,8 +651,8 @@ mp4h_timer (MP4H_BUILTIN_ARGS)
   char buf[128];
 
   times(&elapsed_time);
-  sprintf (buf, "user %d\nsys %d\n", elapsed_time.tms_utime,
-           elapsed_time.tms_stime);
+  sprintf (buf, "user %d\nsys %d\n", (int) elapsed_time.tms_utime,
+           (int) elapsed_time.tms_stime);
   obstack_grow (obs, buf, strlen (buf));
 }
 
@@ -1330,7 +1317,7 @@ math_relation (mathrel_type mathrel, MP4H_BUILTIN_ARGS)
   if (bad_argc (argv[0], argc, 2, 3))
       return;
   
-  if (isdigit (ARG (1)[0]) || ARG (1)[0] == '-' || ARG (1)[0] == '.')
+  if (isdigit ((int) ARG (1)[0]) || ARG (1)[0] == '-' || ARG (1)[0] == '.')
       val1 = strtod (ARG (1), 0);
   else
     {
@@ -1342,7 +1329,7 @@ math_relation (mathrel_type mathrel, MP4H_BUILTIN_ARGS)
   
   if (argc == 2)
       val2 = 0.;
-  else if (isdigit (ARG (2)[0]) || ARG (2)[0] == '-' || ARG (2)[0] == '.')
+  else if (isdigit ((int) ARG (2)[0]) || ARG (2)[0] == '-' || ARG (2)[0] == '.')
       val2 = strtod (ARG (2), 0);
   else
     {
@@ -2166,7 +2153,6 @@ mp4h_set_regexp_syntax (MP4H_BUILTIN_ARGS)
 static void
 mp4h_get_regexp_syntax (MP4H_BUILTIN_ARGS)
 {
-  reg_syntax_t syntax_options = re_syntax_options;
   switch (re_syntax_options)
     {
       case RE_SYNTAX_POSIX_EXTENDED:

@@ -98,7 +98,7 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
          macro, it could be ePerl delimiters.  */
 
       if (*text == '/' ||
-          (!isalpha(*text) && *text != '%' && *text != '_'))
+          (!isalpha((int) *text) && *text != '%' && *text != '_'))
         {
           expand_unknown_macro (text, expansion);
           break;
@@ -289,7 +289,6 @@ collect_body (symbol *sym, boolean whitespace, struct obstack *argptr)
   struct obstack body;
   char *text;
   symbol *newsym;
-  boolean end_delimiter = FALSE;
 
   obstack_init (&body);
   while (1)

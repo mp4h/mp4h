@@ -7,7 +7,7 @@
 
 #ifndef _SRC_VERSION_C
 #define _SRC_VERSION_C
-#define MP4H_VERSION 0x005200
+#define MP4H_VERSION 0x005201
 extern const int  MP4H_Version;
 extern const char MP4H_VersionStr[];
 extern const char MP4H_Hello[];
@@ -20,13 +20,13 @@ extern const char MP4H_PlainID[];
 
 #else
 
-const int  MP4H_Version      = 0x005200;
-const char MP4H_VersionStr[] = "0.5.0 (29-Nov-1999)";
-const char MP4H_Hello[]      = "This is MP4H, Version 0.5.0 (29-Nov-1999)";
-const char MP4H_GNUVersion[] = "MP4H Version 0.5.0";
-const char MP4H_WhatID[]     = "@(#)MP4H Version 0.5.0 (29-Nov-1999)";
-const char MP4H_RCSIdentID[] = "$Id: version.c,v 1.3 1999/11/29 00:31:11 barbier Exp $";
-const char MP4H_WebID[]      = "MP4H/0.5.0";
-const char MP4H_PlainID[]    = "0.5.0";
+const int  MP4H_Version      = 0x005201;
+const char MP4H_VersionStr[] = "0.5.1 (30-Nov-1999)";
+const char MP4H_Hello[]      = "This is MP4H, Version 0.5.1 (30-Nov-1999)";
+const char MP4H_GNUVersion[] = "MP4H Version 0.5.1";
+const char MP4H_WhatID[]     = "@(#)MP4H Version 0.5.1 (30-Nov-1999)";
+const char MP4H_RCSIdentID[] = "$Id: shtool,v 1.1 1999/11/07 23:45:50 barbier Exp $";
+const char MP4H_WebID[]      = "MP4H/0.5.1";
+const char MP4H_PlainID[]    = "0.5.1";
 
 #endif

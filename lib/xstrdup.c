@@ -21,6 +21,14 @@
 #include <config.h>
 #endif
 
+#ifndef __P
+# ifdef PROTOTYPES
+#  define __P(Args) Args
+# else
+#  define __P(Args) ()
+# endif
+#endif
+
 #if defined(STDC_HEADERS) || defined(HAVE_STRING_H)
 #include <string.h>
 #else

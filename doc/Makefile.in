@@ -13,9 +13,6 @@ LONG_VERSION    = @LONG_VERSION@
 
 RM              = rm -f
 
-GENMAN = \
-    sed -e 's|\@LONG_VERSION\@|$(LONG_VERSION)|g' < $< | ../src/mp4h > $@
-
 # ------------------------------------------------
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
@@ -26,8 +23,9 @@ all: mp4h.html
 #   DOCUMENTATION
 # ------------------------------------------------
 
-mp4h.html: mp4h.mp4h macros.inc ../src/mp4h
-	$(GENMAN)
+mp4h.html: mp4h.mp4h html.out ../src/mp4h
+	sed -e 's|\@LONG_VERSION\@|$(LONG_VERSION)|g' < mp4h.mp4h \
+	| ../src/mp4h > $@
 
 # ------------------------------------------------
 #   PROGRAM
@@ -41,7 +39,7 @@ mp4h.html: mp4h.mp4h macros.inc ../src/mp4h
 # ------------------------------------------------
 
 clean:
-	$(RM) *.1
+	$(RM) *.html
 
 distclean: clean
 	$(RM) Makefile

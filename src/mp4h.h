@@ -448,6 +448,7 @@ extern int output_current_line;
 
 void output_init __P ((void));
 void shipout_text __P ((struct obstack *, const char *, int));
+void shipout_string __P ((struct obstack *obs, const char *s, int len));
 void make_diversion __P ((int));
 void insert_diversion __P ((int));
 void insert_file __P ((FILE *));

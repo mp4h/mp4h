@@ -27,6 +27,14 @@
 #define VOID char
 #endif
 
+#ifndef __P
+# ifdef PROTOTYPES
+#  define __P(Args) Args
+# else
+#  define __P(Args) ()
+# endif
+#endif
+
 #include <sys/types.h>
 
 #if STDC_HEADERS || _LIBC

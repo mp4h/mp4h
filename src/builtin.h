@@ -34,8 +34,19 @@
 #define BUILTIN_H 1
 
 #include "mp4h.h"
+#include "regex.h"
+#include <pwd.h>
+#include <grp.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/times.h>
 #include <math.h>
 #include <locale.h>
+#include <time.h>
+
+#define _AS_HEADER
+#include "version.c"
 
 #define MP4H_BUILTIN_ARGS struct obstack *obs, int argc, token_data **argv, \
                             read_type expansion
@@ -69,7 +80,7 @@ enum mathrel_type
 typedef enum mathop_type mathop_type;
 typedef enum mathrel_type mathrel_type;
 
-const char *skip_space (const char *arg);
+const char *skip_space __P ((const char *arg));
 
 typedef struct var_stack var_stack;
 struct var_stack
@@ -81,8 +92,7 @@ struct var_stack
 /*  Stack for variables.  */
 var_stack *vs;
 
-boolean numeric_arg (token_data *macro, const char *arg, boolean, int *valuep);
-void shipout_int (struct obstack *obs, int val);
-void shipout_string (struct obstack *obs, const char *s, int len);
+boolean numeric_arg __P ((token_data *macro, const char *arg, boolean, int *valuep));
+void shipout_int __P ((struct obstack *obs, int val));
 
 #endif /* BUILTIN_H */

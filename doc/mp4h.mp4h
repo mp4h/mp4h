@@ -6,7 +6,7 @@
 <set-var version="@LONG_VERSION@">
 <set-var title="MP4H - A Macro Processor for HTML">
 
-<include macros.inc>
+<include html.out>
 
 <header>
 <section "Description">
