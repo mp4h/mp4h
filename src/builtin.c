@@ -3096,7 +3096,7 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   regex_t re;
   regmatch_t *match_ptr = NULL;
   int max_subexps = 0;
-  int regex_rc;
+  int regex_rc, eflags = 0;
 
   int matchpos;                 /* start position of match */
   int offset;                   /* current match offset */
@@ -3132,10 +3132,13 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
           max_subexps += 10;
           match_ptr = (regmatch_t *)
             xrealloc (match_ptr, sizeof (regmatch_t) * (max_subexps+1));
-          regex_rc  = regexec (&re, victim+offset, max_subexps, match_ptr, 0);
+          regex_rc  = regexec (&re, victim+offset, max_subexps, match_ptr, eflags);
         }
       while (regex_rc == REG_ESPACE);
       max_subexps -= 10;
+
+      /*  Subsequent calls to regexec do not match beginning o line */
+      eflags = REG_NOTBOL;
 
       if (regex_rc != 0)
         {
@@ -3510,38 +3513,41 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
             remove_special_chars (value, FALSE);
 
             ptr_index = strchr (ARG (i), ']');
-            if (ptr_index != NULL && *(ptr_index-1) == '[')
-              *(ptr_index-1) = '\0';
-            else if (ptr_index != NULL && *(ptr_index-1) != '[')
+            if (ptr_index != NULL)
               {
-                *ptr_index = '\0';
-                ptr_index = strchr (ARG (i), '[');
-                if (!ptr_index)
+                if (*(ptr_index-1) == '[')
+                  *(ptr_index-1) = '\0';
+                else
                   {
-                    MP4HERROR ((warning_status, 0, _("\
-Warning:%s:%d: wrong index declaration in <%s>"),
-                         CURRENT_FILE_LINE, ARG (0)));
-                    return;
-                  }
-                *ptr_index = '\0';
-                ptr_index++;
-                if (!numeric_arg (argv[0], ptr_index, FALSE, &array_index))
-                  {
-                    /*   Maybe there is an implicit index like in
-                           <set-var foo[i]=bar>.  */
-                    index_var = lookup_variable (ptr_index, SYMBOL_LOOKUP);
-                    if (index_var)
-                      {
-                        if (!numeric_arg (argv[0], SYMBOL_TEXT (index_var),
-                                    FALSE, &array_index))
-                            index_var = NULL;
-                      }
-                    if (!index_var)
+                    *ptr_index = '\0';
+                    ptr_index = strchr (ARG (i), '[');
+                    if (!ptr_index)
                       {
                         MP4HERROR ((warning_status, 0, _("\
 Warning:%s:%d: wrong index declaration in <%s>"),
                              CURRENT_FILE_LINE, ARG (0)));
                         return;
+                      }
+                    *ptr_index = '\0';
+                    ptr_index++;
+                    if (!numeric_arg (argv[0], ptr_index, FALSE, &array_index))
+                      {
+                        /*   Maybe there is an implicit index like in
+                               <set-var foo[i]=bar>.  */
+                        index_var = lookup_variable (ptr_index, SYMBOL_LOOKUP);
+                        if (index_var)
+                          {
+                            if (!numeric_arg (argv[0], SYMBOL_TEXT (index_var),
+                                        FALSE, &array_index))
+                                index_var = NULL;
+                          }
+                        if (!index_var)
+                          {
+                            MP4HERROR ((warning_status, 0, _("\
+Warning:%s:%d: wrong index declaration in <%s>"),
+                                 CURRENT_FILE_LINE, ARG (0)));
+                            return;
+                          }
                       }
                   }
               }
@@ -3617,38 +3623,41 @@ Warning:%s:%d: wrong index declaration in <%s>"),
           {
             array_index = -1;
             ptr_index = strchr (ARG (i), ']');
-            if (ptr_index != NULL && *(ptr_index-1) == '[')
-              *(ptr_index-1) = '\0';
-            else if (ptr_index != NULL && *(ptr_index-1) != '[')
+            if (ptr_index != NULL)
               {
-                *ptr_index = '\0';
-                ptr_index = strchr (ARG (i), '[');
-                if (!ptr_index)
+                if (*(ptr_index-1) == '[')
+                  *(ptr_index-1) = '\0';
+                else
                   {
-                    MP4HERROR ((warning_status, 0, _("\
-Warning:%s:%d: wrong index declaration in <%s>"),
-                         CURRENT_FILE_LINE, ARG (0)));
-                    return;
-                  }
-                *ptr_index = '\0';
-                ptr_index++;
-                if (!numeric_arg (argv[0], ptr_index, FALSE, &array_index))
-                  {
-                    /*   Maybe there is an implicit index like in
-                           <get-var foo[i]>.  */
-                    index_var = lookup_variable (ptr_index, SYMBOL_LOOKUP);
-                    if (index_var)
-                      {
-                        if (!numeric_arg (argv[0], SYMBOL_TEXT (index_var),
-                                    FALSE, &array_index))
-                            index_var = NULL;
-                      }
-                    if (!index_var)
+                    *ptr_index = '\0';
+                    ptr_index = strchr (ARG (i), '[');
+                    if (!ptr_index)
                       {
                         MP4HERROR ((warning_status, 0, _("\
 Warning:%s:%d: wrong index declaration in <%s>"),
                              CURRENT_FILE_LINE, ARG (0)));
                         return;
+                      }
+                    *ptr_index = '\0';
+                    ptr_index++;
+                    if (!numeric_arg (argv[0], ptr_index, FALSE, &array_index))
+                      {
+                        /*   Maybe there is an implicit index like in
+                               <get-var foo[i]>.  */
+                        index_var = lookup_variable (ptr_index, SYMBOL_LOOKUP);
+                        if (index_var)
+                          {
+                            if (!numeric_arg (argv[0], SYMBOL_TEXT (index_var),
+                                        FALSE, &array_index))
+                                index_var = NULL;
+                          }
+                        if (!index_var)
+                          {
+                            MP4HERROR ((warning_status, 0, _("\
+Warning:%s:%d: wrong index declaration in <%s>"),
+                                 CURRENT_FILE_LINE, ARG (0)));
+                            return;
+                          }
                       }
                   }
               }

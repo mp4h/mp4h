@@ -8,6 +8,12 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.0.5 and SNAP:
+
+    *) Fix `beginning of line' bug in regular expressions (09-Jul-2000):
+       The `^' special character was not interpreted.
+       [Denis Barbier]
+
   Changes between 1.0.4 and 1.0.5:
 
     *) Minor fix to restore compatibility with old syntax (09-Jul-2000):
