@@ -96,6 +96,8 @@ typedef struct module_list {
 
 static module_list *modules;
 
+static char *add_suffix_searchdir __P ((const char *, const char *));
+
 /* 
  * Initialisation.  Currently the module search path in path.c is
  * initialised from MP4HMODPATH.  Only absolute path names are accepted to
@@ -140,6 +142,64 @@ module_init (void)
 }
 
 /* 
+ * By default, when `foo/bar' is searched by libltdl (or in fact lt_dlopenext)
+ * it is only searched into ./foo and not other paths defined elsewhere.
+ * This is very sad, and instead of patching libtool, which may cause
+ * some headaches when upgrading, this function adds a given dir to a
+ * path list.
+ */
+static char *
+add_suffix_searchdir (const char *oldpath, const char *dir)
+{
+  const char *cp;
+  char *new_search_path, *sp, *next, *path;
+  int num, len, lendir, offset;
+
+  lendir = strlen (dir);
+
+  /*   First count paths   */
+  cp = oldpath;
+  num = 0;
+  while (cp)
+    {
+      ++num;
+      cp = strchr (cp, LT_PATHSEP_CHAR);
+    }
+
+  new_search_path = xmalloc (strlen (oldpath) + num * (lendir + 2) + 1);
+  /*   And copies directories  */
+  path = xstrdup (oldpath);
+  sp = path;
+  offset = 0;
+  while (sp)
+    {
+      next = strchr (sp, LT_PATHSEP_CHAR);
+      if (next)
+        {
+          /*  Special case: null path  */
+          if (next == sp)
+            {
+              *(new_search_path+offset) = LT_PATHSEP_CHAR;
+              ++offset;
+              sp = next + 1;
+              continue;
+            }
+          len = strlen (sp);
+          *next = '\0';
+          ++next;
+        }
+      else
+        len = next - sp;
+      sprintf(new_search_path+offset, "%s/%s%c", sp, dir, LT_PATHSEP_CHAR);
+      offset += len + lendir + 2;
+      sp = next;
+    }
+  *(new_search_path+strlen (new_search_path)) = '\0';
+  xfree ((voidstar) path);
+  return new_search_path;
+}
+
+/* 
  * Load a dynamic library.
  */
 
@@ -148,10 +208,35 @@ library_load (const char *libname, struct obstack *obs)
 {
   lt_dlhandle library;
   module_list *list;
+  char *dir;
+  const char *lib_name = libname;
+  const char *save_path = NULL;
+  char *cp, *new_search_path;
   builtin *bp;
 
+  /*  If it contains a slash, leading dir is appended to search path.  */
+  cp = strrchr(libname, '/');
+  if (cp && cp != libname)
+    {
+      lib_name = cp + 1;
+      dir = xmalloc (cp - libname + 1);
+      strncpy (dir, libname, cp - libname);
+      dir[cp - libname] = '\0';
+      save_path = lt_dlgetsearchpath ();
+      new_search_path = add_suffix_searchdir (save_path, dir);
+      lt_dlsetsearchpath (new_search_path);
+      xfree ((voidstar) new_search_path);
+      xfree ((voidstar) dir);
+    }
+
   /* Dynamically load the named module. */
-  library = lt_dlopenext(libname);
+  library = lt_dlopenext(lib_name);
+
+  if (save_path)
+    {
+      lt_dlsetsearchpath (save_path);
+      xfree ((voidstar) save_path);
+    }
 
   if (library != NULL)
     {
@@ -173,12 +258,37 @@ module_load (const char *modname, struct obstack *obs)
   module_init_t *init_func;
   lt_dlhandle module;
   module_list *list;
+  char *dir;
+  const char *mod_name = modname;
+  const char *save_path = NULL;
+  char *cp, *new_search_path;
   builtin *bp;
 
   module_init();
 
+  /*  If it contains a slash, leading dir is appended to search path.  */
+  cp = strrchr(modname, '/');
+  if (cp && cp != modname)
+    {
+      mod_name = cp + 1;
+      dir = xmalloc (cp - modname + 1);
+      strncpy (dir, modname, cp - modname);
+      dir[cp - modname] = '\0';
+      save_path = lt_dlgetsearchpath ();
+      new_search_path = add_suffix_searchdir (save_path, dir);
+      lt_dlsetsearchpath (new_search_path);
+      xfree ((voidstar) new_search_path);
+      xfree ((voidstar) dir);
+    }
+
   /* Dynamically load the named module. */
-  module = lt_dlopenext(modname);
+  module = lt_dlopenext(mod_name);
+
+  if (save_path)
+    {
+      lt_dlsetsearchpath (save_path);
+      xfree ((voidstar) save_path);
+    }
 
   if (module != NULL)
     {
