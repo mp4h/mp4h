@@ -10,15 +10,23 @@
 
   Changes between 1.1.2 and 1.1.3:
 
-    *) New <set-var-x> tag  (24-Mar-2001):
+    *) Change module invocation (07-Apr-2001):
+       The <loadmodule> tag is replaced by a more generic <load> tag,
+       which works with shared library and mp4h modules.
+       [Denis Barbier]
+
+    *) Rearrange modules/ subdirectory (07-Apr-2001):
+       [Denis Barbier]
+
+    *) New <set-var-x> tag (24-Mar-2001):
        Like <set-var>, but this is a complex tag.
        [Anders Dinsen]
 
-    *) New <real-path> tag  (24-Mar-2001):
+    *) New <real-path> tag (24-Mar-2001):
        Returns absolute pathname of a file.
        [Anders Dinsen]
 
-    *) Clean-up src/builtin.c  (24-Mar-2001):
+    *) Clean-up src/builtin.c (24-Mar-2001):
        The mp4h_set_var_verbatim function is useless and removed.
        [Anders Dinsen]
 
