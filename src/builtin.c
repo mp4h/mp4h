@@ -1054,7 +1054,7 @@ void
 locale_init (void)
 {
 #ifdef HAVE_LOCALE_H
-  setlocale (LC_ALL, "");
+  setlocale (LC_ALL, NULL);
   my_locale = localeconv ();
   decimal_point = my_locale->decimal_point;
 #endif
@@ -2128,15 +2128,13 @@ generic_set_hook (MP4H_BUILTIN_ARGS, boolean before, int action)
       /*  Insert before the current hooks */
       case 1:
         text = (char *) xmalloc (strlen (hook) + strlen (ARGBODY) + 1);
-        strcpy (text, ARGBODY);
-        strcat (text, hook);
+        sprintf (text, "%s%s", ARGBODY, hook);
         break;
 
       /*  Append after the current hooks */
       case 2:
         text = (char *) xmalloc (strlen (hook) + strlen (ARGBODY) + 1);
-        strcpy (text, hook);
-        strcat (text, ARGBODY);
+        sprintf (text, "%s%s", hook, ARGBODY);
         break;
 
       default:
@@ -2629,8 +2627,7 @@ mp4h_use (MP4H_BUILTIN_ARGS)
     }
 
   real_filename = xmalloc (strlen (ARG (1)) + 7);
-  strcpy (real_filename, ARG (1));
-  strcat (real_filename, ".mp4hp");
+  sprintf (real_filename, "%s.mp4hp", ARG (1));
 
   for (cp=real_filename; *cp != '\0'; cp++)
     {
@@ -4177,9 +4174,7 @@ mp4h_array_add_unique (MP4H_BUILTIN_ARGS)
       if (exists == -1)
         {
           value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (2)) + 2);
-          strcpy (value, SYMBOL_TEXT (var));
-          strcat (value, "\n");
-          strcat (value, ARG (2));
+          sprintf (value, "%s\n%s", SYMBOL_TEXT (var), ARG (2));
           xfree (SYMBOL_TEXT (var));
           SYMBOL_TEXT (var) = xstrdup (value);
           xfree (value);
@@ -4208,9 +4203,7 @@ mp4h_array_push (MP4H_BUILTIN_ARGS)
   else
     {
       old_value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (2)) + 2);
-      strcpy (old_value, SYMBOL_TEXT (var));
-      strcat (old_value, "\n");
-      strcat (old_value, ARG (2));
+      sprintf (old_value, "%s\n%s", SYMBOL_TEXT (var), ARG (2));
       xfree (SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xstrdup (old_value);
       xfree (old_value);
@@ -4379,9 +4372,7 @@ mp4h_array_concat (MP4H_BUILTIN_ARGS)
       
       value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) +
                        strlen (SYMBOL_TEXT (varadd)) + 2);
-      strcpy (value, SYMBOL_TEXT (var));
-      strcat (value, "\n");
-      strcat (value, SYMBOL_TEXT (varadd));
+      sprintf (value, "%s\n%s", SYMBOL_TEXT (var), SYMBOL_TEXT (varadd));
       xfree (SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xstrdup (value);
       xfree (value);

@@ -152,9 +152,7 @@ path_search (const char *dir, char **expanded_name)
 
   if (fp == NULL)
     {
-      strcpy (name, PKGDATADIR);
-      name[strlen (PKGDATADIR)] = '/';
-      strcpy (name + strlen (PKGDATADIR) + 1, dir);
+      sprintf (name, "%s/%s", PKGDATADIR, dir);
 
 #ifdef DEBUG_INCL
       fprintf (stderr, "path_search (%s) -- trying %s\n", dir, name);
