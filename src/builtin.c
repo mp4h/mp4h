@@ -50,145 +50,145 @@
    "builtin_tab" is both used for initialisation, and by the "builtin"
    builtin.  */
 
-DECLARE (mp4h___file__);
-DECLARE (mp4h___line__);
-DECLARE (mp4h___version__);
-DECLARE (mp4h_lb);
-DECLARE (mp4h_rb);
-DECLARE (mp4h_dq);
-DECLARE (mp4h_bs);
-DECLARE (mp4h_timer);
+DECLARE (mp4h_bp___file__);
+DECLARE (mp4h_bp___line__);
+DECLARE (mp4h_bp___version__);
+DECLARE (mp4h_bp_lb);
+DECLARE (mp4h_bp_rb);
+DECLARE (mp4h_bp_dq);
+DECLARE (mp4h_bp_bs);
+DECLARE (mp4h_bp_timer);
 #ifdef HAVE_LOCALE_H
-DECLARE (mp4h_mp4h_l10n);
+DECLARE (mp4h_bp_mp4h_l10n);
 #endif
-DECLARE (mp4h_mp4h_output_radix);
+DECLARE (mp4h_bp_mp4h_output_radix);
 #if !defined(HAVE_FILE_FUNCS) || !defined (HAVE_LOCALE_H) || !defined(WITH_MODULES)
-DECLARE (mp4h_unsupported);
+DECLARE (mp4h_bp_unsupported);
 #endif
 
   /*  debug functions  */
-DECLARE (mp4h_debugmode);
-DECLARE (mp4h_debugfile);
-DECLARE (mp4h_function_def);
-DECLARE (mp4h_debugging_off);
-DECLARE (mp4h_debugging_on);
+DECLARE (mp4h_bp_debugmode);
+DECLARE (mp4h_bp_debugfile);
+DECLARE (mp4h_bp_function_def);
+DECLARE (mp4h_bp_debugging_off);
+DECLARE (mp4h_bp_debugging_on);
 
   /*  file functions  */
 #ifdef HAVE_FILE_FUNCS
-DECLARE (mp4h_get_file_properties);
-DECLARE (mp4h_directory_contents);
-DECLARE (mp4h_file_exists);
-DECLARE (mp4h_real_path);
+DECLARE (mp4h_bp_get_file_properties);
+DECLARE (mp4h_bp_directory_contents);
+DECLARE (mp4h_bp_file_exists);
+DECLARE (mp4h_bp_real_path);
 #endif /* HAVE_FILE_FUNCS */
-DECLARE (mp4h_date);
+DECLARE (mp4h_bp_date);
 
   /*  flow functions  */
-DECLARE (mp4h_group);
-DECLARE (mp4h_compound);
-DECLARE (mp4h_disjoin);
-DECLARE (mp4h_noexpand);
-DECLARE (mp4h_expand);
-DECLARE (mp4h_if);
-DECLARE (mp4h_ifeq);
-DECLARE (mp4h_ifneq);
-DECLARE (mp4h_when);
-DECLARE (mp4h_while);
-DECLARE (mp4h_foreach);
-DECLARE (mp4h_var_case);
-DECLARE (mp4h_break);
-DECLARE (mp4h_return);
-DECLARE (mp4h_warning);
-DECLARE (mp4h_exit);
-DECLARE (mp4h_at_end_of_file);
+DECLARE (mp4h_bp_group);
+DECLARE (mp4h_bp_compound);
+DECLARE (mp4h_bp_disjoin);
+DECLARE (mp4h_bp_noexpand);
+DECLARE (mp4h_bp_expand);
+DECLARE (mp4h_bp_if);
+DECLARE (mp4h_bp_ifeq);
+DECLARE (mp4h_bp_ifneq);
+DECLARE (mp4h_bp_when);
+DECLARE (mp4h_bp_while);
+DECLARE (mp4h_bp_foreach);
+DECLARE (mp4h_bp_var_case);
+DECLARE (mp4h_bp_break);
+DECLARE (mp4h_bp_return);
+DECLARE (mp4h_bp_warning);
+DECLARE (mp4h_bp_exit);
+DECLARE (mp4h_bp_at_end_of_file);
 
   /*  macro functions  */
-DECLARE (mp4h_define_tag);
-DECLARE (mp4h_provide_tag);
-DECLARE (mp4h_let);
-DECLARE (mp4h_undef);
-DECLARE (mp4h_set_hook);
-DECLARE (mp4h_get_hook);
-DECLARE (mp4h_attributes_quote);
-DECLARE (mp4h_attributes_remove);
-DECLARE (mp4h_attributes_extract);
+DECLARE (mp4h_bp_define_tag);
+DECLARE (mp4h_bp_provide_tag);
+DECLARE (mp4h_bp_let);
+DECLARE (mp4h_bp_undef);
+DECLARE (mp4h_bp_set_hook);
+DECLARE (mp4h_bp_get_hook);
+DECLARE (mp4h_bp_attributes_quote);
+DECLARE (mp4h_bp_attributes_remove);
+DECLARE (mp4h_bp_attributes_extract);
 
   /*  math functions  */
-DECLARE (mp4h_add);
-DECLARE (mp4h_substract);
-DECLARE (mp4h_multiply);
-DECLARE (mp4h_divide);
-DECLARE (mp4h_modulo);
-DECLARE (mp4h_min);
-DECLARE (mp4h_max);
-DECLARE (mp4h_gt);
-DECLARE (mp4h_lt);
-DECLARE (mp4h_eq);
-DECLARE (mp4h_neq);
+DECLARE (mp4h_bp_add);
+DECLARE (mp4h_bp_substract);
+DECLARE (mp4h_bp_multiply);
+DECLARE (mp4h_bp_divide);
+DECLARE (mp4h_bp_modulo);
+DECLARE (mp4h_bp_min);
+DECLARE (mp4h_bp_max);
+DECLARE (mp4h_bp_gt);
+DECLARE (mp4h_bp_lt);
+DECLARE (mp4h_bp_eq);
+DECLARE (mp4h_bp_neq);
 
   /*  page functions  */
-DECLARE (mp4h_include);
-DECLARE (mp4h___include);
-DECLARE (mp4h_use);
+DECLARE (mp4h_bp_include);
+DECLARE (mp4h_bp___include);
+DECLARE (mp4h_bp_use);
 #ifdef WITH_MODULES
-DECLARE (mp4h_load);
+DECLARE (mp4h_bp_load);
 #endif
-DECLARE (mp4h_comment);
-DECLARE (mp4h_set_eol_comment);
-DECLARE (mp4h_set_quotes);
-DECLARE (mp4h_dnl);
-DECLARE (mp4h_frozen_dump);
+DECLARE (mp4h_bp_comment);
+DECLARE (mp4h_bp_set_eol_comment);
+DECLARE (mp4h_bp_set_quotes);
+DECLARE (mp4h_bp_dnl);
+DECLARE (mp4h_bp_frozen_dump);
 
   /*  relational operators  */
-DECLARE (mp4h_not);
-DECLARE (mp4h_and);
-DECLARE (mp4h_or);
+DECLARE (mp4h_bp_not);
+DECLARE (mp4h_bp_and);
+DECLARE (mp4h_bp_or);
 
   /*  string functions  */
-DECLARE (mp4h_downcase);
-DECLARE (mp4h_upcase);
-DECLARE (mp4h_capitalize);
-DECLARE (mp4h_string_length);
-DECLARE (mp4h_substring);
-DECLARE (mp4h_string_eq);
-DECLARE (mp4h_string_neq);
-DECLARE (mp4h_string_compare);
-DECLARE (mp4h_char_offsets);
+DECLARE (mp4h_bp_downcase);
+DECLARE (mp4h_bp_upcase);
+DECLARE (mp4h_bp_capitalize);
+DECLARE (mp4h_bp_string_length);
+DECLARE (mp4h_bp_substring);
+DECLARE (mp4h_bp_string_eq);
+DECLARE (mp4h_bp_string_neq);
+DECLARE (mp4h_bp_string_compare);
+DECLARE (mp4h_bp_char_offsets);
 
   /*  regexp functions  */
-DECLARE (mp4h_subst_in_string);
-DECLARE (mp4h_subst_in_var);
-DECLARE (mp4h_match);
+DECLARE (mp4h_bp_subst_in_string);
+DECLARE (mp4h_bp_subst_in_var);
+DECLARE (mp4h_bp_match);
 
   /*  variable functions  */
-DECLARE (mp4h_get_var);
-DECLARE (mp4h_get_var_once);
-DECLARE (mp4h_set_var_x);
-DECLARE (mp4h_set_var);
-DECLARE (mp4h_unset_var);
-DECLARE (mp4h_preserve);
-DECLARE (mp4h_restore);
-DECLARE (mp4h_var_exists);
-DECLARE (mp4h_increment);
-DECLARE (mp4h_decrement);
-DECLARE (mp4h_symbol_info);
-DECLARE (mp4h_copy_var);
-DECLARE (mp4h_defvar);
+DECLARE (mp4h_bp_get_var);
+DECLARE (mp4h_bp_get_var_once);
+DECLARE (mp4h_bp_set_var_x);
+DECLARE (mp4h_bp_set_var);
+DECLARE (mp4h_bp_unset_var);
+DECLARE (mp4h_bp_preserve);
+DECLARE (mp4h_bp_restore);
+DECLARE (mp4h_bp_var_exists);
+DECLARE (mp4h_bp_increment);
+DECLARE (mp4h_bp_decrement);
+DECLARE (mp4h_bp_symbol_info);
+DECLARE (mp4h_bp_copy_var);
+DECLARE (mp4h_bp_defvar);
 
   /*  array functions  */
-DECLARE (mp4h_array_size);
-DECLARE (mp4h_array_add_unique);
-DECLARE (mp4h_array_member);
-DECLARE (mp4h_array_push);
-DECLARE (mp4h_array_pop);
-DECLARE (mp4h_array_topvalue);
-DECLARE (mp4h_array_shift);
-DECLARE (mp4h_array_concat);
-DECLARE (mp4h_sort);
+DECLARE (mp4h_bp_array_size);
+DECLARE (mp4h_bp_array_add_unique);
+DECLARE (mp4h_bp_array_member);
+DECLARE (mp4h_bp_array_push);
+DECLARE (mp4h_bp_array_pop);
+DECLARE (mp4h_bp_array_topvalue);
+DECLARE (mp4h_bp_array_shift);
+DECLARE (mp4h_bp_array_concat);
+DECLARE (mp4h_bp_sort);
 
   /*  diversion functions  */
-DECLARE (mp4h_divert);
-DECLARE (mp4h_divnum);
-DECLARE (mp4h_undivert);
+DECLARE (mp4h_bp_divert);
+DECLARE (mp4h_bp_divnum);
+DECLARE (mp4h_bp_undivert);
 
 #undef DECLARE
 
@@ -199,154 +199,154 @@ builtin_tab[] =
   /* name             container   expand    function
                                 attributes                      */
 
-  { "__file__",         FALSE,    TRUE,   mp4h___file__ },
-  { "__line__",         FALSE,    TRUE,   mp4h___line__ },
-  { "__version__",      FALSE,    TRUE,   mp4h___version__ },
-  { "lb",               FALSE,    TRUE,   mp4h_lb },
-  { "rb",               FALSE,    TRUE,   mp4h_rb },
-  { "dq",               FALSE,    TRUE,   mp4h_dq },
-  { "bs",               FALSE,    TRUE,   mp4h_bs },
-  { "timer",            FALSE,    TRUE,   mp4h_timer },
+  { "__file__",         FALSE,    TRUE,   mp4h_bp___file__ },
+  { "__line__",         FALSE,    TRUE,   mp4h_bp___line__ },
+  { "__version__",      FALSE,    TRUE,   mp4h_bp___version__ },
+  { "lb",               FALSE,    TRUE,   mp4h_bp_lb },
+  { "rb",               FALSE,    TRUE,   mp4h_bp_rb },
+  { "dq",               FALSE,    TRUE,   mp4h_bp_dq },
+  { "bs",               FALSE,    TRUE,   mp4h_bp_bs },
+  { "timer",            FALSE,    TRUE,   mp4h_bp_timer },
 #ifdef HAVE_LOCALE_H
-  { "mp4h-l10n",        FALSE,    TRUE,   mp4h_mp4h_l10n },
+  { "mp4h-l10n",        FALSE,    TRUE,   mp4h_bp_mp4h_l10n },
 #else
-  { "mp4h-l10n",        FALSE,    TRUE,   mp4h_unsupported },
+  { "mp4h-l10n",        FALSE,    TRUE,   mp4h_bp_unsupported },
 #endif
-  { "mp4h-output-radix",FALSE,    TRUE,   mp4h_mp4h_output_radix },
-  { "date",             FALSE,    TRUE,   mp4h_date },
+  { "mp4h-output-radix",FALSE,    TRUE,   mp4h_bp_mp4h_output_radix },
+  { "date",             FALSE,    TRUE,   mp4h_bp_date },
 
       /*  debug functions  */
-  { "debugmode",        FALSE,    TRUE,   mp4h_debugmode },
-  { "debugfile",        FALSE,    TRUE,   mp4h_debugfile },
-  { "function-def",     FALSE,    TRUE,   mp4h_function_def },
-  { "debugging-off",    FALSE,    TRUE,   mp4h_debugging_off },
-  { "debugging-on",     FALSE,    TRUE,   mp4h_debugging_on },
+  { "debugmode",        FALSE,    TRUE,   mp4h_bp_debugmode },
+  { "debugfile",        FALSE,    TRUE,   mp4h_bp_debugfile },
+  { "function-def",     FALSE,    TRUE,   mp4h_bp_function_def },
+  { "debugging-off",    FALSE,    TRUE,   mp4h_bp_debugging_off },
+  { "debugging-on",     FALSE,    TRUE,   mp4h_bp_debugging_on },
 
   /*  file functions  */
 #ifdef HAVE_FILE_FUNCS
-  { "get-file-properties", FALSE, TRUE,   mp4h_get_file_properties },
-  { "directory-contents",  FALSE, TRUE,   mp4h_directory_contents },
-  { "file-exists",         FALSE, TRUE,   mp4h_file_exists },
-  { "real-path",           FALSE, TRUE,   mp4h_real_path },
+  { "get-file-properties", FALSE, TRUE,   mp4h_bp_get_file_properties },
+  { "directory-contents",  FALSE, TRUE,   mp4h_bp_directory_contents },
+  { "file-exists",         FALSE, TRUE,   mp4h_bp_file_exists },
+  { "real-path",           FALSE, TRUE,   mp4h_bp_real_path },
 #else
-  { "get-file-properties", FALSE, TRUE,   mp4h_unsupported },
-  { "directory-contents",  FALSE, TRUE,   mp4h_unsupported },
-  { "file-exists",         FALSE, TRUE,   mp4h_unsupported },
-  { "real-path",           FALSE, TRUE,   mp4h_unsupported },
+  { "get-file-properties", FALSE, TRUE,   mp4h_bp_unsupported },
+  { "directory-contents",  FALSE, TRUE,   mp4h_bp_unsupported },
+  { "file-exists",         FALSE, TRUE,   mp4h_bp_unsupported },
+  { "real-path",           FALSE, TRUE,   mp4h_bp_unsupported },
 #endif /* HAVE_FILE_FUNCS */
 
       /*  flow functions  */
-  { "group",            FALSE,    TRUE,   mp4h_group },
-  { "compound",          TRUE,    TRUE,   mp4h_compound },
-  { "disjoin",          FALSE,    TRUE,   mp4h_disjoin },
-  { "noexpand",         FALSE,    FALSE,  mp4h_noexpand },
-  { "expand",           FALSE,    TRUE,   mp4h_expand },
-  { "if",               FALSE,    FALSE,  mp4h_if },
-  { "ifeq",             FALSE,    FALSE,  mp4h_ifeq },
-  { "ifneq",            FALSE,    FALSE,  mp4h_ifneq },
-  { "when",             TRUE,     TRUE,   mp4h_when },
-  { "while",            TRUE,     FALSE,  mp4h_while },
-  { "foreach",          TRUE,     TRUE,   mp4h_foreach },
-  { "var-case",         FALSE,    FALSE,  mp4h_var_case },
-  { "break",            FALSE,    TRUE,   mp4h_break },
-  { "return",           FALSE,    TRUE,   mp4h_return },
-  { "warning",          FALSE,    TRUE,   mp4h_warning },
-  { "exit",             FALSE,    TRUE,   mp4h_exit },
-  { "at-end-of-file",   TRUE,     TRUE,   mp4h_at_end_of_file },
+  { "group",            FALSE,    TRUE,   mp4h_bp_group },
+  { "compound",          TRUE,    TRUE,   mp4h_bp_compound },
+  { "disjoin",          FALSE,    TRUE,   mp4h_bp_disjoin },
+  { "noexpand",         FALSE,    FALSE,  mp4h_bp_noexpand },
+  { "expand",           FALSE,    TRUE,   mp4h_bp_expand },
+  { "if",               FALSE,    FALSE,  mp4h_bp_if },
+  { "ifeq",             FALSE,    FALSE,  mp4h_bp_ifeq },
+  { "ifneq",            FALSE,    FALSE,  mp4h_bp_ifneq },
+  { "when",             TRUE,     TRUE,   mp4h_bp_when },
+  { "while",            TRUE,     FALSE,  mp4h_bp_while },
+  { "foreach",          TRUE,     TRUE,   mp4h_bp_foreach },
+  { "var-case",         FALSE,    FALSE,  mp4h_bp_var_case },
+  { "break",            FALSE,    TRUE,   mp4h_bp_break },
+  { "return",           FALSE,    TRUE,   mp4h_bp_return },
+  { "warning",          FALSE,    TRUE,   mp4h_bp_warning },
+  { "exit",             FALSE,    TRUE,   mp4h_bp_exit },
+  { "at-end-of-file",   TRUE,     TRUE,   mp4h_bp_at_end_of_file },
 
       /*  macro functions  */
-  { "define-tag",       TRUE,     TRUE,   mp4h_define_tag },
-  { "provide-tag",      TRUE,     TRUE,   mp4h_provide_tag },
-  { "let",              FALSE,    TRUE,   mp4h_let },
-  { "undef",            FALSE,    TRUE,   mp4h_undef },
-  { "set-hook",          TRUE,    TRUE,   mp4h_set_hook },
-  { "get-hook",         FALSE,    TRUE,   mp4h_get_hook },
-  { "attributes-quote",    FALSE, TRUE,   mp4h_attributes_quote },
-  { "attributes-remove",   FALSE, TRUE,   mp4h_attributes_remove },
-  { "attributes-extract",  FALSE, TRUE,   mp4h_attributes_extract },
+  { "define-tag",       TRUE,     TRUE,   mp4h_bp_define_tag },
+  { "provide-tag",      TRUE,     TRUE,   mp4h_bp_provide_tag },
+  { "let",              FALSE,    TRUE,   mp4h_bp_let },
+  { "undef",            FALSE,    TRUE,   mp4h_bp_undef },
+  { "set-hook",          TRUE,    TRUE,   mp4h_bp_set_hook },
+  { "get-hook",         FALSE,    TRUE,   mp4h_bp_get_hook },
+  { "attributes-quote",    FALSE, TRUE,   mp4h_bp_attributes_quote },
+  { "attributes-remove",   FALSE, TRUE,   mp4h_bp_attributes_remove },
+  { "attributes-extract",  FALSE, TRUE,   mp4h_bp_attributes_extract },
 
       /*  numerical relational operators  */
-  { "gt",               FALSE,    TRUE,   mp4h_gt },
-  { "lt",               FALSE,    TRUE,   mp4h_lt },
-  { "eq",               FALSE,    TRUE,   mp4h_eq },
-  { "neq",              FALSE,    TRUE,   mp4h_neq },
+  { "gt",               FALSE,    TRUE,   mp4h_bp_gt },
+  { "lt",               FALSE,    TRUE,   mp4h_bp_lt },
+  { "eq",               FALSE,    TRUE,   mp4h_bp_eq },
+  { "neq",              FALSE,    TRUE,   mp4h_bp_neq },
 
       /*  math functions  */
-  { "add",              FALSE,    TRUE,   mp4h_add },
-  { "substract",        FALSE,    TRUE,   mp4h_substract },
-  { "multiply",         FALSE,    TRUE,   mp4h_multiply },
-  { "divide",           FALSE,    TRUE,   mp4h_divide },
-  { "modulo",           FALSE,    TRUE,   mp4h_modulo },
-  { "min",              FALSE,    TRUE,   mp4h_min },
-  { "max",              FALSE,    TRUE,   mp4h_max },
+  { "add",              FALSE,    TRUE,   mp4h_bp_add },
+  { "substract",        FALSE,    TRUE,   mp4h_bp_substract },
+  { "multiply",         FALSE,    TRUE,   mp4h_bp_multiply },
+  { "divide",           FALSE,    TRUE,   mp4h_bp_divide },
+  { "modulo",           FALSE,    TRUE,   mp4h_bp_modulo },
+  { "min",              FALSE,    TRUE,   mp4h_bp_min },
+  { "max",              FALSE,    TRUE,   mp4h_bp_max },
 
       /*  page functions  */
-  { "include",          FALSE,   FALSE,   mp4h_include },
-  { "__include",        TRUE,     TRUE,   mp4h___include },
-  { "use",              FALSE,    TRUE,   mp4h_use },
+  { "include",          FALSE,   FALSE,   mp4h_bp_include },
+  { "__include",        TRUE,     TRUE,   mp4h_bp___include },
+  { "use",              FALSE,    TRUE,   mp4h_bp_use },
 #ifdef WITH_MODULES
-  { "load",             FALSE,    TRUE,   mp4h_load },
+  { "load",             FALSE,    TRUE,   mp4h_bp_load },
 #else
-  { "load",             FALSE,    TRUE,   mp4h_unsupported },
+  { "load",             FALSE,    TRUE,   mp4h_bp_unsupported },
 #endif
-  { "comment",          TRUE,     TRUE,   mp4h_comment },
-  { "set-eol-comment",  FALSE,    TRUE,   mp4h_set_eol_comment },
-  { "set-quotes",       FALSE,    TRUE,   mp4h_set_quotes },
-  { "dnl",              FALSE,    TRUE,   mp4h_dnl },
-  { "frozen-dump",      FALSE,    TRUE,   mp4h_frozen_dump },
+  { "comment",          TRUE,     TRUE,   mp4h_bp_comment },
+  { "set-eol-comment",  FALSE,    TRUE,   mp4h_bp_set_eol_comment },
+  { "set-quotes",       FALSE,    TRUE,   mp4h_bp_set_quotes },
+  { "dnl",              FALSE,    TRUE,   mp4h_bp_dnl },
+  { "frozen-dump",      FALSE,    TRUE,   mp4h_bp_frozen_dump },
 
       /*  relational operators  */
-  { "not",              FALSE,    TRUE,   mp4h_not },
-  { "and",              FALSE,    TRUE,   mp4h_and },
-  { "or",               FALSE,    TRUE,   mp4h_or },
+  { "not",              FALSE,    TRUE,   mp4h_bp_not },
+  { "and",              FALSE,    TRUE,   mp4h_bp_and },
+  { "or",               FALSE,    TRUE,   mp4h_bp_or },
 
       /*  string functions  */
-  { "downcase",         FALSE,    TRUE,   mp4h_downcase },
-  { "upcase",           FALSE,    TRUE,   mp4h_upcase },
-  { "capitalize",       FALSE,    TRUE,   mp4h_capitalize },
-  { "string-length",    FALSE,    TRUE,   mp4h_string_length },
-  { "substring",        FALSE,    TRUE,   mp4h_substring },
-  { "string-eq",        FALSE,    TRUE,   mp4h_string_eq },
-  { "string-neq",       FALSE,    TRUE,   mp4h_string_neq },
-  { "string-compare",   FALSE,    TRUE,   mp4h_string_compare },
-  { "char-offsets",     FALSE,    TRUE,   mp4h_char_offsets },
+  { "downcase",         FALSE,    TRUE,   mp4h_bp_downcase },
+  { "upcase",           FALSE,    TRUE,   mp4h_bp_upcase },
+  { "capitalize",       FALSE,    TRUE,   mp4h_bp_capitalize },
+  { "string-length",    FALSE,    TRUE,   mp4h_bp_string_length },
+  { "substring",        FALSE,    TRUE,   mp4h_bp_substring },
+  { "string-eq",        FALSE,    TRUE,   mp4h_bp_string_eq },
+  { "string-neq",       FALSE,    TRUE,   mp4h_bp_string_neq },
+  { "string-compare",   FALSE,    TRUE,   mp4h_bp_string_compare },
+  { "char-offsets",     FALSE,    TRUE,   mp4h_bp_char_offsets },
   
       /*  regexp functions  */
-  { "subst-in-string",  FALSE,    TRUE,   mp4h_subst_in_string },
-  { "subst-in-var",     FALSE,    TRUE,   mp4h_subst_in_var },
-  { "match",            FALSE,    TRUE,   mp4h_match },
+  { "subst-in-string",  FALSE,    TRUE,   mp4h_bp_subst_in_string },
+  { "subst-in-var",     FALSE,    TRUE,   mp4h_bp_subst_in_var },
+  { "match",            FALSE,    TRUE,   mp4h_bp_match },
 
       /*  variable functions  */
-  { "get-var",          FALSE,    TRUE,   mp4h_get_var },
-  { "get-var-once",     FALSE,    TRUE,   mp4h_get_var_once },
-  { "set-var-x",        TRUE,     TRUE,   mp4h_set_var_x },
-  { "set-var",          FALSE,    TRUE,   mp4h_set_var },
-  { "set-var-verbatim", FALSE,    FALSE,  mp4h_set_var },
-  { "unset-var",        FALSE,    TRUE,   mp4h_unset_var },
-  { "preserve",         FALSE,    TRUE,   mp4h_preserve },
-  { "restore",          FALSE,    TRUE,   mp4h_restore },
-  { "var-exists",       FALSE,    TRUE,   mp4h_var_exists },
-  { "increment",        FALSE,    TRUE,   mp4h_increment },
-  { "decrement",        FALSE,    TRUE,   mp4h_decrement },
-  { "symbol-info",      FALSE,    TRUE,   mp4h_symbol_info },
-  { "copy-var",         FALSE,    TRUE,   mp4h_copy_var },
-  { "defvar",           FALSE,    TRUE,   mp4h_defvar },
+  { "get-var",          FALSE,    TRUE,   mp4h_bp_get_var },
+  { "get-var-once",     FALSE,    TRUE,   mp4h_bp_get_var_once },
+  { "set-var-x",        TRUE,     TRUE,   mp4h_bp_set_var_x },
+  { "set-var",          FALSE,    TRUE,   mp4h_bp_set_var },
+  { "set-var-verbatim", FALSE,    FALSE,  mp4h_bp_set_var },
+  { "unset-var",        FALSE,    TRUE,   mp4h_bp_unset_var },
+  { "preserve",         FALSE,    TRUE,   mp4h_bp_preserve },
+  { "restore",          FALSE,    TRUE,   mp4h_bp_restore },
+  { "var-exists",       FALSE,    TRUE,   mp4h_bp_var_exists },
+  { "increment",        FALSE,    TRUE,   mp4h_bp_increment },
+  { "decrement",        FALSE,    TRUE,   mp4h_bp_decrement },
+  { "symbol-info",      FALSE,    TRUE,   mp4h_bp_symbol_info },
+  { "copy-var",         FALSE,    TRUE,   mp4h_bp_copy_var },
+  { "defvar",           FALSE,    TRUE,   mp4h_bp_defvar },
 
       /*  array functions  */
-  { "array-size",       FALSE,    TRUE,   mp4h_array_size },
-  { "array-add-unique", FALSE,    TRUE,   mp4h_array_add_unique },
-  { "array-member",     FALSE,    TRUE,   mp4h_array_member },
-  { "array-push",       FALSE,    TRUE,   mp4h_array_push },
-  { "array-pop",        FALSE,    TRUE,   mp4h_array_pop },
-  { "array-topvalue",   FALSE,    TRUE,   mp4h_array_topvalue },
-  { "array-shift",      FALSE,    TRUE,   mp4h_array_shift },
-  { "array-concat",     FALSE,    TRUE,   mp4h_array_concat },
-  { "sort",             FALSE,    TRUE,   mp4h_sort },
+  { "array-size",       FALSE,    TRUE,   mp4h_bp_array_size },
+  { "array-add-unique", FALSE,    TRUE,   mp4h_bp_array_add_unique },
+  { "array-member",     FALSE,    TRUE,   mp4h_bp_array_member },
+  { "array-push",       FALSE,    TRUE,   mp4h_bp_array_push },
+  { "array-pop",        FALSE,    TRUE,   mp4h_bp_array_pop },
+  { "array-topvalue",   FALSE,    TRUE,   mp4h_bp_array_topvalue },
+  { "array-shift",      FALSE,    TRUE,   mp4h_bp_array_shift },
+  { "array-concat",     FALSE,    TRUE,   mp4h_bp_array_concat },
+  { "sort",             FALSE,    TRUE,   mp4h_bp_sort },
 
       /*  diversion functions  */
-  { "divert",           FALSE,    TRUE,   mp4h_divert },
-  { "divnum",           FALSE,    TRUE,   mp4h_divnum },
-  { "undivert",         FALSE,    TRUE,   mp4h_undivert },
+  { "divert",           FALSE,    TRUE,   mp4h_bp_divert },
+  { "divnum",           FALSE,    TRUE,   mp4h_bp_divnum },
+  { "undivert",         FALSE,    TRUE,   mp4h_bp_undivert },
 
   { 0,                  FALSE,    FALSE,  0 },
 };
@@ -363,6 +363,9 @@ static boolean safe_strtod __P ((const char *, const char *, double *));
 static boolean safe_strtol __P ((const char *, const char *, long int *));
 static void quote_name_value __P ((struct obstack *, char *));
 static void matching_attributes __P ((struct obstack *, int, token_data **, boolean, char *));
+static char * utf8char_skip __P ((char *, int));
+static int utf8char_strlen __P ((char *));
+static int encoding_strlen __P ((char *));
 static void substitute __P ((struct obstack *, const char *, const char *, int *));
 static void string_regexp __P ((struct obstack *, int, token_data **, int, const char *));
 static void subst_in_string __P ((struct obstack *, int, token_data **, int));
@@ -648,6 +651,8 @@ xre_compile (const char *pattern, int cflags)
   const char *errbuf;
   int erroffset;
 
+  if (document_encoding == ENCODING_UTF8)
+      cflags |= PCRE_UTF8;
   patcomp = pcre_compile (pattern, cflags, &errbuf, &erroffset, re_tableptr);
   if (patcomp == 0)
     {
@@ -883,7 +888,7 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
    The rest of this file is the code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
    
-     void mp4h_MACRONAME (
+     void mp4h_bp_MACRONAME (
         struct obstack *obs,
         int argc,
         char *argv[],
@@ -910,7 +915,7 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
 /* Miscellaneous builtins -- "__file__" and "__line__".  */
 
 static void
-mp4h___file__ (MP4H_BUILTIN_ARGS)
+mp4h_bp___file__ (MP4H_BUILTIN_ARGS)
 {
   if (argc == 1)
     shipout_string (obs, current_file, 0);
@@ -922,7 +927,7 @@ mp4h___file__ (MP4H_BUILTIN_ARGS)
 }
 
 static void
-mp4h___line__ (MP4H_BUILTIN_ARGS)
+mp4h_bp___line__ (MP4H_BUILTIN_ARGS)
 {
   if (argc == 1)
     shipout_int (obs, current_line);
@@ -952,7 +957,7 @@ locale_init (void)
 `---------------------------*/
 
 static void
-mp4h_mp4h_l10n (MP4H_BUILTIN_ARGS)
+mp4h_bp_mp4h_l10n (MP4H_BUILTIN_ARGS)
 {
   char *cp;
   int i;
@@ -1002,7 +1007,7 @@ mp4h_mp4h_l10n (MP4H_BUILTIN_ARGS)
 `----------------------------------------------*/
 
 static void
-mp4h_mp4h_output_radix (MP4H_BUILTIN_ARGS)
+mp4h_bp_mp4h_output_radix (MP4H_BUILTIN_ARGS)
 {
   if (bad_argc (argv[0], argc, 0, 2))
     return;
@@ -1011,7 +1016,7 @@ mp4h_mp4h_output_radix (MP4H_BUILTIN_ARGS)
 }
 
 static void
-mp4h_timer (MP4H_BUILTIN_ARGS)
+mp4h_bp_timer (MP4H_BUILTIN_ARGS)
 {
   char buf[128];
 
@@ -1023,7 +1028,7 @@ mp4h_timer (MP4H_BUILTIN_ARGS)
 
 #if !defined(HAVE_FILE_FUNCS) || !defined (HAVE_LOCALE_H) || !defined(WITH_MODULES)
 static void
-mp4h_unsupported (MP4H_BUILTIN_ARGS)
+mp4h_bp_unsupported (MP4H_BUILTIN_ARGS)
 {
   MP4HERROR ((warning_status, 0,
     _("Error:%s:%d: The <%s> tag is not implemented on your OS\n"),
@@ -1032,7 +1037,7 @@ mp4h_unsupported (MP4H_BUILTIN_ARGS)
 #endif
 
 static void
-mp4h___version__ (MP4H_BUILTIN_ARGS)
+mp4h_bp___version__ (MP4H_BUILTIN_ARGS)
 {
   obstack_grow (obs, mp4h_version.v_short, strlen (mp4h_version.v_short));
 }
@@ -1046,25 +1051,25 @@ add_1char_protected (struct obstack *obs, char ch)
 }
 
 static void
-mp4h_lb (MP4H_BUILTIN_ARGS)
+mp4h_bp_lb (MP4H_BUILTIN_ARGS)
 {
   add_1char_protected (obs, '<');
 }
 
 static void
-mp4h_rb (MP4H_BUILTIN_ARGS)
+mp4h_bp_rb (MP4H_BUILTIN_ARGS)
 {
   add_1char_protected (obs, '>');
 }
 
 static void
-mp4h_dq (MP4H_BUILTIN_ARGS)
+mp4h_bp_dq (MP4H_BUILTIN_ARGS)
 {
   obstack_1grow (obs, CHAR_QUOTE);
 }
 
 static void
-mp4h_bs (MP4H_BUILTIN_ARGS)
+mp4h_bp_bs (MP4H_BUILTIN_ARGS)
 {
   add_1char_protected (obs, '\\');
 }
@@ -1087,7 +1092,7 @@ set_trace (symbol *sym, const char *data)
 }
 
 static void
-mp4h_debugging_on (MP4H_BUILTIN_ARGS)
+mp4h_bp_debugging_on (MP4H_BUILTIN_ARGS)
 {
   symbol *s;
   int i;
@@ -1112,7 +1117,7 @@ mp4h_debugging_on (MP4H_BUILTIN_ARGS)
 `------------------------------------------------------------------------*/
 
 static void
-mp4h_debugging_off (MP4H_BUILTIN_ARGS)
+mp4h_bp_debugging_off (MP4H_BUILTIN_ARGS)
 {
   symbol *s;
   int i;
@@ -1138,7 +1143,7 @@ mp4h_debugging_off (MP4H_BUILTIN_ARGS)
 | none in which case the debug_level is zeroed.                         |
 `----------------------------------------------------------------------*/
 static void
-mp4h_debugmode (MP4H_BUILTIN_ARGS)
+mp4h_bp_debugmode (MP4H_BUILTIN_ARGS)
 {
   int new_debug_level;
   int change_flag;
@@ -1191,7 +1196,7 @@ mp4h_debugmode (MP4H_BUILTIN_ARGS)
 `-------------------------------------------------------------------------*/
 
 static void
-mp4h_debugfile (MP4H_BUILTIN_ARGS)
+mp4h_bp_debugfile (MP4H_BUILTIN_ARGS)
 {
   if (bad_argc (argv[0], argc, 1, 2))
     return;
@@ -1208,7 +1213,7 @@ mp4h_debugfile (MP4H_BUILTIN_ARGS)
 | Print the replacement text for a builtin or user macro.  |
 `---------------------------------------------------------*/
 static void
-mp4h_function_def (MP4H_BUILTIN_ARGS)
+mp4h_bp_function_def (MP4H_BUILTIN_ARGS)
 {
   symbol *s;
 
@@ -1236,7 +1241,7 @@ mp4h_function_def (MP4H_BUILTIN_ARGS)
 
     default:
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Bad symbol type in mp4h_function_def ()")));
+        _("INTERNAL ERROR: Bad symbol type in mp4h_bp_function_def ()")));
       abort ();
     }
 }
@@ -1258,7 +1263,7 @@ mp4h_function_def (MP4H_BUILTIN_ARGS)
 |    Line 8: name of the group of this file                        |
 `-----------------------------------------------------------------*/
 static void
-mp4h_get_file_properties (MP4H_BUILTIN_ARGS)
+mp4h_bp_get_file_properties (MP4H_BUILTIN_ARGS)
 {
   struct stat buf;
   struct passwd *user;
@@ -1314,7 +1319,7 @@ mp4h_get_file_properties (MP4H_BUILTIN_ARGS)
 | not a shell expansion.                                           |
 `-----------------------------------------------------------------*/
 static void
-mp4h_directory_contents (MP4H_BUILTIN_ARGS)
+mp4h_bp_directory_contents (MP4H_BUILTIN_ARGS)
 {
   DIR *dir;
   struct dirent *entry;
@@ -1379,7 +1384,7 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
 | Returns "true" if file exists.  |
 `--------------------------------*/
 static void
-mp4h_file_exists (MP4H_BUILTIN_ARGS)
+mp4h_bp_file_exists (MP4H_BUILTIN_ARGS)
 {
   struct stat file;
 
@@ -1396,7 +1401,7 @@ mp4h_file_exists (MP4H_BUILTIN_ARGS)
 | Returns a real (absolute) path name |
 `------------------------------------*/
 static void
-mp4h_real_path (MP4H_BUILTIN_ARGS)
+mp4h_bp_real_path (MP4H_BUILTIN_ARGS)
 {
   const char *pathname, *cp;
   char *username;
@@ -1427,7 +1432,7 @@ mp4h_real_path (MP4H_BUILTIN_ARGS)
 | If no argument is given, current date and time is printed.  |
 `------------------------------------------------------------*/
 static void
-mp4h_date (MP4H_BUILTIN_ARGS)
+mp4h_bp_date (MP4H_BUILTIN_ARGS)
 {
   time_t epoch_time = (time_t)0;
   char *ascii_time;
@@ -1486,7 +1491,7 @@ mp4h_date (MP4H_BUILTIN_ARGS)
 | combined with tests like <if>, <ifeq>, ....               |
 `----------------------------------------------------------*/
 static void
-mp4h_group (MP4H_BUILTIN_ARGS)
+mp4h_bp_group (MP4H_BUILTIN_ARGS)
 {
   const char *separator;
 
@@ -1502,7 +1507,7 @@ mp4h_group (MP4H_BUILTIN_ARGS)
 | Like <group>, but this one is a container tag.  |
 `------------------------------------------------*/
 static void
-mp4h_compound (MP4H_BUILTIN_ARGS)
+mp4h_bp_compound (MP4H_BUILTIN_ARGS)
 {
   const char *separator;
 
@@ -1519,7 +1524,7 @@ mp4h_compound (MP4H_BUILTIN_ARGS)
 | Allow breaking an object into several pieces.   |
 `------------------------------------------------*/
 static void
-mp4h_disjoin (MP4H_BUILTIN_ARGS)
+mp4h_bp_disjoin (MP4H_BUILTIN_ARGS)
 {
   obstack_1grow (obs, CHAR_EGROUP);
   obstack_grow (obs, ARG(1), strlen (ARG(1)));
@@ -1530,7 +1535,7 @@ mp4h_disjoin (MP4H_BUILTIN_ARGS)
 | Prevent further expansion of attributes.   |
 `-------------------------------------------*/
 static void
-mp4h_noexpand (MP4H_BUILTIN_ARGS)
+mp4h_bp_noexpand (MP4H_BUILTIN_ARGS)
 {
   obstack_1grow (obs, CHAR_LQUOTE);
   dump_args (obs, argc, argv, NULL);
@@ -1541,7 +1546,7 @@ mp4h_noexpand (MP4H_BUILTIN_ARGS)
 | Remove special characters which forbid expansion.         |
 `----------------------------------------------------------*/
 static void
-mp4h_expand (MP4H_BUILTIN_ARGS)
+mp4h_bp_expand (MP4H_BUILTIN_ARGS)
 {
   int i, offset;
   register char *cp;
@@ -1567,7 +1572,7 @@ mp4h_expand (MP4H_BUILTIN_ARGS)
 | expanded, otherwise 3rd argument is read.                     |
 `--------------------------------------------------------------*/
 static void
-mp4h_if (MP4H_BUILTIN_ARGS)
+mp4h_bp_if (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
 
@@ -1619,7 +1624,7 @@ mp4h_if (MP4H_BUILTIN_ARGS)
 | expanded, otherwise 5th argument is expanded.         |
 `------------------------------------------------------*/
 static void
-mp4h_ifeq (MP4H_BUILTIN_ARGS)
+mp4h_bp_ifeq (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
 
@@ -1661,7 +1666,7 @@ mp4h_ifeq (MP4H_BUILTIN_ARGS)
 | expanded, otherwise 5th argument is expanded.             |
 `----------------------------------------------------------*/
 static void
-mp4h_ifneq (MP4H_BUILTIN_ARGS)
+mp4h_bp_ifneq (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
 
@@ -1702,7 +1707,7 @@ mp4h_ifneq (MP4H_BUILTIN_ARGS)
 | argument is empty.                                              |
 `----------------------------------------------------------------*/
 static void
-mp4h_when (MP4H_BUILTIN_ARGS)
+mp4h_bp_when (MP4H_BUILTIN_ARGS)
 {
   /*
        This test succeeds if one of these 2 clauses is true
@@ -1717,7 +1722,7 @@ mp4h_when (MP4H_BUILTIN_ARGS)
 | Loops while condition is true.  |
 `--------------------------------*/
 static void
-mp4h_while (MP4H_BUILTIN_ARGS)
+mp4h_bp_while (MP4H_BUILTIN_ARGS)
 {
   if (bad_argc (argv[0], argc, 0, 2))
     return;
@@ -1756,7 +1761,7 @@ mp4h_while (MP4H_BUILTIN_ARGS)
 | element of this array, this element being put into the variable.     |
 `---------------------------------------------------------------------*/
 static void
-mp4h_foreach (MP4H_BUILTIN_ARGS)
+mp4h_bp_foreach (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   char *value;
@@ -1839,7 +1844,7 @@ mp4h_foreach (MP4H_BUILTIN_ARGS)
 |         var=value    expression>                               |
 `---------------------------------------------------------------*/
 static void
-mp4h_var_case (MP4H_BUILTIN_ARGS)
+mp4h_bp_var_case (MP4H_BUILTIN_ARGS)
 {
   char *cp;
   int i;
@@ -1874,7 +1879,7 @@ mp4h_var_case (MP4H_BUILTIN_ARGS)
 | Immediately exits from inner loop.  |
 `------------------------------------*/
 static void
-mp4h_break (MP4H_BUILTIN_ARGS)
+mp4h_bp_break (MP4H_BUILTIN_ARGS)
 {
   xfree ((voidstar) SYMBOL_TEXT (&varbreak));
   SYMBOL_TEXT (&varbreak) = xstrdup ("true");
@@ -1884,7 +1889,7 @@ mp4h_break (MP4H_BUILTIN_ARGS)
 | Immediately exits from inner macro.  |
 `------------------------------------*/
 static void
-mp4h_return (MP4H_BUILTIN_ARGS)
+mp4h_bp_return (MP4H_BUILTIN_ARGS)
 {
   int i, levels=1;
   const char *up;
@@ -1916,7 +1921,7 @@ mp4h_return (MP4H_BUILTIN_ARGS)
 | Writes a message to stderr.  |
 `-----------------------------*/
 static void
-mp4h_warning (MP4H_BUILTIN_ARGS)
+mp4h_bp_warning (MP4H_BUILTIN_ARGS)
 {
   MP4HERROR ((warning_status, 0,
       _("Warning:%s:%d: %s"),
@@ -1927,7 +1932,7 @@ mp4h_warning (MP4H_BUILTIN_ARGS)
 | Immediately exits.  |
 `--------------------*/
 static void
-mp4h_exit (MP4H_BUILTIN_ARGS)
+mp4h_bp_exit (MP4H_BUILTIN_ARGS)
 {
   const char *status, *message;
   int rc = -1;
@@ -1949,7 +1954,7 @@ mp4h_exit (MP4H_BUILTIN_ARGS)
 `-------------------------------------------------------------------------*/
 
 static void
-mp4h_at_end_of_file (MP4H_BUILTIN_ARGS)
+mp4h_bp_at_end_of_file (MP4H_BUILTIN_ARGS)
 {
   dump_args (obs, 2, argv, " ");
   obstack_1grow (obs, '\0');
@@ -1966,7 +1971,7 @@ mp4h_at_end_of_file (MP4H_BUILTIN_ARGS)
 `-------------------------------------*/
 
 static void
-mp4h_define_tag (MP4H_BUILTIN_ARGS)
+mp4h_bp_define_tag (MP4H_BUILTIN_ARGS)
 {
   const builtin *bp;
   const char *attributes, *endtag, *whitespace;
@@ -2015,7 +2020,7 @@ mp4h_define_tag (MP4H_BUILTIN_ARGS)
 
     default:
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Bad token data type in mp4h_define_tag ()")));
+        _("INTERNAL ERROR: Bad token data type in mp4h_bp_define_tag ()")));
       abort ();
     }
 
@@ -2033,20 +2038,20 @@ mp4h_define_tag (MP4H_BUILTIN_ARGS)
 `-------------------------------------*/
 
 static void
-mp4h_provide_tag (MP4H_BUILTIN_ARGS)
+mp4h_bp_provide_tag (MP4H_BUILTIN_ARGS)
 {
   symbol *sym;
 
   sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
   if (sym == NULL)
-    mp4h_define_tag (MP4H_BUILTIN_RECUR);
+    mp4h_bp_define_tag (MP4H_BUILTIN_RECUR);
 }
 
 /*-------------------.
 | Define a synonym.  |
 `-------------------*/
 static void
-mp4h_let (MP4H_BUILTIN_ARGS)
+mp4h_bp_let (MP4H_BUILTIN_ARGS)
 {
   const builtin *bp;
   symbol *s;
@@ -2083,7 +2088,7 @@ mp4h_let (MP4H_BUILTIN_ARGS)
 
             default:
               MP4HERROR ((warning_status, 0,
-                _("INTERNAL ERROR: Bad token data type in mp4h_let ()")));
+                _("INTERNAL ERROR: Bad token data type in mp4h_bp_let ()")));
               abort ();
             }
         }
@@ -2100,7 +2105,7 @@ mp4h_let (MP4H_BUILTIN_ARGS)
 | Undefine symbols.  |
 `-------------------*/
 static void
-mp4h_undef (MP4H_BUILTIN_ARGS)
+mp4h_bp_undef (MP4H_BUILTIN_ARGS)
 {
   register int i;
 
@@ -2176,7 +2181,7 @@ generic_set_hook (MP4H_BUILTIN_ARGS, boolean before, int action)
 }
 
 static void
-mp4h_set_hook (MP4H_BUILTIN_ARGS)
+mp4h_bp_set_hook (MP4H_BUILTIN_ARGS)
 {
   const char *action, *position;
   symbol *sym;
@@ -2210,7 +2215,7 @@ mp4h_set_hook (MP4H_BUILTIN_ARGS)
 | Retrieve hooks.  |
 `-----------------*/
 static void
-mp4h_get_hook (MP4H_BUILTIN_ARGS)
+mp4h_bp_get_hook (MP4H_BUILTIN_ARGS)
 {
   symbol *sym;
   const char *position;
@@ -2240,7 +2245,7 @@ mp4h_get_hook (MP4H_BUILTIN_ARGS)
 | emulated via mp4h builtins.                               |
 `----------------------------------------------------------*/
 static void
-mp4h_attributes_quote (MP4H_BUILTIN_ARGS)
+mp4h_bp_attributes_quote (MP4H_BUILTIN_ARGS)
 {
   int i;
 
@@ -2257,7 +2262,7 @@ mp4h_attributes_quote (MP4H_BUILTIN_ARGS)
 }
 
 static void
-mp4h_attributes_remove (MP4H_BUILTIN_ARGS)
+mp4h_bp_attributes_remove (MP4H_BUILTIN_ARGS)
 {
   if (bad_argc (argv[0], argc, 2, 0))
     return;
@@ -2279,7 +2284,7 @@ mp4h_attributes_remove (MP4H_BUILTIN_ARGS)
 }
 
 static void
-mp4h_attributes_extract (MP4H_BUILTIN_ARGS)
+mp4h_bp_attributes_extract (MP4H_BUILTIN_ARGS)
 {
   if (bad_argc (argv[0], argc, 2, 0))
     return;
@@ -2390,25 +2395,25 @@ math_relation (MP4H_BUILTIN_ARGS, mathrel_type mathrel)
 }
 
 static void
-mp4h_gt (MP4H_BUILTIN_ARGS)
+mp4h_bp_gt (MP4H_BUILTIN_ARGS)
 {
   math_relation (MP4H_BUILTIN_RECUR, MATHREL_GT);
 }
 
 static void
-mp4h_lt (MP4H_BUILTIN_ARGS)
+mp4h_bp_lt (MP4H_BUILTIN_ARGS)
 {
   math_relation (MP4H_BUILTIN_RECUR, MATHREL_LT);
 }
 
 static void
-mp4h_eq (MP4H_BUILTIN_ARGS)
+mp4h_bp_eq (MP4H_BUILTIN_ARGS)
 {
   math_relation (MP4H_BUILTIN_RECUR, MATHREL_EQ);
 }
 
 static void
-mp4h_neq (MP4H_BUILTIN_ARGS)
+mp4h_bp_neq (MP4H_BUILTIN_ARGS)
 {
   math_relation (MP4H_BUILTIN_RECUR, MATHREL_NEQ);
 }
@@ -2494,7 +2499,7 @@ mathop_functions (MP4H_BUILTIN_ARGS, mathop_type mathop)
       break;
     default:
         MP4HERROR ((warning_status, 0,
-          _("INTERNAL ERROR: Illegal mathop in mp4h_mathop ()")));
+          _("INTERNAL ERROR: Illegal mathop in mp4h_bp_mathop ()")));
     }
 
   sprintf (sformat, "%%.%df", output_radix);
@@ -2511,43 +2516,43 @@ mathop_functions (MP4H_BUILTIN_ARGS, mathop_type mathop)
 #undef MATH_ARG_LOOP
 
 static void
-mp4h_add (MP4H_BUILTIN_ARGS)
+mp4h_bp_add (MP4H_BUILTIN_ARGS)
 {
   mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_ADD);
 }
 
 static void
-mp4h_substract (MP4H_BUILTIN_ARGS)
+mp4h_bp_substract (MP4H_BUILTIN_ARGS)
 {
   mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_SUB);
 }
 
 static void
-mp4h_multiply (MP4H_BUILTIN_ARGS)
+mp4h_bp_multiply (MP4H_BUILTIN_ARGS)
 {
   mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_MUL);
 }
 
 static void
-mp4h_divide (MP4H_BUILTIN_ARGS)
+mp4h_bp_divide (MP4H_BUILTIN_ARGS)
 {
   mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_DIV);
 }
 
 static void
-mp4h_modulo (MP4H_BUILTIN_ARGS)
+mp4h_bp_modulo (MP4H_BUILTIN_ARGS)
 {
   mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_MOD);
 }
 
 static void
-mp4h_min (MP4H_BUILTIN_ARGS)
+mp4h_bp_min (MP4H_BUILTIN_ARGS)
 {
   mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_MIN);
 }
 
 static void
-mp4h_max (MP4H_BUILTIN_ARGS)
+mp4h_bp_max (MP4H_BUILTIN_ARGS)
 {
   mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_MAX);
 }
@@ -2563,7 +2568,7 @@ mp4h_max (MP4H_BUILTIN_ARGS)
 | body.                                                 |
 `------------------------------------------------------*/
 static void
-mp4h_include (MP4H_BUILTIN_ARGS)
+mp4h_bp_include (MP4H_BUILTIN_ARGS)
 {
   const char *alt, *verbatim;
 
@@ -2583,7 +2588,7 @@ mp4h_include (MP4H_BUILTIN_ARGS)
 }
 
 static void
-mp4h___include (MP4H_BUILTIN_ARGS)
+mp4h_bp___include (MP4H_BUILTIN_ARGS)
 {
   const char *verbatim, *command, *file;
   FILE *fp;
@@ -2622,25 +2627,18 @@ WARNING:%s:%d: `file' and `command' attributes in <include> tag are mutually exc
     }
   else
     {
-      /*  In compatibility mode, filename may be specified as first argument */
-      if (compatibility_mode)
+      if (file)
         {
-          if (file)
-            {
-              if (bad_argc (argv[0], argc, 1, 1))
-                return;
-            }
-          else
-            {
-              if (bad_argc (argv[0], argc, 2, 2))
-                return;
-              file = ARG(1);
-            }
+          /*  New syntax  */
+          if (bad_argc (argv[0], argc, 1, 1))
+            return;
         }
       else
         {
-          if (bad_argc (argv[0], argc, 1, 1))
+          /*  Old syntax  */
+          if (bad_argc (argv[0], argc, 2, 2))
             return;
+          file = ARG(1);
         }
       if (!file)
         {
@@ -2677,9 +2675,10 @@ WARNING:%s:%d: `file' and `command' attributes in <include> tag are mutually exc
 | Read and parse a package if not already loaded.  |
 `-------------------------------------------------*/
 static void
-mp4h_use (MP4H_BUILTIN_ARGS)
+mp4h_bp_use (MP4H_BUILTIN_ARGS)
 {
   FILE *fp;
+  const char *name = NULL;
   char *filename = NULL, *real_filename = NULL;
   symbol *sym;
   char *cp;
@@ -2687,16 +2686,25 @@ mp4h_use (MP4H_BUILTIN_ARGS)
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  sym = lookup_file (ARG (1), SYMBOL_LOOKUP);
-  if (sym)
+  name = predefined_attribute ("name", &argc, argv, FALSE);
+  if (name == NULL)
     {
-      if (debug_level & DEBUG_TRACE_PATH)
-        DEBUG_MESSAGE1 (_("Module `%s' already loaded -- Skipped"), ARG (1));
+      MP4HERROR ((warning_status, errno,
+        _("Warning:%s:%d: `name' attribute must be set in <use> tag"),
+             CURRENT_FILE_LINE));
       return;
     }
 
-  real_filename = xmalloc (strlen (ARG (1)) + 7);
-  sprintf (real_filename, "%s.mp4hp", ARG (1));
+  sym = lookup_file (name, SYMBOL_LOOKUP);
+  if (sym)
+    {
+      if (debug_level & DEBUG_TRACE_PATH)
+        DEBUG_MESSAGE1 (_("Module `%s' already loaded -- Skipped"), name);
+      return;
+    }
+
+  real_filename = xmalloc (strlen (name) + 7);
+  sprintf (real_filename, "%s.mp4hp", name);
 
   for (cp=real_filename; *cp != '\0'; cp++)
     {
@@ -2709,12 +2717,12 @@ mp4h_use (MP4H_BUILTIN_ARGS)
     {
       MP4HERROR ((warning_status, errno,
         _("Warning:%s:%d: Cannot open %s"),
-             CURRENT_FILE_LINE, ARG (1)));
+             CURRENT_FILE_LINE, name));
       xfree ((voidstar) real_filename);
       return;
     }
 
-  lookup_file (ARG (1), SYMBOL_INSERT);
+  lookup_file (name, SYMBOL_INSERT);
 
   push_file (fp, filename);
 
@@ -2727,7 +2735,7 @@ mp4h_use (MP4H_BUILTIN_ARGS)
 #ifdef WITH_MODULES
 
 static void
-mp4h_load (MP4H_BUILTIN_ARGS)
+mp4h_bp_load (MP4H_BUILTIN_ARGS)
 {
   const char *module, *library;
   library = predefined_attribute ("library", &argc, argv, FALSE);
@@ -2751,7 +2759,7 @@ mp4h_load (MP4H_BUILTIN_ARGS)
 | Discards its body contents.  |
 `-----------------------------*/
 static void
-mp4h_comment (MP4H_BUILTIN_ARGS)
+mp4h_bp_comment (MP4H_BUILTIN_ARGS)
 {
 }
 
@@ -2759,7 +2767,7 @@ mp4h_comment (MP4H_BUILTIN_ARGS)
 | Set EOL comment delimiter.  |
 `----------------------------*/
 static void
-mp4h_set_eol_comment (MP4H_BUILTIN_ARGS)
+mp4h_bp_set_eol_comment (MP4H_BUILTIN_ARGS)
 {
   bad_argc (argv[0], argc, 0, 2);
   xfree ((voidstar) eolcomm.string);
@@ -2771,7 +2779,7 @@ mp4h_set_eol_comment (MP4H_BUILTIN_ARGS)
 | Set quotes to disable parsing.  |
 `--------------------------------*/
 static void
-mp4h_set_quotes (MP4H_BUILTIN_ARGS)
+mp4h_bp_set_quotes (MP4H_BUILTIN_ARGS)
 {
   const char *display;
 
@@ -2816,7 +2824,7 @@ mp4h_set_quotes (MP4H_BUILTIN_ARGS)
 `------------------------------------------------------------------------*/
 
 static void
-mp4h_dnl (MP4H_BUILTIN_ARGS)
+mp4h_bp_dnl (MP4H_BUILTIN_ARGS)
 {
   if (bad_argc (argv[0], argc, 1, 1))
     return;
@@ -2825,7 +2833,7 @@ mp4h_dnl (MP4H_BUILTIN_ARGS)
 }
 
 static void
-mp4h_frozen_dump (MP4H_BUILTIN_ARGS)
+mp4h_bp_frozen_dump (MP4H_BUILTIN_ARGS)
 {
   if (frozen_dump)
     input_close ();
@@ -2839,7 +2847,7 @@ mp4h_frozen_dump (MP4H_BUILTIN_ARGS)
 | returns nothing.                                                |
 `----------------------------------------------------------------*/
 static void
-mp4h_not (MP4H_BUILTIN_ARGS)
+mp4h_bp_not (MP4H_BUILTIN_ARGS)
 {
   int i;
 
@@ -2865,7 +2873,7 @@ mp4h_not (MP4H_BUILTIN_ARGS)
 | Otherwise, the last string is returned.                    |
 `-----------------------------------------------------------*/
 static void
-mp4h_and (MP4H_BUILTIN_ARGS)
+mp4h_bp_and (MP4H_BUILTIN_ARGS)
 {
   int i;
   char *cp;
@@ -2890,7 +2898,7 @@ mp4h_and (MP4H_BUILTIN_ARGS)
 | "or" returns the first non-empty argument.  |
 `--------------------------------------------*/
 static void
-mp4h_or (MP4H_BUILTIN_ARGS)
+mp4h_bp_or (MP4H_BUILTIN_ARGS)
 {
   int i;
   char *cp;
@@ -2915,7 +2923,7 @@ mp4h_or (MP4H_BUILTIN_ARGS)
 | Returns the length of the string.  |
 `-----------------------------------*/
 static void
-mp4h_string_length (MP4H_BUILTIN_ARGS)
+mp4h_bp_string_length (MP4H_BUILTIN_ARGS)
 {
   if (bad_argc (argv[0], argc, 0, 2))
     return;
@@ -2923,7 +2931,7 @@ mp4h_string_length (MP4H_BUILTIN_ARGS)
   if (argc == 1)
     shipout_int (obs, 0);
   else
-    shipout_int (obs, strlen (ARG (1)));
+    shipout_int (obs, encoding_strlen (ARG (1)));
 }
 
 /*---------------------------------------------------------------.
@@ -2962,19 +2970,19 @@ updowncase (struct obstack *obs, int argc, token_data **argv, boolean upcase)
 }
 
 static void
-mp4h_downcase (MP4H_BUILTIN_ARGS)
+mp4h_bp_downcase (MP4H_BUILTIN_ARGS)
 {
   updowncase (obs, argc, argv, FALSE);
 }
 
 static void
-mp4h_upcase (MP4H_BUILTIN_ARGS)
+mp4h_bp_upcase (MP4H_BUILTIN_ARGS)
 {
   updowncase (obs, argc, argv, TRUE);
 }
 
 static void
-mp4h_capitalize (MP4H_BUILTIN_ARGS)
+mp4h_bp_capitalize (MP4H_BUILTIN_ARGS)
 {
   char *text;
   register char *cp;
@@ -3012,9 +3020,9 @@ mp4h_capitalize (MP4H_BUILTIN_ARGS)
 | character.                                                     |
 `---------------------------------------------------------------*/
 static void
-mp4h_substring (MP4H_BUILTIN_ARGS)
+mp4h_bp_substring (MP4H_BUILTIN_ARGS)
 {
-  char *text;
+  char *text, *cp;
   int start, end;
 
   if (bad_argc (argv[0], argc, 3, 4))
@@ -3025,13 +3033,28 @@ mp4h_substring (MP4H_BUILTIN_ARGS)
     {
       if (!numeric_arg (argv[0], ARG (3), TRUE, &end))
         return;
-      *(text+end) = '\0';
+      if (document_encoding == ENCODING_UTF8)
+        {
+          cp = utf8char_skip(text, end);
+          if (!cp)
+            return;
+          *cp = '\0';
+        }
+      else
+        *(text+end) = '\0';
     }
   if (argc>2)
     {
       if (!numeric_arg (argv[0], ARG (2), TRUE, &start))
         return;
-      text += start;
+      if (document_encoding == ENCODING_UTF8)
+        {
+          text = utf8char_skip(text, start);
+          if (!text)
+            return;
+        }
+      else
+        text += start;
     }
   obstack_grow (obs, text, strlen (text));
 }
@@ -3041,7 +3064,7 @@ mp4h_substring (MP4H_BUILTIN_ARGS)
 | is performed without consideration of case.                     |
 `----------------------------------------------------------------*/
 static void
-mp4h_string_eq (MP4H_BUILTIN_ARGS)
+mp4h_bp_string_eq (MP4H_BUILTIN_ARGS)
 {
   const char *caseless;
 
@@ -3068,7 +3091,7 @@ mp4h_string_eq (MP4H_BUILTIN_ARGS)
 }
 
 static void
-mp4h_string_neq (MP4H_BUILTIN_ARGS)
+mp4h_bp_string_neq (MP4H_BUILTIN_ARGS)
 {
   const char *caseless;
 
@@ -3100,7 +3123,7 @@ mp4h_string_neq (MP4H_BUILTIN_ARGS)
 | without case.                                                    |
 `-----------------------------------------------------------------*/
 static void
-mp4h_string_compare (MP4H_BUILTIN_ARGS)
+mp4h_bp_string_compare (MP4H_BUILTIN_ARGS)
 {
   const char *caseless;
   int result;
@@ -3128,7 +3151,7 @@ mp4h_string_compare (MP4H_BUILTIN_ARGS)
 | where character appear in the string.                           |
 `----------------------------------------------------------------*/
 static void
-mp4h_char_offsets (MP4H_BUILTIN_ARGS)
+mp4h_bp_char_offsets (MP4H_BUILTIN_ARGS)
 {
   const char *caseless;
   char *cp;
@@ -3185,6 +3208,62 @@ mp4h_char_offsets (MP4H_BUILTIN_ARGS)
      Latest sources are available from
         ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
 */
+
+static char *
+utf8char_skip (char *utf, int offset)
+{
+  if (!utf)
+    return(NULL);
+  while (offset > 0) {
+    offset--;
+    if (utf[0] & 0x80) {
+      if ((utf[1] & 0xc0) != 0x80)
+        return(NULL);
+      if ((utf[0] & 0xe0) == 0xe0) {
+        if ((utf[2] & 0xc0) != 0x80)
+          return(NULL);
+        if ((utf[0] & 0xf0) == 0xf0) {
+          if ((utf[0] & 0xf8) != 0xf0 || (utf[3] & 0xc0) != 0x80)
+            return(NULL);
+          utf += 4;
+        } else {
+          utf += 3;
+        }
+      } else {
+        utf += 2;
+      }
+    } else {
+      utf++;
+    }
+  }
+  return(utf);
+}
+
+static int
+utf8char_strlen(char *utf)
+{
+  int ret = 0;
+
+  if (utf == NULL)
+    return(-1);
+
+  while (*utf != 0) {
+    utf = utf8char_skip(utf, 1);
+    if (!utf)
+      return(-1);
+    ret++;
+  }
+  return(ret);
+}
+
+static int
+encoding_strlen(char *str)
+{
+  if (document_encoding == ENCODING_UTF8)
+    return(utf8char_strlen (str));
+  else
+    return(strlen (str));
+}
 
 /*-------------------------------------------------------------------------.
 | Function to perform substitution by regular expressions.  Used by the    |
@@ -3489,7 +3568,7 @@ Warning:%s:%d: unknown modifier `%c' in reflags"),
 }
 
 static void
-mp4h_subst_in_string (MP4H_BUILTIN_ARGS)
+mp4h_bp_subst_in_string (MP4H_BUILTIN_ARGS)
 {
   int extra_re_flags;
 
@@ -3501,7 +3580,7 @@ mp4h_subst_in_string (MP4H_BUILTIN_ARGS)
 | Substitutes regular expressions in a variable.  |
 `------------------------------------------------*/
 static void
-mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
+mp4h_bp_subst_in_var (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   token_data td;
@@ -3547,7 +3626,7 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
 |   length : returns length of the matched string.                   |
 `-------------------------------------------------------------------*/
 static void
-mp4h_match (MP4H_BUILTIN_ARGS)
+mp4h_bp_match (MP4H_BUILTIN_ARGS)
 {
   const char *action;
   int extra_re_flags;
@@ -3570,7 +3649,8 @@ mp4h_match (MP4H_BUILTIN_ARGS)
 
 /*----------------------------------------------------------------.
 | The function generic_variable is the generic function used by   |
-| mp4h_set_var, mp4h_set_var, mp4h_get_var and mp4h_get_var_once. |
+| mp4h_bp_set_var, mp4h_bp_set_var, mp4h_bp_get_var and           |
+| mp4h_bp_get_var_once.                                           |
 `----------------------------------------------------------------*/
 
 static void
@@ -3837,7 +3917,7 @@ Warning:%s:%d: wrong index declaration in <%s>"),
 | this.                                                  |
 `-------------------------------------------------------*/
 static void
-mp4h_set_var_x (MP4H_BUILTIN_ARGS)
+mp4h_bp_set_var_x (MP4H_BUILTIN_ARGS)
 {
   const char *name;
   symbol *var;
@@ -3856,7 +3936,7 @@ mp4h_set_var_x (MP4H_BUILTIN_ARGS)
 | function thus duplicates for both set-var and set-var-varbatim tags.  |
 `----------------------------------------------------------------------*/
 static void
-mp4h_set_var (MP4H_BUILTIN_ARGS)
+mp4h_bp_set_var (MP4H_BUILTIN_ARGS)
 {
   /* verbatim argument is actually ignored for SYMBOL_INSERT */
   generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_INSERT, FALSE);
@@ -3866,7 +3946,7 @@ mp4h_set_var (MP4H_BUILTIN_ARGS)
 | Get the value of a variable.  |
 `------------------------------*/
 static void
-mp4h_get_var (MP4H_BUILTIN_ARGS)
+mp4h_bp_get_var (MP4H_BUILTIN_ARGS)
 {
   generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_LOOKUP, FALSE);
 }
@@ -3875,7 +3955,7 @@ mp4h_get_var (MP4H_BUILTIN_ARGS)
 | Get the value of a variable without expanding its attribute.  |
 `--------------------------------------------------------------*/
 static void
-mp4h_get_var_once (MP4H_BUILTIN_ARGS)
+mp4h_bp_get_var_once (MP4H_BUILTIN_ARGS)
 {
   generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_LOOKUP, TRUE);
 }
@@ -3884,7 +3964,7 @@ mp4h_get_var_once (MP4H_BUILTIN_ARGS)
 | Undefine a variable.  |
 `----------------------*/
 static void
-mp4h_unset_var (MP4H_BUILTIN_ARGS)
+mp4h_bp_unset_var (MP4H_BUILTIN_ARGS)
 {
   int i;
 
@@ -3896,7 +3976,7 @@ mp4h_unset_var (MP4H_BUILTIN_ARGS)
 | Push a variable to a stack and reset this variable.  |
 `-----------------------------------------------------*/
 static void
-mp4h_preserve (MP4H_BUILTIN_ARGS)
+mp4h_bp_preserve (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   var_stack *next;
@@ -3926,7 +4006,7 @@ mp4h_preserve (MP4H_BUILTIN_ARGS)
 | Pop a variable from the variable stack.  |
 `-----------------------------------------*/
 static void
-mp4h_restore (MP4H_BUILTIN_ARGS)
+mp4h_bp_restore (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   var_stack *prev;
@@ -3954,7 +4034,7 @@ mp4h_restore (MP4H_BUILTIN_ARGS)
 | Test if a variable exists.  |
 `----------------------------*/
 static void
-mp4h_var_exists (MP4H_BUILTIN_ARGS)
+mp4h_bp_var_exists (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
 
@@ -3967,7 +4047,7 @@ mp4h_var_exists (MP4H_BUILTIN_ARGS)
 | Increment a variable.  |
 `-----------------------*/
 static void
-mp4h_increment (MP4H_BUILTIN_ARGS)
+mp4h_bp_increment (MP4H_BUILTIN_ARGS)
 {
   int value, incr;
   symbol *var;
@@ -4000,7 +4080,7 @@ mp4h_increment (MP4H_BUILTIN_ARGS)
 }
 
 static void
-mp4h_decrement (MP4H_BUILTIN_ARGS)
+mp4h_bp_decrement (MP4H_BUILTIN_ARGS)
 {
   int value, incr;
   symbol *var;
@@ -4036,7 +4116,7 @@ mp4h_decrement (MP4H_BUILTIN_ARGS)
 | Dumps informations of symbols.  |
 `--------------------------------*/
 static void
-mp4h_symbol_info (MP4H_BUILTIN_ARGS)
+mp4h_bp_symbol_info (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   int size;
@@ -4080,7 +4160,7 @@ mp4h_symbol_info (MP4H_BUILTIN_ARGS)
 | Copy a variable to another one. |
 `--------------------------------*/
 static void
-mp4h_copy_var (MP4H_BUILTIN_ARGS)
+mp4h_bp_copy_var (MP4H_BUILTIN_ARGS)
 {
   symbol *var1, *var2;
 
@@ -4107,7 +4187,7 @@ mp4h_copy_var (MP4H_BUILTIN_ARGS)
 | is not set yet.                 |
 `--------------------------------*/
 static void
-mp4h_defvar (MP4H_BUILTIN_ARGS)
+mp4h_bp_defvar (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
 
@@ -4196,7 +4276,7 @@ array_value (symbol *var, int offset, int *length)
 | Prints number of elements of an array.  |
 `----------------------------------------*/
 static void
-mp4h_array_size (MP4H_BUILTIN_ARGS)
+mp4h_bp_array_size (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   int result = -1;
@@ -4249,7 +4329,7 @@ array_member (const char *text, symbol *var, boolean caseless)
 }
 
 static void
-mp4h_array_member (MP4H_BUILTIN_ARGS)
+mp4h_bp_array_member (MP4H_BUILTIN_ARGS)
 {
   int result = -1;
   symbol *var;
@@ -4269,7 +4349,7 @@ mp4h_array_member (MP4H_BUILTIN_ARGS)
 | Adds an element to an array only if it is not yet present.   |
 `-------------------------------------------------------------*/
 static void
-mp4h_array_add_unique (MP4H_BUILTIN_ARGS)
+mp4h_bp_array_add_unique (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   char *value;
@@ -4310,7 +4390,7 @@ mp4h_array_add_unique (MP4H_BUILTIN_ARGS)
 | Adds an element to an array.  |
 `------------------------------*/
 static void
-mp4h_array_push (MP4H_BUILTIN_ARGS)
+mp4h_bp_array_push (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   char *old_value;
@@ -4338,7 +4418,7 @@ mp4h_array_push (MP4H_BUILTIN_ARGS)
 | Remove the top level value from an array and return it.  |
 `---------------------------------------------------------*/
 static void
-mp4h_array_pop (MP4H_BUILTIN_ARGS)
+mp4h_bp_array_pop (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   char *cp;
@@ -4367,7 +4447,7 @@ mp4h_array_pop (MP4H_BUILTIN_ARGS)
 | Prints the value with the highest index.   |
 `-------------------------------------------*/
 static void
-mp4h_array_topvalue (MP4H_BUILTIN_ARGS)
+mp4h_bp_array_topvalue (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   char *cp;
@@ -4394,7 +4474,7 @@ mp4h_array_topvalue (MP4H_BUILTIN_ARGS)
 | left unchanged.                                                  |
 `-----------------------------------------------------------------*/
 static void
-mp4h_array_shift (MP4H_BUILTIN_ARGS)
+mp4h_bp_array_shift (MP4H_BUILTIN_ARGS)
 {
   int offset, ind_start;
   symbol *var;
@@ -4470,7 +4550,7 @@ mp4h_array_shift (MP4H_BUILTIN_ARGS)
 | Concatenate multiple arrays.  |
 `------------------------------*/
 static void
-mp4h_array_concat (MP4H_BUILTIN_ARGS)
+mp4h_bp_array_concat (MP4H_BUILTIN_ARGS)
 {
   symbol *var, *varadd;
   char *value;
@@ -4543,7 +4623,7 @@ sort_function (const void *item1, const void *item2)
 }
 
 static void
-mp4h_sort (MP4H_BUILTIN_ARGS)
+mp4h_bp_sort (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   const char *caseless, *numeric, *sortorder;
@@ -4613,7 +4693,7 @@ mp4h_sort (MP4H_BUILTIN_ARGS)
 `-----------------------------------------------------------------------*/
 
 static void
-mp4h_divert (MP4H_BUILTIN_ARGS)
+mp4h_bp_divert (MP4H_BUILTIN_ARGS)
 {
   const char *divnum;
   int i = 0;
@@ -4628,7 +4708,7 @@ mp4h_divert (MP4H_BUILTIN_ARGS)
 `-----------------------------------------------------*/
 
 static void
-mp4h_divnum (MP4H_BUILTIN_ARGS)
+mp4h_bp_divnum (MP4H_BUILTIN_ARGS)
 {
   if (bad_argc (argv[0], argc, 1, 1))
     return;
@@ -4641,7 +4721,7 @@ mp4h_divnum (MP4H_BUILTIN_ARGS)
 `-----------------------------------------------------------------------*/
 
 static void
-mp4h_undivert (MP4H_BUILTIN_ARGS)
+mp4h_bp_undivert (MP4H_BUILTIN_ARGS)
 {
   int i;
   const char *divnum;
