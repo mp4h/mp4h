@@ -374,6 +374,7 @@ static int array_size __P ((symbol *));
 static char *array_value __P ((symbol *, int, int *));
 static int array_member __P ((const char *, symbol *, boolean));
 static int sort_function __P ((const void *, const void *));
+static void logical_to_physical_paths __P ((char **));
 
 /*  This symbol controls breakings of flow statements.  */
 static symbol varbreak;
@@ -2672,6 +2673,21 @@ WARNING:%s:%d: `file' and `command' attributes in <include> tag are mutually exc
 }
 
 /*-------------------------------------------------.
+| Transform a module or library name foo:bar into  |
+| physical path `foo/bar'.                         |
+`-------------------------------------------------*/
+static void
+logical_to_physical_paths (char **name)
+{
+  register char *cp;
+  for (cp=*name; *cp != '\0'; cp++)
+    {
+      if (*cp == ':')
+        *cp = '/';
+    }
+}
+
+/*-------------------------------------------------.
 | Read and parse a package if not already loaded.  |
 `-------------------------------------------------*/
 static void
@@ -2681,7 +2697,6 @@ mp4h_bp_use (MP4H_BUILTIN_ARGS)
   const char *name = NULL;
   char *filename = NULL, *real_filename = NULL;
   symbol *sym;
-  char *cp;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -2705,12 +2720,7 @@ mp4h_bp_use (MP4H_BUILTIN_ARGS)
 
   real_filename = xmalloc (strlen (name) + 7);
   sprintf (real_filename, "%s.mp4hp", name);
-
-  for (cp=real_filename; *cp != '\0'; cp++)
-    {
-      if (*cp == ':')
-        *cp = '/';
-    }
+  logical_to_physical_paths (&real_filename);
 
   fp = path_search (real_filename, &filename);
   if (fp == NULL)
@@ -2738,6 +2748,7 @@ static void
 mp4h_bp_load (MP4H_BUILTIN_ARGS)
 {
   const char *module, *library;
+  char *realname = NULL;
   library = predefined_attribute ("library", &argc, argv, FALSE);
   module = predefined_attribute ("module", &argc, argv, FALSE);
   if (!library && !module)
@@ -2748,9 +2759,19 @@ mp4h_bp_load (MP4H_BUILTIN_ARGS)
       return;
     }
   if (library)
-    library_load (library, obs);
+    {
+      realname = xstrdup (library);
+      logical_to_physical_paths (&realname);
+      library_load (realname, obs);
+      xfree (realname);
+    }
   if (module)
-    module_load (module, obs);
+    {
+      realname = xstrdup (module);
+      logical_to_physical_paths (&realname);
+      module_load (realname, obs);
+      xfree (realname);
+    }
 }
 
 #endif

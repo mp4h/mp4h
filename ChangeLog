@@ -10,6 +10,11 @@
 
   Changes between 1.1.2 and 1.2.0:
 
+    *) Install libraries in subdirectories (13-Aug-2001):
+       As with <use>, double colons are replaced by slashes in <load>
+       attributes, which allows putting libraries in subdirectories.
+       [Denis Barbier]
+
     *) Upgrade to Autoconf 2.50 (12-Aug-2001):
        [Denis Barbier]
 
