@@ -6,7 +6,9 @@
 <set-var version="@LONG_VERSION@">
 <set-var title="MP4H - A Macro Processor for HTML">
 
-<include html.out>
+<when <get-var format>>
+<include <get-var format>.out>
+</when>
 
 <header>
 <section "Description">
@@ -18,8 +20,8 @@ documents.  One can define and use its own tags very easily.
 
 <para>
 This software was originally written as a piece of a more complex
-program, <WML> (Website Meta Language
-<URL http://www.engelschall.com/sw/wml/>).
+program, Website Meta Language (<WML>)
+<URL http://www.engelschall.com/sw/wml/>.
 <WML> used <Meta-HTML> (<URL http://www.metahtml.org/> written
 by Brian J. Fox) to perform macro substitutions.  For license reasons,
 it was difficult to hack <Meta-HTML> into <WML>, so a replacement for
@@ -44,7 +46,7 @@ is derived from GNU <m4> 1.4n, which is a development version.
 <tag:description define-tag complex>
 <var name>
 [attributes=verbatim]
-[type=simple|complex]
+[endtag=required]
 </tag:description>
 
 <para>
@@ -57,7 +59,7 @@ This function defines a new tag.
 </example>
 
 <example>
-<define-tag foo type=complex>body is: %body</define-tag>
+<define-tag foo endtag=required>body is: %body</define-tag>
 <foo>Here it is</foo>
 </example>
 

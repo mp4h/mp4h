@@ -51,7 +51,7 @@
 ;;;
 ;;;    Description of MP4H tags
 ;;;
-<define-tag tag:description type=complex whitespace=delete>
+<define-tag tag:description endtag=required whitespace=delete>
 <preserve complex>
 <preserve verbatim>
 <set-var complex=*>
@@ -63,7 +63,7 @@
 <tr>
 <th>Name</th>
 <th>Complex</th>
-<th><group "Verbatim arguments"></th>
+<th><group "Verbatim attributes"></th>
 <th>Attributes</th>
 </tr>
 <tr valign=top>
@@ -87,12 +87,12 @@
 ;;;
 ;;;    Paragraphs
 ;;;
-<define-tag para type=complex><p>%body</p></define-tag>
+<define-tag para endtag=required><p>%body</p></define-tag>
 
 ;;;
 ;;;    Example of MP4H code
 ;;;
-<define-tag example type=complex attributes=verbatim>
+<define-tag example andtag=required attributes=verbatim>
 <set-var-verbatim verb-body=%ubody>;;;
 <subst-in-var verb-body "&" "&amp;">;;;
 <subst-in-var verb-body "<" "&lt;">;;;

@@ -1,5 +1,5 @@
 <foo>
-<define-tag foo type=complex>
+<define-tag foo endtag=required>
 bar
 </define-tag>
 <foo>

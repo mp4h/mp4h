@@ -1,4 +1,4 @@
-<define-tag foo type=complex>
+<define-tag foo endtag=required>
 attr: %attributes
 body: %body
 </define-tag>

@@ -142,7 +142,7 @@ _BUILDDIST = \
     echo "Creating tarball..."; \
     cd $(top_srcdir) && \
     $(TARBALL) -u $(NAME) -g mp4h -c '$(GZIP) --best' \
-        -e 'CVS,\.cvsignore,mp4h-*' \
+        -e 'CVS,\.cvsignore,mp4h-.*' \
         -o $${_tarball} $${_distname} .; \
     echo "Done"; \
     cd $$_cwd && ls -l $${_tarball}

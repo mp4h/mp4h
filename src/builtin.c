@@ -1,4 +1,4 @@
-/* MP4H -- A macro-processor for HTML documents
+/* MP4H -- A macro processor for HTML documents
    Copyright 1999, Denis Barbier
    All rights reserved.
 
@@ -1196,15 +1196,15 @@ static void
 mp4h_define_tag (MP4H_BUILTIN_ARGS)
 {
   const builtin *bp;
-  const char *attributes, *tag_type;
+  const char *attributes, *endtag;
   boolean expand_args = TRUE;
   boolean container = FALSE;
 
   attributes = predefined_attribute ("attributes", &argc, argv, TRUE, TRUE);
   if (attributes && strcmp (attributes, "verbatim") == 0)
     expand_args = FALSE;
-  tag_type = predefined_attribute ("type", &argc, argv, TRUE, TRUE);
-  if (tag_type && strcmp (tag_type, "complex") == 0)
+  endtag = predefined_attribute ("endtag", &argc, argv, TRUE, TRUE);
+  if (endtag && strcmp (endtag, "required") == 0)
     container = TRUE;
 
   if (bad_argc (argv[0], argc, 2, 3))
@@ -3212,7 +3212,10 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
 {
   const unsigned char *text;
   int i;
+  boolean unexpanded;
+  char sep[2];
 
+  sep[1] = '\0';
   for (text = SYMBOL_TEXT (sym); *text != '\0';)
     {
       if (*text != '%')
@@ -3222,6 +3225,18 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
           continue;
         }
       text++;
+      unexpanded = FALSE;
+      sep[0] = ' ';
+      
+      while (*text == 'U' || *text == 'A' || *text == 'u' || *text == 'y')
+        {
+          if (*text == 'U' || *text == 'u')
+            unexpanded = TRUE;
+          if (*text == 'A' || *text == 'y')
+            sep[0] = '\n';
+          text++;
+        }
+
       if (isdigit ((int) *text))
         {
           char *endp;
@@ -3234,42 +3249,38 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                || strncmp (text, "xbody", 5) == 0
                || strncmp (text, "qbody", 5) == 0)
         {
+          if (unexpanded)
+            obstack_1grow (obs, CHAR_LQUOTE);
           if (SYMBOL_CONTAINER (sym))
-            dump_args (obs, 2, (argv+argc-1), " ");
+            dump_args (obs, 2, (argv+argc-1), sep);
           else
-            dump_args (obs, argc, argv, " ");
+            dump_args (obs, argc, argv, sep);
+          if (unexpanded)
+            obstack_1grow (obs, CHAR_RQUOTE);
 
           if (*text == 'b')
             text += 4;
           else
             text += 5;
         }
-      else if (strncmp (text, "ubody", 5) == 0)
-        {
-          obstack_1grow (obs, CHAR_LQUOTE);
-          if (SYMBOL_CONTAINER (sym))
-            dump_args (obs, 2, (argv+argc-1), " ");
-          else
-            dump_args (obs, argc, argv, " ");
-          obstack_1grow (obs, CHAR_RQUOTE);
-          text+=5;
-        }
       else if (strncmp (text, "attributes", 10) == 0
                || strncmp (text, "xattributes", 11) == 0
                || strncmp (text, "qattributes", 11) == 0)
         {
-          dump_args (obs, argc, argv, " ");
+          if (unexpanded)
+            obstack_1grow (obs, CHAR_LQUOTE);
+          else
+            obstack_1grow (obs, CHAR_BGROUP);
+          dump_args (obs, argc, argv, sep);
+          if (unexpanded)
+            obstack_1grow (obs, CHAR_RQUOTE);
+          else
+            obstack_1grow (obs, CHAR_EGROUP);
+
           if (*text == 'a')
             text += 10;
           else
             text += 11;
-        }
-      else if (strncmp (text, "uattributes", 11) == 0)
-        {
-          obstack_1grow (obs, CHAR_LQUOTE);
-          dump_args (obs, argc, argv, " ");
-          obstack_1grow (obs, CHAR_RQUOTE);
-          text+=11;
         }
       else
         obstack_1grow (obs, '%');

@@ -15,7 +15,6 @@ PROGRAM = mp4h
 
 SUBDIRS = \
    define-tag \
-   define-container \
    undef \
    let \
    function-def \

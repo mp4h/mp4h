@@ -25,7 +25,7 @@ all: mp4h.html
 
 mp4h.html: mp4h.mp4h html.out ../src/mp4h
 	sed -e 's|\@LONG_VERSION\@|$(LONG_VERSION)|g' < mp4h.mp4h \
-	| ../src/mp4h > $@
+	| ../src/mp4h -D format=html > $@
 
 # ------------------------------------------------
 #   PROGRAM
