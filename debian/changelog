@@ -1,3 +1,15 @@
+mp4h (1.2.4-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Denis Barbier <barbier@debian.org>  Sat,  2 Mar 2002 23:22:32 +0100
+
+mp4h (1.2.3-2) unstable; urgency=low
+
+  * Apply upstream patches to keep track of line numbers in error messages.
+
+ -- Denis Barbier <barbier@debian.org>  Mon, 10 Dec 2001 23:43:27 +0100
+
 mp4h (1.2.3-1) unstable; urgency=low
 
   * New upstream release
