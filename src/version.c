@@ -34,12 +34,12 @@ extern mp4h_version_t mp4h_version;
 mp4h_version_t mp4h_version = {
     0x102201,
     "1.2.1",
-    "1.2.1 (30-Sep-2001)",
-    "This is mp4h, Version 1.2.1 (30-Sep-2001)",
-    "mp4h 1.2.1 (30-Sep-2001)",
+    "1.2.1 (01-Oct-2001)",
+    "This is mp4h, Version 1.2.1 (01-Oct-2001)",
+    "mp4h 1.2.1 (01-Oct-2001)",
     "mp4h/1.2.1",
-    "@(#)mp4h 1.2.1 (30-Sep-2001)",
-    "$Id: mp4h 1.2.1 (30-Sep-2001) $"
+    "@(#)mp4h 1.2.1 (01-Oct-2001)",
+    "$Id: mp4h 1.2.1 (01-Oct-2001) $"
 };
 
 #endif /* _SRC_VERSION_C_AS_HEADER_ */
