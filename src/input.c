@@ -998,64 +998,42 @@ next_token (token_data *td, read_type expansion, boolean in_string)
       (void) next_char ();
       if (IS_TAG(ch))             /* ESCAPED WORD */
         {
-          if (lquote.length > 0 && MATCH (ch, lquote.string))
+          obstack_1grow (&token_stack, ch);
+          ch = peek_input ();
+          if (ch != CHAR_EOF)
             {
-              if (visible_quotes || expansion == READ_ATTR_VERB
-                  || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
-                obstack_grow (&token_stack, lquote.string, lquote.length);
-              while ((ch = next_char ()) != CHAR_EOF)
+              if (ch == '/')
                 {
-                  if (rquote.length > 0 && MATCH (ch, rquote.string))
-                    break;
+                  obstack_1grow (&token_stack, '/');
+                  (void) next_char ();
+                  ch = peek_input ();
+                }
+              if (IS_ALPHA(ch))
+                {
+                  ch = next_char ();
                   obstack_1grow (&token_stack, ch);
-                }
-              if (visible_quotes || expansion == READ_ATTR_VERB
-                  || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
-                {
-                  obstack_grow (&token_stack, rquote.string, rquote.length);
-                  type = TOKEN_STRING;
-                }
-              else
-                type = TOKEN_QUOTED;
-            }
-          else
-            {
-              obstack_1grow (&token_stack, ch);
-              if ((ch = peek_input ()) != CHAR_EOF)
-                {
-                  if (ch == '/')
+                  while ((ch = next_char ()) != CHAR_EOF && IS_ALNUM(ch))
                     {
-                      obstack_1grow (&token_stack, '/');
-                      (void) next_char ();
+                      obstack_1grow (&token_stack, ch);
+                    }
+                  if (ch == '*')
+                    {
+                      obstack_1grow (&token_stack, ch);
                       ch = peek_input ();
                     }
-                  if (IS_ALPHA(ch))
-                    {
-                      ch = next_char ();
-                      obstack_1grow (&token_stack, ch);
-                      while ((ch = next_char ()) != CHAR_EOF && IS_ALNUM(ch))
-                        {
-                          obstack_1grow (&token_stack, ch);
-                        }
-                      if (ch == '*')
-                        {
-                          obstack_1grow (&token_stack, ch);
-                          ch = peek_input ();
-                        }
-                      else
-                        unget_input(ch);
+                  else
+                    unget_input(ch);
 
-                      if (IS_SPACE(ch) || IS_CLOSE(ch) || IS_SLASH (ch))
-                        type = TOKEN_WORD;
-                      else
-                        type = TOKEN_STRING;
-                    }
+                  if (IS_SPACE(ch) || IS_CLOSE(ch) || IS_SLASH (ch))
+                    type = TOKEN_WORD;
                   else
                     type = TOKEN_STRING;
                 }
               else
-                type = TOKEN_SIMPLE;        /* escape before eof */
+                type = TOKEN_STRING;
             }
+          else
+            type = TOKEN_SIMPLE;        /* '<' before eof */
         }
       else if (IS_CLOSE(ch))
         {
