@@ -136,6 +136,7 @@ char *mktemp ();
 #define _(Text) (Text)
 #endif
 
+/*  Last character of a string.  */
 #define LAST_CHAR(Text) *(Text + strlen (Text) - 1)
 
 
@@ -331,7 +332,7 @@ struct token_data
 /* The status of processing. */
 #define READ_NORMAL    (1 << 0)  /* normal expansion of macros */
 #define READ_ATTRIBUTE (1 << 1)  /* when reading macro arguments */
-#define READ_ATTR_QUOT (1 << 2)  /* like READ_ATTRIBUTES, but quotes
+#define READ_ATTR_QUOT (1 << 2)  /* like READ_ATTRIBUTE, but quotes
                                     are preserved */
 #define READ_ATTR_VERB (1 << 3)  /* inside macros with attributes=verbatim */
 #define READ_ATTR_ASIS (1 << 4)  /* attributes are read without any
@@ -395,6 +396,8 @@ extern int *array_current_line;
 
 /* Begin and end quote */
 extern STRING lquote, rquote;
+
+/* Eof-of-line comment  */
 extern STRING eolcomm;
 
 #define CHAR_LQUOTE '\1'
@@ -402,9 +405,11 @@ extern STRING eolcomm;
 #define CHAR_BGROUP '\3'
 #define CHAR_EGROUP '\4'
 #define CHAR_QUOTE  '\5'
-#define CHAR_LANGLE '\6'
 
+/* Default eof-of-line comment  */
 #define DEF_EOLCOMM  ";;;"
+
+/* Default quotes  */
 #define DEF_LQUOTE  "<@["
 #define DEF_RQUOTE  "]@>"
 
@@ -442,10 +447,10 @@ extern unsigned short syntax_table[256];
 #define IS_ALNUM(ch)  ((((syntax_table[(int)(ch)]) & SYNTAX_ALNUM) != 0) \
                           || ch == ':' || ch == '-')
 
-#define IS_LQUOTE(ch) (ch == CHAR_LQUOTE)
-#define IS_RQUOTE(ch) (ch == CHAR_RQUOTE)
 #define IS_BGROUP(ch) (ch == CHAR_BGROUP)
 #define IS_EGROUP(ch) (ch == CHAR_EGROUP)
+#define IS_LQUOTE(ch) (ch == CHAR_LQUOTE)
+#define IS_RQUOTE(ch) (ch == CHAR_RQUOTE)
 
 void set_syntax __P ((int, const char *));
 void set_syntax_internal __P ((int, int));
@@ -464,7 +469,7 @@ void make_diversion __P ((int));
 void insert_diversion __P ((int));
 void insert_file __P ((FILE *));
 void freeze_diversions __P ((FILE *));
-void remove_special_chars __P ((char *));
+int remove_special_chars __P ((char *, boolean));
 
 
 /* File symtab.c  --- symbol table definitions.  */
@@ -482,7 +487,6 @@ struct symbol
 {
   struct symbol *next;
   boolean traced;
-  boolean shadowed;
   boolean container;
   boolean expand_args;
 
@@ -494,7 +498,6 @@ struct symbol
 
 #define SYMBOL_NEXT(S)          ((S)->next)
 #define SYMBOL_TRACED(S)        ((S)->traced)
-#define SYMBOL_SHADOWED(S)      ((S)->shadowed)
 #define SYMBOL_CONTAINER(S)     ((S)->container)
 #define SYMBOL_EXPAND_ARGS(S)   ((S)->expand_args)
 #define SYMBOL_NAME(S)          ((S)->name)

@@ -177,10 +177,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
       if (cmp == 0 && sym != NULL)
         break;
 
-      /* Insert a name in the symbol table.  If there is already a symbol
-         with the name, insert this in front of it, and mark the old
-         symbol as "shadowed".  */
-
+      /* Insert a name in the symbol table.  */
       sym = (symbol *) xmalloc (sizeof (symbol));
       initialize_builtin (sym);
       SYMBOL_NAME (sym) = xstrdup (lcname);
@@ -266,10 +263,9 @@ hack_all_symbols (hack_symbol *func, const char *data)
 static void
 dump_symbol (symbol *sym, const char *data)
 {
-  printf ("\tname %s, addr 0x%p, next 0x%p, flags%s%s\n",
+  printf ("\tname %s, addr 0x%p, next 0x%p, flags%s\n",
            SYMBOL_NAME (sym), sym, sym->next,
-           SYMBOL_TRACED (sym) ? " traced" : "",
-           SYMBOL_SHADOWED (sym) ? " shadowed" : "");
+           SYMBOL_TRACED (sym) ? " traced" : "");
 }
 
 static void
@@ -314,10 +310,9 @@ symtab_print_list (int i)
 
   printf ("Symbol dump %d:\n", i);
   for (sym = symtab[0]; sym != NULL; sym = sym->next)
-    printf ("\tname %s, addr 0x%p, next 0x%p, flags%s%s\n",
+    printf ("\tname %s, addr 0x%p, next 0x%p, flags%s\n",
            SYMBOL_NAME (sym), sym, sym->next,
-           SYMBOL_TRACED (sym) ? " traced" : "",
-           SYMBOL_SHADOWED (sym) ? " shadowed" : "");
+           SYMBOL_TRACED (sym) ? " traced" : "");
 }
 
 #endif /* DEBUG_SYM */

@@ -8,7 +8,14 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 0.9.5 and 0.9.6:
+  Changes between 0.9.5 and 1.0.0:
+
+    *) Numerous clean-ups and documentation enhancements (19-Jun-2000):
+       Macro parser is now very robust, and extensible with the -X flag.
+       It should be useful to any HTML (or XHTML) writer which wants a
+       simple but powerful macro-processor.
+       Documentation is enhanced, but need some more work.
+       [Denis Barbier]
 
     *) Change expansion flags (18-Jun-2000):
        Two flags have been switched, and two new options added to

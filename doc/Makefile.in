@@ -9,7 +9,7 @@ top_srcdir      = @top_srcdir@
 VPATH           = @srcdir@
 PROGDIR         = $(top_srcdir)/src
 PROGRAM         = $(PROGDIR)/mp4h
-FLAGS           =
+FLAGS           = -X 0
 DEPS            = list-tags
 TIDY            = @TIDY@
 
@@ -26,14 +26,12 @@ all: $(PROGRAM) mp4h.html mp4h.1
 # ------------------------------------------------
 
 mp4h.html: mp4h.mp4h html.out
-	$(PROGRAM) $(FLAGS) -D format=html mp4h.mp4h \
-        | sed -e 's/<\**\(\/*[a-zA-Z]*\)\**/<\1/g' > $@
+	$(PROGRAM) $(FLAGS) -D format=html mp4h.mp4h > $@
 	$(TIDY) $(TIDYOPT) -m $@
 
 mp4h.pod: mp4h.mp4h pod.out $(PROGRAM) $(DEPS)
 	$(PROGRAM) $(FLAGS) -D format=pod mp4h.mp4h \
-        | sed -e 's/<\**\(\/*[a-zA-Z]*\)\**/<\1/g' \
-              -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
+        | sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
 
 mp4h.1: mp4h.pod
 	pod2man --section=1 \

@@ -381,7 +381,7 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
             {
             case TOKEN_TEXT:
               text = xstrdup (TOKEN_DATA_TEXT (argv[i]));
-              remove_special_chars (text);
+              remove_special_chars (text, FALSE);
               trace_format ("%S", text);
               xfree (text);
               break;
@@ -434,7 +434,7 @@ trace_post (const char *name, int id, int argc, token_data **argv,
   if (expanded && (debug_level & DEBUG_TRACE_EXPANSION))
     {
       text = xstrdup (expanded);
-      remove_special_chars (text);
+      remove_special_chars (text, FALSE);
       trace_format (" -> %S", text);
       xfree (text);
     }

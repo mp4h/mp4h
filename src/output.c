@@ -89,6 +89,10 @@ static int output_unused;       /* current value of (size - used) */
 
 /* Number of input line we are generating output for.  */
 int output_current_line;
+
+/* Set to true after a left angle, to remove star before tag name  */
+static boolean after_left_angle = FALSE;
+
 
 /*------------------------.
 | Output initialisation.  |
@@ -267,34 +271,112 @@ make_room_for (int length)
     }
 }
 
-/*---------------------------------------------.
-| Remove special characters added in strings.  |
-| Replacement is made in place.                |
-`---------------------------------------------*/
+/*----------------------------------------------------.
+| Remove special characters added in strings.         |
+| Replacement is made in place, and this function     |
+| returns how many characters are removed.            |
+| IMPORTANT WARNING: string must be null-terminated.  |
+`----------------------------------------------------*/
 
-void
-remove_special_chars (char *s)
+int
+remove_special_chars (char *s, boolean restore_quotes)
 {
-  int offset;
+  int offset = 0;
   register char *cp;
 
-  /*  For efficiency reason, this loop is divided into 2 parts.  */
-  for (cp=s; *cp != '\0' && *cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE
+  /*  For efficiency reason, this loop is divided into 2 parts.
+      Until a special character is removed, there is nothing to do.
+      After that, string is shifyed.  */
+  if (restore_quotes)
+    {
+      for (cp=s; *cp != '\0' && *cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE
              && *cp != CHAR_BGROUP && *cp != CHAR_EGROUP; cp++)
-    ;
-  if (*cp == '\0')
-    return;
+        {
+          if (*cp == CHAR_QUOTE)
+            *cp = '"';
+        }
+    }
+  else
+    {
+      for (cp=s; *cp != '\0' && *cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE
+             && *cp != CHAR_BGROUP && *cp != CHAR_EGROUP; cp++)
+        ;
+    }
 
-  offset = 0;
+  if (*cp == '\0')
+    return offset;
+
   for ( ; *cp != '\0'; cp++)
     {
       if (*cp == CHAR_LQUOTE || *cp == CHAR_RQUOTE
        || *cp == CHAR_BGROUP || *cp == CHAR_EGROUP)
         offset++;
+      else if ((*cp == CHAR_QUOTE) && restore_quotes)
+        *(cp-offset) = '"';
       else
         *(cp-offset) = *cp;
     }
   *(cp-offset) = '\0';
+  return offset;
+}
+
+/*----------------------------------------------------.
+| Remove leading and trailing stars in tag names.     |
+`----------------------------------------------------*/
+
+static void
+remove_stars (char *s, int *length_ptr)
+{
+  int offset, i;
+  register char *cp;
+  int length = *length_ptr;
+
+  offset = 0;
+  cp = s;
+  if (*s == '*' && after_left_angle &&
+          !(exp_flags & EXP_LEAVE_LEADING_STAR))
+    {
+      offset++;
+      cp++;
+    }
+
+  for (i=0; i<length; cp++, i++)
+    {
+      *(cp-offset) = *cp;
+      if (*cp == '<' && i<length-1)
+        {
+          if (*(cp+1) == '*' && !(exp_flags & EXP_LEAVE_LEADING_STAR))
+            {
+              offset++;
+              cp++, i++;
+              continue;
+            }
+          if (exp_flags & EXP_LEAVE_TRAILING_STAR)
+            continue;
+
+          if (*(cp+1) == '/')
+            {
+              cp++, i++;
+              *(cp-offset) = *cp;
+            }
+          cp++, i++;
+          if (i<length && IS_ALPHA (*cp))
+            {
+              while (i<length && IS_ALNUM(*cp))
+                {
+                  *(cp-offset) = *cp;
+                  cp++, i++;
+                }
+              if (i<length && *cp == '*' )
+                offset++;
+              else
+                {
+                  cp--, i--;
+                }
+            }
+        }
+    }
+  *length_ptr -= offset;
 }
 
 /*------------------------------------------------------------------------.
@@ -369,8 +451,6 @@ shipout_text (struct obstack *obs, char *text, int length)
   static boolean start_of_output_line = TRUE;
   char line[20];
   const char *cursor;
-  register int i;
-  register char *cp;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
 
@@ -385,15 +465,12 @@ shipout_text (struct obstack *obs, char *text, int length)
   if (output_diversion == NULL)
     return;
 
-  /* Restitute some special characters */
-  remove_special_chars (text);
-  for (cp=text, i=0; i<length; cp++, i++)
-    {
-      if (*cp == CHAR_QUOTE)
-        *cp = '"';
-      else if (*cp == CHAR_LANGLE && !(exp_flags & EXP_LEAVE_LEADING_STAR))
-        *cp = '<';
-    }
+  /* Restitute some special characters  */
+  length -= remove_special_chars (text, TRUE);
+
+  /* Remove leading and trailing stars in tag names  */
+  if (!(exp_flags & (EXP_LEAVE_TRAILING_STAR | EXP_LEAVE_TRAILING_STAR)))
+    remove_stars (text, &length);
 
   /* Output TEXT to a file, or in-memory diversion buffer.  */
 
@@ -411,13 +488,13 @@ shipout_text (struct obstack *obs, char *text, int length)
       case 3: OUTPUT_CHARACTER (*text); text++;
       case 2: OUTPUT_CHARACTER (*text); text++;
       case 1: OUTPUT_CHARACTER (*text);
-      case 0:
-        return;
+              break;
 
         /* Optimize longer texts.  */
 
       default:
         output_text (text, length);
+        text += length - 1;
       }
   else
     for (; length-- > 0; text++)
@@ -457,4 +534,9 @@ shipout_text (struct obstack *obs, char *text, int length)
         if (*text == '\n')
           start_of_output_line = TRUE;
       }
+
+  if (*text == '<')
+    after_left_angle = TRUE;
+  else
+    after_left_angle = FALSE;
 }

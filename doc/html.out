@@ -79,6 +79,9 @@
 <body* bgcolor="#ffffff" text="#000000">
 
 <h1><get-var title /></h1>
+<para>
+This documentation describes <get-var package /> version <get-var version />.
+</para>
 </define-tag>
 
 ;;;
@@ -216,7 +219,7 @@
 <subst-in-var verb-body "<" "&lt;" />
 <subst-in-var verb-body ">" "&gt;" />
 <set-var body=%body />
-<subst-in-var body "<([a-z]*)[*]" "<\\1" />
+<subst-in-var body "<(/?[a-z]*)[*]" "<\\1" />
 <subst-in-var body "&" "&amp;" />
 <subst-in-var body "<" "&lt;" />
 <subst-in-var body ">" "&gt;" />

@@ -433,7 +433,6 @@ initialize_builtin (symbol *sym)
 {
   SYMBOL_TYPE (sym)        = TOKEN_VOID;
   SYMBOL_TRACED (sym)      = FALSE;
-  SYMBOL_SHADOWED (sym)    = FALSE;
   SYMBOL_CONTAINER (sym)   = FALSE;
   SYMBOL_EXPAND_ARGS (sym) = FALSE;
   SYMBOL_HOOK_BEGIN (sym)  = NULL;
@@ -2458,7 +2457,7 @@ mp4h_not (MP4H_BUILTIN_ARGS)
 
   for (i=1; i<argc; i++)
     {
-      remove_special_chars (ARG (i));
+      remove_special_chars (ARG (i), FALSE);
       if (*(ARG (i)) == '\0')
         {
           obstack_grow (obs, "true", 4);
@@ -2484,7 +2483,7 @@ mp4h_and (MP4H_BUILTIN_ARGS)
   for (i=argc-1; i>0; i--)
     {
       quote = strchr (ARG (i), CHAR_LQUOTE);
-      remove_special_chars (ARG (i));
+      remove_special_chars (ARG (i), FALSE);
       if (*(ARG (i)) != '\0')
         break;
     }
@@ -2521,7 +2520,7 @@ mp4h_or (MP4H_BUILTIN_ARGS)
   for (i=1; i<argc; i++)
     {
       quote = strchr (ARG (i), CHAR_LQUOTE);
-      remove_special_chars (ARG (i));
+      remove_special_chars (ARG (i), FALSE);
       if (*ARG (i) != '\0')
         {
           if (obs)
@@ -2752,11 +2751,11 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
   int regexp_len;
 
   victim = ARG (1);
-  remove_special_chars (victim);
+  remove_special_chars (victim, FALSE);
   length = strlen (victim);
 
   regexp = ARG (2);
-  remove_special_chars (regexp);
+  remove_special_chars (regexp, FALSE);
   regexp_len = strlen (regexp);
 
   buf.buffer = NULL;
@@ -2851,11 +2850,11 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
     return;
 
   victim = ARG (1);
-  remove_special_chars (victim);
+  remove_special_chars (victim, FALSE);
   length = strlen (victim);
 
   regexp = ARG (2);
-  remove_special_chars (regexp);
+  remove_special_chars (regexp, FALSE);
   regexp_len = strlen (regexp);
 
   buf.buffer = NULL;
@@ -3243,7 +3242,7 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
               }
             
             /*  Remove special quote characters. */
-            remove_special_chars (value);
+            remove_special_chars (value, FALSE);
 
             ptr_index = strchr (ARG (i), ']');
             if (ptr_index != NULL && *(ptr_index-1) != '[')

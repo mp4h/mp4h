@@ -5,14 +5,15 @@
 
 <mp4h-l10n LC_ALL=C />
 <set-var package=mp4h />
-<set-var version=0.9.6 />
-<set-var title="mp4h - A Macro Processeur for HTML Documents" />
+<set-var version=1.0.0 />
+<set-var title="mp4h - A Macro Processor for HTML Documents" />
 
 <include <get-var format />.out
     alt=<exit status=1
         message="This file has to be compiled with one of the following lines
    ../src/mp4h -D format=html mp4h.mp4h > mp4h.html
-   ../src/mp4h -D format=pod mp4h.mp4h > mp4h.pod
+   ../src/mp4h -D format=pod mp4h.mp4h | \\
+   sed -e 's/_LT_/</g' -e 's/_GT_/>/g'  > mp4h.pod
 " />
 />
 
@@ -123,7 +124,7 @@ NUMBER is a combination of
 </option-list>
 </para>
 <para>
-In version <get-var version />, default value is 3306=2+8+32+64+128+1024+2048.
+In version <get-var version />, default value is 3114=2+8+32+1024+2048.
 </para>
 
 <subsection "Limits control" />
@@ -169,9 +170,8 @@ Flags are any of:
 <para>
 The <mp4h/> software is a macro-processor, which means that keywords are
 replaced by other text.  This chapter describes all primitives.
-and default value is 0.
 As <mp4h/> has been specially designed for HTML documents, its syntax is
-very similar to HTML, with tags and attributes.  An important feature
+very similar to HTML, with tags and attributes.  One important feature
 has no equivalent in HTML: comments until end of line.  All text
 following three colons is discarded until end of line, like
 
@@ -200,6 +200,15 @@ whereas a complex tag looks like:
 body
 </name></code>
 
+</para>
+
+<para>
+Since version 0.9.1, <mp4h/> knows XHTML syntax too, so your input file
+may conform to HTML or XHTML syntax.  In this manual, we adopt the
+latter, which is why simple tags have a trailing slash in attributes.
+If you want to produce HTML files with this input file, you may either
+choose an adequate <optflag -expansion /> flag or use a post-processor like
+<URL src="http://www.w3.org/People/Raggett/tidy/" name="tidy" />.
 </para>
 
 <para>
@@ -845,10 +854,10 @@ regular expressions. By default extended regular expressions are used.
 <set-var foo="abcdefghijk" />
 <set-regexp-syntax type=basic />
 <subst-in-string <get-var foo /> "([c-e]+)" ":\\1:" />
-<subst-in-string <get-var foo /> "\([c-e]\{1,\}\)" ":\\1:" />
+<subst-in-string <get-var foo /> "\\([c-e]\\{1,\\}\\)" ":\\1:" />
 <set-regexp-syntax type=extended />
 <subst-in-string <get-var foo /> "([c-e]+)" ":\\1:" />
-<subst-in-string <get-var foo /> "\([c-e]\{1,\}\)" ":\\1:" />
+<subst-in-string <get-var foo /> "\\([c-e]\\{1,\\}\\)" ":\\1:" />
 </example>
 
 <tag:description get-regexp-syntax>
@@ -1277,9 +1286,9 @@ Cancels the <command noexpand /> tag.
 
 <pseudo-func foo />
 <example>
-<subst-in-string "=LT=define-tag foo>bar</define-tag>" "=LT=" "<" />
+<subst-in-string "=LT=define-tag foo>bar=LT=/define-tag>" "=LT=" "<" />
 <foo/>
-<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT="
+<subst-in-string "=LT=define-tag foo>quux=LT=/define-tag>" "=LT="
    "<noexpand "<" />" />
 <foo/>
 </example>
@@ -1993,7 +2002,7 @@ This definition has a major drawback:
 <example>
 <text-tt>This is an <text-tt>example</text-tt></text-tt>
 </example>
-We would like that inner tags are removed.
+We would like the inner tags be removed.
 </para>
 
 <set-var _text:tt=0 />
@@ -2018,6 +2027,7 @@ are inside such an environment:
 <decrement _text:tt />
 </define-tag>
 </code>
+(presence of asterisks in HTML tags is explained in next section).
 
 <example>
 <text-tt>This is an <text-tt>example</text-tt></text-tt>
@@ -2047,12 +2057,135 @@ expansion with
 </example>
 </para>
 
+<subsection "Expansion flags" />
+<para>
+When you want to embed some server-side scripting language in your
+pages, you face up some weird problems, like in
+<code>
+<a href=<%= $url %>>Hello</a>
+</code>
+The question is how do <mp4h/> know that this input has some extra
+delimiters? The answer is that <mp4h/> should not try to handle some
+special delimiters, because it cannot handle all of them (there are ASP,
+ePerl, PHP,... and some of them are customizable). Now, remember that <mp4h/>
+is a macro-processor, not an XML parser. So we must focus on macros,and
+format our input file so that it can be parsed without any problem.
+Previous example may be written
+<code>
+<a href="<%= $url %>">Hello</a>
+</code>
+because quotes prevent inner right-angle bracket from closing the
+<command a /> tag. 
+</para>
+
+<para>
+Another common problem is when we need to print only a begin or an end
+tag alone.  For instance it is very desirable to define its own headers
+and footers with
+<code>
+<define-tag header>
+<html*>
+<head>
+... put here some informations ....
+</head>
+<body* bgcolor="#ffffff" text="#000000">
+</define-tag>
+<define-tag footer>
+</body*>
+</html*>
+</define-tag>
+</code>
+Asterisks mark these tags as pseudo-simple tags, which means that they
+are complex HTML tags, but used as simple tags within <mp4h/> because
+tags would not be well nested otherwise.
+</para>
+<para>
+This asterisk is called ``trailing star'', it appears at the end of the
+tag name.
+</para>
+
+<para>
+Sometimes HTML tags are not parsable,as in this javascript code.
+<code>
+  ...
+    document.write('<*img src="foo.gif"');
+    if (text) document.write(' alt="'+text+'"');
+    document.write('>');
+  ...
+</code>
+The ``leading star'' is an asterisk between left-angle bracket and
+tag name, which prevents this tag from being parsed.
+</para>
+
+<para>
+That said we can now understand what the <optflag -expansion /> flag is
+for.  It controls how expansion is performed by mp4h.  It is followed by
+an integer, which is a bit sum of the following values
+<option-list>
+<option 1>do not parse unknown tags.  When set, HTML tags are not
+parsed.  When unset, HTML tags are parsed, i.e. that attributes and/or
+body is collected.
+</option>
+<option 2>unknown tags are assumed being simple.
+When set, HTML tags are simple by default.
+When unset, HTML tags are complex by default, unless their attribute
+contain a trailing slash or a trailing star appear just after tag name
+(see below).
+</option>
+<option 4>trailing star in tag name do not make this tag simple.
+When set, trailing star in tag name has no special effect.
+When unset, it causs an HTML tag to be simple.
+</option>
+<option 8>an unmatched end tag closes all previous unmatched begin tags.
+When set, all missing end closing tags are automatically inserted.
+When unset, an unmatched end tag is discarded and interpreted as normal
+text, so processing continues until matching and tag is found.
+</option>
+<option 16>interpret backslashes as printf.
+When set, backslashes before non special characters are removed.
+When unset, they are preserved.
+</option>
+<option 32>remove trailing slash in tag attributes.
+When set, remove trailing slash in tag attributes on output.
+When unset, they are preserved.
+</option>
+<option 64>do not remove trailing star in tag name.
+When set, trailing star after tag name are preserved on output.
+When unset, they are removed.
+</option>
+<option 128>do not remove leading star in tag name.
+When set, leading star before tag name are preserved on output.
+When unset, they are removed.
+</option>
+<option 1024>suppress warnings about bad nested tags.
+When set, warnings about bad nested tags are not displayed.
+When unset, they are printed on standard error.
+</option>
+<option 2048>suppress warnings about missing trailing slash.
+When set, warnings about missing trailing slash are not displayed.
+When unset, they are printed on standard error.
+</option>
+</option-list>
+</para>
+
+<para>
+Run
+<code>
+  mp4h -h
+</code>
+to find default value. Current value matches HTML syntax, and it will
+tend to zero when XHTML syntax becomes more familiar.
+</para>
+
 <section "Author" />
 <para>
 <URL src="mailto:barbier@imacs.polytechnique.fr"
      name="Denis Barbier" />
 </para>
-
+<para>
+Mp4h has its own
+<URL src="http://www.engelschall.com/sw/mp4h/" name="homepage" />.
+</para>
 
 <section "Thanks" />
 <para>

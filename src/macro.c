@@ -698,11 +698,6 @@ expand_unknown_tag (char *name, read_type expansion)
 
   obs_expansion = push_string_init ();
 
-  /*  When this tag is no more processed, remove the trailing star.  */
-  if (!(exp_flags & EXP_LEAVE_TRAILING_STAR) && LAST_CHAR (symbol_name) == '*'
-      && (expansion_level == 1))
-    LAST_CHAR (symbol_name) = '\0';
-
   if (expansion != READ_BODY)
     obstack_1grow (obs_expansion, CHAR_LQUOTE);
   obstack_1grow (obs_expansion, '<');

@@ -993,13 +993,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
       (void) next_char ();
       if (IS_ESCAPE(ch))             /* ESCAPED WORD */
         {
-          if (peek_input () == '*' && !(exp_flags & EXP_LEAVE_LEADING_STAR))
-            {
-              next_char ();
-              obstack_1grow (&token_stack, CHAR_LANGLE);
-              type = TOKEN_SIMPLE;
-            }
-          else if (lquote.length > 0 && MATCH (ch, lquote.string))
+          if (lquote.length > 0 && MATCH (ch, lquote.string))
             {
               if (visible_quotes || expansion == READ_ATTR_VERB
                   || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
@@ -1036,12 +1030,6 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                       obstack_1grow (&token_stack, ch);
                       while ((ch = next_char ()) != CHAR_EOF && IS_ALNUM(ch))
                         {
-                          if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
-                            {
-                              skip_line ();
-                              ch = CHAR_EOF;
-                              break;
-                            }
                           obstack_1grow (&token_stack, ch);
                         }
                       if (ch == '*')
@@ -1094,12 +1082,6 @@ next_token (token_data *td, read_type expansion, boolean in_string)
           obstack_1grow (&token_stack, ch);
           while ((ch = next_char ()) != CHAR_EOF && (IS_ALNUM(ch)))
             {
-              if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
-                {
-                  skip_line ();
-                  ch = CHAR_EOF;
-                  break;
-                }
               obstack_1grow (&token_stack, ch);
             }
           if (ch == '*')

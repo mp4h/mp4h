@@ -58,7 +58,7 @@ int warning_status = 0;
 int nesting_limit = 250;
 
 /* Flags to control how expansion is performed.  */
-#define DEFAULT_EXPANSION_FLAGS 3306
+#define DEFAULT_EXPANSION_FLAGS 3114
 
 int exp_flags = DEFAULT_EXPANSION_FLAGS;
 
