@@ -6,7 +6,7 @@ AC_INIT(src/mp4h.c)
 AC_CONFIG_HEADER(config.h)
 
 shtool=./shtool
-PACKAGE=MP4H
+PACKAGE=mp4h
 VERSION="`$shtool version -l c -d short src/version.c`"
 LONG_VERSION="`$shtool version -l c -d long src/version.c`"
 $shtool echo -e "Configuring for %B$PACKAGE $LONG_VERSION %b"

@@ -1,4 +1,4 @@
-/* MP4H -- A macro processor for HTML documents
+/* Mp4h -- A macro processor for HTML documents
    Copyright 2000, Denis Barbier
    All rights reserved.
 
@@ -133,8 +133,8 @@ struct input_block
       u_c;
       struct
         {
-          unsigned char *start; /* string value */
-          unsigned char *current; /* current value */
+          char *start; /* string value */
+          char *current; /* current value */
         }
       u_s;
       struct
@@ -734,11 +734,11 @@ skip_buffer (void)
 `---------------------------------------------------------------------*/
 
 static boolean
-match_comment (const unsigned char *s)
+match_comment (const char *s)
 {
   int n;                        /* number of characters matched */
   int ch;                       /* input character */
-  const unsigned char *t;
+  const char *t;
   struct obstack *st;
 
   ch = peek_input ();

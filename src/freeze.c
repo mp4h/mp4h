@@ -1,4 +1,4 @@
-/* MP4H -- A macro processor for HTML documents
+/* Mp4h -- A macro processor for HTML documents
    Copyright 2000, Denis Barbier
    All rights reserved.
 

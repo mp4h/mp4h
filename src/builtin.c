@@ -1,4 +1,4 @@
-/* MP4H -- A macro processor for HTML documents
+/* Mp4h -- A macro processor for HTML documents
    Copyright 2000, Denis Barbier
    All rights reserved.
 
@@ -716,7 +716,7 @@ shipout_int (struct obstack *obs, int val)
 | Idem, for long int.  |
 `---------------------*/
 
-void
+static void
 shipout_long (struct obstack *obs, long val)
 {
   char buf[128];
@@ -4031,7 +4031,7 @@ void
 expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                    token_data **argv, read_type expansion)
 {
-  const unsigned char *text, *save;
+  const char *text, *save;
   int i;
   boolean unexpanded;
   char sep[2];

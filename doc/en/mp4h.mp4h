@@ -5,7 +5,7 @@
 
 <set-var package=mp4h>
 <set-var version=0.9.1>
-<set-var title="MP4H - A Macro Processeur for HTML Documents">
+<set-var title="Mp4h - A Macro Processeur for HTML Documents">
 
 <include <get-var format>.out
     alt=<exit status=1
@@ -1466,7 +1466,7 @@ size, type, ctime, mtime, atime, owner and group.
 </para>
 
 <example>
-<get-file-properties mp4h.mp4h>
+<get-file-properties <__file__>>
 </example>
 
 <tag:description include>
@@ -1668,7 +1668,7 @@ selected.
 </para>
 
 <example>
-<mp4h-l10n LC_NUMERIC=fr_FR>
+<mp4h-l10n LC_NUMERIC=fr>
 <add 1,2 3,4>
 </example>
 <mp4h-l10n LC_ALL=C>

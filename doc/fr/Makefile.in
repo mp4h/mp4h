@@ -1,5 +1,5 @@
 ##
-##  Makefile -- MP4H Documentation
+##  Makefile -- mp4h Documentation
 ##
 
 @SET_MAKE@
@@ -28,11 +28,12 @@ all: mp4h.html mp4h.1
 
 #   Do not rebuild HTML documentation
 mp4h.html: mp4h.mp4h $(INCDIR)/html.out
-	LC_CTYPE=fr_FR; export LC_CTYPE; \
+	LC_CTYPE=fr; export LC_CTYPE; \
 	PATH=$(PROGDIR):$(PATH) mp4h -D format=html -I $(INCDIR) mp4h.mp4h > $@
 	[ $(TIDY) = no ] || $(TIDY) $(TIDYOPT) -m $@
 
 mp4h.pod: mp4h.mp4h $(INCDIR)/pod.out $(PROGRAM) $(DEPS)
+	LC_CTYPE=fr; export LC_CTYPE; \
 	PATH=$(PROGDIR):$(PATH) mp4h -D format=pod -I $(INCDIR) mp4h.mp4h \
 	| sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
 

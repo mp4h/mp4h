@@ -124,7 +124,7 @@ by the Foundation.
 </define-tag>
 
 ;;;
-;;;    Description of MP4H tags
+;;;    Description of mp4h tags
 ;;;
 <define-tag tag:description endtag=required whitespace=delete>
 <preserve complex>
@@ -159,7 +159,7 @@ by the Foundation.
 <para>@b{<lang:note>}: %body</para></define-tag>
 
 ;;;
-;;;    Example of MP4H code
+;;;    Example of mp4h code
 ;;;
 <define-tag example endtag=required attributes=verbatim>
 

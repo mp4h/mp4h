@@ -92,7 +92,7 @@
 </define-tag>
 
 ;;;
-;;;    Description of MP4H tags
+;;;    Description of mp4h tags
 ;;;
 <define-tag tag:description endtag=required whitespace=delete>
 <preserve complex>
@@ -208,7 +208,7 @@
 <define-tag item><li></define-tag>
 
 ;;;
-;;;    Example of MP4H code
+;;;    Example of mp4h code
 ;;;
 <set-eol-comment "###">
 <define-tag three-colon>;;;</define-tag>

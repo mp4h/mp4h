@@ -1,4 +1,4 @@
-/* MP4H -- A macro processor for HTML documents
+/* Mp4h -- A macro processor for HTML documents
    Copyright 2000, Denis Barbier
    All rights reserved.
 
@@ -84,20 +84,6 @@ struct macro_definition
 typedef struct macro_definition macro_definition;
 
 
-#ifdef USE_STACKOVF
-
-/*---------------------------------------.
-| Tell user stack overflowed and abort.  |
-`---------------------------------------*/
-
-static void
-stackovf_handler (void)
-{
-  MP4HERROR ((EXIT_FAILURE, 0,
-    _("ERROR: Stack overflow.  (Infinite define recursion?)")));
-}
-
-#endif /* USE_STACKOV */
 
 /* Memory allocation.  */
 
@@ -220,7 +206,7 @@ static const struct option long_options[] =
 #define OPTSTRING "D:EF:H:I:L:QR:U:d:hl:o:st:V"
 
 int
-main (int argc, char *const *argv, char *const *envp)
+main (int argc, char *const *argv)
 {
   macro_definition *head;       /* head of deferred argument list */
   macro_definition *tail;
@@ -235,10 +221,6 @@ main (int argc, char *const *argv, char *const *envp)
 
   debug_init ();
   include_init ();
-
-#ifdef USE_STACKOVF
-  setup_stackovf_trap (argv, envp, stackovf_handler);
-#endif
 
   /* First, we decode the arguments, to size up tables and stuff.  */
 

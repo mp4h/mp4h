@@ -1,5 +1,5 @@
 ##
-##  Makefile -- MP4H Makefile
+##  Makefile -- mp4h Makefile
 ##
 
 @SET_MAKE@
@@ -128,13 +128,13 @@ NAME = barbier   # name of maintainer who rolls the tarball
 EXCLUDE_FILES = CVS .cvsignore core mp4h-*.tar.gz debian
 
 NEWVERS = \
-    $(VERSION_TOOL) -l c -p MP4H $$OPT src/version.c; \
+    $(VERSION_TOOL) -l c -p mp4h $$OPT src/version.c; \
     V=`$(VERSION_TOOL) -l c -d long src/version.c`;\
     sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
 
 UPDATEVERS = \
     V=`$(VERSION_TOOL) -l c -d short src/version.c`;\
-    $(VERSION_TOOL) -l c -p MP4H -s $$V src/version.c; \
+    $(VERSION_TOOL) -l c -p mp4h -s $$V src/version.c; \
     V=`$(VERSION_TOOL) -l c -d long src/version.c`;\
     sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
 
@@ -162,14 +162,14 @@ release: distclean manifest fixperm
 	@$(_GETDISTINFO) \
     _distname="mp4h-$${_version}"; \
     _tarball="$${_distname}.tar.gz"; \
-    echo "Release Distribution: MP4H Version $$_version"; \
+    echo "Release Distribution: mp4h Version $$_version"; \
     $(_BUILDDIST)
 
 snap: distclean fixperm
 	@$(_GETDISTINFO) \
     _distname="mp4h-$${_version}-SNAP"; \
     _tarball="$${_distname}.tar.gz"; \
-    echo "Snap of whole source tree: MP4H Version $$_version as of $$_date"; \
+    echo "Snap of whole source tree: mp4h Version $$_version as of $$_date"; \
     $(_BUILDDIST)
 
 new-version:

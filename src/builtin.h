@@ -1,4 +1,4 @@
-/* MP4H -- A macro processor for HTML documents
+/* Mp4h -- A macro processor for HTML documents
    Copyright 2000, Denis Barbier
    All rights reserved.
 
@@ -79,7 +79,7 @@ enum mathop_type
   MATHOP_DIV,                   /* division */
   MATHOP_MIN,                   /* minimum */
   MATHOP_MAX,                   /* maximum */
-  MATHOP_MOD,                   /* modulus */
+  MATHOP_MOD                    /* modulus */
 };
 
 enum mathrel_type
@@ -87,7 +87,7 @@ enum mathrel_type
   MATHREL_GT,
   MATHREL_LT,
   MATHREL_EQ,
-  MATHREL_NEQ,
+  MATHREL_NEQ 
 };
 
 typedef enum mathop_type mathop_type;

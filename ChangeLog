@@ -2,11 +2,19 @@
   C H A N G E L O G
   =================
 
-  This file summarizes *all* types of changes to the MP4H sources,
+  This file summarizes *all* types of changes to the mp4h sources,
   i.e. changes between each patchlevel (0.x.y->0.x.(y+1) and
   0.x.y->0.(x+1).0). Take this logfile for concrete and detailed
   information about every single change.
   ___________________________________________________________________________
+
+  Changes between 0.9.1 and SNAP:
+
+    *) Many cosmetic changes (13-Apr-2000):
+       Mp4h is now spelled mp4h in lowercase letters in all files.
+       Some source files are fixed to produce no warning at compilation
+       time.
+       [Ralf S. Engelschall]
 
   Changes between 0.9.0 and 0.9.1:
 

@@ -1,4 +1,4 @@
-/* MP4H -- A macro processor for HTML documents
+/* Mp4h -- A macro processor for HTML documents
    Copyright 2000, Denis Barbier
    All rights reserved.
 
@@ -141,7 +141,7 @@ char *mktemp ();
 
 struct string
   {
-    unsigned char *string;      /* characters of the string */
+    char *string;               /* characters of the string */
     size_t length;              /* length of the string */
   };
 typedef struct string STRING;
@@ -178,11 +178,6 @@ extern int frozen_dump;                 /* -F */
 
 /* Error handling.  */
 #define MP4HERROR(Arglist) (error Arglist)
-
-#ifdef USE_STACKOVF
-void setup_stackovf_trap __P ((char *const *, char *const *,
-                               void (*handler) (void)));
-#endif
 
 
 /* File: debug.c  --- debugging and tracing function.  */
@@ -355,6 +350,7 @@ void input_close __P ((void));
 /* push back input */
 void push_file __P ((FILE *, const char *));
 void push_macro __P ((builtin_func *, boolean));
+void push_single __P ((int));
 struct obstack *push_string_init __P ((void));
 const char *push_string_finish __P ((read_type));
 void push_wrapup __P ((const char *));
