@@ -5,7 +5,7 @@
 ;;;
 
 <load module="exec">
-<load module="exec-sh">
+<load module="exec:sh">
 
 ##EOF##
 __END__
