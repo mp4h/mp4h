@@ -2295,8 +2295,11 @@ mp4h_bp_attributes_quote (MP4H_BUILTIN_ARGS)
 
   for (i = 1; i < argc; i++)
     {
-      obstack_1grow (obs, ' ');
-      quote_name_value (obs, ARG (i));
+      if (*(ARG (i)) != '\0')
+        {
+          obstack_1grow (obs, ' ');
+          quote_name_value (obs, ARG (i));
+        }
     }
 }
 
