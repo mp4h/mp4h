@@ -4379,7 +4379,7 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                    token_data **argv, read_type expansion)
 {
   const char *text, *save;
-  int i;
+  int i, len;
   boolean unexpanded;
   char sep[2];
 
@@ -4388,9 +4388,13 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
     {
       if (*text != '%')
         {
-          obstack_1grow (obs, *text);
-          text++;
-          continue;
+          save = text;
+          len = 1;
+          for (text++ ; *text != '%' && *text != '\0'; text++)
+            len++;
+          obstack_grow (obs, save, len);
+          if (*text == '\0')
+            break;
         }
       text++;
       unexpanded = FALSE;
