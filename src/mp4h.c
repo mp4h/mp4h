@@ -61,8 +61,8 @@ int nesting_limit = 250;
 /* Security level */
 int safety_level = 0;
 
-/* Enable compatibility mode */
-int compatibility_mode = 0;
+/* Document encoding */
+encoding_type document_encoding = ENCODING_8BIT;
 
 /* Flags to control how expansion is performed.  */
 #define DEFAULT_EXPANSION_FLAGS 3114
@@ -139,7 +139,7 @@ Preprocessor features:\n\
       fputs (_("\
 \n\
 Parser features:\n\
-  -O, --compatibility          eable compatibility mode\n\
+  -e, --encoding=NAME          specify document encoding\n\
   -X, --expansion=NUMBER       set parser behaviour according to the bits\n\
                                of NUMBER, with (star marks current flags)\n\
 "), stdout);
@@ -218,7 +218,7 @@ static const struct option long_options[] =
   {"silent", no_argument, NULL, 'Q'},
   {"synclines", no_argument, NULL, 's'},
   {"safety-level", required_argument, NULL, 'S'},
-  {"compatibility", no_argument, NULL, 'O'},
+  {"encoding", required_argument, NULL, 'e'},
 
   {"help", no_argument, NULL, 'h'},
   {"version", no_argument, NULL, 'V'},
@@ -231,7 +231,7 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
-#define OPTSTRING "D:EF:H:I:L:QR:U:X:d:hl:o:sS:Ot:V"
+#define OPTSTRING "D:e:EF:H:I:L:QR:U:X:d:hl:o:sS:Ot:V"
 
 int
 main (int argc, char *const *argv)
@@ -281,6 +281,15 @@ main (int argc, char *const *argv)
           tail->next = new;
         tail = new;
 
+        break;
+
+      case 'e':
+        if (strcasecmp(optarg, "8bit") == 0)
+            document_encoding = ENCODING_8BIT;
+        else if (strcasecmp(optarg, "utf8") == 0)
+            document_encoding = ENCODING_UTF8;
+        else
+            error (0, 0, _("Bad encoding: `%s'"), optarg);
         break;
 
       case 'E':
@@ -349,10 +358,6 @@ main (int argc, char *const *argv)
 
       case 'S':
         safety_level = atoi (optarg);
-        break;
-
-      case 'O':
-        compatibility_mode = 1;
         break;
 
       case 'V':

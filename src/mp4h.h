@@ -543,6 +543,13 @@ extern int expansion_level;
 
 /* File: builtin.c  --- builtins.  */
 
+enum encoding_type
+{
+  ENCODING_8BIT,                /* 1-byte char */
+  ENCODING_UTF8                 /* UTF-8 */
+};
+typedef enum encoding_type encoding_type;
+
 struct builtin
 {
   const char *name;
@@ -558,8 +565,8 @@ extern boolean visible_quotes;
 /* Used to disable risky functions. */
 extern int safety_level;
 
-/* Enable compatibility mode. */
-extern int compatibility_mode;
+/* Document encoding */
+extern encoding_type document_encoding;
 
 void locale_init __P ((void));
 void initialize_builtin __P ((symbol *));
