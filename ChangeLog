@@ -10,6 +10,13 @@
 
   Changes between 0.8.4 and 0.8.3:
 
+    *) Change in grouping (25-Mar-2000):
+       The quoted=true attribute of the <group> tag is removed and this
+       feature is now provided by the <noexpand> tag. Its counterpart is
+       <expand>.
+       New attribute of <group> : ``separator=string''
+       [Denis Barbier]
+
     *) Fix memory leaks (22-Mar-2000):
        [Denis Barbier]
 
@@ -22,7 +29,7 @@
        replacement text.
        [Denis Barbier]
 
-    *) Fix a bug in wml_p2_mp4h (18-Mar-2000):
+    *) Bugfix in replacement text (18-Mar-2000):
        Letters `A' and `U' after a percent sign were gobbled by mp4h
        in macro replacement text.
        [Joerg Plate <Joerg@Plate.cx>]

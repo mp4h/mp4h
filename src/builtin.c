@@ -63,6 +63,8 @@ DECLARE (mp4h_date);
 
   /*  flow functions  */
 DECLARE (mp4h_group);
+DECLARE (mp4h_noexpand);
+DECLARE (mp4h_expand);
 DECLARE (mp4h_if);
 DECLARE (mp4h_ifeq);
 DECLARE (mp4h_ifneq);
@@ -190,6 +192,8 @@ builtin_tab[] =
 
       /*  flow functions  */
   { "group",            FALSE,    TRUE,   mp4h_group },
+  { "noexpand",         FALSE,    FALSE,  mp4h_noexpand },
+  { "expand",           FALSE,    TRUE,   mp4h_expand },
   { "if",               FALSE,    FALSE,  mp4h_if },
   { "ifeq",             FALSE,    FALSE,  mp4h_ifeq },
   { "ifneq",            FALSE,    FALSE,  mp4h_ifneq },
@@ -282,14 +286,16 @@ builtin_tab[] =
   { 0,                  FALSE,    FALSE,  0 },
 };
 
-/*  this symbol controls breaks of flow statements.  */
+/*  This symbol controls breakings of flow statements.  */
 symbol varbreak;
 
-/*  Global variable containing predefined attributes.  */
-#define MAX_CHARS_ATTRIBUTES      256
-static char attribute[MAX_CHARS_ATTRIBUTES];
+/*  Stack preserve/restore variables.  */
+static var_stack *vs = NULL;
 
-/*  global variables needed by sort algorithms.  */
+/*  Stack for predefined attributes.  */
+static var_stack *tag_attr = NULL;
+
+/*  Global variables needed by sort algorithms.  */
 static boolean sort_caseless;
 static boolean sort_sortorder;
 static boolean sort_numeric;
@@ -317,7 +323,7 @@ push_builtin_table (builtin *table)
 {
   builtin_table *bt;
 
-  bt = (builtin_table *)xmalloc (sizeof (struct builtin_table));
+  bt = (builtin_table *) xmalloc (sizeof (struct builtin_table));
   bt->next = builtin_tables;
   bt->table = table;
   builtin_tables = bt;
@@ -362,22 +368,20 @@ find_builtin_by_name (const char *name)
 }
 
 
-/*-------------------------------.
-| Initialize a builtin symbol.   |
-`-------------------------------*/
+/*-----------------------.
+| Initialize a symbol.   |
+`-----------------------*/
 
 void
 initialize_builtin (symbol *sym)
 {
   SYMBOL_TYPE (sym)        = TOKEN_VOID;
-  SYMBOL_FUNC (sym)        = NULL;
   SYMBOL_TRACED (sym)      = FALSE;
   SYMBOL_SHADOWED (sym)    = FALSE;
   SYMBOL_CONTAINER (sym)   = FALSE;
   SYMBOL_EXPAND_ARGS (sym) = FALSE;
   SYMBOL_HOOK_BEGIN (sym)  = NULL;
   SYMBOL_HOOK_END (sym)    = NULL;
-  SYMBOL_TEXT (sym)        = NULL;
 }
 
 /*-------------------------------------------------------------------------.
@@ -397,10 +401,10 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode,
   SYMBOL_TYPE (sym)        = TOKEN_FUNC;
   SYMBOL_FUNC (sym)        = bp->func;
   SYMBOL_TRACED (sym)      = traced;
-  SYMBOL_SHADOWED (sym)    = FALSE;
   SYMBOL_CONTAINER (sym)   = bp->container;
   SYMBOL_EXPAND_ARGS (sym) = bp->expand_args;
 }
+
 
 /*------------------------------.
 | Install a new builtin_table.  |
@@ -437,18 +441,16 @@ define_user_macro (const char *name, char *text, symbol_lookup mode,
   char *begin, *cp;
   int offset, bracket_level = 0;
 
-  s = lookup_symbol (name, SYMBOL_LOOKUP);
-  if (s)
+  s = lookup_symbol (name, mode);
+  if (SYMBOL_TYPE (s) == TOKEN_TEXT)
     {
       xfree (SYMBOL_HOOK_BEGIN (s));
       xfree (SYMBOL_HOOK_END (s));
       xfree (SYMBOL_TEXT (s));
     }
+  initialize_builtin (s);
 
-  s = lookup_symbol (name, SYMBOL_INSERT);
-  SYMBOL_TYPE (s)        = TOKEN_TEXT;
-  SYMBOL_CONTAINER (s)   = container;
-  SYMBOL_EXPAND_ARGS (s) = expand_args;
+  SYMBOL_TYPE (s) = TOKEN_TEXT;
   if (space_delete)
     {
       for (begin=text; *begin != '\0' && IS_SPACE(*begin); begin++)
@@ -503,6 +505,8 @@ define_user_macro (const char *name, char *text, symbol_lookup mode,
   else
     SYMBOL_TEXT (s) = xstrdup (text);
 
+  SYMBOL_CONTAINER (s)   = container;
+  SYMBOL_EXPAND_ARGS (s) = expand_args;
 #ifdef DEBUG_INPUT
   fprintf (stderr, "Define: %s\nText: %s\nContainer: %d\n",
     SYMBOL_NAME (s), SYMBOL_TEXT (s), SYMBOL_CONTAINER (s));
@@ -664,21 +668,18 @@ static void
 dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
 {
   int i;
-  size_t len = strlen (sep);
 
   for (i = 1; i < argc; i++)
     {
-      if (i > 1)
-        obstack_grow (obs, sep, len);
+      if (i > 1 && sep)
+        obstack_grow (obs, sep, strlen (sep));
 
-      if (expansion_level > 0)
-        obstack_1grow (obs, CHAR_BGROUP);
+      obstack_1grow (obs, CHAR_BGROUP);
       if (*ARG (i) == '"' && *(ARG (i) + strlen (ARG (i))) == '"')
         obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 2));
       else
         obstack_grow (obs, ARG (i), strlen (ARG (i)));
-      if (expansion_level > 0)
-        obstack_1grow (obs, CHAR_EGROUP);
+      obstack_1grow (obs, CHAR_EGROUP);
     }
 }
 
@@ -691,9 +692,10 @@ static const char *
 predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
                       boolean lowercase)
 {
-  char *attr = NULL;
-  char *cp;
+  var_stack *next;
+  char *cp, *lower;
   int i, j;
+  boolean found = FALSE;
 
   i = 1;
   while (i<*ptr_argc)
@@ -703,11 +705,19 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
           (cp != NULL && strncasecmp (TOKEN_DATA_TEXT (argv[i]), key, strlen (key)) == 0
                && *(TOKEN_DATA_TEXT (argv[i]) + strlen (key)) == '='))
         {
+          found = TRUE;
+          next = (var_stack *) xmalloc (sizeof (var_stack));
+          next->prev = tag_attr;
           if (cp)
-            attr  = cp + 1;
+            next->text = xstrdup (cp+1);
           else
-            attr  = NULL;
-          
+            next->text = xstrdup ("");
+          tag_attr = next;
+
+          if (lowercase)
+            for (lower=tag_attr->text; *lower != '\0'; lower++)
+              *lower = tolower (*lower);
+
           if (remove)
             {
               /* remove this attribute from argv[].  */
@@ -720,16 +730,21 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
       i++;
     }
 
-  if (attr && lowercase)
+  return (found ? tag_attr->text : NULL );
+}
+
+void
+clear_tag_attr (void)
+{
+  var_stack *pa;
+
+  while (tag_attr)
     {
-      for (i=0,cp=attr; i < MAX_CHARS_ATTRIBUTES && *cp != '\0'; cp++,i++)
-        attribute[i] = tolower (*cp);
-      attribute[i] = '\0';
+      pa = tag_attr->prev;
+      xfree (tag_attr->text);
+      xfree (tag_attr);
+      tag_attr = pa;
     }
-  if (attr)
-    return attribute;
-  else
-    return NULL;
 }
 
 
@@ -1038,10 +1053,6 @@ mp4h_get_file_properties (MP4H_BUILTIN_ARGS)
   group = getgrgid (buf.st_gid);
   obstack_grow (obs, group->gr_name, strlen (group->gr_name));
   obstack_1grow (obs, '\n');
-  /*
-  xfree (user);
-  xfree (group);
-  */
 }
 
 /*-----------------------------------------------------------------.
@@ -1059,7 +1070,7 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
   struct re_pattern_buffer buf; /* compiled regular expression */
   const char *msg;              /* error message from re_compile_pattern */
 
-  matching = predefined_attribute ("matching", &argc, argv, TRUE);
+  matching = predefined_attribute ("matching", &argc, argv, FALSE);
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
@@ -1164,25 +1175,50 @@ mp4h_date (MP4H_BUILTIN_ARGS)
 static void
 mp4h_group (MP4H_BUILTIN_ARGS)
 {
-  const char *quoted;
+  const char *separator;
 
-  quoted = predefined_attribute ("quoted", &argc, argv, TRUE);
+  separator = predefined_attribute ("separator", &argc, argv, FALSE);
 
-  if (expansion_level > 1)
+  obstack_1grow (obs, CHAR_BGROUP);
+  /*  separator = NULL is handled by dump_args */
+  dump_args (obs, argc, argv, separator);
+  obstack_1grow (obs, CHAR_EGROUP);
+}
+
+/*-------------------------------------------.
+| Prevent further expansion of attributes.   |
+`-------------------------------------------*/
+static void
+mp4h_noexpand (MP4H_BUILTIN_ARGS)
+{
+  obstack_1grow (obs, CHAR_LQUOTE);
+  dump_args (obs, argc, argv, NULL);
+  obstack_1grow (obs, CHAR_RQUOTE);
+}
+
+/*----------------------------------------------------------.
+| Remove special characters which forbid expansion.         |
+`----------------------------------------------------------*/
+static void
+mp4h_expand (MP4H_BUILTIN_ARGS)
+{
+  int i, offset;
+  register char *cp;
+  
+  for (i=1; i<argc; i++)
     {
-      if (quoted)
-        obstack_1grow (obs, CHAR_LQUOTE);
-      else
-        obstack_1grow (obs, CHAR_BGROUP);
+      offset = 0;
+      for (cp=ARG(i); *cp != '\0'; cp++)
+        {
+          if (*cp == CHAR_LQUOTE || *cp == CHAR_RQUOTE)
+            offset++;
+          else
+            *(cp-offset) = *cp;
+        }
+      *(cp-offset) = '\0';
     }
-  dump_args (obs, argc, argv, "");
-  if (expansion_level > 1)
-    {
-      if (quoted)
-        obstack_1grow (obs, CHAR_RQUOTE);
-      else
-        obstack_1grow (obs, CHAR_EGROUP);
-    }
+
+  dump_args (obs, argc, argv, NULL);
 }
 
 /*--------------------------------------------------------------.
@@ -1332,9 +1368,9 @@ mp4h_foreach (MP4H_BUILTIN_ARGS)
   int length;
   int i;
 
-  start  = predefined_attribute ("start", &argc, argv, TRUE);
-  end    = predefined_attribute ("end", &argc, argv, TRUE);
-  step   = predefined_attribute ("step", &argc, argv, TRUE);
+  start  = predefined_attribute ("start", &argc, argv, FALSE);
+  end    = predefined_attribute ("end", &argc, argv, FALSE);
+  step   = predefined_attribute ("step", &argc, argv, FALSE);
 
   if (bad_argc (argv[0], argc, 3, 3))
     return;
@@ -1457,7 +1493,7 @@ mp4h_return (MP4H_BUILTIN_ARGS)
   const char *up;
   struct obstack *st;
 
-  up = predefined_attribute ("up", &argc, argv, TRUE);
+  up = predefined_attribute ("up", &argc, argv, FALSE);
   if (up)
     numeric_arg (argv[0], up, TRUE, &levels);
 
@@ -1495,7 +1531,7 @@ mp4h_exit (MP4H_BUILTIN_ARGS)
   const char *status, *message;
   int rc = -1;
 
-  status = predefined_attribute ("status", &argc, argv, TRUE);
+  status = predefined_attribute ("status", &argc, argv, FALSE);
   if (status)
     numeric_arg (argv[0], status, FALSE, &rc);
   message = predefined_attribute ("message", &argc, argv, FALSE);
@@ -1693,14 +1729,14 @@ generic_set_hook (MP4H_BUILTIN_ARGS, boolean before, int action)
 
       /*  Insert before the current hooks */
       case 1:
-        text = xmalloc (strlen (hook) + strlen (TOKEN_DATA_TEXT (argv[argc])));
+        text = (char *) xmalloc (strlen (hook) + strlen (TOKEN_DATA_TEXT (argv[argc])) + 1);
         strcpy (text, TOKEN_DATA_TEXT (argv[argc]));
         strcat (text, hook);
         break;
 
       /*  Append after the current hooks */
       case 2:
-        text = xmalloc (strlen (hook) + strlen (TOKEN_DATA_TEXT (argv[argc])));
+        text = (char *) xmalloc (strlen (hook) + strlen (TOKEN_DATA_TEXT (argv[argc])) + 1);
         strcpy (text, hook);
         strcat (text, TOKEN_DATA_TEXT (argv[argc]));
         break;
@@ -1775,25 +1811,6 @@ mp4h_get_hook (MP4H_BUILTIN_ARGS)
   if (hook)
     obstack_grow (obs, hook, strlen (hook));
 }
-
-#if 0
-static void
-mp4h_get_hook_after (MP4H_BUILTIN_ARGS)
-{
-  symbol *sym;
-
-  if (bad_argc (argv[0], argc, 2, 2))
-    return;
-
-  sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
-  if (sym == NULL)
-    return;
-
-  if (SYMBOL_HOOK_END (sym))
-    obstack_grow (obs, SYMBOL_HOOK_END (sym),
-                         strlen (SYMBOL_HOOK_END (sym)));
-}
-#endif
 
 
 /*  Math functions  */
@@ -2034,14 +2051,14 @@ mp4h_include (MP4H_BUILTIN_ARGS)
 {
   const char *alt, *verbatim;
 
-  alt = predefined_attribute ("alt", &argc, argv, TRUE);
+  alt = predefined_attribute ("alt", &argc, argv, FALSE);
   verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
   obstack_grow (obs, "<%%include ", 11);
   obstack_grow (obs, ARG (1), strlen (ARG (1)));
-  if (verbatim)
+  if (verbatim && strcmp (verbatim, "true") == 0)
     obstack_grow (obs, " verbatim=true", 14);
   obstack_1grow (obs, '>');
   if (alt)
@@ -2076,7 +2093,7 @@ mp4h___include (MP4H_BUILTIN_ARGS)
 
   push_file (fp, filename);
 
-  if (verbatim)
+  if (verbatim && strcmp (verbatim, "true") == 0)
     read_file_verbatim (obs);
 
   xfree (filename);
@@ -2423,10 +2440,7 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
 
   if (startpos >= 0)
     match_length = re_match (&buf, victim, length, startpos, &regs);
-
   xfree (buf.buffer);
-  xfree (buf.fastmap);
-  xfree (buf.translate);
 
   if (strcmp(action, "startpos") == 0)
     {
@@ -2523,8 +2537,6 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   victim = TOKEN_DATA_TEXT (argv[1]);
   length = strlen (victim);
 
-  obstack_1grow (obs, CHAR_BGROUP);
-
   offset = 0;
   matchpos = 0;
   while (offset < length)
@@ -2565,7 +2577,6 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
       if (regs.start[0] == regs.end[0])
         obstack_1grow (obs, victim[offset++]);
     }
-  obstack_1grow (obs, CHAR_EGROUP);
 
   xfree (buf.buffer);
   return;
@@ -2592,6 +2603,8 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
   token_data td;
   const char *singleline;
   boolean s;
+  char *text;
+  struct obstack temp_obs;
 
   singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
   s = (singleline
@@ -2607,16 +2620,15 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_TEXT (var);
 
-  /*  we write the new string into the variable.  This is done
-      with the <set-var-verbatim> tag.  */
-  obstack_grow (obs, "<set-var-verbatim ", 18);
-  obstack_grow (obs, ARG (1), strlen (ARG (1)));
-  obstack_1grow (obs, '=');
-  obstack_1grow (obs, CHAR_BGROUP);
+  obstack_init (&temp_obs);
+
   argv[1] = &td;
-  subst_in_string (obs, argc, argv, s);
-  obstack_1grow (obs, CHAR_EGROUP);
-  obstack_1grow (obs, '>');
+  subst_in_string (&temp_obs, argc, argv, s);
+  obstack_1grow (&temp_obs, '\0');
+  text = obstack_finish (&temp_obs);
+  xfree (SYMBOL_TEXT (var));
+  SYMBOL_TEXT (var) = xstrdup (text);
+  obstack_free (&temp_obs, NULL);
 }
 
 /*-----------------------------------------------------------------.
@@ -2892,6 +2904,14 @@ generic_variable (struct obstack *obs, int argc, token_data **argv,
                 *value = '\0';
                 value++;
               }
+            
+            /*  Remove special quote characters. */
+            if (*value == CHAR_LQUOTE && *(value+strlen(value)-1) == CHAR_RQUOTE)
+              {
+                *(value+strlen(value)-1) = '\0';
+                value++;
+              }
+
             ptr_index = strchr (ARG (i), ']');
             if (ptr_index != NULL && *(ptr_index-1) != '[')
               {
@@ -2918,7 +2938,8 @@ Warning:%s:%d: wrong index declaration in <%s>"),
             if (array_index == -1)
               {
                 /*  simple value.  */
-                xfree (SYMBOL_TEXT (var));
+                if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+                  xfree (SYMBOL_TEXT (var));
                 SYMBOL_TEXT (var) = xstrdup (value);
               }
             else
@@ -2935,8 +2956,7 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                     old_value = xstrdup ("");
                     length = strlen (value) + array_index;       
                   }
-                SYMBOL_TYPE (var) = TOKEN_TEXT;
-                SYMBOL_TEXT (var) = xmalloc (length);
+                SYMBOL_TEXT (var) = (char *) xmalloc (length + 1);
                 *(SYMBOL_TEXT (var)) = '\0';
 
                 if (array_index == 0)
@@ -3013,15 +3033,16 @@ Warning:%s:%d: wrong index declaration in <%s>"),
               return;
 
             value = xstrdup (SYMBOL_TEXT (var));
+            old_value = value;
+            cp = strchr (value, '\n');
             if (array_index == 0)
               {
-                cp = strchr (value, '\n');
                 if (cp)
                   *cp = '\0';
               }
             else if (array_index > 0)
               {
-                cp = old_value = value;
+                /*   Note that array_index>0 here.  */
                 for (j=0; j<array_index; j++)
                   {
                     cp = strchr (value, '\n');
@@ -3035,18 +3056,14 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                 cp = strchr (cp + 1, '\n');
                 if (cp)
                   *cp = '\0';
-
-                cp = value;
-                value = xstrdup (cp);
-                xfree (old_value);
               }
 
-            if (verbatim && expansion_level > 1)
+            if (verbatim)
               obstack_1grow (obs, CHAR_LQUOTE);
             obstack_grow (obs, value, strlen (value));
-            if (verbatim && expansion_level > 1)
+            if (verbatim)
               obstack_1grow (obs, CHAR_RQUOTE);
-            xfree (value);
+            xfree (old_value);
           }
         break;
 
@@ -3117,21 +3134,15 @@ mp4h_preserve (MP4H_BUILTIN_ARGS)
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  next = xmalloc (sizeof (var_stack));
+  next = (var_stack *) xmalloc (sizeof (var_stack));
   var  = lookup_variable (ARG (1), SYMBOL_LOOKUP);
-  if (var  && SYMBOL_TYPE (var) == TOKEN_TEXT)
+  if (var)
     {
       next->text = xstrdup (SYMBOL_TEXT (var));
-      xfree (SYMBOL_TEXT (var));
+      *(SYMBOL_TEXT (var)) = '\0';
     }
   else
     next->text = xstrdup ("");
-
-  var  = lookup_variable (ARG (1), SYMBOL_INSERT);
-
-  initialize_builtin (var);
-  SYMBOL_TYPE (var) = TOKEN_TEXT;
-  SYMBOL_TEXT (var) = xstrdup ("");
 
   next->prev = vs;
   vs = next;
@@ -3150,9 +3161,8 @@ mp4h_restore (MP4H_BUILTIN_ARGS)
     return;
 
   var = lookup_variable (ARG (1), SYMBOL_INSERT);
-
-  xfree (SYMBOL_TEXT (var));
-  SYMBOL_TYPE (var) = TOKEN_TEXT;
+  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+    xfree (SYMBOL_TEXT (var));
   SYMBOL_TEXT (var) = xstrdup (vs->text);
 
   prev = vs->prev;
@@ -3185,7 +3195,7 @@ mp4h_increment (MP4H_BUILTIN_ARGS)
   char buf[128];
   const char *by;
 
-  by = predefined_attribute ("by", &argc, argv, TRUE);
+  by = predefined_attribute ("by", &argc, argv, FALSE);
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
@@ -3203,7 +3213,9 @@ mp4h_increment (MP4H_BUILTIN_ARGS)
   if (!numeric_arg (argv[0], by, TRUE, &incr))
     return;
 
-  xfree (SYMBOL_TEXT (var));
+  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+    xfree (SYMBOL_TEXT (var));
+
   sprintf (buf, "%d", value+incr);
   SYMBOL_TEXT (var) = xstrdup(buf);
 }
@@ -3216,7 +3228,7 @@ mp4h_decrement (MP4H_BUILTIN_ARGS)
   char buf[128];
   const char *by;
 
-  by = predefined_attribute ("by", &argc, argv, TRUE);
+  by = predefined_attribute ("by", &argc, argv, FALSE);
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
@@ -3234,7 +3246,9 @@ mp4h_decrement (MP4H_BUILTIN_ARGS)
   if (!numeric_arg (argv[0], by, TRUE, &incr))
     return;
 
-  xfree (SYMBOL_TEXT (var));
+  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+    xfree (SYMBOL_TEXT (var));
+
   sprintf (buf, "%d", value-incr);
   SYMBOL_TEXT (var) = xstrdup(buf);
 }
@@ -3303,8 +3317,9 @@ mp4h_copy_var (MP4H_BUILTIN_ARGS)
       return;
     }
   var2 = lookup_variable (ARG (2), SYMBOL_INSERT);
+  if (SYMBOL_TYPE (var2) == TOKEN_TEXT)
+    xfree (SYMBOL_TEXT (var2));
 
-  xfree (SYMBOL_TEXT (var2));
   SYMBOL_TEXT (var2) = xstrdup(SYMBOL_TEXT (var1));
 }
 
@@ -3324,13 +3339,11 @@ mp4h_defvar (MP4H_BUILTIN_ARGS)
   if (var == NULL)
     {
       var = lookup_variable (ARG (1), SYMBOL_INSERT);
-      initialize_builtin (var);
       SYMBOL_TYPE (var) = TOKEN_TEXT;
       SYMBOL_TEXT (var) = xstrdup(ARG (2));
     }
   else if (strlen (SYMBOL_TEXT (var)) == 0)
     {
-      xfree (SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xstrdup(ARG (2));
     }
 }
@@ -3441,13 +3454,12 @@ mp4h_array_append (MP4H_BUILTIN_ARGS)
     }
   else
     {
-      old_value = xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (1)) + 2);
+      old_value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (1)) + 2);
       strcpy (old_value, SYMBOL_TEXT (var));
       strcat (old_value, "\n");
       strcat (old_value, ARG (1));
       xfree (SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xstrdup (old_value);
-      xfree (old_value);
     }
 }
 
@@ -3525,20 +3537,20 @@ mp4h_array_add_unique (MP4H_BUILTIN_ARGS)
   if (var == NULL)
     {
       var = lookup_variable (ARG (2), SYMBOL_INSERT);
-      SYMBOL_TYPE (var) = TOKEN_TEXT;
       SYMBOL_TEXT (var) = xstrdup (ARG (1));
+      SYMBOL_TYPE (var) = TOKEN_TEXT;
     }
   else if (SYMBOL_TYPE (var) != TOKEN_TEXT || strlen (SYMBOL_TEXT (var)) == 0)
     {
-      SYMBOL_TYPE (var) = TOKEN_TEXT;
       SYMBOL_TEXT (var) = xstrdup (ARG (1));
+      SYMBOL_TYPE (var) = TOKEN_TEXT;
     }
   else
     {
       exists = array_member (ARG (1), var, (caseless != NULL));
       if (exists == -1)
         {
-          value = xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (1)) + 2);
+          value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (1)) + 2);
           strcpy (value, SYMBOL_TEXT (var));
           strcat (value, "\n");
           strcat (value, ARG (1));
@@ -3585,7 +3597,7 @@ mp4h_array_shift (MP4H_BUILTIN_ARGS)
     }
 
   ind_start = 0;
-  start = predefined_attribute ("start", &argc, argv, TRUE);
+  start = predefined_attribute ("start", &argc, argv, FALSE);
   if (start)
     {
       if (!numeric_arg (argv[0], start, TRUE, &ind_start))
@@ -3595,7 +3607,7 @@ mp4h_array_shift (MP4H_BUILTIN_ARGS)
   if (offset == 0)
     return;
 
-  value = xmalloc (strlen (SYMBOL_TEXT (var)) + offset + 1);
+  value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + offset + 1);
   if (ind_start > 0)
     {
       old_value = array_value (var, ind_start, 0);
@@ -3645,8 +3657,8 @@ mp4h_array_concat (MP4H_BUILTIN_ARGS)
   if (var == NULL)
     {
       var = lookup_variable (ARG (1), SYMBOL_INSERT);
-      SYMBOL_TYPE (var) = TOKEN_TEXT;
       SYMBOL_TEXT (var) = xstrdup ("");
+      SYMBOL_TYPE (var) = TOKEN_TEXT;
     }
   for (i=2; i<argc; i++)
     {
@@ -3656,7 +3668,7 @@ mp4h_array_concat (MP4H_BUILTIN_ARGS)
       if (SYMBOL_TYPE (varadd) != TOKEN_TEXT)
         continue;
       
-      value = xmalloc (strlen (SYMBOL_TEXT (var)) +
+      value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) +
                        strlen (SYMBOL_TEXT (varadd)) + 2);
       strcpy (value, SYMBOL_TEXT (var));
       strcat (value, "\n");
@@ -3739,7 +3751,7 @@ mp4h_sort (MP4H_BUILTIN_ARGS)
   
   /*  Build a pointer to array values.  All newlines are replaced by
       NULL chars to use standard string comparison functions.  */
-  array = xmalloc ((size+1) * sizeof (char *));
+  array = (char **) xmalloc ((size+1) * sizeof (char *));
   i = 0;
   
   value = xstrdup (SYMBOL_TEXT (var));

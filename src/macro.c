@@ -529,4 +529,7 @@ expand_macro (symbol *sym, read_type expansion)
   obstack_free (&arguments, NULL);
   obstack_free (&argptr, NULL);
   obstack_free (&body, NULL);
+
+  if (expansion_level == 0)
+    clear_tag_attr ();
 }

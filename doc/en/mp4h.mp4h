@@ -187,7 +187,6 @@ chapter on macro expansion for further details).
 This function lets you define your own tags.  First argument is the
 command name. Replacement text is the function body.
 
-<undef foo>
 <example>
 <define-tag foo>bar</define-tag>
 <foo>
@@ -204,6 +203,7 @@ are not equivalent, the latter form contains two newlines that were not
 present in the former.
 </para>
 
+<pseudo-func foo bar>
 <attributes:description>
 <attributes:item "whitespace=delete">
 Some spaces are suppressed in replacement text, in particular any
@@ -213,25 +213,23 @@ brackets.
 <attributes:item "endtag=required">
 Define a complex tag
 
-<undef foo>
 <example>
 <define-tag foo>bar</define-tag>
 <foo>
 </example>
 
-<undef foo>
 <example>
 <define-tag foo endtag=required>;;;
 body is: %body</define-tag>
 <foo>Here it is</foo>
 </example>
+<undef foo>
 
 <attributes:item "attributes=verbatim">
 By default attributes are expanded before text is replaced. If this
 attribute is used, attributes are inserted into replacement text without
 expansion.
 
-<undef foo bar>
 <example>
 <define-tag bar>quux</define-tag>
 <define-tag foo attributes=verbatim endtag=required>
@@ -240,6 +238,7 @@ Attributes: %uattributes
 </define-tag>
 <foo txt="<bar>">Here we go</foo>
 </example>
+<undef foo bar>
 </attributes:description>
 
 <tag:description provide-tag complex>
@@ -263,7 +262,6 @@ Copy a function. This command is useful to save a macro definition
 before redefining it.
 </para>
 
-<undef foo bar>
 <example>
 <define-tag foo>one</define-tag>
 <let bar foo>
@@ -279,7 +277,6 @@ before redefining it.
 Delete a command definition.
 </para>
 
-<undef foo>
 <example>
 <define-tag foo>one</define-tag>
 <undef foo>
@@ -298,7 +295,6 @@ of existing macros without having to worry about its type, whether it is
 complex or not.
 </para>
 
-<undef foo>
 <example>
 <let foo add>
 <set-hook foo position=before>
@@ -374,7 +370,6 @@ This is version <get-var version>
 As above but attributes are not expanded.
 </para>
 
-<undef foo>
 <example>
 <define-tag foo>0.10.1</define-tag>
 <set-var version="<foo>">;;;
@@ -514,6 +509,7 @@ If it is a macro name, one of the following messages is printed:
 </para>
 
 <unset-var x foo bar symbol-info define-tag>
+<pseudo-func foo bar>
 <example>
 <set-var x="0\n1\n2\n3\n4">
 <define-tag foo>bar</define-tag>
@@ -524,6 +520,7 @@ If it is a macro name, one of the following messages is printed:
 <symbol-info foo>
 <symbol-info bar>
 </example>
+<undef bar>
 
 ###
 ###    String functions
@@ -1133,7 +1130,7 @@ Returns the first non empty argument.
 <tag:description group verbatim>
 <var statement>
 [<var statement>] ...
-[quoted=true]
+[separator=<var string>]
 </tag:description>
 
 <para>
@@ -1146,7 +1143,7 @@ A less intuitive but very helpful use of this macro is to preserve newlines
 when <attribute whitespace=delete> is specified.
 </para>
 
-<undef text1 text2 text3>
+<pseudo-func text1 text2 text3>
 <example>
 <define-tag text1>
 Text on
@@ -1174,15 +1171,36 @@ certainly unwanted.
 </para>
 
 <attributes:description>
-<attributes:item "quoted=true">
-Statements grouped will no longer be expanded.
+<attributes:item "separator=<var chaîne>">
+By default arguments are put aside.  This attribute define a separator
+inserted between arguments.
 </attributes:description>
 
-<undef foo>
+<tag:description noexpand verbatim>
+<var command>
+[<var command>] ...
+</tag:description>
+
+<para>
+Prints its arguments without expansion.  They will never be expanded
+unless the <command expand> tag is used to cancel this <command
+noexpand> tag.
+</para>
+
+<tag:description expand>
+<var commande>
+[<var commande>] ...
+</tag:description>
+
+<para>
+Annule l'effet de la balise <command noexpand>.
+</para>
+
+<pseudo-func foo>
 <example>
 <subst-in-string "=LT=define-tag foo>bar</define-tag>" "=LT=" "<">
 <foo>
-<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT=" "<group "<" quoted=true>">
+<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT=" "<noexpand "<">">
 <foo>
 </example>
 
@@ -1197,6 +1215,7 @@ If string is non empty, second argument is evalled otherwise third
 argument is evalled.
 </para>
 
+<pseudo-func test>
 <example>
 <define-tag test whitespace=delete>
 <if %0 "yes" "no">
@@ -1304,6 +1323,7 @@ If step is negative, array is treated in reverse order.
 [<var var2>=<var value2> <var action2> ...
 </tag:description>
 
+<pseudo-func test>
 <para>
 This command performs multiple conditions with a single instruction.
 
@@ -1611,8 +1631,8 @@ if you have any suggestion.
 
 <subsection "Basics">
 
-<undef foo bar>
 Let us begin with some examples:
+<pseudo-func foo bar>
 <example>
 <define-tag foo>
 This is a simple tag
@@ -1623,13 +1643,19 @@ This is a complex tag
 <foo>
 <bar>Body function</bar>
 </example>
+<undef bar>
 
-<undef href mail1 mail2 show-attributes show1 show2 bar>
+<pseudo-func href mail1 mail2>
+<pseudo-func outer inner1 inner2>
+<pseudo-func show-attributes>
+<pseudo-func show1 show2 bar>
 <para>
 User defined macros may have attributes like HTML tags. To handle these
 attributes in replacement text, following conventions have been adopted
 (mostly derived from <Meta-HTML>):
 <list>
+<item>Sequence <value %name> is replaced by the command name.
+
 <item>Attributes are numbered from 0. In replacement text,
 <value %0> is replaced by first argument, <value %1>
 by the 2nd, etc.
@@ -1684,6 +1710,7 @@ list of attributes.
 <img src="photo.png" alt="Dr. Foo" border=0>
 </mail2>
 </example>
+<undef mail2>
 
 <item>The two forms above accept modifiers. When <value %Aattributes>
 or <value %Abody> is used, a newline separated list of attributes is
@@ -1749,7 +1776,6 @@ or even
 In these examples, the <command foo> has only one argument.
 </para>
 
-<undef foo bar>
 <para>
 Under certain circumstances it is necessary to group multiple statements
 into a single one. This can be done with double quotes or with the
@@ -1845,7 +1871,7 @@ are inside such an environment:
 </example>
 </para>
 
-<undef opt>
+<pseudo-func opt>
 <para>
 But if we use simple tags, as in the example below, our definition does
 not seem to work. It is because attributes are expanded before they are
@@ -1856,7 +1882,6 @@ put into replacement text.
 </example>
 </para>
 
-<undef opt>
 <para>
 If we want to prevent this problem we have to forbid attributes
 expansion with

@@ -206,11 +206,11 @@ Cette fonction permet de définir ses propres commandes. Le premier
 argument est le nom de la nouvelle commande. Le texte de remplacement
 est le corps de la fonction.
 
-<undef foo>
 <example>
 <define-tag foo>bar</define-tag>
 <foo>
 </example>
+<undef foo>
 
 Même si en HTML les espaces ont en général peu d'importance, il est
 utile de comprendre certains points. En particulier,
@@ -223,6 +223,7 @@ ne sont pas équivalents, la deuxième forme comprenant deux sauts de
 lignes non présents dans la première.
 </para>
 
+<pseudo-func foo bar>
 <attributes:description>
 <attributes:item "whitespace=delete">
 Certains espaces sont supprimés dans le texte de remplacement. Il s'agit
@@ -233,25 +234,23 @@ qui ne sont pas compris à l'intérieur de commandes délimitées par
 <attributes:item "endtag=required">
 Définit une balise complexe
 
-<undef foo>
 <example>
 <define-tag foo>bar</define-tag>
 <foo>
 </example>
 
-<undef foo>
 <example>
 <define-tag foo endtag=required>;;;
 Le corps est : %body</define-tag>
 <foo>Here it is</foo>
 </example>
+<undef foo>
 
 <attributes:item "attributes=verbatim">
 Par défaut, les attributs sont évalués avant d'être insérés dans le
 texte de remplacement. Lorsque cet attribut est utilisé, les arguments
 sont insérés sans développement.
 
-<undef foo bar>
 <example>
 <define-tag bar>quux</define-tag>
 <define-tag foo attributes=verbatim endtag=required>
@@ -260,6 +259,7 @@ Attributs: %uattributes
 </define-tag>
 <foo txt="<bar>">Et voila</foo>
 </example>
+<undef foo>
 </attributes:description>
 
 <tag:description provide-tag complex>
@@ -283,7 +283,6 @@ Copie une fonction dans une autre. Cette fonction permet notamment de
 sauvegarder une commande avant de la redéfinir.
 </para>
 
-<undef foo bar>
 <example>
 <define-tag foo>un</define-tag>
 <let bar foo>
@@ -299,7 +298,6 @@ sauvegarder une commande avant de la redéfinir.
 Supprime la définition d'une commande.
 </para>
 
-<undef foo>
 <example>
 <define-tag foo>un</define-tag>
 <undef foo>
@@ -318,7 +316,6 @@ des commandes existantes, sans avoir à se préoccuper si cette commande
 est complexe ou non.
 </para>
 
-<undef foo>
 <example>
 <let foo add>
 <set-hook foo position=before>
@@ -395,7 +392,6 @@ Ceci est la version <get-var version>
 Comme la commande précédente, mais les arguments ne sont pas développés.
 </para>
 
-<undef foo>
 <example>
 <define-tag foo>0.10.1</define-tag>
 <set-var version="<foo>">;;;
@@ -535,6 +531,7 @@ primitive, un message indique de quel type de symbole il s'agit :
 </para>
 
 <unset-var x foo bar symbol-info define-tag>
+<pseudo-func foo bar>
 <example>
 <set-var x="0\n1\n2\n3\n4">
 <define-tag foo>bar</define-tag>
@@ -545,6 +542,7 @@ primitive, un message indique de quel type de symbole il s'agit :
 <symbol-info foo>
 <symbol-info bar>
 </example>
+<undef bar>
 
 ###
 ###    Manipulation de chaînes de caractères
@@ -1184,7 +1182,7 @@ Affiche le premier argument non nul.
 <tag:description group verbatim>
 <var commande>
 [<var commande>] ...
-[quoted=true]
+[separator=<var chaîne>]
 </tag:description>
 
 <para>
@@ -1199,7 +1197,7 @@ importante, est de pouvoir mettre des sauts de ligne même si l'attribut
 <attribute whitespace=delete> a été spécifié.
 </para>
 
-<undef texte1 texte2 texte3>
+<pseudo-func texte1 texte2 texte3>
 <example>
 <define-tag texte1>
 Ce texte est sur
@@ -1227,16 +1225,39 @@ a pour conséquence de coller des lettres qui ne doivent pas l'être.
 </para>
 
 <attributes:description>
-<attributes:item "quoted=true">
-Avec cet attribut, le résultat de l'évaluation est entouré de caractères
-de contrôle, pour qu'il ne soit plus développé ensuite.
+<attributes:item "separator=<var chaîne>">
+Par défaut, les arguments sont accolés. Cet attribut permet de définir
+le séparateur inséré entre les arguments.
 </attributes:description>
 
-<undef foo>
+<tag:description noexpand verbatim>
+<var commande>
+[<var commande>] ...
+</tag:description>
+
+<para>
+Cette fonction affiche ses arguments sans les développer. Ils ne seront
+ensuite plus jamais développés, à moins d'utiliser la commande <command
+expand>.
+</para>
+
+<tag:description expand>
+<var commande>
+[<var commande>] ...
+</tag:description>
+
+<para>
+Annule l'effet de la balise <command noexpand>.
+</para>
+
+<pseudo-func foo>
 <example>
 <subst-in-string "=LT=define-tag foo>bar</define-tag>" "=LT=" "<">
 <foo>
-<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT=" "<group "<" quoted=true>">
+<set-var a=<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT=" "<noexpand "<">">>
+<foo>
+<get-var a>
+<expand <get-var a>>
 <foo>
 </example>
 
@@ -1251,6 +1272,7 @@ Si la chaîne de caractères passée en premier argument n'est pas vide, le
 deuxième argument est exécuté, sinon c'est le troisième.
 </para>
 
+<pseudo-func test>
 <example>
 <define-tag test whitespace=delete>
 <if %0 "oui" "non">
@@ -1365,6 +1387,7 @@ Si le pas est négatif, la boucle est inversée.
 [<var var2>=<var valeur2> <var action2> ...
 </tag:description>
 
+<pseudo-func test>
 <para>
 Cette commande permet de faire plusieurs tests en une seule instruction.
 
@@ -1690,8 +1713,8 @@ toute erreur ou omission.
 
 <subsection "Généralités">
 
-<undef foo bar>
 Commençons par donner des exemples de définition de balises:
+<pseudo-func foo bar>
 <example>
 <define-tag foo>
 Ceci est un exemple de balise simple
@@ -1702,13 +1725,19 @@ Ceci est un exemple de balise complexe
 <foo>
 <bar>Corps de la fonction</bar>
 </example>
+<undef bar>
 
-<undef href mail1 mail2 show-attributes show1 show2 bar>
+<pseudo-func href mail1 mail2>
+<pseudo-func externe interne1 interne2>
+<pseudo-func show-attributes>
+<pseudo-func show1 show2 bar>
 <para>
 Les commandes ainsi définies peuvent avoir des attributs, comme toute
 balise HTML. Pour que ces attributs se retrouvent dans le texte de
 remplacement, les conventions suivantes ont été adoptées:
 <list>
+<item>La séquence <value %name> est remplacée par le nom de la balise.
+
 <item>Les attributs sont numérotés à partir de 0. Dans le texte de
 remplacement, <value %0> sera remplacé par le 1er attribut, <value %1>
 par le 2e attribut, etc. Comme le nombre d'attribut n'est pas limité,
@@ -1764,6 +1793,7 @@ commande, dans le cas d'une balise complexe.
 <img src="photo.png" alt="Dr. Foo" border=0>
 </mail2>
 </example>
+<undef mail2>
 
 <item>Les deux formes ci-dessus possèdent une forme alternative, où la
 liste est séparée par des sauts de lignes au lieu d'espaces. Il s'agit
@@ -1780,12 +1810,11 @@ dire array (tableau en français).
 <show-attributes name="Dr. Foo" mail="hello@foo.com">
 </example>
 
-<item>Une autre forme alternative est obtenue en remoplaçant le <value
-A> par <value U>, auquel cas le texte est remplacé mais n'est lui-même
-pas évalué. Cela n'a de sens que si la commande a été déclarée avec
-l'attribut <attribute attributes=verbatim>, parce que dans le cas
-contraire les arguments sont développés avant que ces substitutions
-n'aient lieu.
+<item>Une autre forme est obtenue en remoplaçant le <value A> par <value
+U>, auquel cas le texte est remplacé mais n'est lui-même pas évalué.
+Cela n'a de sens que si la commande a été déclarée avec l'attribut
+<attribute attributes=verbatim>, parce que dans le cas contraire les
+arguments sont développés avant que ces substitutions n'aient lieu.
 <example>
 <define-tag show1>
 Avant développement: %Uattributes
@@ -1820,6 +1849,7 @@ très bien être supprimées dans les versions futures.
 
 <subsection "Attributs">
 
+<undef foo bar>
 <para>
 Les attributs sont séparés par un ou plusieurs espaces, tabulations ou
 sauts de lignes, et chaque attribut doit être une entité complète de
@@ -1935,7 +1965,7 @@ on est déjà à l'intérieur d'une de ces balises:
 </example>
 </para>
 
-<undef opt>
+<pseudo-func opt>
 <para>
 Mais si nous utilisons des balises simples, comme dans l'exemple
 ci-dessous, notre définition ne marche plus parce que les attributs sont
@@ -1946,7 +1976,6 @@ développés avant la commande elle-même:
 </example>
 </para>
 
-<undef opt>
 <para>
 Pour remédier à ce problème, il convient donc d'empêcher que les
 attributs soient développés en premier. Il convient donc d'écrire:

@@ -102,9 +102,6 @@ struct var_stack
     char *text;
 };
 
-/*  Stack for variables.  */
-var_stack *vs = NULL;
-
 boolean numeric_arg __P ((token_data *macro, const char *arg, boolean, int *valuep));
 void shipout_int __P ((struct obstack *obs, int val));
 

@@ -187,6 +187,12 @@
 </define-tag>
 <set-eol-comment ";;;">
 
+<define-tag pseudo-func>;;;
+<set-var liste-funcs="%Aattributes">;;;
+<foreach func liste-funcs>;;;
+  <subst-in-string "=LT=define-tag <get-var func>>=LT=/define-tag>" "=LT=" "<">;;;
+</foreach>;;;
+</define-tag>
 ;;;
 ;;;    Verbatim code
 ;;;
