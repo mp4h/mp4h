@@ -968,6 +968,13 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
   }
 }
 
+/* 
+ * prototype to make pedantic compilers happy,
+ * because getopt.h contains (for good reasons)
+ * only a non-ANSI-C prototype declaration
+ */
+int getopt(int, char *const *, const char *);
+
 int
 getopt (argc, argv, optstring)
      int argc;
