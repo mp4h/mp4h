@@ -5,6 +5,19 @@ mp4h (1.2.0-1) unstable; urgency=low
 
  -- Denis Barbier <barbier@debian.org>  Wed, 15 Aug 2001 00:30:47 +0200
 
+mp4h (1.1.2-5) unstable; urgency=low
+
+  * Upgrade config.{sub,guess}
+
+ -- Denis Barbier <barbier@debian.org>  Sun,  8 Jul 2001 11:14:27 +0200
+
+mp4h (1.1.2-4) unstable; urgency=low
+
+  * Fix <get-file-properties>, which caused a segmentation fault
+    when applied to a file whose uid or gid cannot be resolved.
+
+ -- Denis Barbier <barbier@debian.org>  Sat, 21 Apr 2001 01:49:18 +0200
+
 mp4h (1.1.2-3) unstable; urgency=low
 
   * Fix broken original tarball, it differed from 1.1.2-1
