@@ -10,6 +10,15 @@
 
   Changes between 0.5.7 and SNAP:
 
+    *) Fix how comments are handled (10-Feb-2000):
+       I did not understand what was called ``comment'' in m4 syntax,
+       and so this implementation was buggy. We need only eol-comments.
+       [Denis Barbier]
+
+    *) Fix -U and -t flags (09-Feb-2000):
+       These flags apply on builtins, whereas -D apply on variables.
+       [Denis Barbier]
+
     *) Fix debugging (08-Feb-2000):
        [Denis Barbier]
 

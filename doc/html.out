@@ -19,9 +19,11 @@
 <define-tag commande><tt>%attributes</tt></define-tag>
 <define-tag left-angle>&lt;</define-tag>
 <define-tag right-angle>&gt;</define-tag>
+<define-tag slash><tt>/</tt></define-tag>
 <define-tag true><tt>true</tt></define-tag>
-<define-tag option><tt>-%attributes</tt></define-tag>
+<define-tag optflag><tt>-%attributes</tt></define-tag>
 <define-tag file><tt>%attributes</tt></define-tag>
+<define-tag anchor><a %attributes>&nbsp;</a></define-tag>
 
 ;;;
 ;;;    Alias for writing URLs
@@ -72,10 +74,11 @@
 <set-var %attributes>
 <set-var list-attributes[]="%body">
 <subst-in-var list-attributes "^\n" "">
+<p><a name="tag-%0">&nbsp;</a></p>
 <table border=2>
 <tr valign=top>
-<td align=center><if <get-var complex> "" "/"></td>
-<td align=center><if <get-var verbatim> "" "V"></td>
+<td align=center><if <get-var complex> "" "<a href=\"#noteattr\">/</a>"></td>
+<td align=center><if <get-var verbatim> "" "<a href=\"#noteattr\">V</a>"></td>
 <td align=center>%0</td>
 <td>
   <table>
@@ -106,18 +109,30 @@
 <define-tag para endtag=required><p>%body</p></define-tag>
 
 ;;;
+;;;    Lists
+;;;
+<define-tag list endtag=required>;;;
+<ul>%body</ul>;;;
+</define-tag>
+<define-tag item><li></define-tag>
+
+;;;
 ;;;    Example of MP4H code
 ;;;
-<define-tag example endtag=required attributes=verbatim>
-<set-var-verbatim verb-body=%ubody>;;;
-<subst-in-var verb-body "&" "&amp;">;;;
-<subst-in-var verb-body "<" "&lt;">;;;
-<subst-in-var verb-body ">" "&gt;">;;;
-<set-var body=%body>;;;
-<subst-in-var body "&" "&amp;">;;;
-<subst-in-var body "<" "&lt;">;;;
-<subst-in-var body ">" "&gt;">;;;
-<subst-in-var body "^\\n+" "">;;;
+<eol-comment "###">
+<define-tag three-colon>;;;</define-tag>
+<define-tag example endtag=required attributes=verbatim whitespace=delete>
+<set-var-verbatim verb-body=%ubody>
+<subst-in-var verb-body "&" "&amp;">
+<subst-in-var verb-body "<" "&lt;">
+<subst-in-var verb-body ">" "&gt;">
+<set-var body=%body>
+<subst-in-var body "&" "&amp;">
+<subst-in-var body "<" "&lt;">
+<subst-in-var body ">" "&gt;">
+<subst-in-var body "<three-colon>[^\n]*\n[ \t]*" "" singleline=true>
+<subst-in-var body "<three-colon>$" "">
+<subst-in-var body "^\n*" "" singleline=true>
 <table border=2 cellpadding=0 cellspacing=0>
     <tr><th bgcolor="#ccccff">Source</th></tr>
     <tr><td bgcolor="#ccff99"><pre><get-var-once verb-body></pre></td></tr>
@@ -125,6 +140,7 @@
     <tr><td bgcolor="#ff99cc"><pre><get-var-once body></pre></td></tr>
 </table>
 </define-tag>
+<eol-comment ";;;">
 
 ;;;
 ;;;    Verbatim code
@@ -148,4 +164,18 @@
 <define-tag html:comment endtag=required>
 &lt;!--%body--&gt;
 </define-tag>
+
+<define-tag option-list endtag=required>
+<table cellspacing=2 border=0>
+%body
+</table>
+</define-tag>
+
+<define-tag option endtag=required>
+<tr valign=top><td>%attributes</td><td>%body</td></tr>
+</define-tag>
+
+<define-tag optmand><tt>%attributes</tt></define-tag>
+
+<define-tag optopt><tt>[%attributes]</tt></define-tag>
 

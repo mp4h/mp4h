@@ -46,7 +46,6 @@ DECLARE (mp4h_version);
 
   /*  debug functions  */
 DECLARE (mp4h_debugmode);
-DECLARE (mp4h_debugquote);
 DECLARE (mp4h_debugfile);
 DECLARE (mp4h_function_def);
 DECLARE (mp4h_debugging_off);
@@ -98,6 +97,7 @@ DECLARE (mp4h_neq);
 DECLARE (mp4h_include);
 DECLARE (mp4h___include);
 DECLARE (mp4h_comment);
+DECLARE (mp4h_eol_comment);
 
   /*  relational operators  */
 DECLARE (mp4h_not);
@@ -163,7 +163,6 @@ builtin_tab[] =
 
       /*  debug functions  */
   { "debugmode",        FALSE,    TRUE,   mp4h_debugmode },
-  { "debugquote",       FALSE,    TRUE,   mp4h_debugquote },
   { "debugfile",        FALSE,    TRUE,   mp4h_debugfile },
   { "function-def",     FALSE,    TRUE,   mp4h_function_def },
   { "debugging-off",    FALSE,    TRUE,   mp4h_debugging_off },
@@ -220,6 +219,7 @@ builtin_tab[] =
   { "include",          FALSE,   FALSE,   mp4h_include },
   { "%%include",        FALSE,    TRUE,   mp4h___include },
   { "comment",          TRUE,     TRUE,   mp4h_comment },
+  { "eol-comment",      FALSE,    TRUE,   mp4h_eol_comment },
 
       /*  relational operators  */
   { "not",              FALSE,    TRUE,   mp4h_not },
@@ -609,10 +609,10 @@ dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
       if (i > 1)
         obstack_grow (obs, sep, len);
 
-      if (expansion_level > 1)
+      if (expansion_level > 0)
         obstack_1grow (obs, CHAR_BGROUP);
       shipout_string (obs, TOKEN_DATA_TEXT (argv[i]), 0);
-      if (expansion_level > 1)
+      if (expansion_level > 0)
         obstack_1grow (obs, CHAR_EGROUP);
     }
 }
@@ -851,36 +851,6 @@ mp4h_debugmode (MP4H_BUILTIN_ARGS)
     }
 }
 
-/*----------------------------------------------------------------------.
-| On-the-fly control of the format of the tracing output.  It takes one |
-| argument, which is a character string like given to the -d option, or |
-| none in which case the debug_level is zeroed.                         |
-`----------------------------------------------------------------------*/
-static void
-mp4h_debugquote (MP4H_BUILTIN_ARGS)
-{
-  if (bad_argc (argv[0], argc, 0, 3))
-    return;
-
-  xfree (debug_lquote);
-  xfree (debug_rquote);
-  if (argc == 1)
-    {
-      debug_lquote = xstrdup ("<");
-      debug_rquote = xstrdup (">");
-    }
-  else if (argc == 2)
-    {
-      debug_lquote = xstrdup (ARG (1));
-      debug_rquote = xstrdup (">");
-    }
-  else
-    {
-      debug_lquote = xstrdup (ARG (1));
-      debug_rquote = xstrdup (ARG (2));
-    }
-}
-
 /*-------------------------------------------------------------------------.
 | Specify the destination of the debugging output.  With one argument, the |
 | argument is taken as a file name, with no arguments, revert to stderr.   |
@@ -917,10 +887,10 @@ mp4h_function_def (MP4H_BUILTIN_ARGS)
   switch (SYMBOL_TYPE (s))
     {
     case TOKEN_TEXT:
-      if (expansion_level > 1)
+      if (expansion_level > 0)
         obstack_1grow (obs, CHAR_LQUOTE);
       shipout_string (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
-      if (expansion_level > 1)
+      if (expansion_level > 0)
         obstack_1grow (obs, CHAR_RQUOTE);
       break;
 
@@ -1115,10 +1085,10 @@ mp4h_date (MP4H_BUILTIN_ARGS)
 static void
 mp4h_group (MP4H_BUILTIN_ARGS)
 {
-  if (expansion_level > 1)
+  if (expansion_level > 0)
     obstack_1grow (obs, CHAR_BGROUP);
   dump_args (obs, argc, argv, "");
-  if (expansion_level > 1)
+  if (expansion_level > 0)
     obstack_1grow (obs, CHAR_EGROUP);
 }
 
@@ -1896,6 +1866,18 @@ mp4h_comment (MP4H_BUILTIN_ARGS)
 {
 }
 
+/*----------------------------.
+| Set EOL comment delimiter.  |
+`----------------------------*/
+static void
+mp4h_eol_comment (MP4H_BUILTIN_ARGS)
+{
+  bad_argc (argv[0], argc, 0, 2);
+  xfree (eolcomm.string);
+  eolcomm.string = xstrdup (ARG (1));
+  eolcomm.length = strlen (eolcomm.string);
+}
+
 
 /*  Relational operators : arguments are strings.  */
 
@@ -2235,8 +2217,8 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   victim = TOKEN_DATA_TEXT (argv[1]);
   length = strlen (victim);
 
-  if (expansion_level > 1)
-    obstack_1grow (obs, CHAR_BGROUP);
+  if (expansion_level > 0)
+    obstack_1grow (obs, CHAR_LQUOTE);
   offset = 0;
   matchpos = 0;
   while (offset < length)
@@ -2277,8 +2259,8 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
         obstack_1grow (obs, victim[offset++]);
     }
 
-  if (expansion_level > 1)
-    obstack_1grow (obs, CHAR_EGROUP);
+  if (expansion_level > 0)
+    obstack_1grow (obs, CHAR_RQUOTE);
 
   xfree (buf.buffer);
   return;
@@ -2287,8 +2269,7 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
 static void
 mp4h_subst_in_string (MP4H_BUILTIN_ARGS)
 {
-  const char *singleline;
-  boolean s;
+  const char *singleline; boolean s;
 
   singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
   s = (singleline
@@ -2326,10 +2307,8 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
   obstack_grow (obs, "<set-var-verbatim ", 18);
   obstack_grow (obs, ARG (1), strlen (ARG (1)));
   obstack_1grow (obs, '=');
-  obstack_1grow (obs, CHAR_BGROUP);
   argv[1] = &td;
   subst_in_string (obs, argc, argv, s);
-  obstack_1grow (obs, CHAR_EGROUP);
   obstack_1grow (obs, '>');
 }
 
@@ -2744,10 +2723,10 @@ generic_variable (struct obstack *obs, int argc, token_data **argv,
                 xfree (old_value);
               }
 
-            if (verbatim && expansion_level > 1)
+            if (verbatim && expansion_level > 0)
               obstack_1grow (obs, CHAR_LQUOTE);
             obstack_grow (obs, value, strlen (value));
-            if (verbatim && expansion_level > 1)
+            if (verbatim && expansion_level > 0)
               obstack_1grow (obs, CHAR_RQUOTE);
             xfree (value);
           }

@@ -175,7 +175,6 @@ extern int max_debug_argument_length;   /* -l */
 extern int suppress_warnings;           /* -Q */
 extern int warning_status;              /* -E */
 extern int nesting_limit;               /* -L */
-extern int discard_comments;            /* -c */
 
 /* Error handling.  */
 #define MP4HERROR(Arglist) (error Arglist)
@@ -189,8 +188,6 @@ void setup_stackovf_trap __P ((char *const *, char *const *,
 /* File: debug.c  --- debugging and tracing function.  */
 
 extern FILE *debug;
-extern char *debug_lquote;
-extern char *debug_rquote;
 
 /* The value of debug_level is a bitmask of the following.  */
 
@@ -362,16 +359,16 @@ void read_file_verbatim __P ((struct obstack *));
 extern const char *current_file;
 extern int current_line;
 
-/* Begin and end comment */
-extern STRING bcomm, ecomm;
+/* Begin and end quote */
 extern STRING lquote, rquote;
+extern STRING eolcomm;
 
 #define CHAR_LQUOTE '\1'
 #define CHAR_RQUOTE '\2'
 #define CHAR_BGROUP '\3'
 #define CHAR_EGROUP '\4'
-#define DEF_BCOMM ";;;"
-#define DEF_ECOMM "\n"
+
+#define DEF_EOLCOMM  ";;;"
 
 /* Syntax table definitions. */
 /* Please read the comment at the top of input.c for details */
@@ -401,11 +398,9 @@ extern unsigned short syntax_table[256];
 #define SYNTAX_RQUOTE   (0x0200)
 #define SYNTAX_BGROUP   (0x0400)
 #define SYNTAX_EGROUP   (0x0800)
-#define SYNTAX_BCOMM    (0x1000)
-#define SYNTAX_ECOMM    (0x2000)
 
 /* These bits define the syntax code of a character */
-#define SYNTAX_VALUE    (0x00FF|SYNTAX_LQUOTE|SYNTAX_BGROUP|SYNTAX_EGROUP|SYNTAX_BCOMM)
+#define SYNTAX_VALUE    (0x00FF|SYNTAX_LQUOTE|SYNTAX_BGROUP|SYNTAX_EGROUP)
 #define SYNTAX_MASKS    (0xFF00)
 
 #define IS_OTHER(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_OTHER)
@@ -428,11 +423,8 @@ extern unsigned short syntax_table[256];
 #define IS_RQUOTE(ch) (syntax_table[(int)(ch)] & SYNTAX_RQUOTE)
 #define IS_BGROUP(ch) (syntax_table[(int)(ch)] & SYNTAX_BGROUP)
 #define IS_EGROUP(ch) (syntax_table[(int)(ch)] & SYNTAX_EGROUP)
-#define IS_BCOMM(ch)  (syntax_table[(int)(ch)] & SYNTAX_BCOMM)
-#define IS_ECOMM(ch)  (syntax_table[(int)(ch)] & SYNTAX_ECOMM)
 
 
-void set_comment __P ((const char *, const char *));
 void set_syntax __P ((int, const char *));
 void set_syntax_internal __P ((int, int));
 void unset_syntax_attribute __P ((int, int));

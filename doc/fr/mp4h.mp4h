@@ -3,9 +3,8 @@
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
-<timer>
 <set-var package=mp4h>
-<set-var version=0.5.6>
+<set-var version=0.5.7>
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -17,6 +16,11 @@
 >
 
 <include list-tags>
+
+;;;
+;;;   Les caractères pour commentaires sont modifiés
+;;;
+<eol-comment "###">
 
 <header>
 <section "Introduction">
@@ -49,31 +53,129 @@ s'appuye sur la version 1.4n de GNU <m4>, qui est une version de
 développement.
 </para>
 
+<section "Options de la ligne de commande">
+
+<para>
+Les arguments optionnels sont placés entre crochets. Tous les synonymes
+d'une option ont la même syntaxe, donc lorsqu'une option accepte un
+argument, l'option courte doit l'accepter aussi.
+</para>
+
+<para>
+La syntaxe générale d'appel de <mp4h> est
+<code>mp4h [options] [fichier]</code>
+Les options sont décrites ci-dessous. Si aucun fichier n'est spécifié
+sur la ligne de commande, ou s'il a pour nom <commande ->, alors les
+caractères sont lus sur l'entrée standard.
+</para>
+
+<subsection "Mode opératoire">
+
+<option-list>
+<option --help>Affiche un message d'aide et quitte le programme</option>
+<option --version>Affiche le numéro de version de <mp4h> et quitte le
+programme</option>
+<option -E --fatal-warnings>Arrête l'exécution du programme dès qu'un
+message d'avertissement est affiché</option>
+<option -Q --quiet --silent>Supprime certains messages
+d'avertissement</option>
+</option-list>
+
+<subsection "Pré-processeur">
+
+<option-list>
+<option -I --include=<optmand REPERTOIRE>>###
+Ajoute ce répertoire à la liste des répertoires où les fichiers à
+inclure sont cherchés</option>
+<option -D --define=<optmand NOM<optopt =VALEUR>>>###
+Affecte une valeur à la variable de nom <var NOM></option>
+<option -U --undefine=<optmand COMMANDE>>###
+Supprime la primitive de nom <commande COMMANDE></option>
+</option-list>
+
+<subsection "Limites des ressources">
+
+<option-list>
+<option -H --hashsize=<optmand PREMIER>>###
+Utilise le nombre premier <optmand PREMIER> pour remplir la table de
+hachage (défaut: 509)</option>
+<option -L -nesting-limit=<optmand NOMBRE>>###
+Fixe la limite arbitraire du nombre d'appels récursifs (défaut: 250)</option>
+</option-list>
+
+<subsection "Déboguage">
+
+<option-list>
+<option -d --debug=<optmand FLAGS>>###
+Détermine quelles sont les informations affichées (voir ci-dessous)</option>
+<option -t --trace=<optmand NOM>>###
+La commande <commande NOM> sera tracée dès qu'elle est définie</option>
+<option -l --arglength=<optmand NOMBRE>>###
+Limite le nombre de caractères affichés dans les messages de
+déboguage</option>
+<option -o --error-output=<optmand FICHIER>>###
+Redirige dans un fichier les messages de déboguage</option>
+</option-list>
+
+<para>
+Les drapeuax pour l'option <optmand -d> sont les suivantes:
+</para>
+<option-list>
+<option t>###
+trace tous les appels de macros, pas seulement
+ceux déclarés avec <commande traceon></option>
+<option a>affiche les arguments</option>
+<option e>affiche le texte de remplacement</option>
+<option c>affiche la commande avant la collecte des arguments, après et
+après l'appel de la fonction</option>
+<option x>ajoute un identifiant à la sortie, ce qui est utile en cas
+d'appel récursif</option>
+<option f>affiche le nom du fichier d'entrée</option>
+<option l>affiche le numéro de la ligne dans le fichier d'entrée</option>
+<option p>affiche le résultat de a recherche de fichiers dans
+l'arborescence</option>
+<option i>affiche les changements dans le fichier d'entrée</option>
+<option V>raccourci pour tous ces drapeaux</option>
+</option-list>
+
 <section "Description">
 
 <para>
 Le programme <mp4h> est un macro-processeur, ce qui signifie que les
-mots-clés définis sont remplacés par un autre texte. Dans ce chapitre
-est vu l'ensemble des commandes définies par <mp4h>.
+mots-clés définis sont remplacés par un autre texte. Ce chapitre
+est un exposé des primitives définies par <mp4h>. Comme <mp4h> a été
+spécialement conçu pour les documents HTML, la syntaxe est très proche
+de celle du HTML, avec des balises et des attributs. La seule notion
+inconnue en HTML est la possibilité de commenter une partie du texte
+jusqu'à la fin de la ligne. Les commentaires commencent par trois
+point-virgules, par exemple:
+<code>;;;  Ceci est un commentaire</code>
 </para>
 
-;;;
-;;;    Definition of new macros
-;;;
+###
+###    Definition of new macros
+###
 
 <subsection "Fonctions pour les définitions">
 
 <para>
 La définition de nouvelles commandes est la tâche la plus courante
-réalisée par <mp4h>. Comme <mp4h> a été spécialement conçu pour les
-documents HTML, la syntaxe est très proche de celle du HTML. Les
-commandes (aussi appelées balises), sont de deux types : simples ou
+réalisée par <mp4h>.
+Les commandes (aussi appelées balises), sont de deux types : simples ou
 complexes. Une balise simple a la forme suivante :
 <code><nom [attributs]></code>
 tandis qu'une balise complexe est de la forme :
 <code><nom [attributs]>
 texte
 </nom></code>
+</para>
+
+<para>
+<anchor name="noteattr">
+Dans les descriptions de commandes, une barre oblique <slash> indique
+que la balise est complexe, et la lettre <commande V> que les attributs
+de la balise sont lus sans être développés (voir le chapitre sur le
+mécanisme de développement des macros pour plus de détails).
 </para>
 
 <tag:description define-tag complex>
@@ -134,7 +236,8 @@ Lorsque cet attribut est utilisé, les arguments ne sont pas évalués.
 <undef foo bar>
 <example>
 <define-tag bar>quux</define-tag>
-<define-tag foo attributes=verbatim endtag=required>Corps: %ubody
+<define-tag foo attributes=verbatim endtag=required>
+Corps: %ubody
 Attributs: %uattributes
 </define-tag>
 <foo txt="<bar>">Et voila</foo>
@@ -185,9 +288,9 @@ Supprime la définition d'une commande.
 <foo>
 </example>
 
-;;;
-;;;    Variable functions
-;;;
+###
+###    Variable functions
+###
 
 <subsection "Variables">
 
@@ -397,9 +500,9 @@ primitive, un message indique de quel type de symbole il s'agit :
 <symbol-info bar>
 </example>
 
-;;;
-;;;    String functions
-;;;
+###
+###    String functions
+###
 
 <subsection "Manipulation de chaînes de caractères">
 
@@ -685,9 +788,9 @@ Affiche quel est le type d'expressions régulières actuellement utilisé.
 <get-regexp-syntax>
 </example>
 
-;;;
-;;;    Array functions
-;;;
+###
+###    Array functions
+###
 
 <subsection "Tableaux">
 
@@ -861,9 +964,9 @@ Effectue le tri en ordre inverse
 </example>
 </attributes:description>
 
-;;;
-;;;    Numerical operators
-;;;
+###
+###    Numerical operators
+###
 
 <subsection "Opérateurs arithmétiques">
 
@@ -980,9 +1083,9 @@ Retourne <true> si les deux arguments sont égaux.
 Retourne <true> si les deux arguments sont différents.
 </para>
 
-;;;
-;;;    Relational operators
-;;;
+###
+###    Relational operators
+###
 
 <subsection "Operateurs relationnels">
 
@@ -1013,9 +1116,9 @@ ne retourne rien.
 Affiche le premier argument non nul.
 </para>
 
-;;;
-;;;    Flow functions
-;;;
+###
+###    Flow functions
+###
 
 <subsection "Fonctions de contrôle">
 
@@ -1221,9 +1324,9 @@ la plus interne.
 </while>
 </example>
 
-;;;
-;;;    File functions
-;;;
+###
+###    File functions
+###
 
 <subsection "Fonctions sur les fichiers">
 
@@ -1289,9 +1392,9 @@ Avec cet attribut, le contenu du fichier est inclus sans être modifié
 par <mp4h>.
 </attributes:description>
 
-;;;
-;;;    Debugging
-;;;
+###
+###    Debugging
+###
 
 <subsection "Aide au déboguage">
 
@@ -1320,7 +1423,7 @@ affiche les exemples à été définie ainsi:
 </tag:description>
 
 <para>
-Cette commande prend le même argument que l'option <option d>.
+Cette commande prend le même argument que l'option <optflag d>.
 </para>
 
 <tag:description debugfile>
@@ -1329,8 +1432,14 @@ Cette commande prend le même argument que l'option <option d>.
 
 <para>
 Indique dans quel fichier les instructions de déboguage doivent être
-écrites. Si le nom de fichier est <file ->, ces instructions sont
-écrites dans le texte.
+écrites. Si le nom de fichier est vide, l'affichage de ces instructions
+se fait de nouveau dans la sortie erreur standard. Si le nom du fichier
+est <fle ->, l'affichage est supprimé.
+</para>
+
+<para>
+Il n'existe aucun moyen pour insérer ces instructions à l'intérieur du
+document post-traité.
 </para>
 
 <tag:description debugging-on>
@@ -1340,7 +1449,7 @@ Indique dans quel fichier les instructions de déboguage doivent être
 
 <para>
 Les commandes dont les noms sont passés en argument sont «tracées»,
-c'est-à-diree que les informations demandées au travers de l'option <option d>
+c'est-à-diree que les informations demandées au travers de l'option <optflag d>
 et de la commande <commande debugmode> sont affichées lors de chaque appel de
 la fonction.
 </para>
@@ -1354,9 +1463,9 @@ la fonction.
 Fonction inverse de la précédente.
 </para>
 
-;;;
-;;;    Misc
-;;;
+###
+###    Misc
+###
 
 <subsection "Divers">
 
@@ -1416,8 +1525,9 @@ dépendant de la vitesse du processeur.
 </para>
 
 <example>
-Depuis le début de la compilation de ce document, le temps suivant s'est
-écoulé:
+Le temps écoulé est mesuré en cycles d'horloge. Depuis le début de la
+compilation de cette documentation par <mp4h>, voici le nombre de cycles
+écoulés:
 <timer>
 </example>
 
@@ -1425,7 +1535,80 @@ Depuis le début de la compilation de ce document, le temps suivant s'est
 </tag:description>
 
 <para>
-Le contenu de cette balise est supprimé.
+Le corps de cette balise est supprimé.
+</para>
+
+<section "Schéma d'expansion des macros">
+
+<para>
+Cette partie décrit les mécanismes utilisés pour le remplacement des
+macros. Elle se veut aussi précise que possible, aussi n'hésitez pas à me
+signaler toute erreur ou omission.
+</para>
+
+<subsection "Généralités">
+
+<undef foo bar>
+Commençons par donner des exemples de définition de balises:
+<example>
+<define-tag foo>;;;
+Ceci est un exemple de balise simple;;;
+</define-tag>;;;
+<define-tag bar endtag=required>;;;
+Ceci est un exemple de balise complexe;;;
+</define-tag>;;;
+<foo>
+<bar>Corps de la fonction</bar>
+</example>
+
+<para>
+Les commandes ainsi définies peuvent avoir des attributs, comme toute
+balise HTML. Ces attributs sont séparés par un ou plusieurs espaces,
+tabulations ou sauts de lignes, et chaque attribut doit être une entité
+complète de <mp4h>. Par exemple, avec les définitionsa ci-dessus,
+<left-angle><commande bar><right-angle> ne peut pas être un attribut,
+parce que la commande <commande bar> est complexe.
+En revanche, il est possible d'écrire
+<code><foo <foo>></code>
+ou même
+<code><foo <foo name=src url=ici>></code>
+Dans les deux exemples ci-dessus, la commande <commande foo> a un seul
+attribut.
+</para>
+
+<undef foo bar>
+<para>
+Dans certains cas, il est nécessaire de regrouper ensemble plusieurs
+chaînes de caractères pour en faire un seul attribut. Cela peut être
+fait soit avec des guillements, soit avec la commande <commande group>.
+Par exemple,
+<code><foo "Ceci est le 1er attribut"
+           <group et le second>></code>
+</para>
+
+<para>
+Pour que ces attributs se retrouvent dans le texte de
+remplacement, les conventions suivantes ontété adoptées:
+<list>
+<item>Les attributs sont numérotés à partir de 0. Dans le texte de
+remplacement, <value %0> sera remplacé par le 1er attribut, <value %1>
+par le 2e attribut, etc. Comme le nombre d'attribut n'est pas limité,
+les lettres <value %20> seront remplacés par le vingt-et-unième
+argument, et pas par le 3e argument suivi d'un 0.
+
+<item>Les caractères <value %attributes> sont remplacés par la liste 
+des arguments, séparés par un espace.
+
+<item>Les caractères <value %body> sont remplacés par le corps de la
+commande, dans le cas d'une balise complexe.
+
+<item>Les deux formes ci-dessus possèdent une forme alternative, où la
+liste est séparée par des sauts de lignes au lieu d'espaces. Il s'agit
+des formes <value %Aattributes> et <value %Abody>, le <value A> voulant
+dire array (tableau en français).
+commande, dans le cas d'une balise complexe.
+
+</list>
 </para>
 
 <section "Problèmes connus">

@@ -77,9 +77,6 @@ static int show_version = 0;
 /* If nonzero, import the environment as macros.  */
 static int import_environment = 0;
 
-/* If nonzero, comments are discarded in the token parser.  */
-int discard_comments = 2;
-
 struct macro_definition
 {
   struct macro_definition *next;
@@ -217,7 +214,6 @@ static const struct option long_options[] =
 {
   {"arglength", required_argument, NULL, 'l'},
   {"debug", optional_argument, NULL, 'd'},
-  {"discard-comments", no_argument, NULL, 'c'},
   {"error-output", required_argument, NULL, 'o'},
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
@@ -338,10 +334,6 @@ main (int argc, char *const *argv, char *const *envp)
         frozen_file_to_read = optarg;
         break;
 
-      case 'c':
-        discard_comments = 1;
-        break;
-
       case 'd':
         debug_level = debug_decode (optarg);
         if (debug_level < 0)
@@ -444,11 +436,11 @@ main (int argc, char *const *argv, char *const *envp)
           break;
 
         case 'U':
-          lookup_variable (defines->macro, SYMBOL_DELETE);
+          lookup_symbol (defines->macro, SYMBOL_DELETE);
           break;
 
         case 't':
-          sym = lookup_variable (defines->macro, SYMBOL_INSERT);
+          sym = lookup_symbol (defines->macro, SYMBOL_INSERT);
           SYMBOL_TRACED (sym) = TRUE;
           break;
 

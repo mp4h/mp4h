@@ -41,10 +41,6 @@
 /* File for debugging output.  */
 FILE *debug = NULL;
 
-/* Quotes used in debugging output.  */
-char *debug_lquote = NULL;
-char *debug_rquote = NULL;
-
 /* Obstack for trace messages.  */
 static struct obstack trace;
 
@@ -195,7 +191,7 @@ debug_set_output (const char *name)
   if (name == NULL)
     debug_set_file (stderr);
   else if (*name == '-' && *(name+1) == '\0')
-    debug_set_file (stdout);
+    debug_set_file (NULL);
   else
     {
       fp = fopen (name, "a");
@@ -359,7 +355,7 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
   const builtin *bp;
 
   trace_header (id);
-  trace_format ("%s%s", debug_lquote, name);
+  trace_format ("<%s", name);
 
   if (argc > 1 && (debug_level & DEBUG_TRACE_ARGS))
     {
@@ -395,11 +391,11 @@ INTERNAL ERROR: Bad token data type (trace_pre ())")));
 
         }
     }
-  trace_format (debug_rquote);
+  trace_format (">");
 
   if (debug_level & DEBUG_TRACE_CALL)
     {
-      trace_format (" -%s ???", debug_rquote);
+      trace_format (" -> ???");
       trace_flush ();
     }
 }
@@ -420,6 +416,6 @@ trace_post (const char *name, int id, int argc, token_data **argv,
     }
 
   if (expanded && (debug_level & DEBUG_TRACE_EXPANSION))
-    trace_format (" -%s %S", debug_rquote, expanded);
+    trace_format (" -> %S", expanded);
   trace_flush ();
 }

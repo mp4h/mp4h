@@ -92,8 +92,6 @@ static void lex_debug __P ((void));
    SYNTAX_RQUOTE        A single characters right quote
    SYNTAX_BGROUP        Begins a group
    SYNTAX_EGROUP        Ends a group
-   SYNTAX_BCOMM         A single characters begin comment delimiter
-   SYNTAX_ECOMM         A single characters end comment delimiter
 
    Besides adding new facilities, the use of a syntax table will reduce
    the number of calls to next_token ().  Now groups of OTHER, NUM and
@@ -116,7 +114,6 @@ static void lex_debug __P ((void));
    The precedence as implemented by next_token () is:
 
    SYNTAX_IGNORE        *Filtered out below next_token ()
-   SYNTAX_BCOMM         Reads all until SYNTAX_ECOMM
    SYNTAX_ESCAPE        Reads macro name iff set, else next
    SYNTAX_ALPHA         Reads macro name
    SYNTAX_LQUOTE        Reads all until balanced SYNTAX_RQUOTE
@@ -218,11 +215,7 @@ unsigned short syntax_table[256];
 #define CHAR_RETRY      258     /* character return for end of input block */
 
 /* Comment chars.  */
-STRING bcomm;
-STRING ecomm;
- 
-/* TRUE iff strlen(bcomm) == strlen(ecomm) == 1 */
-static boolean single_comments;
+STRING eolcomm;
 
 
 
@@ -748,11 +741,8 @@ input_init (void)
 
   start_of_input_line = FALSE;
 
-  bcomm.string = xstrdup (DEF_BCOMM);
-  bcomm.length = strlen (bcomm.string);
-  ecomm.string = xstrdup (DEF_ECOMM);
-  ecomm.length = strlen (ecomm.string);
-  single_comments = (bcomm.length == 1 && ecomm.length == 1);
+  eolcomm.string = xstrdup (DEF_EOLCOMM);
+  eolcomm.length = strlen (eolcomm.string);
 
   for (ch = 256; --ch > 0; )
     {
@@ -785,41 +775,9 @@ input_init (void)
   /* This routine tells whether we want extended regexp or not. */
   set_regexp_extended (TRUE);
   
-  /* Default quotes in debugging output.  */
-	debug_lquote = xstrdup ("<");
-	debug_rquote = xstrdup (">");
 }
 
 
-/*---------------------------------------------------------------------.
-| Functions for setting comment delimiters.  Not used yet.             |
-`---------------------------------------------------------------------*/
-
-void
-set_comment (const char *bc, const char *ec)
-{
-  int ch;
-  for (ch = 256; --ch >= 0; )   /* changecom overrides syntax_table */
-    if (IS_BCOMM(ch) || IS_ECOMM(ch))
-      unset_syntax_attribute(SYNTAX_BCOMM|SYNTAX_ECOMM, ch);
-
-  xfree (bcomm.string);
-  xfree (ecomm.string);
-
-  bcomm.string = xstrdup (bc ? bc : DEF_BCOMM);
-  bcomm.length = strlen (bcomm.string);
-  ecomm.string = xstrdup (ec ? ec : DEF_ECOMM);
-  ecomm.length = strlen (ecomm.string);
-
-  single_comments = (bcomm.length == 1 && ecomm.length == 1);
-
-  if (single_comments)
-    {
-      set_syntax_internal(SYNTAX_BCOMM, bcomm.string[0]);
-      set_syntax_internal(SYNTAX_ECOMM, ecomm.string[0]);
-    }
-}
-
 /*-------------------------------------------.
 | Functions to manipulate the syntax table.  |
 `-------------------------------------------*/
@@ -927,44 +885,9 @@ next_token (token_data *td, read_type expansion)
         }
 
       (void) next_char ();
-      if (IS_BCOMM(ch))                   /* COMMENT, SHORT DELIM */
+      if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
         {
-          obstack_1grow (&token_stack, ch);
-          while ((ch = next_char ()) != CHAR_EOF && !IS_ECOMM(ch))
-            obstack_1grow (&token_stack, ch);
-          if (ch != CHAR_EOF)
-            obstack_1grow (&token_stack, ch);
-
-          /*  Additionally skip spaces */
-          if (discard_comments > 1)
-            {
-              while ((ch = next_char()) != CHAR_EOF && IS_SPACE(ch))
-                obstack_1grow (&token_stack, ch);
-              if (ch != CHAR_EOF)
-                unget_input(ch);
-            }
-
-          type = discard_comments ? TOKEN_NONE : TOKEN_STRING;
-        }
-                                        /* COMMENT, LONGER DELIM */
-      else if (!single_comments && MATCH (ch, bcomm.string))
-        {
-          obstack_grow (&token_stack, bcomm.string, bcomm.length);
-          while ((ch = next_char ()) != CHAR_EOF && !MATCH (ch, ecomm.string))
-            obstack_1grow (&token_stack, ch);
-          if (ch != CHAR_EOF)
-            obstack_grow (&token_stack, ecomm.string, ecomm.length);
-
-          /*  Additionally skip spaces */
-          if (discard_comments > 1)
-            {
-              while ((ch = next_char()) != CHAR_EOF && IS_SPACE(ch))
-                obstack_1grow (&token_stack, ch);
-              if (ch != CHAR_EOF)
-                unget_input(ch);
-            }
-
-          type = discard_comments ? TOKEN_NONE : TOKEN_STRING;
+          skip_line ();
         }
       else if (IS_ESCAPE(ch))             /* ESCAPED WORD */
         {
@@ -1049,7 +972,9 @@ next_token (token_data *td, read_type expansion)
                 MP4HERROR ((EXIT_FAILURE, 0,
                         _("ERROR: EOF in string")));
 
-              if (IS_RQUOTE(ch))
+              if (IS_BGROUP(ch) || IS_EGROUP(ch))
+                continue;
+              else if (IS_RQUOTE(ch))
                 {
                   quote_level--;
                   if (quote_level == 0)

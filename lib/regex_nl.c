@@ -5519,6 +5519,7 @@ re_compile_pattern (pattern, length, bufp)
      struct re_pattern_buffer *bufp;
 {
   reg_errcode_t ret;
+  reg_syntax_t syntax = re_syntax_options;
 
   /* GNU code is written to assume at least RE_NREGS registers will be set
      (and at least one extra will be -1).  */
@@ -5531,8 +5532,10 @@ re_compile_pattern (pattern, length, bufp)
 
   /* Match anchors at newline.  */
   bufp->newline_anchor = 1;
+  syntax &= ~RE_DOT_NEWLINE;
+  syntax |= RE_HAT_LISTS_NOT_NEWLINE;
 
-  ret = regex_compile (pattern, length, re_syntax_options, bufp);
+  ret = regex_compile (pattern, length, syntax, bufp);
 
   if (!ret)
     return NULL;
