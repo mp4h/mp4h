@@ -76,6 +76,7 @@ mp4h-config: mp4h-config.src
         -e 's|\@VERSION\@|$(MP4H_VERSION)|g' \
         -e 's|\@prefix\@|$(prefix)|g' \
         -e 's|\@pkglibdir\@|$(pkglibdir)|g' \
+        -e 's|\@pkgdatadir\@|$(pkgdatadir)|g' \
         -e 's|\@mandir\@|$(mandir)|g' \
         -e 's|\@CC\@|$(CC)|g' \
         -e 's|\@CFLAGS\@|$(CFLAGS)|g' \

@@ -26,90 +26,21 @@ MKDIR           = $(SHTOOL) mkdir -f -p -m 755
 
 prefix          = @prefix@
 
-CC              = @CC@
-CFLAGS          = @CFLAGS@
-CPPFLAGS        = @CPPFLAGS@
-DEFS            = @DEFS@ -I. -I$(srcdir)
-INCLUDES        = -I$(top_srcdir) -I$(top_srcdir)/lib  -I$(top_srcdir)/src
-LDFLAGS         = @LDFLAGS@
-LIBS            = @LIBS@
-LIBTOOL         = @LIBTOOL@
-mp4h_config     = $(top_srcdir)/mp4h-config
-
-SDP     = packages
+SDP     = packages/
 SUBDIRS = \
-   WML \
-   exec
-
-man3ext         = 3
-SOURCES         = exec.src
-PKGFILES        = $(SOURCES:.src=.mp4hp)
-MODSOURCES      = exec.c
-MODULE          = exec
-LOBJ            = $(MODSOURCES:.c=.lo)
-LARCHIVE        = $(MODSOURCES:.c=.la)
-
-INITVARS = \
-   pkgdatadir=`$(top_srcdir)/mp4h-config --pkgdatadir` \
-   mandir=`$(top_srcdir)/mp4h-config --mandir`
-
-.SUFFIXES:
-.SUFFIXES: .src .mp4hp .c .o .lo .la
-
-.src.mp4hp:
-	sed -e '/^=head1/,/^=cut/d' -e '/^##EOF##/,$$d' $< > $@
-	cat $< > $*.pod && pod2man --section=$(man3ext) \
-   --center="mp4h packages" \
-   --release="mp4h packages" \
-   $*.pod > $*.$(man3ext) && rm -f $*.pod
-
-.c.o:
-	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -c $<
-
-.c.lo:
-	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -c $<
-
-.lo.la:
-	$(LIBTOOL) --quiet --mode=link `$(mp4h_config) --cc` -o $@ $< \
-	    -module -rpath `$(mp4h_config) --pkglibdir` -avoid-version
+   WML
 
 # ------------------------------------------------
 #   THE DEFAULT TARGET
 # ------------------------------------------------
 
-all: $(PKGFILES) $(LARCHIVE) all-recursive
+all: all-recursive
 
 # ------------------------------------------------
 #   THE INSTALL TARGET
 # ------------------------------------------------
 
-INSTALL_LA_FILES = \
-   d=`$(mp4h_config) --pkglibdir`; \
-   echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
-   $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
-
 install: install-recursive
-	@list='$(LARCHIVE)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    $(INSTALL_LA_FILES); \
-	  else :; fi; \
-	done
-	@set -e; $(INITVARS); \
-	files='$(PKGFILES)'; \
-	for file in $$files; do \
-	    base=`echo $$file | sed -e 's/\.mp4hp$$//g'`; \
-	    dir=`echo $$file | sed -e 's/[a-zA-Z0-9_]*.mp4hp$$//g'`; \
-	    name="$(thisdir):$$base"; \
-	    if [ ! -d "$(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir" ]; then \
-	        echo "$(MKDIR) $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir"; \
-	        $(MKDIR) $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir; \
-	    else :; \
-	    fi; \
-            echo "$(INSTALL_DATA) $$file $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$file"; \
-            $(INSTALL_DATA) $$file $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$file; \
-            echo "$(INSTALL_DATA) $$base.$(man3ext) $(INSTPREFIX)$$mandir/man$(man3ext)/$$name.$(man3ext)"; \
-            $(INSTALL_DATA) $$base.$(man3ext) $(INSTPREFIX)$$mandir/man$(man3ext)/$$name.$(man3ext); \
-	done
 
 install-dirs:
 	@set -e; $(INITVARS); \
@@ -125,10 +56,6 @@ install-dirs:
 # ------------------------------------------------
 
 clean: clean-recursive
-	-rm -f *.o *.lo *.la core
-	-rm -rf .libs
-	-rm -f *.mp4hp
-	-rm -f *.pod *.$(man3ext)
 
 distclean: clean distclean-recursive
 	-$(RM) Makefile
