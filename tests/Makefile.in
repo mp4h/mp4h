@@ -53,6 +53,8 @@ SUBDIRS = \
    directory-contents \
    file-exists \
    Misc \
+   attributes-remove \
+   attributes-extract \
    attributes-print
 
 #   common tools

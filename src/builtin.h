@@ -58,7 +58,7 @@
 
 #include "mp4h.h"
 
-#define _AS_HEADER
+#define _SRC_VERSION_C_AS_HEADER_
 #include "version.c"
 
 #define MP4H_BUILTIN_ARGS struct obstack *obs, int argc, token_data **argv, \

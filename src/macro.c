@@ -541,8 +541,13 @@ expand_macro (symbol *sym, read_type expansion)
           cp = TOKEN_DATA_TEXT (argv[argc-1]);
           if (IS_SLASH(*cp) && *(cp+1) == '\0')
             argc--;
-          else if (LAST_CHAR (cp) == '/')
-            LAST_CHAR (cp) = '\0';
+          else if (IS_SLASH (LAST_CHAR (cp)))
+            {
+              if (IS_SPACE (*(cp+strlen(cp)-2)))
+                *(cp+strlen(cp)-2) = '\0';
+              else
+                LAST_CHAR (cp) = '\0';
+            }
         }
       else if (!(exp_flags & EXP_NOWARN_SLASH))
         MP4HERROR ((warning_status, 0,
@@ -653,7 +658,8 @@ expand_unknown_tag (char *name, read_type expansion)
   obstack_init (&argptr);
   obstack_init (&body);
 
-  if (expansion == READ_NORMAL || expansion == READ_ATTRIBUTE)
+  if (expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
+          || expansion == READ_ATTR_QUOT)
     attr_expansion = READ_ATTR_QUOT;
   else
     attr_expansion = READ_ATTR_ASIS;
@@ -683,10 +689,15 @@ expand_unknown_tag (char *name, read_type expansion)
   if (slash)
     {
       cp = TOKEN_DATA_TEXT (argv[argc-1]);
-      if (*cp == '/' && *(cp+1) == '\0')
+      if (IS_SLASH (*cp) && *(cp+1) == '\0')
         argc--;
-      else if (LAST_CHAR (cp) == '/')
-        LAST_CHAR (cp) = '\0';
+      else if (IS_SLASH (LAST_CHAR (cp)))
+        {
+          if (IS_SPACE (*(cp+strlen(cp)-2)))
+            *(cp+strlen(cp)-2) = '\0';
+          else
+            LAST_CHAR (cp) = '\0';
+        }
     }
 
   if (expansion == READ_ATTR_ASIS

@@ -119,13 +119,13 @@ NAME = barbier   # name of maintainer who rolls the tarball
 EXCLUDE_FILES = CVS .cvsignore core mp4h-*.tar.gz debian
 
 NEWVERS = \
-    $(VERSION_TOOL) -l c -p mp4h $$OPT src/version.c; \
+    $(VERSION_TOOL) -l c -n mp4h -p mp4h $$OPT src/version.c; \
     V=`$(VERSION_TOOL) -l c -d long src/version.c`;\
     sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
 
 UPDATEVERS = \
     V=`$(VERSION_TOOL) -l c -d short src/version.c`;\
-    $(VERSION_TOOL) -l c -p mp4h -s $$V src/version.c; \
+    $(VERSION_TOOL) -l c -n mp4h -p mp4h -s $$V src/version.c; \
     V=`$(VERSION_TOOL) -l c -d long src/version.c`;\
     sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
 

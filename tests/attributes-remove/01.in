@@ -1,0 +1,5 @@
+<define-tag foo attributes=verbatim whitespace=delete>
+<foo* <attributes-remove src,name,id %Uattributes />>Hey folks</foo*>
+</define-tag>
+<set-var q=1 />
+<foo q=<get-var q/> name="foo bar quux" id="" />

@@ -1,0 +1,5 @@
+<define-tag bar attributes=verbatim whitespace=delete>
+<bar* <attributes-extract src,name,q %attributes />>Hey folks</bar*>
+</define-tag>
+<set-var q=1 />
+<bar q=<get-var q/> name="foo bar quux" id="" />

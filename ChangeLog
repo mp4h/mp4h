@@ -10,9 +10,19 @@
 
   Changes between 1.0.3 and SNAP:
 
-    *) New tags to affect attributes (28-Jun-2000):
+    *) More facilities added to modify list of attributes (02-Jul-2000):
+       [Denis Barbier]
+
+    *) New <compound> tag for grouping (02-Jul-2000):
+       It does exactly the same job as <group>, but this tag is
+       complex.
+       [Denis Barbier]
+
+    *) New tags to affect attributes (01-Jul-2000):
        The <attributes-extract> and <attributes-remove> tags allow
        extraction and removal of specific attributes from %attributes.
+       And <attributes-print> prints the list of attributes with quotes
+       around attribute values.
        [Denis Barbier, Ralf S. Engelschall]
 
     *) Reintroduce support for dmalloc (28-Jun-2000):

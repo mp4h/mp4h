@@ -276,6 +276,7 @@ file_clean(void)
   fclose (isp->u.u_f.file);
   xfree (current_file);
   current_file = xstrdup (isp->u.u_f.name);
+  xfree (isp->u.u_f.name);
   current_line = isp->u.u_f.lineno;
   output_current_line = isp->u.u_f.out_lineno;
   start_of_input_line = isp->u.u_f.advance_line;
@@ -311,7 +312,6 @@ push_file (FILE *fp, const char *title)
   i->u.u_f.out_lineno = output_current_line;
   i->u.u_f.advance_line = start_of_input_line;
 
-  xfree (current_file);
   current_file = xstrdup (obstack_copy0 (current_input, title, strlen (title)));
   current_line = 1;
   output_current_line = -1;
@@ -1051,7 +1051,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                       else
                         unget_input(ch);
 
-                      if (IS_SPACE(ch) || IS_CLOSE(ch) || ch == '/')
+                      if (IS_SPACE(ch) || IS_CLOSE(ch) || IS_SLASH (ch))
                         type = TOKEN_WORD;
                       else
                         type = TOKEN_STRING;

@@ -33,7 +33,7 @@
 
 #include <getopt.h>
 
-#define _AS_HEADER
+#define _SRC_VERSION_C_AS_HEADER_
 #include "version.c"
 
 /* Enable sync output for /lib/cpp (-s).  */
@@ -346,7 +346,7 @@ main (int argc, char *const *argv)
 
   if (show_version)
     {
-      printf ("%s %s", program_name, mp4h_VersionStr);
+      printf ("%s %s", program_name, mp4hversion.v_long);
       fputs("\n", stdout);
       exit (EXIT_SUCCESS);
     }

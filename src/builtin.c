@@ -71,6 +71,7 @@ DECLARE (mp4h_date);
 
   /*  flow functions  */
 DECLARE (mp4h_group);
+DECLARE (mp4h_compound);
 DECLARE (mp4h_noexpand);
 DECLARE (mp4h_expand);
 DECLARE (mp4h_if);
@@ -211,6 +212,7 @@ builtin_tab[] =
 
       /*  flow functions  */
   { "group",            FALSE,    TRUE,   mp4h_group },
+  { "compound",          TRUE,    TRUE,   mp4h_compound },
   { "noexpand",         FALSE,    FALSE,  mp4h_noexpand },
   { "expand",           FALSE,    TRUE,   mp4h_expand },
   { "if",               FALSE,    FALSE,  mp4h_if },
@@ -319,9 +321,10 @@ static void dump_args __P ((struct obstack *, int, token_data **, const char *))
 static boolean safe_strtod __P ((const char *, const char *, double *));
 static boolean safe_strtol __P ((const char *, const char *, long int *));
 static const char *predefined_attribute __P ((const char *, int *, token_data **, boolean));
+static void quote_name_value __P ((struct obstack *, char *));
+static void matching_attributes __P ((struct obstack *, int, token_data **, char *, boolean, boolean));
 static void set_trace __P ((symbol *, const char *));
 static void generic_set_hook __P ((MP4H_BUILTIN_PROTO, boolean, int));
-static void quote_name_value __P ((struct obstack *, char *));
 static void math_relation __P ((MP4H_BUILTIN_PROTO, mathrel_type));
 static void mathop_functions __P ((MP4H_BUILTIN_PROTO, mathop_type));
 static void updowncase __P ((struct obstack *, int, token_data **, boolean));
@@ -776,9 +779,9 @@ dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
 
       obstack_1grow (obs, CHAR_BGROUP);
       /*   Remove surrounding double quotes  */
-      if (*ARG (i) == '"' && *(ARG (i) + strlen (ARG (i))) == '"')
+      if (*ARG (i) == '"' && LAST_CHAR (ARG (i)) == '"')
         obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 2));
-      else if (*ARG (i) == CHAR_QUOTE && *(ARG (i) + strlen (ARG (i))) == CHAR_QUOTE)
+      else if (*ARG (i) == CHAR_QUOTE && LAST_CHAR (ARG (i)) == CHAR_QUOTE)
         obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 2));
       else
         obstack_grow (obs, ARG (i), strlen (ARG (i)));
@@ -797,23 +800,38 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
                       boolean lowercase)
 {
   var_stack *next;
-  char *cp, *lower;
-  int i, j;
+  char *cp, *sp, *lower;
+  int i, j, special_chars;
   boolean found = FALSE;
 
   i = 1;
   while (i<*ptr_argc)
     {
-      cp = strchr (TOKEN_DATA_TEXT (argv[i]), '=');
-      if ((cp == NULL && strcasecmp (TOKEN_DATA_TEXT (argv[i]), key) == 0) ||
-          (cp != NULL && strncasecmp (TOKEN_DATA_TEXT (argv[i]), key, strlen (key)) == 0
-               && *(TOKEN_DATA_TEXT (argv[i]) + strlen (key)) == '='))
+      special_chars = 0;
+      sp = TOKEN_DATA_TEXT (argv[i]);
+      while (IS_GROUP (*sp))
+        {
+          sp++;
+          special_chars++;
+        }
+
+      cp = strchr (sp, '=');
+      if ((cp == NULL && strcasecmp (sp, key) == 0) ||
+          (cp != NULL && strncasecmp (sp, key, strlen (key)) == 0
+               && *(sp + strlen (key)) == '='))
         {
           found = TRUE;
           next = (var_stack *) xmalloc (sizeof (var_stack));
           next->prev = tag_attr;
           if (cp)
-            next->text = xstrdup (cp+1);
+            {
+              next->text = (char *) xmalloc (special_chars + strlen (cp+1) + 1);
+              if (special_chars)
+                strncpy (next->text, TOKEN_DATA_TEXT (argv[i]), special_chars);
+              else
+                *(next->text) = '\0';
+              strcat (next->text, cp+1);
+            }
           else
             next->text = xstrdup (key);
           tag_attr = next;
@@ -845,6 +863,128 @@ clear_tag_attr (void)
       xfree (tag_attr->text);
       xfree (tag_attr);
       tag_attr = pa;
+    }
+}
+
+static void
+quote_name_value (struct obstack *obs, char *pair)
+{
+  char *equal_ptr, *cp;
+  int special_chars;
+  boolean valid;
+
+  equal_ptr = strchr (pair, '=');
+  if (equal_ptr == NULL)
+    {
+      obstack_grow (obs, pair, strlen (pair));
+      return;
+    }
+
+  /*  Skip special characters */
+  special_chars = 0;
+  cp = pair;
+  while (IS_GROUP (*cp))
+    {
+      cp++;
+      special_chars++;
+    }
+
+  valid = TRUE;
+  while (cp < equal_ptr)
+    {
+      if (IS_SPACE (*cp) || IS_CLOSE (*cp))
+        {
+          valid = FALSE;
+          break;
+        }
+      cp++;
+    }
+  if (!valid)
+    {
+      obstack_grow (obs, pair, strlen (pair));
+      return;
+    }
+
+  if (special_chars)
+    obstack_grow (obs, pair, special_chars);
+  *equal_ptr = '\0';
+  obstack_grow (obs, pair+special_chars, strlen (pair)-special_chars);
+  *equal_ptr = '=';
+  obstack_1grow (obs, '=');
+  if (*(equal_ptr+1) != '"' && *(equal_ptr+1) != CHAR_QUOTE)
+    obstack_1grow (obs, CHAR_QUOTE);
+  obstack_grow (obs, equal_ptr+1, strlen (equal_ptr+1)-special_chars);
+  if (*(equal_ptr+1) != '"' && *(equal_ptr+1) != CHAR_QUOTE)
+    obstack_1grow (obs, CHAR_QUOTE);
+  if (special_chars)
+    obstack_grow (obs, equal_ptr+1+strlen (equal_ptr+1)-special_chars,
+            special_chars);
+}
+
+static void
+matching_attributes (struct obstack *obs, int argc, token_data **argv,
+        char *list, boolean quote, boolean unexpanded)
+{
+  char *cp, *next, *sp;
+  int i, special_chars;
+  boolean first = TRUE;
+
+  for (cp=list; cp != NULL; )
+    {
+      next = strchr (cp, ',');
+      if (next)
+        {
+          *next = '\0';
+          next++;
+        }
+      for (i=1; i<argc; i++)
+        {
+          special_chars = 0;
+          sp = ARG (i);
+          while (IS_GROUP (*sp))
+            {
+              sp++;
+              special_chars++;
+            }
+
+          sp = strchr (ARG (i)+special_chars, '=');
+          if (sp == NULL && strcasecmp (ARG (i)+special_chars, cp) == 0)
+            {
+              if (!first)
+                obstack_1grow (obs, ' ');
+              first = FALSE;
+              if (unexpanded)
+                obstack_1grow (obs, CHAR_LQUOTE);
+              else
+                obstack_1grow (obs, CHAR_BGROUP);
+              obstack_grow (obs, ARG (i), strlen (ARG (i)));
+              if (unexpanded)
+                obstack_1grow (obs, CHAR_RQUOTE);
+              else
+                obstack_1grow (obs, CHAR_EGROUP);
+            }
+          else if (sp != NULL
+                   && strncasecmp (ARG (i)+special_chars, cp, strlen (cp)) == 0
+                   && *(ARG (i)+special_chars + strlen (cp)) == '=')
+            {
+              if (!first)
+                obstack_1grow (obs, ' ');
+              first = FALSE;
+              if (unexpanded)
+                obstack_1grow (obs, CHAR_LQUOTE);
+              else
+                obstack_1grow (obs, CHAR_BGROUP);
+              if (quote)
+                quote_name_value (obs, ARG (i));
+              else
+                obstack_grow (obs, ARG (i), strlen (ARG (i)));
+              if (unexpanded)
+                obstack_1grow (obs, CHAR_RQUOTE);
+              else
+                obstack_1grow (obs, CHAR_EGROUP);
+            }
+        }
+      cp = next;
     }
 }
 
@@ -1002,7 +1142,7 @@ mp4h_unsupported (MP4H_BUILTIN_ARGS)
 static void
 mp4h___version__ (MP4H_BUILTIN_ARGS)
 {
-  obstack_grow (obs, mp4h_PlainID, strlen (mp4h_PlainID));
+  obstack_grow (obs, mp4hversion.v_short, strlen (mp4hversion.v_short));
 }
 
 static void
@@ -1405,6 +1545,20 @@ mp4h_group (MP4H_BUILTIN_ARGS)
   obstack_1grow (obs, CHAR_BGROUP);
   /*  separator = NULL is handled by dump_args */
   dump_args (obs, argc, argv, separator);
+  obstack_1grow (obs, CHAR_EGROUP);
+}
+
+static void
+mp4h_compound (MP4H_BUILTIN_ARGS)
+{
+  const char *separator;
+
+  separator = predefined_attribute ("separator", &argc, argv, FALSE);
+
+  obstack_1grow (obs, CHAR_BGROUP);
+  /*  separator = NULL is handled by dump_args */
+  dump_args (obs, argc, argv, separator);
+  obstack_grow (obs, ARGBODY, strlen (ARGBODY));
   obstack_1grow (obs, CHAR_EGROUP);
 }
 
@@ -2064,59 +2218,6 @@ mp4h_get_hook (MP4H_BUILTIN_ARGS)
 | emulated via mp4h builtins.                               |
 `----------------------------------------------------------*/
 static void
-quote_name_value (struct obstack *obs, char *pair)
-{
-  char *equal_ptr, *cp;
-  int i, special_chars;
-  boolean valid;
-
-  equal_ptr = strchr (pair, '=');
-  if (equal_ptr == NULL)
-    {
-      obstack_grow (obs, pair, strlen (pair));
-      return;
-    }
-
-  /*  Skip special characters not to mix them with double quotes.  */
-  special_chars = 0;
-  cp = pair;
-  while (*cp == CHAR_LQUOTE || *cp == CHAR_RQUOTE
-         || *cp == CHAR_BGROUP || *cp == CHAR_EGROUP)
-    {
-      cp++;
-      special_chars++;
-    }
-
-  valid = TRUE;
-  while (cp < equal_ptr)
-    {
-      if (IS_SPACE (*cp) || IS_CLOSE (*cp))
-        {
-          valid = FALSE;
-          break;
-        }
-      cp++;
-    }
-  if (!valid)
-    {
-      obstack_grow (obs, pair, strlen (pair));
-      return;
-    }
-
-  if (special_chars)
-    obstack_grow (obs, pair, special_chars);
-  *equal_ptr = '\0';
-  obstack_grow (obs, pair+special_chars, strlen (pair)-special_chars);
-  *equal_ptr = '=';
-  obstack_grow (obs, "=\"", 2);
-  obstack_grow (obs, equal_ptr+1, strlen (equal_ptr+1)-special_chars);
-  obstack_1grow (obs, '"');
-  if (special_chars)
-    obstack_grow (obs, equal_ptr+1+strlen (equal_ptr+1)-special_chars,
-            special_chars);
-}
-
-static void
 mp4h_attributes_print (MP4H_BUILTIN_ARGS)
 {
   int i;
@@ -2177,10 +2278,6 @@ mp4h_attributes_remove (MP4H_BUILTIN_ARGS)
 static void
 mp4h_attributes_extract (MP4H_BUILTIN_ARGS)
 {
-  char *cp, *next, *sp;
-  int i;
-  boolean first = TRUE;
-
   if (bad_argc (argv[0], argc, 2, 0))
     return;
 
@@ -2192,35 +2289,8 @@ mp4h_attributes_extract (MP4H_BUILTIN_ARGS)
         || expansion == READ_ATTR_QUOT))
       obstack_1grow (obs, CHAR_EGROUP);
 
-  for (cp=ARG (1); cp != NULL; )
-    {
-      next = strchr (cp, ',');
-      if (next)
-        {
-          *next = '\0';
-          next++;
-        }
-      for (i=2; i<argc; i++)
-        {
-          sp = strchr (ARG (i), '=');
-          if (sp == NULL && strcasecmp (ARG (i), cp) == 0)
-            {
-              if (!first)
-                obstack_1grow (obs, ' ');
-              first = FALSE;
-              obstack_grow (obs, ARG (i), strlen (ARG (i)));
-            }
-          else if (sp != NULL
-                   && strncasecmp (ARG (i), cp, strlen (cp)) == 0)
-            {
-              if (!first)
-                obstack_1grow (obs, ' ');
-              first = FALSE;
-              quote_name_value (obs, ARG (i));
-            }
-        }
-      cp = next;
-    }
+  matching_attributes (obs, argc-1, argv+1, ARG (1), TRUE, FALSE);
+
   if (expansion_level > 1 && (
         expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
         || expansion == READ_ATTR_QUOT))
@@ -4387,6 +4457,7 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                    token_data **argv, read_type expansion)
 {
   const char *text, *save;
+  char *temp, *cp;
   int i;
   boolean unexpanded;
   char sep[2];
@@ -4441,24 +4512,20 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                || strncmp (text, "xbody", 5) == 0
                || strncmp (text, "qbody", 5) == 0)
         {
-          if (obs)
-            {
-              if (unexpanded)
-                obstack_1grow (obs, CHAR_LQUOTE);
-              else
-                obstack_1grow (obs, CHAR_BGROUP);
-            }
+          if (unexpanded)
+            obstack_1grow (obs, CHAR_LQUOTE);
+          else
+            obstack_1grow (obs, CHAR_BGROUP);
+
           if (SYMBOL_CONTAINER (sym))
             dump_args (obs, 2, (argv+argc-1), sep);
           else
             dump_args (obs, argc, argv, sep);
-          if (obs)
-            {
-              if (unexpanded)
-                obstack_1grow (obs, CHAR_RQUOTE);
-              else
-                obstack_1grow (obs, CHAR_EGROUP);
-            }
+
+          if (unexpanded)
+            obstack_1grow (obs, CHAR_RQUOTE);
+          else
+            obstack_1grow (obs, CHAR_EGROUP);
 
           if (*text == 'b')
             text += 4;
@@ -4469,25 +4536,69 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                || strncmp (text, "xattributes", 11) == 0
                || strncmp (text, "qattributes", 11) == 0)
         {
-          if (unexpanded && obs)
-            {
-              for (i = 1; i < argc; i++)
-                {
-                  if (i > 1)
-                    obstack_grow (obs, sep, strlen (sep));
-
-                  obstack_1grow (obs, CHAR_LQUOTE);
-                  obstack_grow (obs, ARG (i), strlen (ARG (i)));
-                  obstack_1grow (obs, CHAR_RQUOTE);
-                }
-            }
-          else
-            dump_args (obs, argc, argv, sep);
-
           if (*text == 'a')
             text += 10;
           else
             text += 11;
+
+          switch (*text)
+            {
+              case '=':
+                text++;
+                save = text;
+                for (; IS_ALNUM (*(text)) || *text == ','; text++)
+                  ;
+
+                temp  = (char *) xmalloc ((int) (text - save));
+                strncpy (temp, save, text-save);
+                *(temp+ (int) (text - save)) = '\0';
+                matching_attributes (obs, argc, argv, temp, FALSE, unexpanded);
+                xfree (temp);
+                break;
+
+              case '-':
+                text++;
+                save = text;
+                for (; IS_ALNUM (*(text)) || *text == ','; text++)
+                  ;
+
+                temp  = (char *) xmalloc ((int) (text - save));
+                strncpy (temp, save, text-save);
+                *(temp+ (int) (text - save)) = '\0';
+
+                save = temp;
+                for (; save != NULL; )
+                  {
+                    cp = strchr (save, ',');
+                    if (cp)
+                      {
+                        *cp = '\0';
+                        cp++;
+                      }
+                    predefined_attribute (save, &argc, argv, FALSE);
+                    save = cp;
+                  }
+                xfree (temp);
+
+                /*  FALL THROUGH  */
+
+              default:
+                if (unexpanded)
+                  {
+                    for (i = 1; i < argc; i++)
+                      {
+                        if (i > 1)
+                          obstack_grow (obs, sep, strlen (sep));
+
+                        obstack_1grow (obs, CHAR_LQUOTE);
+                        obstack_grow (obs, ARG (i), strlen (ARG (i)));
+                        obstack_1grow (obs, CHAR_RQUOTE);
+                      }
+                  }
+                else
+                  dump_args (obs, argc, argv, sep);
+                break;
+            }
         }
       else if (strncmp (text, "name", 4) == 0)
         {
