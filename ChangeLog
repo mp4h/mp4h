@@ -8,6 +8,13 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.1.2 and ???:
+
+    *) Fix bug with body tag surrounded by quotes (20-Feb-2001):
+       When a body function was surrounded within double quotes (without
+       any whitespace around), it was simply discarded.
+       [Petr Andreyev <petr@xanadu.ru>]
+
   Changes between 1.1.1 and 1.1.2:
 
     *) Fix bugs with conditionals (07-Nov-2000):

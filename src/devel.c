@@ -161,9 +161,7 @@ dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
       obstack_1grow (obs, CHAR_BGROUP);
       /*   Remove surrounding double quotes  */
       if (*ARG (i) == '"' && LAST_CHAR (ARG (i)) == '"')
-        obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 2));
-      else if (*ARG (i) == CHAR_QUOTE && LAST_CHAR (ARG (i)) == CHAR_QUOTE)
-        obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 2));
+        obstack_grow (obs, ARG (i) + 1, strlen (ARG (i)) - 2);
       else
         obstack_grow (obs, ARG (i), strlen (ARG (i)));
 
