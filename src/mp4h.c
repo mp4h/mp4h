@@ -58,7 +58,7 @@ int warning_status = 0;
 int nesting_limit = 250;
 
 /* Flags to control how expansion is performed.  */
-int exp_flags = 6;
+int exp_flags = 0;
 
 /* Name of frozen file to digest after initialization.  */
 const char *frozen_file_to_read = NULL;
@@ -137,7 +137,7 @@ Preprocessor features:\n\
 \n\
 Parser features:\n\
   -X, --expansion=NUMBER       set parser behaviour according to the bits\n\
-                               of NUMBER (default is NUMBER=6), with\n\
+                               of NUMBER (default is NUMBER=0), with\n\
   1  do not parse unknown tags\n\
   2  unknown tags are assumed being complex\n\
   4  an unknown tag whose name ends with a star is assumed simple\n"),
@@ -312,7 +312,7 @@ main (int argc, char *const *argv)
         if (exp_flags < 0)
           {
             error (0, 0, _("Bad expansion flags: `%s'"), optarg);
-            exp_flags = 6;
+            exp_flags = 0;
           }
         break;
 
