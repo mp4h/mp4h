@@ -1,0 +1,33 @@
+;;;
+;;;  Checks 
+;;;
+
+<define-tag check-tag>
+  <provide-tag %0>
+  <exit status=1
+        message="The `%0' tag is not defined">
+  </provide-tag>
+</define-tag>
+
+<check-tag mp4h>
+<check-tag Meta-HTML>
+<check-tag WML>
+<check-tag URL>
+
+<check-tag para>
+<check-tag section>
+<check-tag subsection>
+
+<check-tag code>
+<check-tag commande>
+<check-tag var>
+
+<check-tag tag:description>
+<check-tag attributes:description>
+<check-tag attributes:item>
+<check-tag example>
+
+<check-tag left-angle>
+<check-tag right-angle>
+<check-tag true>
+

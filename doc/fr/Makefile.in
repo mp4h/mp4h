@@ -9,7 +9,7 @@ top_srcdir      = @top_srcdir@
 VPATH           = @srcdir@
 PROGRAM         = $(top_srcdir)/src/mp4h
 INCDIR          = ..
-DEPS            = version tags
+DEPS            = version ../list-tags
 
 RM              = rm -f
 

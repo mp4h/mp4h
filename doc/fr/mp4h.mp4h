@@ -13,14 +13,14 @@
 ">>
 
 <include <get-var format>.out>
-<include tags>
+<include list-tags>
 
 <header>
 <section "Description">
 
 <para>
 Le programme <mp4h> est un macro-processeur spécialement conçu pour
-traiter les documents HTMl. Il possède des capacités puissantes de
+traiter les documents HTML. Il possède des capacités puissantes de
 programmation, avec une syntaxe familière aux auteurs de documents HTML.
 </para>
 
@@ -87,7 +87,7 @@ est le corps de la fonction.
 
 <undef foo>
 <example>
-<define-tag foo>bar</define-tag>;;;
+<define-tag foo>bar</define-tag>
 <foo>
 </example>
 
@@ -114,13 +114,13 @@ Définit une balise complexe
 
 <undef foo>
 <example>
-<define-tag foo>bar</define-tag>;;;
+<define-tag foo>bar</define-tag>
 <foo>
 </example>
 
 <undef foo>
 <example>
-<define-tag foo endtag=required>body is: %body</define-tag>;;;
+<define-tag foo endtag=required>body is: %body</define-tag>
 <foo>Here it is</foo>
 </example>
 
@@ -130,10 +130,10 @@ Lorsque cet attribut est utilisé, les arguments ne sont pas évalués.
 
 <undef foo bar>
 <example>
-<define-tag bar>quux</define-tag>;;;
+<define-tag bar>quux</define-tag>
 <define-tag foo attributes=verbatim endtag=required>Corps: %ubody
 Attributs: %uattributes
-</define-tag>;;;
+</define-tag>
 <foo txt="<bar>">Et voila</foo>
 </example>
 </attributes:description>
@@ -161,9 +161,9 @@ sauvegarder une fonction avant de la redéfinir.
 
 <undef foo bar>
 <example>
-<define-tag foo>un</define-tag>;;;
-<let bar foo>;;;
-<define-tag foo>deux</define-tag>;;;
+<define-tag foo>un</define-tag>
+<let bar foo>
+<define-tag foo>deux</define-tag>
 <foo><bar>
 </example>
 
@@ -177,8 +177,8 @@ Supprime la définition d'une commande.
 
 <undef foo>
 <example>
-<define-tag foo>un</define-tag>;;;
-<undef foo>;;;
+<define-tag foo>un</define-tag>
+<undef foo>
 <foo>
 </example>
 
@@ -228,7 +228,7 @@ première valeur d'un tableau correspond à un indice 0).
 </para>
 
 <example>
-<set-var version="0.10.1">;;;
+<set-var version="0.10.1">
 Ceci est la version <get-var version>
 </example>
 
@@ -236,7 +236,7 @@ Ceci est la version <get-var version>
 <set-var foo="0
 1
 2
-3">;;;
+3">
 <get-var foo[2] foo[0] foo>
 </example>
 
@@ -251,7 +251,7 @@ Comme la commande précédente, mais les arguments ne sont pas développés.
 
 <undef foo>
 <example>
-<define-tag foo>0.10.1</define-tag>;;;
+<define-tag foo>0.10.1</define-tag>
 <set-var version="<foo>">Ici version <get-var version>
 <set-var-verbatim version="<foo>">Ici version <get-var version>
 <set-var-verbatim version="<foo>">Ici version <get-var-once version>
@@ -310,7 +310,7 @@ Spécifie la valeur de l'incrément.
 </attributes:description>
 
 <example>
-<set-var i=10>;;;
+<set-var i=10>
 <get-var i>
 <increment i><get-var i>
 <increment i amount="-3"><get-var i>
@@ -332,7 +332,7 @@ Spécifie la valeur qui est soustraite à la variable
 </attributes:description>
 
 <example>
-<set-var i=10>;;;
+<set-var i=10>
 <get-var i>
 <decrement i><get-var i>
 <decrement i amount="3"><get-var i>
@@ -348,8 +348,8 @@ Copie le contenu d'une variable dans une autre.
 </para>
 
 <example>
-<set-var i=10>;;;
-<copy-var i j>;;;
+<set-var i=10>
+<copy-var i j>
 <get-var j>
 </example>
 
@@ -365,7 +365,7 @@ contraire, aucune opération n'est effectuée.
 </para>
 
 <example>
-<unset-var title>;;;
+<unset-var title>
 <defvar title "Titre"><get-var title>
 <defvar title "Nouveau titre"><get-var title>
 </example>
@@ -376,17 +376,17 @@ contraire, aucune opération n'est effectuée.
 
 <para>
 Affiche des informations sur le symbole passé en argument. S'il s'agit
-d'une variable, le mot <code>STRING</code> est affiché, ainsi que le
+d'une variable, le mot <commande STRING> est affiché, ainsi que le
 nombre de lignes de cette variable. S'il s'agit d'une commande ou
 primitive, un message indique de quel type de symbole il s'agit :
-<code>PRIM COMPLEX</code>, <code>PRIM TAG</code>,
-<code>USER COMPLEX</code> et <code>USER TAG</code>
+<commande PRIM COMPLEX>, <commande PRIM TAG>,
+<commande USER COMPLEX> et <commande USER TAG>
 </para>
 
 <example>
-<set-var x="0\n1\n2\n3\n4">;;;
-<define-tag foo>bar</define-tag>;;;
-<define-tag bar endtag=required>quux</define-tag>;;;
+<set-var x="0\n1\n2\n3\n4">
+<define-tag foo>bar</define-tag>
+<define-tag bar endtag=required>quux</define-tag>
 <symbol-info x>
 <symbol-info symbol-info>
 <symbol-info define-tag>
@@ -413,10 +413,10 @@ ligne comptent pour un caractère.
 <set-var foo="0
 1
 2
-3">;;;
+3">
 <string-length <get-var foo>>
-<set-var foo="0 1 2 3">;;;
-<set-var l=<string-length <get-var foo>>>;;;
+<set-var foo="0 1 2 3">
+<set-var l=<string-length <get-var foo>>>
 <get-var l>
 </example>
 
@@ -457,7 +457,7 @@ caractère est représenté par l'indice 0.
 </para>
 
 <example>
-<set-var foo="abcdefghijk">;;;
+<set-var foo="abcdefghijk">
 <substring <get-var foo> 4>
 <substring <get-var foo> 4 6>
 </example>
@@ -474,13 +474,13 @@ Effectue une substitution dans la chaîne de caractères.
 </para>
 
 <example>
-<set-var foo="abcdefghijk">;;;
+<set-var foo="abcdefghijk">
 <subst-in-string <get-var foo> "[c-e]">
 <subst-in-string <get-var foo> "([c-e])" "\\1 ">
 </example>
 
 <example>
-<set-var foo="abcdefghijk\nabcdefghijk\nabcdefghijk">;;;
+<set-var foo="abcdefghijk\nabcdefghijk\nabcdefghijk">
 <subst-in-string <get-var foo> ".$" "">
 <subst-in-string <get-var foo> ".$" "" singleline=true>
 </example>
@@ -662,11 +662,11 @@ extended.
 </para>
 
 <example>
-<set-var foo="abcdefghijk">;;;
-<set-regexp-syntax type=basic>;;;
+<set-var foo="abcdefghijk">
+<set-regexp-syntax type=basic>
 <subst-in-string <get-var foo> "([c-e]+)" ":\\1:">
 <subst-in-string <get-var foo> "\\([c-e]\\{1,\\}\\)" ":\\1:">
-<set-regexp-syntax type=extended>;;;
+<set-regexp-syntax type=extended>
 <subst-in-string <get-var foo> "([c-e]+)" ":\\1:">
 <subst-in-string <get-var foo> "\\([c-e]\\{1,\\}\\)" ":\\1:">
 </example>
@@ -701,7 +701,7 @@ de lignes séparées par des sauts de ligne. Ainsi, après
 </code>
 nous pouvons afficher soit le contenu de cette variable, soit une des
 lignes.
-<set-var chiffres="0\n1\n2\n3">;;;
+<set-var chiffres="0\n1\n2\n3">
 <example>
 <get-var chiffres[2]>
 <get-var chiffres>
@@ -731,7 +731,7 @@ Ajoute une ou plusieurs lignes à la fin du tableau.
 </para>
 
 <example>
-<array-append "10\n11\n12" chiffres>;;;
+<array-append "10\n11\n12" chiffres>
 <get-var chiffres>
 </example>
 
@@ -747,7 +747,7 @@ dans ce tableau.
 </para>
 
 <example>
-<array-add-unique 2 chiffres>;;;
+<array-add-unique 2 chiffres>
 <get-var chiffres>
 </example>
 
@@ -768,8 +768,8 @@ en premier.
 </para>
 
 <example>
-<set-var foo="foo">;;;
-<set-var bar="bar">;;;
+<set-var foo="foo">
+<set-var bar="bar">
 <array-concat foo bar><get-var foo>
 </example>
 
@@ -810,9 +810,9 @@ premières valeurs sont remplies par des lignes vides.
 </para>
 
 <example>
-<array-shift 2 chiffres>;;;
+<array-shift 2 chiffres>
 Maintenant: <get-var chiffres>
-<array-shift -4 chiffres>;;;
+<array-shift -4 chiffres>
 Et là: <get-var chiffres>
 </example>
 
@@ -1138,7 +1138,7 @@ de cette fonction est exécuté.
 </tag:description>
 
 <para>
-Cette commande est similaire à la commande <code>foreach</code> de Perl ; 
+Cette commande est similaire à la commande <commande foreach> de Perl ; 
 une variable prend successivement toutes les valeurs stockées dans un
 tableau, et le corps de la fonction est exécuté pour chacune de ces
 valeurs.
@@ -1206,7 +1206,7 @@ Cette commande permet de faire plusieurs tests en une seule instruction.
 </tag:description>
 
 <para>
-Cette commande fait sortir de la boucle <code>while</code>
+Cette commande fait sortir de la boucle <commande while>
 la plus interne.
 </para>
 
@@ -1252,11 +1252,39 @@ trouvé, et rien sinon.
 <var filename>
 </tag:description>
 
+<para>
+Affiche un tableau d'informations sur le fichier dont le nom est donné
+en argument. Les informations sont dans l'ordre : la taille du fichier,
+son type, la date du dernier changement de l'inode (en secondes depuis
+le 1er janvier 1970), la date de la dernière modification du fichier, la
+date du dernier accès au fichier, le nom du propriétaire du fichier, et
+le nom du groupe.
+</para>
+
+<example>
+<get-file-properties mp4h.mp4h>
+</example>
+
 <tag:description include>
 <var filename>
 [alt=<var action>]
 [verbatim=true]
 </tag:description>
+
+<para>
+Lit les données contenues dans le fichier passé en argument.
+</para>
+
+<attributes:description>
+<attributes:item "alt=<var texte>">
+Si le fichier n'est pas trouvé, le texte alternatif est affiché. Si cet
+attribut est absent et que le fichier n'est pas trouvé, le programme
+s'arrête.
+
+<attributes:item "verbatim=true">
+Avec cet attribut, le contenu du fichier est inclus sans être modifié
+par <mp4h>.
+</attributes:description>
 
 ;;;
 ;;;    Debugging
@@ -1286,13 +1314,6 @@ trouvé, et rien sinon.
 
 <subsection "Miscellaneous">
 
-<tag:description date>
-[epoch]
-</tag:description>
-
-<tag:description timer>
-</tag:description>
-
 <tag:description __file__>
 </tag:description>
 
@@ -1302,22 +1323,41 @@ trouvé, et rien sinon.
 <tag:description version>
 </tag:description>
 
+<tag:description date>
+[epoch]
+</tag:description>
+
+<tag:description timer>
+</tag:description>
+
 <tag:description comment complex>
 </tag:description>
 
-<section Bugs>
+<section "Problèmes connus">
 
 <para>
-When a tag name is not followed by a space or a closing bracket,
-expansion is wrong.  For instance, this comment
+Quand une balise n'est pas suivie par un espace ou un signe supérieur,
+la lecture et l'affichage des symboles peuvent être erronés ou même
+entrainer l'arrêt du programme. Par exemple, ce commentaire
 <pre>
     <html:comment>this is a comment</html:comment>
 </pre>
-will cause trouble whereas this one
+peut entrainer des problèmes tandis que celui-ci
 <pre>
     <html:comment> this is a comment</html:comment>
 </pre>
-is correctly parsed.
+est correct.
+</para>
+
+<para>
+Dans la même veine, il est fréquent d'avoir des problèmes quand du code
+perl est à l'intérieur des pages HTML pour être exécuté par le serveur.
+Les lignes suivantes sont des exemples des problèmes rencontrés avec
+<mp4h>:
+<pre>
+    $x = 1 if $x<=0;
+    @articles = sort {$a <=> $b} @files;
+</pre>
 </para>
 
 <footer>

@@ -16,6 +16,7 @@
 
 <define-tag var><em>%attributes</em></define-tag>
 <define-tag value><tt>%attributes</tt></define-tag>
+<define-tag commande><tt>%attributes</tt></define-tag>
 <define-tag left-angle>&lt;</define-tag>
 <define-tag right-angle>&gt;</define-tag>
 <define-tag true><tt>true</tt></define-tag>
@@ -120,6 +121,7 @@
 <subst-in-var body "&" "&amp;">;;;
 <subst-in-var body "<" "&lt;">;;;
 <subst-in-var body ">" "&gt;">;;;
+<subst-in-var body "^\\n+" "">;;;
 <table border=2 cellpadding=0 cellspacing=0>
     <tr><th bgcolor="#ccccff">Source</th></tr>
     <tr><td bgcolor="#ccff99"><pre><get-var-once verb-body></pre></td></tr>
