@@ -62,17 +62,19 @@ host_triplet = @host@
 AS = @AS@
 CC = @CC@
 DLLTOOL = @DLLTOOL@
-LD = @LD@
+ECHO = @ECHO@
+EXEEXT = @EXEEXT@
 LIBADD_DL = @LIBADD_DL@
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
-NM = @NM@
 OBJDUMP = @OBJDUMP@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
+STRIP = @STRIP@
 VERSION = @VERSION@
 
 AUTOMAKE_OPTIONS = no-dependencies foreign
@@ -83,8 +85,10 @@ AUTOMAKE_OPTIONS = no-dependencies foreign
 
 @CONVENIENCE_LTDL_TRUE@noinst_LTLIBRARIES = libltdlc.la
 
+CLEANFILES = libltdl.la libltdlc.la
+
 libltdl_la_SOURCES = ltdl.c
-libltdl_la_LDFLAGS = -version-info 1:1:1
+libltdl_la_LDFLAGS = -no-undefined -version-info 3:0:0
 libltdl_la_LIBADD = $(LIBADD_DL)
 
 libltdlc_la_SOURCES = ltdl.c
@@ -125,7 +129,7 @@ OBJECTS = $(libltdl_la_OBJECTS) $(libltdlc_la_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .lo .o .s
+.SUFFIXES: .S .c .lo .o .obj .s
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile
 
@@ -172,7 +176,7 @@ maintainer-clean-hdr:
 mostlyclean-libLTLIBRARIES:
 
 clean-libLTLIBRARIES:
-	-test -z "$(LTLIBRARIES)" || rm -f $(LTLIBRARIES)
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
 
 distclean-libLTLIBRARIES:
 
@@ -206,6 +210,11 @@ maintainer-clean-noinstLTLIBRARIES:
 .c.o:
 	$(COMPILE) -c $<
 
+# FIXME: We should only use cygpath when building on Windows,
+# and only if it is available.
+.c.obj:
+	$(COMPILE) -c `cygpath -w $<`
+
 .s.o:
 	$(COMPILE) -c $<
 
@@ -214,6 +223,7 @@ maintainer-clean-noinstLTLIBRARIES:
 
 mostlyclean-compile:
 	-rm -f *.o core *.core
+	-rm -f *.$(OBJEXT)
 
 clean-compile:
 
@@ -372,6 +382,7 @@ installdirs:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-rm -f Makefile $(CONFIG_CLEAN_FILES)
@@ -442,10 +453,10 @@ local-install-files: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(DESTDIR)$(datadir)/libtool/libltdl/$$file; \
+	    cp -r $$d/$$file $(DESTDIR)$(datadir)/libtool/libltdl/$$file; \
 	  else \
 	    test -f $(DESTDIR)$(datadir)/libtool/libltdl/$$file \
-	    || cp -p $$d/$$file $(DESTDIR)$(datadir)/libtool/libltdl/$$file || :; \
+	    || cp $$d/$$file $(DESTDIR)$(datadir)/libtool/libltdl/$$file || :; \
 	  fi; \
 	done
 

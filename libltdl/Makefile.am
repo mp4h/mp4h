@@ -13,8 +13,12 @@ if CONVENIENCE_LTDL
 noinst_LTLIBRARIES = libltdlc.la
 endif
 
+## Make sure these will be cleaned even when they're not built by
+## default.
+CLEANFILES = libltdl.la libltdlc.la
+
 libltdl_la_SOURCES = ltdl.c
-libltdl_la_LDFLAGS = -version-info 1:1:1
+libltdl_la_LDFLAGS = -no-undefined -version-info 3:0:0
 libltdl_la_LIBADD = $(LIBADD_DL)
 
 libltdlc_la_SOURCES = ltdl.c
@@ -29,16 +33,16 @@ libtool: $(LIBTOOL_DEPS)
 
 ## This allows us to install libltdl without using ln and without creating
 ## a world writeable directory.
-## FIXME:  Removed this rule once automake can do this properly by itself.
+## FIXME:  Remove this rule once automake can do this properly by itself.
 local-install-files: $(DISTFILES)
 	-rm -rf $(DESTDIR)$(datadir)/libtool/libltdl
 	$(mkinstalldirs) $(DESTDIR)$(datadir)/libtool/libltdl
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(DESTDIR)$(datadir)/libtool/libltdl/$$file; \
+	    cp -r $$d/$$file $(DESTDIR)$(datadir)/libtool/libltdl/$$file; \
 	  else \
 	    test -f $(DESTDIR)$(datadir)/libtool/libltdl/$$file \
-	    || cp -p $$d/$$file $(DESTDIR)$(datadir)/libtool/libltdl/$$file || :; \
+	    || cp $$d/$$file $(DESTDIR)$(datadir)/libtool/libltdl/$$file || :; \
 	  fi; \
 	done
