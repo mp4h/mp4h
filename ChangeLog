@@ -10,6 +10,9 @@
 
   Changes between 1.2.3 and ???:
 
+    *) Fix line numbers in error messages (10-Dec-2001):
+       [Denis Barbier]
+
     *) Upgrade to PCRE 3.7 (08-Nov-2001):
        Upstream do allow various definitions of newline char, I keep
        stuck with `\n' in internal.h until I know exactly how to

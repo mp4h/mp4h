@@ -158,6 +158,7 @@ typedef struct input_block input_block;
 
 /* Current input file name.  */
 char *current_file;
+char **array_current_file;
 
 /* Current input line number.  */
 int current_line;
@@ -812,9 +813,14 @@ match_comment (const unsigned char *s)
 void
 input_init (void)
 {
+  int i;
+
   current_file = xstrdup ("NONE");
   current_line = 0;
   array_current_line = (int *) xmalloc (sizeof (int) * nesting_limit);
+  array_current_file = (char **) xmalloc (sizeof (char *) * nesting_limit);
+  for (i = 0; i < nesting_limit; i++)
+    array_current_file[i] = (char *) NULL;
 
   obstack_init (&token_stack);
   obstack_init (&input_stack);
@@ -877,7 +883,12 @@ syntax_init (void)
 void
 input_deallocate (void)
 {
+  int i;
+
   xfree ((voidstar) array_current_line);
+  for (i = 0; i < nesting_limit; i++)
+    xfree(array_current_file[i]);
+  xfree ((voidstar) array_current_file);
   xfree ((voidstar) eolcomm.string);
   xfree ((voidstar) lquote.string);
   xfree ((voidstar) rquote.string);

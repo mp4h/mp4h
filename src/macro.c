@@ -575,11 +575,14 @@ expand_macro (symbol *sym, read_type expansion)
   read_type attr_expansion;
 
   expansion_level++;
-  array_current_line[expansion_level] = current_line;
   if (expansion_level > nesting_limit)
     MP4HERROR ((EXIT_FAILURE, 0,
       _("ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
            nesting_limit));
+
+  array_current_line[expansion_level] = current_line;
+  xfree((voidstar) array_current_file[expansion_level]);
+  array_current_file[expansion_level] = xstrdup(current_file);
 
   macro_call_id++;
   my_call_id = macro_call_id;
@@ -713,11 +716,14 @@ expand_unknown_tag (char *name, read_type expansion)
   boolean slash, single;
 
   expansion_level++;
-  array_current_line[expansion_level] = current_line;
   if (expansion_level > nesting_limit)
     MP4HERROR ((EXIT_FAILURE, 0,
       _("ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
            nesting_limit));
+
+  array_current_line[expansion_level] = current_line;
+  xfree((voidstar) array_current_file[expansion_level]);
+  array_current_file[expansion_level] = xstrdup(current_file);
 
   symbol_name = xstrdup (name);
 
@@ -834,11 +840,14 @@ expand_entity (symbol *sym, read_type expansion)
   int my_call_id;
 
   expansion_level++;
-  array_current_line[expansion_level] = current_line;
   if (expansion_level > nesting_limit)
     MP4HERROR ((EXIT_FAILURE, 0,
       _("ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
            nesting_limit));
+
+  array_current_line[expansion_level] = current_line;
+  xfree((voidstar) array_current_file[expansion_level]);
+  array_current_file[expansion_level] = xstrdup(current_file);
 
   macro_call_id++;
   my_call_id = macro_call_id;

@@ -390,9 +390,13 @@ void read_file_verbatim __P ((struct obstack *));
 /* current input file, and line */
 extern char *current_file;
 extern int current_line;
+extern char **array_current_file;
 extern int *array_current_line;
-#define CURRENT_FILE_LINE current_file, (expansion_level == 0 ? current_line: \
-                                        array_current_line[expansion_level])
+#define CURRENT_FILE_LINE                                               \
+        (expansion_level == 0 ? current_file :                          \
+                                array_current_file[expansion_level]),   \
+        (expansion_level == 0 ? current_line :                          \
+                                array_current_line[expansion_level])
 
 /* Begin and end quote */
 extern STRING lquote, rquote;
