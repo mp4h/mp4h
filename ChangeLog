@@ -10,6 +10,18 @@
 
   Changes between 1.0.3 and SNAP:
 
+    *) Add support for third-party packages (08-Jul-2000):
+       The new <use> tag is similar to the synonym Perl command.
+       Files are searched in directories listed in MP4HPATH if this
+       environment variable exists; then they are searched under
+       /usr/local/share/mp4h (or any other location specified at
+       configure time), then in all directories specified with the
+       -I command-line flag.
+       Filename in <use> does not include the .mp4hp suffix.
+       If filename contains colons, they are replaced by slashes and
+       so represent directory names.
+       [Denis Barbier]
+
     *) Internal changes about regular expressions (06-Jul-2000):
        Mp4h now uses the POSIX functions of the GNU libc regex.c instead
        of old GNU functions.  The most important reason for this change

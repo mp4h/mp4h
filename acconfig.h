@@ -9,5 +9,5 @@
 #undef WITH_DMALLOC
 
 /* Default location for mp4h packages */
-#undef PKGPATH
+#undef PKGDATADIR
 

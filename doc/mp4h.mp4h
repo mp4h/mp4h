@@ -5,7 +5,7 @@
 
 <mp4h-l10n LC_ALL=C />
 <set-var package=mp4h />
-<set-var version=1.0a403 />
+<set-var version=1.0.4 />
 <set-var title="mp4h - A Macro Processor for HTML Documents" />
 
 <include <get-var format />.out
@@ -94,9 +94,9 @@ name is <file - />, then characters are read on standard input.
 
 <option-list>
 <option -I --include=<optmand DIRECTORY />>###
-search this directory second for includes</option>
+search this directory for includes and packages</option>
 <option -D --define=<optmand NAME<optopt =VALUE /> />>###
-enter NAME has having VALUE, or empty</option>
+set variable NAME to VALUE, or empty</option>
 <option -U --undefine=<optmand COMMAND />>###
 delete builtin COMMAND</option>
 </option-list>
@@ -1667,6 +1667,14 @@ is not set and file is not found, then an error is raised.
 File content is included without expansion.
 </attributes:description>
 
+<tag:description use>
+<var package />
+</tag:description>
+
+<para>
+Load definitions from a package file.
+</para>
+
 <tag:description comment complex>
 </tag:description>
 
@@ -2308,6 +2316,16 @@ Run
 </code>
 to find default value. Current value matches HTML syntax, and it will
 tend to zero when XHTML syntax becomes more familiar.
+</para>
+
+<section "External packages" />
+<para>
+It is possible to include external files with the <command include />
+command.  Files are first searched in current directory, then in
+directories specified on command-line with the <optflag I> option, next
+in directories listed in the MP4HPATH environment variable, and last
+under the compile-time location (<texttt>/usr/local/share/mp4h</texttt>
+by default).
 </para>
 
 <section "Author" />

@@ -83,7 +83,8 @@ include_init (void)
 {
   dirpath.list = NULL;
   dirpath.list_end = NULL;
-  dirpath.max_length = 0;
+  /* This directory is always searched for packages */
+  dirpath.max_length = strlen (PKGDATADIR);
 }
 
 
@@ -92,8 +93,8 @@ include_init (void)
 void
 include_env_init (void)
 {
-  search_path_env_init (&dirpath, PKGPATH);
   search_path_env_init (&dirpath, getenv ("MP4HPATH"));
+  search_path_env_init (&dirpath, PKGDATADIR);
 }
 
 
@@ -128,7 +129,6 @@ path_search (const char *dir, char **expanded_name)
     return NULL;
 
   name = (char *) xmalloc (dirpath.max_length + 1 + strlen (dir) + 1);
-
   for (incl = dirpath.list; incl != NULL; incl = incl->next)
     {
       strncpy (name, incl->dir, incl->len);
@@ -148,6 +148,27 @@ path_search (const char *dir, char **expanded_name)
           if (expanded_name != NULL)
             *expanded_name = xstrdup (name);
           break;
+        }
+    }
+
+  if (fp == NULL)
+    {
+      strcpy (name, PKGDATADIR);
+      name[strlen (PKGDATADIR)] = '/';
+      strcpy (name + strlen (PKGDATADIR) + 1, dir);
+
+#ifdef DEBUG_INCL
+      fprintf (stderr, "path_search (%s) -- trying %s\n", dir, name);
+#endif
+
+      fp = fopen (name, "r");
+      if (fp != NULL)
+        {
+          if (debug_level & DEBUG_TRACE_PATH)
+            DEBUG_MESSAGE2 (_("Path search for `%s' found `%s'"), dir, name);
+
+          if (expanded_name != NULL)
+            *expanded_name = xstrdup (name);
         }
     }
 

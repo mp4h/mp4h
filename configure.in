@@ -18,14 +18,14 @@ AC_DEFINE_UNQUOTED(VERSION, "$VERSION")
 
 if test x$datadir = 'x${prefix}/share'; then
     if test x$prefix = xNONE; then
-        PKGPATH="$ac_default_prefix/share/mp4h"
+        PKGDATADIR="$ac_default_prefix/share/mp4h"
     else
-        PKGPATH="$prefix/share/mp4h"
+        PKGDATADIR="$prefix/share/mp4h"
     fi
 else
-    PKGPATH="$datadir/mp4h"
+    PKGDATADIR="$datadir/mp4h"
 fi
-AC_DEFINE_UNQUOTED(PKGPATH, "$PKGPATH")
+AC_DEFINE_UNQUOTED(PKGDATADIR, "$PKGDATADIR")
 
 AC_ARG_PROGRAM
 
