@@ -12,7 +12,6 @@ PROGRAM         = $(PROGDIR)/mp4h
 INCDIR          = ..
 DEPS            = ../list-tags
 TIDY            = @TIDY@
-TIDYOPT         =
 
 RM              = rm -f
 
@@ -20,7 +19,7 @@ RM              = rm -f
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
 
-all: mp4h.html mp4h.1
+all: $(PROGRAM) mp4h.html mp4h.1
 
 # ------------------------------------------------
 #   DOCUMENTATION
@@ -28,11 +27,11 @@ all: mp4h.html mp4h.1
 
 #   Do not rebuild HTML documentation
 mp4h.html: mp4h.mp4h $(INCDIR)/html.out
-	PATH=$(PROGDIR):$(PATH) mp4h -D format=html -I $(INCDIR) mp4h.mp4h > $@
-	[ $(TIDY) = no ] || $(TIDY) $(TIDYOPT) -m $@
+	$(PROGRAM) -D format=html -I $(INCDIR) mp4h.mp4h > $@
+	$(TIDY) $(TIDYOPT) -m $@
 
 mp4h.pod: mp4h.mp4h $(INCDIR)/pod.out $(PROGRAM) $(DEPS)
-	PATH=$(PROGDIR):$(PATH) mp4h -D format=pod -I $(INCDIR) mp4h.mp4h \
+	$(PROGRAM) -D format=pod -I $(INCDIR) mp4h.mp4h \
 	| sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
 
 mp4h.1: mp4h.pod
@@ -42,7 +41,7 @@ mp4h.1: mp4h.pod
         mp4h.pod > $@
 
 mp4h.texinfo: mp4h.mp4h $(INCDIR)/texinfo.out $(PROGRAM) $(DEPS)
-	PATH=$(PROGDIR):$(PATH) mp4h -D format=texinfo -I $(INCDIR) mp4h.mp4h \
+	$(PROGRAM) -D format=texinfo -I $(INCDIR) mp4h.mp4h \
 	| sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
 
 mp4h.info: mp4h.texinfo

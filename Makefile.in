@@ -35,16 +35,7 @@ mandir          = @mandir@
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
 
-all: $(SHTOOL)
-	@echo "===> $(SDP)lib (all)"; \
-	cd lib && $(MAKE) SDP="$(SDP)lib/" all; \
-	echo "<=== $(SDP)lib"
-	@echo "===> $(SDP)src (all)"; \
-	cd src && $(MAKE) SDP="$(SDP)src/" all; \
-	echo "<=== $(SDP)src"
-	@echo "===> $(SDP)doc (all)"; \
-	cd doc && $(MAKE) SDP="$(SDP)doc/" all; \
-	echo "<=== $(SDP)doc"
+all: $(SHTOOL) all-recursive
 
 # ------------------------------------------------
 #   TEST SUITE

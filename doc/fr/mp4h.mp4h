@@ -3,9 +3,9 @@
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
-<mp4h-l10n LC_CTYPE=fr>
+<mp4h-l10n LC_CTYPE=fr_FR>
 <set-var package=mp4h>
-<set-var version=0.9.2>
+<set-var version=0.9.3>
 <set-var title="mp4h - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -1764,7 +1764,7 @@ avec la localisation «C».
 </para>
 
 <example>
-<mp4h-l10n LC_NUMERIC=fr>
+<mp4h-l10n LC_NUMERIC=fr_FR>
 <add 1,2 3,4>
 </example>
 

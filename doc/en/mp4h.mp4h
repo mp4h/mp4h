@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.9.2>
+<set-var version=0.9.3>
 <set-var title="mp4h - A Macro Processeur for HTML Documents">
 
 <include <get-var format>.out
@@ -1680,7 +1680,7 @@ selected.
 </para>
 
 <example>
-<mp4h-l10n LC_NUMERIC=fr>
+<mp4h-l10n LC_NUMERIC=fr_FR>
 <add 1,2 3,4>
 </example>
 <mp4h-l10n LC_ALL=C>

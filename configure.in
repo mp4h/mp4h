@@ -42,8 +42,17 @@ AC_FUNC_VPRINTF
 AC_REPLACE_FUNCS(strtol obstack xmalloc xstrdup)
 AC_CHECK_FUNC(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
 
-dnl  Tidy is used to clean up HTML documentation
-AC_CHECK_PROG(TIDY, tidy, tidy, no)
+AC_MSG_CHECKING([for HTML postprocessing])
+AC_ARG_WITH(tidy,dnl
+[  --with-tidy=PATH        post-process HTML documentation with tidy],[dnl
+TIDY=$with_tidy
+test "$TIDY" = yes && TIDY=tidy
+AC_MSG_RESULT([$TIDY])
+],[
+TIDY="@:"
+AC_MSG_RESULT([no])
+])
+AC_SUBST(TIDY)
 
 AC_OUTPUT(
    Makefile
