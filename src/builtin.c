@@ -37,6 +37,15 @@
 
 #include "builtin.h"
 
+#define CHECK_SAFETY_LEVEL(sl)                                  \
+  if (safety_level > sl)                                        \
+    {                                                           \
+      MP4HERROR ((warning_status, 0,                            \
+        _("Warning:%s:%d: `<%s>' ignored due to -S flag"),      \
+             CURRENT_FILE_LINE, ARG (0)));                      \
+      return;                                                   \
+    }
+
 /* Initialisation of builtin and predefined macros.  The table
    "builtin_tab" is both used for initialisation, and by the "builtin"
    builtin.  */
@@ -1253,6 +1262,8 @@ mp4h_get_file_properties (MP4H_BUILTIN_ARGS)
   struct passwd *user;
   struct group *group;
 
+  CHECK_SAFETY_LEVEL(1);
+
   if (bad_argc (argv[0], argc, 2, 2))
     return;
   
@@ -1305,6 +1316,8 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
   pcre_extra *re_extra = NULL;
   const char *errptr = NULL;
   int *match_ptr = NULL;
+
+  CHECK_SAFETY_LEVEL(1);
 
   matching = predefined_attribute ("matching", &argc, argv, FALSE);
   if (bad_argc (argv[0], argc, 2, 2))
@@ -1362,6 +1375,8 @@ mp4h_file_exists (MP4H_BUILTIN_ARGS)
 {
   struct stat file;
 
+  CHECK_SAFETY_LEVEL(1);
+
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
@@ -1395,12 +1410,12 @@ mp4h_date (MP4H_BUILTIN_ARGS)
     {
       epoch_time = strtol (timespec, &endp, 10);
       if (!endp)
-	{
-	  MP4HERROR ((warning_status, 0,
-	    _("Warning:%s:%d: Invalid value in date: %s"),
-		 CURRENT_FILE_LINE, ARG (1)));
-	  return;
-	}
+        {
+          MP4HERROR ((warning_status, 0,
+            _("Warning:%s:%d: Invalid value in date: %s"),
+                 CURRENT_FILE_LINE, ARG (1)));
+          return;
+        }
     }
   else
     epoch_time = time ((time_t *)NULL);
@@ -2511,6 +2526,8 @@ mp4h_include (MP4H_BUILTIN_ARGS)
 {
   const char *alt, *verbatim;
 
+  CHECK_SAFETY_LEVEL(1);
+
   alt = predefined_attribute ("alt", &argc, argv, FALSE);
   verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 2))
@@ -2532,6 +2549,8 @@ mp4h___include (MP4H_BUILTIN_ARGS)
   const char *verbatim;
   FILE *fp;
   char *filename = NULL;
+
+  CHECK_SAFETY_LEVEL(1);
 
   verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 2))
@@ -2568,6 +2587,8 @@ mp4h_execute (MP4H_BUILTIN_ARGS)
   const char *verbatim;
   char *command;
   FILE *fp;
+
+  CHECK_SAFETY_LEVEL(0);
 
   verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 2))
@@ -4503,7 +4524,7 @@ mp4h_sort (MP4H_BUILTIN_ARGS)
 
 /*-----------------------------------------------------------------------.
 | Divert further output to the diversion given by ARGV[1].  Out of range |
-| means discard further output.						 |
+| means discard further output.                                          |
 `-----------------------------------------------------------------------*/
 
 static void
@@ -4533,10 +4554,10 @@ mp4h_divnum (MP4H_BUILTIN_ARGS)
 }
 
 /*-----------------------------------------------------------------------.
-| Bring back the diversion given by the argument list.  If none is	 |
-| specified, bring back all diversions.  GNU specific is the option of	 |
+| Bring back the diversion given by the argument list.  If none is       |
+| specified, bring back all diversions.  GNU specific is the option of   |
 | undiverting named files, by passing a non-numeric argument to undivert |
-| ().									 |
+| ().                                                                    |
 `-----------------------------------------------------------------------*/
 
 static void
@@ -4550,20 +4571,20 @@ mp4h_undivert (MP4H_BUILTIN_ARGS)
   else
     for (i = 1; i < argc; i++)
       {
-	if (sscanf (ARG (i), "%d", &file) == 1)
-	  insert_diversion (file);
-	else
-	  {
-	    fp = path_search (ARG (i), (char **)NULL);
-	    if (fp != NULL)
-	      {
-		insert_file (fp);
-		fclose (fp);
-	      }
-	    else
-	      MP4HERROR ((warning_status, errno,
-			_("Cannot undivert %s"), ARG (i)));
-	  }
+        if (sscanf (ARG (i), "%d", &file) == 1)
+          insert_diversion (file);
+        else
+          {
+            fp = path_search (ARG (i), (char **)NULL);
+            if (fp != NULL)
+              {
+                insert_file (fp);
+                fclose (fp);
+              }
+            else
+              MP4HERROR ((warning_status, errno,
+                        _("Cannot undivert %s"), ARG (i)));
+          }
       }
 }
 
