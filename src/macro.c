@@ -181,11 +181,15 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
           break;
 
         case TOKEN_BGROUP:
+          if (expansion == READ_ATTR_ASIS && group_level == 0)
+            obstack_1grow (obs, CHAR_BGROUP);
           group_level++;
           break;
 
         case TOKEN_EGROUP:
           group_level--;
+          if (expansion == READ_ATTR_ASIS && group_level == 0)
+            obstack_1grow (obs, CHAR_EGROUP);
           break;
 
         case TOKEN_QUOTE:
