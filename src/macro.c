@@ -576,7 +576,11 @@ expand_macro (symbol *sym, read_type expansion)
             }
         }
       if (!SYMBOL_CONTAINER (sym))
-        obstack_1grow (obs_expansion, '/');
+        {
+          if (argc > 1)
+            obstack_1grow (obs_expansion, ' ');
+          obstack_1grow (obs_expansion, '/');
+        }
 
       obstack_1grow (obs_expansion, '>');
       if (SYMBOL_CONTAINER (sym))
@@ -635,7 +639,8 @@ expand_unknown_tag (char *name, read_type expansion)
   slash = collect_arguments (symbol_name, attr_expansion, &argptr, &arguments);
   argc  = obstack_object_size (&argptr) / sizeof (token_data *);
 
-  /*  This tag is a simple tag if either
+  /*
+     This tag is a simple tag if either
          - tag name begins with a slash (i.e. this is an end tag)
          - tag name last character is a star
          - attributes are ended by a trailing slash
@@ -653,12 +658,12 @@ expand_unknown_tag (char *name, read_type expansion)
 
   /*  When this tag is no more processed, remove the trailing star.  */
   if ((exp_flags & EXP_REMOVE_TRAILING_STAR) &&
-      expansion_level == 1 && LAST_CHAR (symbol_name) == '*')
+      expansion == READ_NORMAL && LAST_CHAR (symbol_name) == '*')
     LAST_CHAR (symbol_name) = '\0';
 
   /*  When this tag is no more processed, remove the trailing slash.  */
   if ((exp_flags & EXP_REMOVE_TRAILING_SLASH) &&
-      expansion_level == 1 && slash)
+      expansion == READ_NORMAL && slash)
     {
       cp = TOKEN_DATA_TEXT (argv[argc-1]);
       if (*cp == '/' && *(cp+1) == '\0')
@@ -667,51 +672,38 @@ expand_unknown_tag (char *name, read_type expansion)
         LAST_CHAR (cp) = '\0';
     }
 
+  if (*(symbol_name) == '/' || expansion == READ_ATTR_ASIS
+     || expansion == READ_ATTR_VERB || expansion == READ_BODY)
+    expansion = READ_BODY;
+
   obs_expansion = push_string_init ();
+
+  if (expansion != READ_BODY)
+    obstack_1grow (obs_expansion, CHAR_LQUOTE);
   obstack_1grow (obs_expansion, '<');
   shipout_string (obs_expansion, symbol_name, 0);
 
   for (i = 1; i < argc; i++)
     {
       obstack_1grow (obs_expansion, ' ');
-      if (expansion == READ_NORMAL)
-        {
-          for (cp = TOKEN_DATA_TEXT (argv[i]); *cp != '\0'; cp++)
-            {
-              if (*cp == CHAR_QUOTE)
-                obstack_1grow (obs_expansion, '"');
-              else if (*cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE
-                    && *cp != CHAR_BGROUP && *cp != CHAR_EGROUP)
-                obstack_1grow (obs_expansion, *cp);
-            }
-        }
-      else
-        shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+      shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
     }
   obstack_1grow (obs_expansion, '>');
+  if (expansion != READ_BODY)
+    obstack_1grow (obs_expansion, CHAR_RQUOTE);
   if ((!slash) && (exp_flags & EXP_COMPLEX))
     {
-      if (expansion == READ_NORMAL)
-        {
-          for (cp = TOKEN_DATA_TEXT (argv[argc]); *cp != '\0'; cp++)
-            {
-              if (*cp == CHAR_QUOTE)
-                obstack_1grow (obs_expansion, '"');
-              else if (*cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE
-                    && *cp != CHAR_BGROUP && *cp != CHAR_EGROUP)
-                obstack_1grow (obs_expansion, *cp);
-            }
-        }
-      else
-        shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[argc]), 0);
-
+      shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[argc]), 0);
+      if (expansion != READ_BODY)
+        obstack_1grow (obs_expansion, CHAR_LQUOTE);
       obstack_grow (obs_expansion, "</", 2);
       shipout_string (obs_expansion, symbol_name, 0);
       obstack_1grow (obs_expansion, '>');
+      if (expansion != READ_BODY)
+        obstack_1grow (obs_expansion, CHAR_RQUOTE);
     }
 
-  /*  Input must not be rescanned, so expansion is set to READ_BODY.  */
-  expanded = push_string_finish (READ_BODY);
+  expanded = push_string_finish (expansion);
 
   --expansion_level;
 
