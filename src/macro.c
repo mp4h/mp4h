@@ -102,7 +102,7 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
          If another character is found, this string is not a
          macro.   */
 
-      if (IS_ALPHA (*text) || (*text == '/' && IS_ALPHA (*(text+1))))
+      if (IS_ALPHA (*text))
         {
           sym = lookup_symbol (text, SYMBOL_LOOKUP);
           if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID)
@@ -114,6 +114,17 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
             }
           else
             expand_macro (sym, expansion);
+        }
+      else if (*text == '/' && IS_ALPHA (*(text+1)))
+        {
+          sym = lookup_symbol (text+1, SYMBOL_LOOKUP);
+          if (sym != NULL)
+            {
+              MP4HERROR ((warning_status, 0,
+                _("Warning:%s:%d: `<%s>' found without begin tag"),
+                    CURRENT_FILE_LINE, text));
+            }
+          expand_unknown_tag (text, expansion);
         }
       else
         shipout_text (obs, TOKEN_DATA_TEXT (td));

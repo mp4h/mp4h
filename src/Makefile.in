@@ -25,7 +25,7 @@ RANLIB  = @RANLIB@
 
 DEFS     = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
-LDFLAGS  = @LDFLAGS@ -export-dynamic
+LDFLAGS  = @LDFLAGS@ @WITH_MODULES_TRUE@ -export-dynamic
 LIBTOOL  = @LIBTOOL@
 INCLTDL  = @INCLTDL@
 LIBLTDL  = @LIBLTDL@
@@ -34,7 +34,8 @@ LDADD    = $(LIBLTDL) ../lib/libmp4h.a
 CFLAGS   = @CFLAGS@
 COMPILE  = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
 CCLD     = $(CC)
-LINK     = $(LIBTOOL) --quiet --mode=link $(CCLD) $(CFLAGS) $(LDFLAGS) -o $@
+@WITH_MODULES_FALSE@LINK     = $(CCLD) $(CFLAGS) $(LDFLAGS) -o $@
+@WITH_MODULES_TRUE@LINK     = $(LIBTOOL) --quiet --mode=link $(CCLD) $(CFLAGS) $(LDFLAGS) -o $@
 LIBS     = @LIBS@ -lm
 
 SOURCES = mp4h.c builtin.c debug.c freeze.c input.c \
