@@ -8,7 +8,34 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 1.1.2 and 1.1.3:
+  Changes between 1.1.2 and 1.2.0:
+
+    *) Upgrade to Autoconf 2.50 (12-Aug-2001):
+       [Denis Barbier]
+
+    *) Change <use> invocation (12-Aug-2001):
+       Module name must now be set through `name' attribute.
+       [Denis Barbier]
+
+    *) Internal naming changes in src/builtin.c (11-Aug-2001):
+       Future versions will be more modularized, and some care must be
+       taken with naming conventions; more functions and variables will
+       be prefixed by `mp4h_', so all functions called by predefined
+       macros are renamed from mp4h_<foo> to mp4h_bp_<foo> to clearly
+       identify builtin primitives.
+       [Denis Barbier]
+
+    *) Experimental UTF-8 support (21-Jul-2001):
+       Compile PCRE 3.4 with UTF-8 support, 
+       A new --encoding option accepts 2 values, either `8bit' or
+       `utf8'.  When `utf8' is selected, regular expressions are
+       compiled with PCRE_UTF8 flag.
+       The <string-length> and <substring> tags are also
+       encoding-dependent.
+       [Denis Barbier]
+
+    *) Upgrade to PCRE 3.4 (21-Jul-2000):
+       [Denis Barbier]
 
     *) Fix <get-file-properties> (21-Apr-2001):
        A segmentation fault occurred when uid or gid could not be
@@ -40,14 +67,9 @@
 
     *) Improve <include> tag (14-Mar-2001):
        File name is passed through the `file' attribute, and a new
-       `cmd' attribute allows reading output from arbitrary shell
+       `command' attribute allows reading output from arbitrary shell
        command.  As this might be considered as a security flaw, a new
        -S flag allows filtering potentially risky functions.
-       [Anders Dinsen]
-
-    *) New -O flag (14-Mar-2001):
-       Macros will be rewritten to adopt an XML syntax, this flag
-       allows using anonymous attributes for backward compatibility .
        [Anders Dinsen]
 
     *) Add diversions (09-Mar-2001):
