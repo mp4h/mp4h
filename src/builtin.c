@@ -2209,14 +2209,6 @@ mp4h_attributes_quote (MP4H_BUILTIN_ARGS)
 {
   int i;
 
-  /*  Dirty hack to prevent aggregation of attributes into
-      a single argument.  When a group is begun in expand_macro (),
-      we finish it here.  */
-  if (expansion_level > 1 && (
-        expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
-        || expansion == READ_ATTR_QUOT))
-      obstack_1grow (obs, CHAR_EGROUP);
-
   for (i = 1; i < argc; i++)
     {
       if (i > 1)
@@ -2224,10 +2216,6 @@ mp4h_attributes_quote (MP4H_BUILTIN_ARGS)
 
       quote_name_value (obs, ARG (i));
     }
-  if (expansion_level > 1 && (
-        expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
-        || expansion == READ_ATTR_QUOT))
-      obstack_1grow (obs, CHAR_BGROUP);
 }
 
 static void

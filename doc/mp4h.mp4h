@@ -430,7 +430,7 @@ names matching any of <var name1 />, <var name2 />....
 </example>
 
 <note>
-The three previous functions are special, because unlike all other macros,
+The two previous functions are special, because unlike all other macros,
 their expansion do not form a group.  This is necessary to parse the
 resulting list of attributes.
 </note>

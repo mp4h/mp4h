@@ -10,6 +10,17 @@
 
   Changes between 1.0.3 and SNAP:
 
+    *) Restore grouping around <attributes-quotes> (06-Jul-2000):
+       Like other <attributes-*> tags, <attributes-quotes> did not group
+       its expansion into a single token.
+       It does now, because it seems that it is more useful in general
+       cases.
+       [Denis Barbier]
+
+    *) Fix boolean operators (05-Jul-2000):
+       The <and> tag was broken, and <or> has been cleaned up.
+       [Denis Barbier]
+
     *) Improve <preserve>/<restore> stuff (05-Jul-2000):
        These tags accept now any number of arguments, so it is possible
        to write
@@ -19,7 +30,6 @@
            ... code using `name', `src' and `text' variables.
            <restore  name src text>
            </define-tag>
-       All module files have been updated in consequence.
        [Denis Barbier]
 
     *) Better control with <return> tag (04-Jul-2000):
