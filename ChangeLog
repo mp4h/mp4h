@@ -8,6 +8,13 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.0.6 and SNAP:
+
+    *) Use of the native API of PCRE (21-Jul-2000):
+       And support for locales has been added.  Mp4h is now fully
+       powered by PCRE.
+       [Denis Barbier]
+
   Changes between 1.0.5 and 1.0.6:
 
     *) Use of the PCRE library (20-Jul-2000):

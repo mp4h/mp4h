@@ -1,2 +1,1 @@
 <subst-in-string "\nabc\ndef\nghi\n" "^\n*(.*[^\n])\n*$" "\\1" singleline=true />
-<subst-in-string "\nabc\ndef\nghi\n" "^(.*[^\n])\n*$" "\\1">

@@ -41,7 +41,7 @@
 #undef HAVE_FILE_FUNCS
 #endif
 
-#include "pcreposix.h"
+#include "pcre.h"
 
 #ifdef HAVE_FILE_FUNCS
 #include <dirent.h>
