@@ -10,6 +10,15 @@
 
   Changes between 1.1.0 and 1.1.1:
 
+    *) Fix trailing slash in empty complex tags (31-Aug-2000):
+       They caused memory errors.
+       [Denis Barbier]
+
+    *) Fix bugs with non-ASCII letters (31-Aug-2000):
+       Mp4h gobbled some non-ASCII letters because of misuse of
+       signedness.  Several similar bugs have been fixed.
+       [Denis Barbier, Debian webmasters]
+
     *) Upgraded to GNU shtool 1.5.1 (08-Aug-2000):
        Upgraded to GNU shtool 1.5.1. This especially fixed problems 
        with "shtool version" under Solaris.

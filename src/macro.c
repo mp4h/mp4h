@@ -522,7 +522,8 @@ expand_macro (symbol *sym, read_type expansion)
 {
   struct obstack arguments, argptr, body;
   token_data **argv;
-  token_data *td;
+  token_data td;
+  token_data *tdp;
   int argc, i;
   struct obstack *obs_expansion;
   const char *expanded;
@@ -571,9 +572,11 @@ expand_macro (symbol *sym, read_type expansion)
     {
       if (SYMBOL_CONTAINER (sym))
         {
-          TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
-          TOKEN_DATA_TEXT (td) = xstrdup ("");
-          obstack_grow (&argptr, (voidstar) &td, sizeof (td));
+          TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
+          TOKEN_DATA_TEXT (&td) = xstrdup ("");
+          tdp = (token_data *) obstack_copy (&arguments,
+                  (voidstar) &td, sizeof (td));
+          obstack_grow (&argptr, (voidstar) &tdp, sizeof (tdp));
         }
 
       argv = (token_data **) obstack_finish (&argptr);
