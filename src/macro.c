@@ -133,7 +133,8 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
 `-------------------------------------------------------------------------*/
 
 static boolean
-expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
+expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
+                 char *last_char_ptr)
 {
   char *text;
   token_type t;
@@ -141,6 +142,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
   int group_level = 0;
   boolean in_string = FALSE;
 
+  *last_char_ptr = ' ';
   TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
 
   /* Skip leading white space.  */
@@ -229,6 +231,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
           abort ();
         }
 
+      *last_char_ptr = *(TOKEN_DATA_TEXT (&td) + strlen (TOKEN_DATA_TEXT (&td)) - 1);
       t = next_token (&td, expansion);
     }
 }
@@ -237,7 +240,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
 | Collect all the arguments to a call of the macro SYM.  The arguments are |
 | stored on the obstack ARGUMENTS and a table of pointers to the arguments |
 | on the obstack ARGPTR.                                                   |
-| If there is a space character before closing bracket, this function      |
+| If there is a slash character before closing bracket, this function      |
 | returns TRUE, otherwise FALSE.                                           |
 `-------------------------------------------------------------------------*/
 
@@ -249,7 +252,8 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
   token_data td;
   token_data *tdp;
   char *last_addr;
-  boolean more_args, spaced = FALSE;
+  boolean more_args;
+  char last_char;
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
@@ -266,7 +270,7 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
           /*  remember last address in use to remove the last
               argument if it is empty.  */
           last_addr = argptr->next_free;
-          more_args = expand_argument (arguments, expansion, &td);
+          more_args = expand_argument (arguments, expansion, &td, &last_char);
           if (internal_abort)
             {
               MP4HERROR ((EXIT_FAILURE, 0,
@@ -283,12 +287,9 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
           remove white spaces before closing brackets.  */
       if (TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT
           && strlen (TOKEN_DATA_TEXT (tdp)) == 0)
-        {
-          argptr->next_free = last_addr;
-          spaced = TRUE;
-        }
+        argptr->next_free = last_addr;
     }
-  return spaced;
+  return (last_char == '/');
 }
 
 /*-----------------------------------------------------------------.
@@ -450,7 +451,7 @@ expand_macro (symbol *sym, read_type expansion)
   struct obstack *obs_expansion;
   const char *expanded;
   char *cp;
-  boolean traced, spaced;
+  boolean traced, slash;
   int my_call_id;
   read_type attr_expansion;
 
@@ -481,7 +482,7 @@ expand_macro (symbol *sym, read_type expansion)
   else
     attr_expansion = READ_ATTRIBUTE;
 
-  spaced = collect_arguments (sym, attr_expansion, &argptr, &arguments);
+  slash = collect_arguments (sym, attr_expansion, &argptr, &arguments);
   argc = obstack_object_size (&argptr) / sizeof (token_data *);
 
   if (SYMBOL_CONTAINER (sym))
@@ -492,10 +493,9 @@ expand_macro (symbol *sym, read_type expansion)
   else
     {
       argv = (token_data **) obstack_finish (&argptr);
-      if (!spaced)
+      if (slash)
         {
           cp = TOKEN_DATA_TEXT (argv[argc-1]);
-          /*   Remove a possible trailing slash from list of arguments.  */
           if (*cp == '/' && *(cp+1) == '\0')
             argc--;
           else if (*(cp + strlen (cp) - 1) == '/')

@@ -153,7 +153,7 @@ _BUILDDIST = \
     cd $$_cwd && ls -l $${_tarball}
 
 manifest: distclean
-	x=`echo $(EXCLUDE_FILES) |\
+	unset LC_ALL; x=`echo $(EXCLUDE_FILES) |\
 	   sed -e 's;/;\\\\/;g' -e 's#[ 	]\{1,\}#/d -e /#g'`; \
 	$(FIND) * -type f -depth -print |\
 	sed -e /$$x/d | sort >MANIFEST
