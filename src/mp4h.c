@@ -1,5 +1,5 @@
 /* MP4H -- A macro processor for HTML documents
-   Copyright 1999, Denis Barbier
+   Copyright 2000, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify

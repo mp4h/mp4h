@@ -1,5 +1,5 @@
 /* MP4H -- A macro processor for HTML documents
-   Copyright 1999, Denis Barbier
+   Copyright 2000, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -641,6 +641,8 @@ peek_input (void)
 static void
 unget_input (int ch)
 {
+  if (ch == CHAR_EOF)
+    return;
   if (isp != NULL && isp->funcs->unget_func != NULL)
     (*isp->funcs->unget_func)(ch);
   else
@@ -649,7 +651,7 @@ unget_input (int ch)
 
 /*------------------------------------------------------------------------.
 | skip_line () simply discards all immediately following characters, upto |
-| the first newline.  It is only used from m4_dnl ().                     |
+| the first newline.                                                      |
 `------------------------------------------------------------------------*/
 
 void
@@ -673,8 +675,8 @@ skip_line (void)
 | of individual chars might break quotes with 8-bit chars in it.       |
 `---------------------------------------------------------------------*/
 
-static int
-match_input (const unsigned char *s)
+static boolean
+match_comment (const unsigned char *s)
 {
   int n;                        /* number of characters matched */
   int ch;                       /* input character */
@@ -683,24 +685,24 @@ match_input (const unsigned char *s)
 
   ch = peek_input ();
   if (ch != *s)
-    return 0;                   /* fail */
-  (void) next_char ();
+    return FALSE;               /* fail */
 
+  (void) next_char ();
   if (s[1] == '\0')
-    return 1;                   /* short match */
+    return TRUE;                /* short match */
 
   for (n = 1, t = s++; (ch = peek_input ()) == *s++; n++)
     {
       (void) next_char ();
       if (*s == '\0')           /* long match */
-        return 1;
+        return TRUE;
     }
 
-  /* Failed, push back input.  */
+  /* Push back input.  */
   st = push_string_init ();
   obstack_grow (st, t, n);
   push_string_finish (0);
-  return 0;
+  return FALSE;
 }
 
 /*------------------------------------------------------------------------.
@@ -708,13 +710,15 @@ match_input (const unsigned char *s)
 | first character is handled inline, for speed.  Hopefully, this will not |
 | hurt efficiency too much when single character quotes and comment       |
 | delimiters are used.                                                    |
+| When it succeeds, ch is set to CHAR_EOF and then no character is        |
+| put back on input.                                                      |
 `------------------------------------------------------------------------*/
 
 #define MATCH(ch, s) \
   ((s)[0] == (ch) \
    && (ch) != '\0' \
    && ((s)[1] == '\0' \
-       || (match_input ((s) + 1) ? (ch) = peek_input (), 1 : 0)))
+       || (match_comment ((s) + 1))))
 
 
 
@@ -900,33 +904,21 @@ next_token (token_data *td, read_type expansion)
                   (void) next_char ();
                   ch = peek_input ();
                 }
-              if (ch == '!' || ch == ':')
+              if (IS_ALPHA(ch))
                 {
                   ch = next_char ();
                   obstack_1grow (&token_stack, ch);
-                  while ((ch = next_char ()) != CHAR_EOF && (!IS_SPACE(ch)))
+                  while ((ch = next_char ()) != CHAR_EOF && IS_ALNUM(ch))
                     {
+                      if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
+                        {
+                          skip_line ();
+                          ch = CHAR_EOF;
+                          break;
+                        }
                       obstack_1grow (&token_stack, ch);
                     }
-
-                  if (ch != CHAR_EOF)
-                    unget_input(ch);
-
-                  type = TOKEN_WORD;
-                }
-              else if (IS_ALPHA(ch))
-                {
-                  ch = next_char ();
-                  obstack_1grow (&token_stack, ch);
-                  while ((ch = next_char ()) != CHAR_EOF
-                          && (IS_ALNUM(ch) || ch == ':'
-                              || ch == '*' || ch == '-'))
-                    {
-                      obstack_1grow (&token_stack, ch);
-                    }
-
-                  if (ch != CHAR_EOF)
-                    unget_input(ch);
+                  unget_input(ch);
 
                   type = TOKEN_WORD;
                 }
@@ -943,10 +935,15 @@ next_token (token_data *td, read_type expansion)
           obstack_1grow (&token_stack, ch);
           while ((ch = next_char ()) != CHAR_EOF && ! (IS_ESCAPE(ch)))
             {
+              if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
+                {
+                  skip_line ();
+                  ch = CHAR_EOF;
+                  break;
+                }
               obstack_1grow (&token_stack, ch);
             }
-          if (ch != CHAR_EOF)
-            unget_input(ch);
+          unget_input(ch);
 
           type = TOKEN_STRING;
         }
@@ -955,10 +952,15 @@ next_token (token_data *td, read_type expansion)
           obstack_1grow (&token_stack, ch);
           while ((ch = next_char ()) != CHAR_EOF && (IS_ALNUM(ch)))
             {
+              if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
+                {
+                  skip_line ();
+                  ch = CHAR_EOF;
+                  break;
+                }
               obstack_1grow (&token_stack, ch);
             }
-          if (ch != CHAR_EOF)
-            unget_input(ch);
+          unget_input(ch);
 
           type = TOKEN_STRING;
         }
@@ -1055,24 +1057,9 @@ next_token (token_data *td, read_type expansion)
           obstack_1grow (&token_stack, ch);
 
           if (IS_OTHER(ch) || IS_NUM(ch))
-            {
-              while ((ch = next_char()) != CHAR_EOF 
-                     && (IS_OTHER(ch) || IS_NUM(ch)))
-                obstack_1grow (&token_stack, ch);
-
-              if (ch != CHAR_EOF)
-                unget_input(ch);
-              type = TOKEN_STRING;
-            }
+            type = TOKEN_STRING;
           else if (IS_SPACE(ch))
-            {
-              while ((ch = next_char()) != CHAR_EOF && IS_SPACE(ch))
-                obstack_1grow (&token_stack, ch);
-
-              if (ch != CHAR_EOF)
-                unget_input(ch);
-              type = TOKEN_SPACE;
-            }
+            type = TOKEN_SPACE;
           else if (IS_ACTIVE(ch))
             type = TOKEN_WORD;
           else

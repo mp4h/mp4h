@@ -1,5 +1,5 @@
 /* MP4H -- A macro processor for HTML documents
-   Copyright 1999, Denis Barbier
+   Copyright 2000, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -170,13 +170,13 @@ builtin_tab[] =
 
   /*  file functions  */
 #ifdef HAVE_FILE_FUNCS
-  { "get-file-properties", FALSE, TRUE, mp4h_get_file_properties },
-  { "directory-contents",  FALSE, TRUE, mp4h_directory_contents },
-  { "file-exists",      FALSE,    TRUE,   mp4h_file_exists },
+  { "get-file-properties", FALSE, TRUE,   mp4h_get_file_properties },
+  { "directory-contents",  FALSE, TRUE,   mp4h_directory_contents },
+  { "file-exists",         FALSE, TRUE,   mp4h_file_exists },
 #else
-  { "get-file-properties", FALSE, TRUE, mp4h_unsupported },
-  { "directory-contents",  FALSE, TRUE, mp4h_unsupported },
-  { "file-exists",      FALSE,    TRUE,   mp4h_unsupported },
+  { "get-file-properties", FALSE, TRUE,   mp4h_unsupported },
+  { "directory-contents",  FALSE, TRUE,   mp4h_unsupported },
+  { "file-exists",         FALSE, TRUE,   mp4h_unsupported },
 #endif /* HAVE_FILE_FUNCS */
 
       /*  flow functions  */
@@ -3116,21 +3116,18 @@ array_member (const char *text, symbol *var, boolean caseless)
 static void
 mp4h_array_member (MP4H_BUILTIN_ARGS)
 {
-  int result;
+  int result = -1;
   symbol *var;
   const char *caseless;
 
   caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
-  if (bad_argc (argv[0], argc, 3, 3))
-    return;
-
-  var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
-  if (var != NULL)
+  if (! bad_argc (argv[0], argc, 3, 3))
     {
-      result = array_member (ARG (1), var, (caseless != NULL));
-      if (result >= 0)
-        shipout_int (obs, result);
+      var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
+      if (var != NULL)
+        result = array_member (ARG (1), var, (caseless != NULL));
     }
+  shipout_int (obs, result);
 }
 
 /*-------------------------------------------------------------.
@@ -3426,6 +3423,19 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
       unexpanded = FALSE;
       sep[0] = ' ';
       
+      if (*text == '#')
+        {
+          shipout_int (obs, argc - 1);
+          text++;
+          continue;
+        }
+      else if (*text == '%')
+        {
+          obstack_1grow (obs, '%');
+          text++;
+          continue;
+        }
+
       while (*text == 'U' || *text == 'A' || *text == 'u' || *text == 'y')
         {
           if (*text == 'U' || *text == 'u')
