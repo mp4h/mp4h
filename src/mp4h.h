@@ -562,6 +562,9 @@ extern boolean visible_quotes;
 /* Used to disable risky functions. */
 extern int safety_level;
 
+/* Enable compatibility mode. */
+extern int compatibility_mode;
+
 void locale_init __P ((void));
 void initialize_builtin __P ((symbol *));
 void builtin_init __P ((void));
