@@ -54,38 +54,39 @@ builtin mp4h_macro_table[] =
   { 0,                  FALSE,    FALSE,  0 },
 };
 
+static JSRuntime *rt;
+static JSContext *cx;
+static JSObject *global;
 static JSClass global_class = {
       "global",0,
       JS_PropertyStub,JS_PropertyStub,JS_PropertyStub,JS_PropertyStub,
       JS_EnumerateStub,JS_ResolveStub,JS_ConvertStub,JS_FinalizeStub
+  };
+
+/* obs holds a pointer to the current obstack for output. It is
+   initialised from the argument to the javascript tag. */
+static struct obstack *javascript_obs;
+
+static JSBool
+my_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+  JSString *jstr;
+  char *s;
+
+  jstr = JS_ValueToString(cx, argv[0]);
+  s = JS_GetStringBytes(jstr);
+  obstack_grow(javascript_obs, s, strlen(s));
+  obstack_1grow(javascript_obs, '\n');
+}
+
+static JSFunctionSpec my_functions[] = {
+      {"print",         my_print,       1},
+      {0}
 };
 
 void
 mp4h_init_module(struct obstack *obs)
 {
-  return;
-}
-
-void
-mp4h_finish_module(void)
-{
-  return;
-}
-
-/* This test function prints its attributes in reverse order.  */
-static void
-mozjs (MP4H_BUILTIN_ARGS)
-{
-  JSRuntime *rt;
-  JSContext *cx;
-  JSObject *global;
-  jsval rval;
-  JSString *jstr;
-  JSScript *jscr;
-  JSBool ok;
-  char *str;
-  char *script;
-
   rt = JS_NewRuntime(0x100000);
   if (!rt)
     {
@@ -102,6 +103,7 @@ mozjs (MP4H_BUILTIN_ARGS)
                 CURRENT_FILE_LINE));
       return;
     }
+
   global = JS_NewObject(cx, &global_class, NULL, NULL);
   if (!global)
     {
@@ -110,40 +112,41 @@ mozjs (MP4H_BUILTIN_ARGS)
                 CURRENT_FILE_LINE));
       return;
     }
-  JS_SetGlobalObject(cx, global);
+  JS_InitStandardClasses (cx, global);
+  JS_DefineFunctions(cx, global, my_functions);
+}
+
+void
+mp4h_finish_module(void)
+{
+  JS_DestroyContext(cx);
+  JS_Finish(rt);
+}
+
+/* This test function prints its attributes in reverse order.  */
+static void
+mozjs (MP4H_BUILTIN_ARGS)
+{
+  jsval rval;
+  JSString *jstr;
+  JSScript *jscr;
+  JSBool ok;
+  char *str;
+  char *script;
+
+  javascript_obs = obs;
 
   script = xstrdup(ARGBODY);
   remove_special_chars (script, TRUE);
 
-  printf("SCRIPT:%d:%s:\n", strlen(script), script);
-#if 1
-  /*
   ok = JS_EvaluateScript(cx, global, script, strlen(script),
-    */
-  ok = JS_EvaluateScript(cx, global, "print(\"ok\")", 11,
-          current_file, current_line, &rval);
-#else
-  jscr = JS_CompileScript(cx, global, script, strlen(script),
-          current_file, current_line);
-  if (!jscr)
-    {
-      MP4HERROR ((warning_status, 0,
-          _("Warning:%s:%d: could not compile script:\n%s"),
-              CURRENT_FILE_LINE));
-    }
-  ok = JS_ExecuteScript(cx, global, jscr, &rval);
-  JS_DestroyScript(cx, jscr);
-#endif
+          CURRENT_FILE_LINE, &rval);
   if (!ok)
     {
       MP4HERROR ((warning_status, 0,
           _("Warning:%s:%d: execution of JavaScript failed:\n"),
               CURRENT_FILE_LINE));
     }
-  jstr = JS_ValueToString(cx, rval);
-  str = JS_GetStringBytes(jstr);
-  obstack_1grow (obs, CHAR_BGROUP);
-  obstack_grow (obs, str, strlen (str));
-  obstack_1grow (obs, CHAR_EGROUP);
   xfree ((voidstar) script);
 }
+
