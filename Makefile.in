@@ -166,13 +166,16 @@ EXCLUDE_FILES = CVS .cvsignore .scvsrc core tags mp4h-*.tar.gz debian build-
 
 NEWVERS = \
     $(VERSION_TOOL) -l c -n mp4h -p mp4h_ $$OPT src/version.c; \
-    V=`$(VERSION_TOOL) -l c -d long src/version.c`;\
+    V=`$(VERSION_TOOL) -l c -d short src/version.c`; \
+    sed -e "7s/version=.*\/>/version=$$V \/>/g" <doc/mp4h.mp4h >doc/mp4h.mp4h.n && mv doc/mp4h.mp4h.n doc/mp4h.mp4h; \
+    V=`$(VERSION_TOOL) -l c -d long src/version.c`; \
     sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
 
 UPDATEVERS = \
-    V=`$(VERSION_TOOL) -l c -d short src/version.c`;\
+    V=`$(VERSION_TOOL) -l c -d short src/version.c`; \
     $(VERSION_TOOL) -l c -n mp4h -p mp4h_ -s $$V src/version.c; \
-    V=`$(VERSION_TOOL) -l c -d long src/version.c`;\
+    sed -e "7s/version=.*\/>/version=$$V \/>/g" <doc/mp4h.mp4h >doc/mp4h.mp4h.n && mv doc/mp4h.mp4h.n doc/mp4h.mp4h; \
+    V=`$(VERSION_TOOL) -l c -d long src/version.c`; \
     sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
 
 _GETDISTINFO = \
