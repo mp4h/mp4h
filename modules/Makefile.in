@@ -28,6 +28,7 @@ INCLUDES        = -I$(top_srcdir)/lib  -I$(top_srcdir)/src
 LDFLAGS         = @LDFLAGS@
 LIBS            = @LIBS@
 LIBTOOL         = @LIBTOOL@
+mp4h_config     = $(top_srcdir)/mp4h-config
 
 #   installation tools
 SHTOOL          = $(top_srcdir)/shtool
@@ -44,10 +45,10 @@ MODULES     = test.la
 .SUFFIXES: .o .lo
 
 .c.o:
-	$(LIBTOOL) --quiet --mode=compile $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $<
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -I.. -c $<
 
 .c.lo:
-	$(LIBTOOL) --quiet --mode=compile $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $<
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -I.. -c $<
 
 # ------------------------------------------------
 #   THE DEFAULT TARGETS
@@ -56,14 +57,15 @@ MODULES     = test.la
 all: $(MODULES)
 
 test.la: $(OBJ) $(LOBJ)
-	$(LIBTOOL) --quiet --mode=link $(CC) -o $@ $(LOBJ) \
-	    -module -rpath $(pkglibdir) -avoid-version
+	$(LIBTOOL) --quiet --mode=link `$(mp4h_config) --cc` -o $@ $(LOBJ) \
+	    -module -rpath `$(mp4h_config) --pkglibdir` -avoid-version
 
 test check install:
 
 INSTALL_LA_FILES = \
-   echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $(pkglibdir)/$$p"; \
-   $(LIBTOOL) --mode=install $(INSTALL) $$p $(pkglibdir)/$$p
+   d=`$(mp4h_config) --pkglibdir`; \
+   echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
+   $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
 
 install:
 	@list='$(MODULES)'; for p in $$list; do \
@@ -71,6 +73,7 @@ install:
 	    $(INSTALL_LA_FILES); \
 	  else :; fi; \
 	done
+
 # ------------------------------------------------
 #   CLEANUP
 # ------------------------------------------------
