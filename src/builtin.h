@@ -41,7 +41,6 @@
 #undef HAVE_FILE_FUNCS
 #endif
 
-#include "mp4h.h"
 #include "regex.h"
 
 #ifdef HAVE_FILE_FUNCS
@@ -56,6 +55,8 @@
 #include <math.h>
 #include <locale.h>
 #include <time.h>
+
+#include "mp4h.h"
 
 #define _AS_HEADER
 #include "version.c"
