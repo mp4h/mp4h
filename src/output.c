@@ -112,6 +112,16 @@ output_init (void)
   output_unused = 0;
 }
 
+/*----------------------.
+| Output deallocation.  |
+`----------------------*/
+
+void
+output_deallocate (void)
+{
+  xfree (diversion_table);
+}
+
 #ifndef HAVE_TMPFILE
 
 #ifndef HAVE_MKSTEMP

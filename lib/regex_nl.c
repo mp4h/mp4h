@@ -4192,6 +4192,11 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
                   if (regs->start == NULL || regs->end == NULL)
 		    {
 		      FREE_VARIABLES ();
+                      /*  Added by DB.  */
+                      if (regs->start)
+                        free (regs->start);
+                      else
+                        free (regs->end);
 		      return -2;
 		    }
                   bufp->regs_allocated = REGS_REALLOCATE;

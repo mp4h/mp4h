@@ -58,6 +58,16 @@ debug_init (void)
   debug_set_file (stderr);
   obstack_init (&trace);
 }
+
+/*----------------------------------.
+| Initialise the debugging module.  |
+`----------------------------------*/
+
+void
+debug_deallocate (void)
+{
+  obstack_free (&trace, 0);
+}
 
 /*-----------------------------------------------------------------.
 | Function to decode the debugging flags OPTS.  Used by main while |

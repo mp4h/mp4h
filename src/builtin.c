@@ -285,6 +285,10 @@ builtin_tab[] =
 /*  this symbol controls breaks of flow statements.  */
 symbol varbreak;
 
+/*  Global variable containing predefined attributes.  */
+#define MAX_CHARS_ATTRIBUTES      256
+static char attribute[MAX_CHARS_ATTRIBUTES];
+
 /*  global variables needed by sort algorithms.  */
 static boolean sort_caseless;
 static boolean sort_sortorder;
@@ -377,8 +381,9 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode,
   SYMBOL_SHADOWED (sym)    = FALSE;
   SYMBOL_CONTAINER (sym)   = bp->container;
   SYMBOL_EXPAND_ARGS (sym) = bp->expand_args;
+  SYMBOL_HOOK_BEGIN (sym)  = NULL;
+  SYMBOL_HOOK_END (sym)    = NULL;
 }
-
 
 /*------------------------------.
 | Install a new builtin_table.  |
@@ -398,6 +403,9 @@ void
 init_break (void) {
   SYMBOL_TYPE (&varbreak) = TOKEN_TEXT;
   SYMBOL_TEXT (&varbreak) = xstrdup ("");
+  SYMBOL_HOOK_BEGIN (&varbreak) = NULL;
+  SYMBOL_HOOK_END (&varbreak) = NULL;
+  SYMBOL_NAME (&varbreak) = NULL;
 }
 
 /*-------------------------------------------------------------------------.
@@ -476,6 +484,8 @@ define_user_macro (const char *name, char *text, symbol_lookup mode,
   SYMBOL_SHADOWED (s)    = FALSE;
   SYMBOL_CONTAINER (s)   = container;
   SYMBOL_EXPAND_ARGS (s) = expand_args;
+  SYMBOL_HOOK_BEGIN (s)  = NULL;
+  SYMBOL_HOOK_END (s)    = NULL;
 #ifdef DEBUG_INPUT
   fprintf (stderr, "Define: %s\nText: %s\nContainer: %d\n",
     SYMBOL_NAME (s), SYMBOL_TEXT (s), SYMBOL_CONTAINER (s));
@@ -490,6 +500,25 @@ void
 builtin_init (void)
 {
   install_builtin_table (builtin_tab);
+}
+
+/*-----------------------------------------------.
+| Deallocate all builtin and predefined macros.  |
+`-----------------------------------------------*/
+
+void
+builtin_deallocate (void)
+{
+  builtin_table *bt, *bt_next;
+
+  for (bt = builtin_tables; bt != NULL; )
+    {
+      bt_next = bt->next;
+      xfree (bt);
+      bt = bt_next;
+    }
+
+  xfree (SYMBOL_TEXT (&varbreak));
 }
 
 /*------------------------------------------------------------------------.
@@ -646,7 +675,7 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
                       boolean lowercase)
 {
   char *attr = NULL;
-  char *cp, *lower;
+  char *cp;
   int i, j;
 
   i = 1;
@@ -657,12 +686,10 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
           (cp != NULL && strncasecmp (TOKEN_DATA_TEXT (argv[i]), key, strlen (key)) == 0
                && *(TOKEN_DATA_TEXT (argv[i]) + strlen (key)) == '='))
         {
-          if (attr)
-            xfree (attr);
           if (cp)
-            attr  = xstrdup (cp+1);
+            attr  = cp + 1;
           else
-            attr  = xstrdup ("");
+            attr  = NULL;
           
           if (remove)
             {
@@ -677,10 +704,15 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
     }
 
   if (attr && lowercase)
-    for (lower=attr; *lower != '\0'; lower++)
-      *lower = tolower (*lower);
-
-  return attr;
+    {
+      for (i=0,cp=attr; i < MAX_CHARS_ATTRIBUTES && *cp != '\0'; cp++,i++)
+        attribute[i] = tolower (*cp);
+      attribute[i] = '\0';
+    }
+  if (attr)
+    return attribute;
+  else
+    return NULL;
 }
 
 
@@ -989,6 +1021,10 @@ mp4h_get_file_properties (MP4H_BUILTIN_ARGS)
   group = getgrgid (buf.st_gid);
   obstack_grow (obs, group->gr_name, strlen (group->gr_name));
   obstack_1grow (obs, '\n');
+  /*
+  xfree (user);
+  xfree (group);
+  */
 }
 
 /*-----------------------------------------------------------------.
@@ -3063,13 +3099,15 @@ mp4h_preserve (MP4H_BUILTIN_ARGS)
 
   next = xmalloc (sizeof (var_stack));
   var  = lookup_variable (ARG (1), SYMBOL_INSERT);
-  if (SYMBOL_TYPE (var) != TOKEN_TEXT)
+  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+    next->text = xstrdup (SYMBOL_TEXT (var));
+  else
     {
+      next->text = xstrdup ("");
+      xfree (SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xmalloc (1);
-      *(SYMBOL_TEXT (var)) = '\0';
     }
 
-  next->text = xstrdup (SYMBOL_TEXT (var));
   SYMBOL_TYPE (var) = TOKEN_TEXT;
   *(SYMBOL_TEXT (var)) = '\0';
 
@@ -3091,8 +3129,8 @@ mp4h_restore (MP4H_BUILTIN_ARGS)
 
   prev = vs->prev;
   var = lookup_variable (ARG (1), SYMBOL_INSERT);
-  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (var));
+
+  xfree (SYMBOL_TEXT (var));
   SYMBOL_TEXT (var) = xstrdup (vs->text);
   SYMBOL_TYPE (var) = TOKEN_TEXT;
 
@@ -3143,9 +3181,7 @@ mp4h_increment (MP4H_BUILTIN_ARGS)
   if (!numeric_arg (argv[0], by, TRUE, &incr))
     return;
 
-  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (var));
-
+  xfree (SYMBOL_TEXT (var));
   sprintf (buf, "%d", value+incr);
   SYMBOL_TEXT (var) = xstrdup(buf);
 }
@@ -3176,9 +3212,7 @@ mp4h_decrement (MP4H_BUILTIN_ARGS)
   if (!numeric_arg (argv[0], by, TRUE, &incr))
     return;
 
-  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (var));
-
+  xfree (SYMBOL_TEXT (var));
   sprintf (buf, "%d", value-incr);
   SYMBOL_TEXT (var) = xstrdup(buf);
 }
@@ -3247,9 +3281,8 @@ mp4h_copy_var (MP4H_BUILTIN_ARGS)
       return;
     }
   var2 = lookup_variable (ARG (2), SYMBOL_INSERT);
-  if (SYMBOL_TYPE (var2) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (var2));
 
+  xfree (SYMBOL_TEXT (var2));
   SYMBOL_TEXT (var2) = xstrdup(SYMBOL_TEXT (var1));
 }
 
@@ -3390,6 +3423,7 @@ mp4h_array_append (MP4H_BUILTIN_ARGS)
       strcat (old_value, ARG (1));
       xfree (SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xstrdup (old_value);
+      xfree (old_value);
     }
 }
 

@@ -123,6 +123,12 @@ produce_frozen_state (const char *name)
                 {
                   fputc (SYMBOL_CONTAINER (sym) ? '1' : '0', file);
                   fputc (SYMBOL_EXPAND_ARGS (sym) ? '1' : '0', file);
+                  fprintf (file, "B%d,%d\n",
+                       (int) strlen (SYMBOL_NAME (sym)),
+                       (int) strlen (SYMBOL_HOOK_BEGIN (sym)));
+                  fprintf (file, "E%d,%d\n",
+                       (int) strlen (SYMBOL_NAME (sym)),
+                       (int) strlen (SYMBOL_HOOK_END (sym)));
                   fputc ('\n', file);
                 }
               break;

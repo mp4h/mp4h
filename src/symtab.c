@@ -62,6 +62,40 @@ symtab_init (void)
     *s++ = NULL;
 }
 
+/*--------------------------------------------.
+| Free all storage associated with a symbol.  |
+`--------------------------------------------*/
+
+static void
+free_symbol (symbol *sym)
+{
+  xfree (SYMBOL_NAME (sym));
+  xfree (SYMBOL_HOOK_BEGIN (sym));
+  xfree (SYMBOL_HOOK_END (sym));
+  if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
+    xfree (SYMBOL_TEXT (sym));
+  xfree ((voidstar) sym);
+}
+
+void
+symtab_deallocate (void)
+{
+  int h;
+  symbol *sym, *next;
+
+  for (h = 0; h < hash_table_size; h++)
+    {
+      for (sym = symtab[h]; sym != NULL; )
+        {
+          next = SYMBOL_NEXT (sym);
+          free_symbol (sym);
+          sym = next;
+        }
+    }
+
+  xfree (symtab);
+}
+
 /*--------------------------------------------------.
 | Return a hashvalue for a string, from GNU-emacs.  |
 `--------------------------------------------------*/
@@ -82,21 +116,6 @@ hash (const char *s)
     };
   val = (val < 0) ? -val : val;
   return val % hash_table_size;
-}
-
-/*--------------------------------------------.
-| Free all storage associated with a symbol.  |
-`--------------------------------------------*/
-
-static void
-free_symbol (symbol *sym)
-{
-  xfree (SYMBOL_NAME (sym));
-  xfree (SYMBOL_HOOK_BEGIN (sym));
-  xfree (SYMBOL_HOOK_END (sym));
-  if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (sym));
-  xfree ((voidstar) sym);
 }
 
 /*------------------------------------------------------------------------.
@@ -138,7 +157,10 @@ lookup_symbol (const char *name, symbol_lookup mode)
   /* If just searching, return status of search.  */
 
   if (mode == SYMBOL_LOOKUP)
-    return cmp == 0 ? sym : NULL;
+    {
+      xfree (lcname);
+      return cmp == 0 ? sym : NULL;
+    }
 
   /* Symbol not found.  */
 
@@ -153,7 +175,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
          Otherwise, just insert the name, and return the new symbol.  */
 
       if (cmp == 0 && sym != NULL)
-        return sym;
+        break;
       /* Fall through.  */
 
     case SYMBOL_PUSHDEF:
@@ -177,14 +199,17 @@ lookup_symbol (const char *name, symbol_lookup mode)
           SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = TRUE;
           SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_NEXT (sym));
         }
-      return sym;
+      break;
 
     case SYMBOL_DELETE:
 
       /* Delete all occurences of symbols with NAME.  */
 
-      if (cmp != 0 || sym == NULL)
-        return NULL;
+      if (cmp != 0)
+        sym = NULL;
+      if (sym == NULL)
+        break;
+
       do
         {
           *spp = SYMBOL_NEXT (sym);
@@ -192,25 +217,33 @@ lookup_symbol (const char *name, symbol_lookup mode)
           sym = *spp;
         }
       while (sym != NULL && strcmp (lcname, SYMBOL_NAME (sym)) == 0);
-      return NULL;
+      sym = NULL;
+      break;
 
     case SYMBOL_POPDEF:
 
        /* Delete the first occurence of a symbol with NAME.  */
 
-      if (cmp != 0 || sym == NULL)
-        return NULL;
+      if (cmp != 0)
+        sym = NULL;
+      if (sym == NULL)
+        break;
+
       if (SYMBOL_NEXT (sym) != NULL && cmp == 0)
         SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
       *spp = SYMBOL_NEXT (sym);
       free_symbol (sym);
-      return NULL;
+      sym = NULL;
+      break;
 
     default:
       MP4HERROR ((warning_status, 0,
         _("INTERNAL ERROR: Illegal mode to symbol_lookup ()")));
       abort ();
     }
+
+  xfree (lcname);
+  return sym;
 }
 
 /*----------------------------------------------------------------------.
@@ -255,6 +288,7 @@ hack_all_symbols (hack_symbol *func, const char *data)
         (*func) (sym, data);
     }
 }
+
 
 #ifdef DEBUG_SYM
 

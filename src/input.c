@@ -159,7 +159,7 @@ struct input_block
       struct
         {
           FILE *file;           /* input file handle */
-          const char *name;     /* name of PREVIOUS input file */
+          char *name;           /* name of PREVIOUS input file */
           int lineno;           /* current line number for do */
           /* Yet another attack of "The curse of global variables" (sigh) */
           int out_lineno;        /* current output line number do */
@@ -181,7 +181,7 @@ typedef struct input_block input_block;
 
 
 /* Current input file name.  */
-const char *current_file;
+char *current_file;
 
 /* Current input line number.  */
 int current_line;
@@ -860,6 +860,21 @@ input_init (void)
   /* This routine tells whether we want extended regexp or not. */
   set_regexp_extended (TRUE);
   
+}
+
+/*----------------------.
+| Deallocate obstacks.  |
+`----------------------*/
+
+void
+input_deallocate (void)
+{
+  xfree (array_current_line);
+  xfree (eolcomm.string);
+
+  obstack_free (&token_stack, 0);
+  obstack_free (&input_stack, 0);
+  obstack_free (&wrapup_stack, 0);
 }
 
 

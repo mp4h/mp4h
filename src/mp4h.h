@@ -268,6 +268,7 @@ extern FILE *debug;
   while (0)
 
 void debug_init __P ((void));
+void debug_deallocate __P ((void));
 int debug_decode __P ((const char *));
 void debug_flush_files __P ((void));
 boolean debug_set_output __P ((const char *));
@@ -342,6 +343,7 @@ typedef enum token_data_type token_data_type;
 typedef int read_type;
 
 void input_init __P ((void));
+void input_deallocate __P ((void));
 int peek_input __P ((void));
 token_type next_token __P ((token_data *, read_type));
 void skip_line __P ((void));
@@ -360,7 +362,7 @@ boolean pop_wrapup __P ((void));
 void read_file_verbatim __P ((struct obstack *));
 
 /* current input file, and line */
-extern const char *current_file;
+extern char *current_file;
 extern int current_line;
 extern int *array_current_line;
 #define CURRENT_FILE_LINE current_file, array_current_line[expansion_level]
@@ -442,6 +444,7 @@ extern int current_diversion;
 extern int output_current_line;
 
 void output_init __P ((void));
+void output_deallocate __P ((void));
 void shipout_text __P ((struct obstack *, char *, int));
 void shipout_string __P ((struct obstack *obs, const char *s, int len));
 void make_diversion __P ((int));
@@ -499,6 +502,7 @@ typedef void hack_symbol ();
 extern symbol **symtab;
 
 void symtab_init __P ((void));
+void symtab_deallocate __P ((void));
 symbol *lookup_symbol __P ((const char *, symbol_lookup));
 symbol *lookup_variable __P ((const char *, symbol_lookup));
 void hack_all_symbols __P ((hack_symbol *, const char *));
@@ -526,6 +530,7 @@ struct builtin
 typedef struct builtin builtin;
 
 void builtin_init __P ((void));
+void builtin_deallocate __P ((void));
 void define_builtin __P ((const char *, const builtin *, symbol_lookup,
                           boolean));
 void set_regexp_extended __P ((boolean));

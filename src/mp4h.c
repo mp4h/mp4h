@@ -250,8 +250,10 @@ main (int argc, char *const *argv, char *const *envp)
   program_name = argv[0];
   error_print_progname = print_program_name;
 
-  setlocale (LC_ALL, "");
-  setlocale (LC_NUMERIC, "C");
+/*
+  (void) setlocale (LC_ALL, "");
+  (void) setlocale (LC_NUMERIC, "C");
+*/
 
   debug_init ();
   include_init ();
@@ -464,6 +466,15 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (frozen_file_to_write)
     produce_frozen_state (frozen_file_to_write);
+
+  /* Free memory */
+  input_deallocate ();
+  debug_deallocate ();
+  output_deallocate ();
+  symtab_deallocate ();
+  builtin_deallocate ();
+  
+  xfree (current_file);
 
   exit (EXIT_SUCCESS);
 }

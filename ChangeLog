@@ -10,6 +10,9 @@
 
   Changes between 0.8.4 and 0.8.3:
 
+    *) Fix memory leaks (22-Mar-2000):
+       [Denis Barbier]
+
     *) Add <return> tag (20-Mar-2000):
        This tag exits from inner macro.
        [Uwe Mindrup <uwe@mindrup.de>]

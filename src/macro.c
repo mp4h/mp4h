@@ -35,7 +35,7 @@
 
 static void expand_macro __P ((symbol *, read_type));
 static void expand_token __P ((struct obstack *, read_type, token_type, token_data *));
-static void collect_body __P ((symbol *, struct obstack *));
+static void collect_body __P ((symbol *, struct obstack *, struct obstack *));
 
 /* Current recursion level in expand_macro ().  */
 int expansion_level = 0;
@@ -173,12 +173,11 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
 
               /* The argument MUST be finished, whether we want it or not.  */
               obstack_1grow (obs, '\0');
-              text = obstack_finish (obs);
 
               if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
                 {
                   TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
-                  TOKEN_DATA_TEXT (argp) = text;
+                  TOKEN_DATA_TEXT (argp) = obstack_finish (obs);
                 }
               return (boolean) (IS_SPACE(*TOKEN_DATA_TEXT (&td)));
             }
@@ -285,7 +284,7 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
       while (more_args);
       
       /*  If the last argument is empty, it is removed.  We need it to
-          remove wjite spaces before closing brackets.  */
+          remove white spaces before closing brackets.  */
       if (TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT
           && strlen (TOKEN_DATA_TEXT (tdp)) == 0)
         argptr->next_free = last_addr;
@@ -296,16 +295,14 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
 | Collect the body of a container tag. No expansion is performed.  |
 `-----------------------------------------------------------------*/
 static void
-collect_body (symbol *sym, struct obstack *argptr)
+collect_body (symbol *sym, struct obstack *argptr, struct obstack *bodyptr)
 {
   token_type t;
   token_data td;
   token_data *tdp;
-  struct obstack body;
   char *text;
   symbol *newsym;
 
-  obstack_init (&body);
   while (1)
     {
       t = next_token (&td, READ_BODY);
@@ -328,10 +325,10 @@ collect_body (symbol *sym, struct obstack *argptr)
         case TOKEN_SPACE:
         case TOKEN_STRING:
           if (expansion_level > 0 && t == TOKEN_QUOTED)
-            obstack_1grow (&body, CHAR_LQUOTE);
-          shipout_text (&body, text, strlen (text));
+            obstack_1grow (bodyptr, CHAR_LQUOTE);
+          shipout_text (bodyptr, text, strlen (text));
           if (expansion_level > 0 && t == TOKEN_QUOTED)
-            obstack_1grow (&body, CHAR_RQUOTE);
+            obstack_1grow (bodyptr, CHAR_RQUOTE);
           break;
 
         case TOKEN_WORD:
@@ -348,38 +345,40 @@ collect_body (symbol *sym, struct obstack *argptr)
                     {
                       t = next_token (&td, READ_BODY);
                     }
-                  while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)));
-                  obstack_1grow (&body, '\0');
+                  while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)))
+                    ;
+
+                  obstack_1grow (bodyptr, '\0');
 
                   /* Add body to argptr */
                   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-                  TOKEN_DATA_TEXT (&td) = obstack_finish (&body);
-                  tdp = (token_data *) obstack_copy (&body,
+                  TOKEN_DATA_TEXT (&td) = obstack_finish (bodyptr);
+                  tdp = (token_data *) obstack_copy (bodyptr,
                       (voidstar) &td, sizeof (td));
                   obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
 
                   return;
-                  break;
                 }
               else
                 {
-                  obstack_grow (&body, TOKEN_DATA_TEXT (&td),
+                  obstack_grow (bodyptr, TOKEN_DATA_TEXT (&td),
                           strlen(TOKEN_DATA_TEXT (&td)) );
                   /*  gobble closing bracket */
                   do
                     {
                       t = next_token (&td, READ_BODY);
-                      obstack_grow (&body, TOKEN_DATA_TEXT (&td),
+                      obstack_grow (bodyptr, TOKEN_DATA_TEXT (&td),
                               strlen(TOKEN_DATA_TEXT (&td)) );
                     }
-                  while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)));
+                  while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)))
+                    ;
                 }
             }
           else
             {
               newsym = lookup_symbol (text, SYMBOL_LOOKUP);
               if (newsym == NULL || SYMBOL_TYPE (newsym) == TOKEN_VOID)
-                shipout_text (&body, TOKEN_DATA_TEXT (&td), strlen (TOKEN_DATA_TEXT (&td)));
+                shipout_text (bodyptr, TOKEN_DATA_TEXT (&td), strlen (TOKEN_DATA_TEXT (&td)));
               else
                 expand_macro (newsym, READ_ATTR_BODY);
             }
@@ -391,7 +390,6 @@ collect_body (symbol *sym, struct obstack *argptr)
           abort ();
         }
     }
-  obstack_free (&body, NULL);
 }
 
 
@@ -444,8 +442,7 @@ call_macro (symbol *sym, struct obstack *obs, int argc, token_data **argv,
 static void
 expand_macro (symbol *sym, read_type expansion)
 {
-  struct obstack arguments;
-  struct obstack argptr, save_argptr;
+  struct obstack arguments, argptr, save_argptr, body;
   token_data **argv;
   int argc, i;
   struct obstack *obs_expansion;
@@ -466,8 +463,9 @@ expand_macro (symbol *sym, read_type expansion)
 
   traced = (boolean) ((debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym));
 
-  obstack_init (&argptr);
   obstack_init (&arguments);
+  obstack_init (&argptr);
+  obstack_init (&body);
 
   if (traced && (debug_level & DEBUG_TRACE_CALL))
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
@@ -486,7 +484,7 @@ expand_macro (symbol *sym, read_type expansion)
 
   if (SYMBOL_CONTAINER (sym))
     {
-      collect_body (sym, &save_argptr);
+      collect_body (sym, &save_argptr, &body);
       argv = (token_data **) obstack_finish (&save_argptr);
     }
 
@@ -530,4 +528,5 @@ expand_macro (symbol *sym, read_type expansion)
 
   obstack_free (&arguments, NULL);
   obstack_free (&argptr, NULL);
+  obstack_free (&body, NULL);
 }

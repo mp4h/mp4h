@@ -1497,7 +1497,7 @@ le nom du groupe.
 </para>
 
 <example>
-<get-file-properties mp4h.mp4h>
+<get-file-properties <__file__>>
 </example>
 
 <tag:description include>
