@@ -1072,13 +1072,13 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                 type = TOKEN_SIMPLE;        /* escape before eof */
             }
         }
+      else if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
+        skip_line ();
       else if (IS_CLOSE(ch))
         {
           obstack_1grow (&token_stack, ch);
           type = TOKEN_SIMPLE;
         }
-      else if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
-        skip_line ();
       else if (expansion == READ_BODY)
         {
           if (ch == '"')
