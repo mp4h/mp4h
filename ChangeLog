@@ -8,6 +8,16 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.2.0 and ???:
+
+    *) Minor change in top level Makefile.in (26-Aug-2001):
+       The `clean' and `distclean' targets are unconditionnally processed
+       through the modules/ directory.
+       [Denis Barbier]
+
+    *) Fix version number in documentation (26-Aug-2001):
+       [Denis Barbier]
+
   Changes between 1.1.2 and 1.2.0:
 
     *) Allow compilation from another directory (14-Aug-2001):

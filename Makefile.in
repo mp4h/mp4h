@@ -135,7 +135,7 @@ all-recursive install-recursive:
 
 clean-recursive distclean-recursive:
 	@target=`echo $@ | sed s/-recursive//`; \
-	for dir in $(SUBDIRS); do \
+	for dir in $(SUBDIRS) modules; do \
 	    if [ -f $$dir/Makefile ]; then \
 	        $(RECURS_TARGET_NOBREAK); \
 	    else :; \

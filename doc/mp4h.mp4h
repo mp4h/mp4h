@@ -4,14 +4,15 @@
 ;;;
 
 <set-var package=mp4h />
-<set-var version=1.1.2 />
+<set-var version=1.2.0 />
 <set-var title="mp4h - A Macro Processor for HTML Documents" />
 
+<defvar srcdir "." />
 <include file=<get-var format />.out
     alt=<exit status=1
         message="This file has to be compiled with one of the following lines
-   ../src/mp4h -D format=html -I srcdir="<get-var srcdir />" <get-var srcdir />/mp4h.mp4h > mp4h.html
-   ../src/mp4h -D format=pod -I srcdir="<get-var srcdir />" <get-var srcdir />/mp4h.mp4h | \\
+   ../src/mp4h -D format=html -D srcdir="<get-var srcdir />" <get-var srcdir />/mp4h.mp4h > mp4h.html
+   ../src/mp4h -D format=pod -D srcdir="<get-var srcdir />" <get-var srcdir />/mp4h.mp4h | \\
    sed -e 's/_LT_/</g' -e 's/_GT_/>/g'  > mp4h.pod
 " />
 />
