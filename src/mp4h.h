@@ -463,13 +463,13 @@ extern int output_current_line;
 
 void output_init __P ((void));
 void output_deallocate __P ((void));
-void shipout_text __P ((struct obstack *, char *, int));
+void shipout_text __P ((struct obstack *, char *));
 void shipout_string __P ((struct obstack *obs, const char *s, int len));
 void make_diversion __P ((int));
 void insert_diversion __P ((int));
 void insert_file __P ((FILE *));
 void freeze_diversions __P ((FILE *));
-int remove_special_chars __P ((char *, boolean));
+void remove_special_chars __P ((char *, boolean));
 
 
 /* File symtab.c  --- symbol table definitions.  */

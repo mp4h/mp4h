@@ -2248,7 +2248,7 @@ mathop_functions (MP4H_BUILTIN_ARGS, mathop_type mathop)
         *pos_radix = '\0';
     }
 
-  shipout_text (obs, svalue, strlen (svalue));
+  shipout_text (obs, svalue);
 }
 #undef MATH_ARG_LOOP
 
@@ -3537,7 +3537,7 @@ mp4h_var_exists (MP4H_BUILTIN_ARGS)
 
   var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
   if (var != NULL)
-    shipout_text (obs, "true", 4);
+    shipout_text (obs, "true");
 }
 
 /*-----------------------.

@@ -89,7 +89,7 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
     case TOKEN_STRING:
       if (expansion_level > 0 && t == TOKEN_QUOTED)
         obstack_1grow (obs, CHAR_LQUOTE);
-      shipout_text (obs, text, strlen (text));
+      shipout_text (obs, text);
       if (expansion_level > 0 && t == TOKEN_QUOTED)
         obstack_1grow (obs, CHAR_RQUOTE);
       break;
@@ -108,8 +108,7 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
           if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID)
             {
               if (exp_flags & EXP_NO_HTMLTAG)
-                shipout_text (obs, TOKEN_DATA_TEXT (td),
-                        strlen (TOKEN_DATA_TEXT (td)));
+                shipout_text (obs, TOKEN_DATA_TEXT (td));
               else
                 expand_unknown_tag (text, expansion);
             }
@@ -117,7 +116,7 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
             expand_macro (sym, expansion);
         }
       else
-        shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
+        shipout_text (obs, TOKEN_DATA_TEXT (td));
       break;
 
     default:
@@ -344,7 +343,7 @@ collect_body (char *symbol_name, read_type expansion,
         case TOKEN_STRING:
           if (expansion_level > 0 && t == TOKEN_QUOTED)
             obstack_1grow (bodyptr, CHAR_LQUOTE);
-          shipout_text (bodyptr, text, strlen (text));
+          shipout_text (bodyptr, text);
           if (expansion_level > 0 && t == TOKEN_QUOTED)
             obstack_1grow (bodyptr, CHAR_RQUOTE);
           break;
@@ -421,8 +420,7 @@ collect_body (char *symbol_name, read_type expansion,
               if (newsym == NULL || SYMBOL_TYPE (newsym) == TOKEN_VOID)
                 {
                   if (exp_flags & EXP_NO_HTMLTAG)
-                    shipout_text (bodyptr, TOKEN_DATA_TEXT (&td),
-                            strlen (TOKEN_DATA_TEXT (&td)));
+                    shipout_text (bodyptr, TOKEN_DATA_TEXT (&td));
                   else
                     expand_unknown_tag (text, expansion);
                 }

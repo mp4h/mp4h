@@ -8,6 +8,18 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.0.1 and 1.0.2:
+
+    *) Improve output routines (22-Jun-2000):
+       Changes are performed to remove some unused garbage.
+       [Denis Barbier]
+
+    *) Fix verbatim inclusion of files by mp4h (22-Jun-2000):
+       An endianness problem caused unexpected results when including
+       files verbatim. And text included this way could not appear
+       inside other tags.  Both problems have been solved.
+       [Denis Barbier]
+
   Changes between 1.0.0 and 1.0.1:
 
     *) Fix '<*' form on some platforms (21-Jun-2000):

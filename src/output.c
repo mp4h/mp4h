@@ -278,7 +278,7 @@ make_room_for (int length)
 | IMPORTANT WARNING: string must be null-terminated.  |
 `----------------------------------------------------*/
 
-int
+void
 remove_special_chars (char *s, boolean restore_quotes)
 {
   int offset = 0;
@@ -304,7 +304,7 @@ remove_special_chars (char *s, boolean restore_quotes)
     }
 
   if (*cp == '\0')
-    return offset;
+    return;
 
   for ( ; *cp != '\0'; cp++)
     {
@@ -317,7 +317,6 @@ remove_special_chars (char *s, boolean restore_quotes)
         *(cp-offset) = *cp;
     }
   *(cp-offset) = '\0';
-  return offset;
 }
 
 /*----------------------------------------------------.
@@ -325,11 +324,10 @@ remove_special_chars (char *s, boolean restore_quotes)
 `----------------------------------------------------*/
 
 static void
-remove_stars (char *s, int *length_ptr)
+remove_stars (char *s)
 {
-  int offset, i;
+  int offset;
   register char *cp;
-  int length = *length_ptr;
 
   offset = 0;
   cp = s;
@@ -340,15 +338,15 @@ remove_stars (char *s, int *length_ptr)
       cp++;
     }
 
-  for (i=0; i<length; cp++, i++)
+  for ( ; *cp != '\0'; cp++)
     {
       *(cp-offset) = *cp;
-      if (*cp == '<' && i<length-1)
+      if (*cp == '<')
         {
           if (*(cp+1) == '*' && !(exp_flags & EXP_LEAVE_LEADING_STAR))
             {
               offset++;
-              cp++, i++;
+              cp++;
               continue;
             }
           if (exp_flags & EXP_LEAVE_TRAILING_STAR)
@@ -356,27 +354,25 @@ remove_stars (char *s, int *length_ptr)
 
           if (*(cp+1) == '/')
             {
-              cp++, i++;
+              cp++;
               *(cp-offset) = *cp;
             }
-          cp++, i++;
-          if (i<length && IS_ALPHA (*cp))
+          cp++;
+          if (IS_ALPHA (*cp))
             {
-              while (i<length && IS_ALNUM(*cp))
+              while (IS_ALNUM(*cp))
                 {
                   *(cp-offset) = *cp;
-                  cp++, i++;
+                  cp++;
                 }
-              if (i<length && *cp == '*' )
+              if (*cp == '*' )
                 offset++;
               else
-                {
-                  cp--, i--;
-                }
+                cp--;
             }
         }
     }
-  *length_ptr -= offset;
+  *(cp-offset) = *cp;
 }
 
 /*------------------------------------------------------------------------.
@@ -446,17 +442,18 @@ output_text (const char *text, int length)
 `-------------------------------------------------------------------------*/
 
 void
-shipout_text (struct obstack *obs, char *text, int length)
+shipout_text (struct obstack *obs, char *text)
 {
   static boolean start_of_output_line = TRUE;
   char line[20];
   const char *cursor;
+  int length;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
 
   if (obs != NULL)
     {
-      obstack_grow (obs, text, length);
+      obstack_grow (obs, text, strlen (text));
       return;
     }
 
@@ -465,19 +462,14 @@ shipout_text (struct obstack *obs, char *text, int length)
   if (output_diversion == NULL)
     return;
 
-  /* `text' is always a null-terminated string, so we can compute
-     its length.  */
-  if (strlen (text) > length)
-    *(text+length) = '\0';
-
   /* Restitute some special characters  */
-  length -= remove_special_chars (text, TRUE);
+  remove_special_chars (text, TRUE);
 
   /* Remove leading and trailing stars in tag names  */
   if (!(exp_flags & (EXP_LEAVE_TRAILING_STAR | EXP_LEAVE_TRAILING_STAR)))
-    remove_stars (text, &length);
+    remove_stars (text);
 
-  if (length <= 0)
+  if (*text == '\0')
     {
       after_left_angle = FALSE;
       return;
@@ -485,6 +477,7 @@ shipout_text (struct obstack *obs, char *text, int length)
 
   /* Output TEXT to a file, or in-memory diversion buffer.  */
 
+  length = strlen (text);
   if (!sync_output)
     switch (length)
       {
@@ -508,7 +501,7 @@ shipout_text (struct obstack *obs, char *text, int length)
         text += length - 1;
       }
   else
-    for (; length-- > 0; text++)
+    for (; *(text+1) != '\0'; text++)
       {
         if (start_of_output_line)
           {

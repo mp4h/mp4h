@@ -777,7 +777,7 @@ match_comment (const char *s)
   /* Push back input.  */
   st = push_string_init ();
   obstack_grow (st, t, n);
-  push_string_finish (0);
+  push_string_finish (READ_NORMAL);
   return FALSE;
 }
 
@@ -1249,10 +1249,27 @@ void
 read_file_verbatim (struct obstack *obs)
 {
   int ch;
+  int (*f)(void);
+  struct obstack *st;
 
-  while ((ch = file_read ()) != CHAR_RETRY)
-    shipout_text (0, (char *) &ch, 1);
-  pop_input ();
+  if (next != NULL)
+    st = obs;
+  else
+    st = push_string_init ();
+
+  f = isp->funcs->read_func;
+  if (f != NULL)
+    {
+      while ((ch = (*f)()) != CHAR_RETRY)
+        obstack_1grow (st, ch);
+    }
+  else
+    {
+      MP4HERROR ((warning_status, 0,
+        _("INTERNAL ERROR: Input stack botch in read_file_verbatim ()")));
+      abort ();
+    }
+  push_string_finish (READ_BODY);
 }
 
 
