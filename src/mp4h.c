@@ -44,9 +44,6 @@ int debug_level = 0;
 /* Hash table size (should be a prime) (-Hsize).  */
 int hash_table_size = HASHMAX;
 
-/* Disable GNU extensions (-G).  */
-int no_gnu_extensions = 0;
-
 /* Max length of arguments in trace output (-lsize).  */
 int max_debug_argument_length = 0;
 
@@ -76,9 +73,6 @@ static int show_help = 0;
 
 /* If nonzero, print the version on standard output and exit.  */
 static int show_version = 0;
-
-/* If nonzero, import the environment as macros.  */
-static int import_environment = 0;
 
 struct macro_definition
 {
@@ -239,7 +233,7 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
-#define OPTSTRING "B:D:EF:H:I:L:N:QR:S:U:cd::ehl:o:st:V"
+#define OPTSTRING "D:EF:H:I:L:QR:U:d:hl:o:st:V"
 
 int
 main (int argc, char *const *argv, char *const *envp)
@@ -379,31 +373,11 @@ main (int argc, char *const *argv, char *const *envp)
   input_init ();
   output_init ();
   symtab_init ();
-  include_env_init ();
 
   if (frozen_file_to_read)
     reload_frozen_state (frozen_file_to_read);
   else
     builtin_init ();
-
-
-  /* Import environment variables as macros.  The definition are
-     preprended to the macro definition list, so -U can override
-     environment variables. */
-
-  if (import_environment)
-    {
-      char *const *env;
-
-      for (env = envp; *env != NULL; env++)
-        {
-          new = (macro_definition *) xmalloc (sizeof (macro_definition));
-          new->code = 'D';
-          new->macro = *env;
-          new->next = head;
-          head = new;
-        }
-    }
 
   /* Handle deferred command line macro definitions.  Must come after
      initialisation of the symbol table.  */
@@ -490,15 +464,6 @@ main (int argc, char *const *argv, char *const *envp)
 
   if (frozen_file_to_write)
     produce_frozen_state (frozen_file_to_write);
-  else
-    {
-      make_diversion (0);
-      undivert_all ();
-    }
-
-#ifdef WITH_MODULES
-  module_unload_all();
-#endif /* WITH_MODULES */
 
   exit (EXIT_SUCCESS);
 }

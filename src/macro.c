@@ -34,7 +34,6 @@
 #include "mp4h.h"
 
 static void expand_macro __P ((symbol *, read_type));
-static void expand_unknown_macro __P ((char *, read_type));
 static void expand_token __P ((struct obstack *, read_type, token_type, token_data *));
 static void collect_body __P ((symbol *, struct obstack *));
 
@@ -113,13 +112,11 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
 
       if (! IS_ALPHA (*text))
         {
-          expand_unknown_macro (text, expansion);
+          shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
           break;
         }
       sym = lookup_symbol (text, SYMBOL_LOOKUP);
-      if (sym == NULL)
-        expand_unknown_macro (text, expansion);
-      else if (SYMBOL_TYPE (sym) == TOKEN_VOID)
+      if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID)
         shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
       else
         expand_macro (sym, expansion);
@@ -382,7 +379,7 @@ collect_body (symbol *sym, struct obstack *argptr)
             {
               newsym = lookup_symbol (text, SYMBOL_LOOKUP);
               if (newsym == NULL || SYMBOL_TYPE (newsym) == TOKEN_VOID)
-                expand_unknown_macro (text, READ_ATTR_BODY);
+                shipout_text (&body, TOKEN_DATA_TEXT (&td), strlen (TOKEN_DATA_TEXT (&td)));
               else
                 expand_macro (newsym, READ_ATTR_BODY);
             }
@@ -527,92 +524,4 @@ expand_macro (symbol *sym, read_type expansion)
 
   obstack_free (&arguments, NULL);
   obstack_free (&argptr, NULL);
-}
-
-static void
-expand_unknown_macro (char *name, read_type expansion)
-{
-  symbol unknown;
-  struct obstack arguments;
-  struct obstack argptr;
-  token_data **argv;
-  int argc, i;
-  struct obstack *obs_expansion;
-  char *symbol_name, *cp;
-  const char *expanded;
-  boolean traced;
-  int my_call_id;
-
-  /* The ``name'' pointer points to a region which is modified
-     so we have to copy it now.  */
-  symbol_name = xstrdup (name);
-  expansion_level++;
-  if (expansion_level > nesting_limit)
-    MP4HERROR ((EXIT_FAILURE, 0,
-      _("ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
-           nesting_limit));
-
-  macro_call_id++;
-  my_call_id = macro_call_id;
-
-  /*  define a temporary symbol */
-  SYMBOL_NAME (&unknown)        = symbol_name;
-  SYMBOL_TRACED (&unknown)      = FALSE;
-  SYMBOL_CONTAINER (&unknown)   = FALSE;
-  SYMBOL_EXPAND_ARGS (&unknown) = TRUE;
-
-  traced = (boolean) ((debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (&unknown));
-
-  obstack_init (&argptr);
-  obstack_init (&arguments);
-
-  if (traced && (debug_level & DEBUG_TRACE_CALL))
-    trace_prepre (SYMBOL_NAME (&unknown), my_call_id);
-
-  if (expansion == READ_ATTR_BODY)
-    expansion = READ_ATTR_BODY;
-  else if (expansion == READ_ATTR_VERB || expansion == READ_BODY)
-    expansion = READ_ATTR_VERB;
-  else
-    expansion = READ_ATTRIBUTE;
-
-  collect_arguments (&unknown, expansion, &argptr, &arguments);
-  argc = obstack_object_size (&argptr) / sizeof (token_data *);
-  argv = (token_data **) obstack_finish (&argptr);
-
-  if (traced)
-    trace_pre (SYMBOL_NAME (&unknown), my_call_id, argc, argv);
-
-  obs_expansion = push_string_init ();
-  obstack_1grow (obs_expansion, '<');
-  obstack_grow (obs_expansion, symbol_name, strlen (symbol_name));
-
-  /*  Replace `name=val' attributes by name="val" */
-  for (i = 1; i < argc; i++)
-    {
-      obstack_1grow (obs_expansion, ' ');
-      cp = strchr (TOKEN_DATA_TEXT (argv[i]), '=');
-      if (cp != NULL && *(cp+1) != '"' && *(cp+1) != CHAR_QUOTE)
-        {
-          *cp = '\0';
-          shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-          obstack_1grow (obs_expansion, '=');
-          obstack_1grow (obs_expansion, CHAR_QUOTE);
-          shipout_string (obs_expansion, cp + 1, 0);
-          obstack_1grow (obs_expansion, CHAR_QUOTE);
-        }
-      else
-        shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-    }
-  obstack_1grow (obs_expansion, '>');
-  expanded = push_string_finish (READ_BODY);
-
-  if (traced)
-    trace_post (SYMBOL_NAME (&unknown), my_call_id, argc, argv, expanded);
-
-  --expansion_level;
-
-  obstack_free (&arguments, NULL);
-  obstack_free (&argptr, NULL);
-  xfree (symbol_name);
 }

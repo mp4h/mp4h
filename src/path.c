@@ -35,24 +35,6 @@
 static struct search_path_info dirpath; /* the list of path directories */
 
 
-/*
- * Generel functions for search paths
- */
-
-struct search_path_info *
-search_path_info_new (void)
-{
-  struct search_path_info *info;
-
-  info = (struct search_path_info *)
-    xmalloc (sizeof (struct search_path_info));
-  info->list = NULL;
-  info->list_end = NULL;
-  info->max_length = 0;
-
-  return info;
-}
-
 void
 search_path_add (struct search_path_info *info, const char *dir)
 {
@@ -76,26 +58,6 @@ search_path_add (struct search_path_info *info, const char *dir)
   info->list_end = path;
 }
 
-void
-search_path_env_init (struct search_path_info *info, char *path, boolean abs)
-{
-  char *path_end;
-
-  if (info == NULL || path == NULL)
-    return;
-
-  do
-    {
-      path_end = strchr (path, ':');
-      if (path_end)
-        *path_end = '\0';
-      if (!abs || *path == '/')
-        search_path_add (info, path);
-      path = path_end + 1;
-    }
-  while (path_end);
-}
-
 
 void
 include_init (void)
@@ -107,12 +69,6 @@ include_init (void)
 
 
 /* Functions for normal input path search */
-
-void
-include_env_init (void)
-{
-  search_path_env_init (&dirpath, getenv ("M4PATH"), FALSE);
-}
 
 void
 add_include_directory (const char *dir)

@@ -1,5 +1,12 @@
+mp4h (0.8.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Denis Barbier <barbier@imacs.polytechnique.fr>  Thu,  2 Mar 2000 23:58:15 +0100
+
 mp4h (0.8.0-1) unstable; urgency=low
 
+  * Sponsored by Raphael Hertzog <rhertzog@hrnet.fr>
   * Initial Release.
 
  -- Denis Barbier <barbier@imacs.polytechnique.fr>  Mon, 28 Feb 2000 21:46:36 +0100

@@ -567,8 +567,6 @@ struct search_path_info
   int max_length;               /* length of longest directory name */
 };
 
-struct search_path_info *search_path_info_new __P((void));
-void search_path_env_init __P ((struct search_path_info *, char *, boolean));
 void search_path_add __P ((struct search_path_info *, const char *));
 
 

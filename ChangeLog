@@ -8,6 +8,15 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.8.1 and 0.8.0:
+
+    *) Remove unused subroutines (02-Mar-2000):
+       [Denis Barbier]
+
+    *) Fix again how unknown macros are expanded (01-Mar-2000):
+       This time, no expansion is done.
+       [Denis Barbier]
+
   Changes between 0.8.0 and 0.7.2:
 
     *) English documentation (28-Feb-2000):

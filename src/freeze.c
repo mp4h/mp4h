@@ -156,11 +156,6 @@ INTERNAL ERROR: Bad token data type in freeze_one_symbol ()")));
       symtab[h] = reverse_symbol_list (symtab[h]);
     }
 
-  /* Let diversions be issued from output.c module, its cleaner to have this
-     piece of code there.  */
-
-  freeze_diversions (file);
-
   /* All done.  */
 
   fputs ("# End of frozen state file\n", file);
