@@ -1,0 +1,13 @@
+
+This is the standard diversion: 0
+Undivert divnum -1: 
+Undivert divnum 2: 
+This is diversion 2: 2
+
+Undivert without arguments: 
+This is from diversion 1: 1
+
+Here is more for diversion 1: 1
+
+Undivert divnum 1: 
+Undivert divnum 0: 

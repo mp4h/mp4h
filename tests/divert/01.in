@@ -1,0 +1,16 @@
+<divert divnum="1" />
+This is from diversion 1: <divnum />
+<divert divnum="-1" />
+This goes nowhere
+<divnum />
+<divert divnum="2" />
+This is diversion 2: <divnum />
+<divert divnum="1" />
+Here is more for diversion 1: <divnum />
+<divert />
+This is the standard diversion: <divnum />
+Undivert divnum -1: <undivert divnum="-1" />
+Undivert divnum 2: <undivert divnum="2" />
+Undivert without arguments: <undivert />
+Undivert divnum 1: <undivert divnum="1" />
+Undivert divnum 0: <undivert divnum="0" />

@@ -1,0 +1,6 @@
+<include command="cat 01.inc" />
+<set-var a="01.inc" />
+<include command="cat <get-var a />" verbatim="true" />
+<get-var a /><set-var a="01.inc" />
+<include command="cat <get-var a />" />
+<get-var a />
