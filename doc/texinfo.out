@@ -388,5 +388,5 @@ _LT_!--%body--_GT_
 ;;;
 ;;;  Load table of contents for Info navigation
 ;;;
-<include mp4h.chp alt=" " />
+<include file=mp4h.chp alt=" " />
 <set-var info:chap=-1 />

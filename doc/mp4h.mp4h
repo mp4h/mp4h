@@ -7,7 +7,7 @@
 <set-var version=1.1.2 />
 <set-var title="mp4h - A Macro Processor for HTML Documents" />
 
-<include <get-var format />.out
+<include file=<get-var format />.out
     alt=<exit status=1
         message="This file has to be compiled with one of the following lines
    ../src/mp4h -D format=html mp4h.mp4h > mp4h.html
@@ -16,7 +16,7 @@
 " />
 />
 
-<include list-tags />
+<include file=list-tags />
 
 ;;;
 ;;;   We need to change comment characters to view original source code
