@@ -5,6 +5,7 @@ INSTALL
 MANIFEST
 Makefile.in
 README
+README.pcre
 acconfig.h
 aclocal.m4
 config.guess
@@ -60,18 +61,12 @@ packages/WML/javascript.src
 packages/WML/preload.src
 packages/WML/rollover.src
 packages/WML/url.src
-pcre/AUTHORS
-pcre/ChangeLog
-pcre/LICENCE
 pcre/Makefile.in
 pcre/dftables.c
-pcre/get.c
 pcre/internal.h
 pcre/maketables.c
 pcre/pcre.c
 pcre/pcre.h
-pcre/pcreposix.c
-pcre/pcreposix.h
 pcre/study.c
 shtool
 src/Makefile.in
