@@ -376,6 +376,23 @@ Text inserted with position=before:<get-hook foo position=before />!
 Text inserted with position=after:<get-hook foo position=after />!
 </example>
 
+<tag:description attributes-quote>
+<value %attributes />
+</tag:description>
+
+<para>
+Like <value %attributes />, except that <value attr=value /> pairs are
+printed with double quotes surrounding attribute values.
+</para>
+
+<example>
+<define-tag foo>
+%attributes
+<attributes-quote %attributes />
+</define-tag>
+<foo id="logo" src="logo.gif" name="Logo" alt="Our logo" />
+</example>
+
 <tag:description attributes-extract>
 <var name1 />
 [,<var name2 />[,<var name3 />...]]
@@ -407,33 +424,15 @@ names matching any of <var name1 />, <var name2 />....
 
 <example>
 <define-tag img whitespace=delete>
-<img* <attributes-remove name,src,alt %attributes /> />
+<img* <attributes-quote <attributes-remove name,src,alt %attributes />/>/>
 </define-tag>
 <img id="logo" src="logo.gif" name="Logo" alt="Our logo" />
-</example>
-
-<tag:description attributes-quote>
-<value %attributes />
-</tag:description>
-
-<para>
-Prints the <value attr=value /> pairs contained within <value %attributes />
-and values are surrounded by double quotes.
-</para>
-
-<example>
-<define-tag foo whitespace=delete>
-%attributes
-<attributes-quote %attributes />
-</define-tag>
-<foo id="logo" src="logo.gif" name="Logo" alt="Our logo" />
 </example>
 
 <note>
 The three previous functions are special, because unlike all other macros,
 their expansion do not form a group.  This is necessary to parse the
-resulting list of attributes.  Moreover, attributes values are
-surrounded by double quotes.
+resulting list of attributes.
 </note>
 
 ###

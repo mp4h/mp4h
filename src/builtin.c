@@ -1142,7 +1142,7 @@ mp4h_unsupported (MP4H_BUILTIN_ARGS)
 static void
 mp4h___version__ (MP4H_BUILTIN_ARGS)
 {
-  obstack_grow (obs, mp4hversion.v_short, strlen (mp4hversion.v_short));
+  obstack_grow (obs, mp4h_version.v_short, strlen (mp4h_version.v_short));
 }
 
 static void
@@ -2278,12 +2278,12 @@ mp4h_attributes_remove (MP4H_BUILTIN_ARGS)
   if (expansion_level > 1 && (
         expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
         || expansion == READ_ATTR_QUOT))
-      obstack_1grow (obs, CHAR_BGROUP);
+      obstack_1grow (obs, CHAR_EGROUP);
   dump_args (obs, argc, argv, " ");
   if (expansion_level > 1 && (
         expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
         || expansion == READ_ATTR_QUOT))
-      obstack_1grow (obs, CHAR_EGROUP);
+      obstack_1grow (obs, CHAR_BGROUP);
 }
 
 static void

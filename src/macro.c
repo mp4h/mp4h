@@ -576,7 +576,7 @@ expand_macro (symbol *sym, read_type expansion)
       for (i = 1; i < argc; i++)
         {
           obstack_1grow (obs_expansion, ' ');
-          if (expansion == READ_ATTR_ASIS)
+          if (expansion == READ_ATTR_ASIS || expansion == READ_BODY)
             shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
           else
             {

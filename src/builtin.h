@@ -60,6 +60,7 @@
 
 #define _SRC_VERSION_C_AS_HEADER_
 #include "version.c"
+#undef _SRC_VERSION_C_AS_HEADER_
 
 #define MP4H_BUILTIN_ARGS struct obstack *obs, int argc, token_data **argv, \
                             read_type expansion

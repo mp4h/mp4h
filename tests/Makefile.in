@@ -55,7 +55,7 @@ SUBDIRS = \
    Misc \
    attributes-remove \
    attributes-extract \
-   attributes-print
+   attributes-quote
 
 #   common tools
 RM      = rm -f
