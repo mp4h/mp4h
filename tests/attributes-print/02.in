@@ -1,0 +1,5 @@
+<define-tag bar whitespace=delete>
+<bar* <attributes-print %attributes />>Coucou</bar*>
+</define-tag>
+<set-var q=1 />
+<a name="<bar q=<get-var q/> name="foo bar quux" />">hey</a>
