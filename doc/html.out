@@ -79,7 +79,7 @@
 <meta name="Author"    content="Denis Barbier" />
 <meta name="Generator" content="mp4h <__version__/>" />
 <meta name="Created"   content="10-Feb-2000" />
-<set-var fileinfo="<get-file-properties mp4h.mp4h />" />;;;
+<set-var fileinfo="<get-file-properties <__file__ /> />" />;;;
 <meta name="Modified"  content="<date <get-var fileinfo[3] /> />" />
 <title><get-var title /></title>
 </head>

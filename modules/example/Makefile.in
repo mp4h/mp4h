@@ -6,7 +6,7 @@
 SHELL = /bin/sh
 
 top_srcdir      = @top_srcdir@
-top_builddir    = @top_srcdir@
+top_builddir    = ../..
 srcdir          = @srcdir@
 prefix          = @prefix@
 exec_prefix     = @exec_prefix@
@@ -23,12 +23,12 @@ SHTOOL          = $(top_srcdir)/shtool
 CC              = @CC@
 CFLAGS          = @CFLAGS@
 CPPFLAGS        = @CPPFLAGS@
-DEFS            = @DEFS@ -I. -I$(srcdir)
-INCLUDES        = -I$(top_srcdir) -I$(top_srcdir)/lib  -I$(top_srcdir)/src
+DEFS            = @DEFS@ -I. -I$(srcdir) -I$(top_builddir)
+INCLUDES        = -I$(top_srcdir)/lib  -I$(top_srcdir)/src
 LDFLAGS         = @LDFLAGS@
 LIBS            = @LIBS@
 LIBTOOL         = @LIBTOOL@
-mp4h_config     = $(top_srcdir)/mp4h-config
+mp4h_config     = $(top_builddir)/mp4h-config
 
 #   installation tools
 SHTOOL          = $(top_srcdir)/shtool
@@ -44,10 +44,10 @@ LOBJ        = $(SOURCES:.c=.lo)
 .SUFFIXES: .c .o .lo .la
 
 .c.o:
-	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -c $<
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` $(DEFS) $(INCLUDES) -c $<
 
 .c.lo:
-	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -c $<
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` $(DEFS) $(INCLUDES) -c $<
 
 .lo.la:
 	$(LIBTOOL) --quiet --mode=link `$(mp4h_config) --cc` -o $@ $< \

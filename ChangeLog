@@ -10,6 +10,18 @@
 
   Changes between 1.1.2 and 1.2.0:
 
+    *) Allow compilation from another directory (14-Aug-2001):
+       Makefiles are updated to allow compilation from another
+       directory, when `make' supports the VPATH feature.
+       [Denis Barbier]
+
+    *) Clean up configure.ac (14-Aug-2001):
+       The new AC_INIT form in Autoconf 2.50 does now its job, and
+       version number is retrieved from src/version.c.  This was not as
+       easy as with Autoconf 2.13, I hope this is the canonical way to
+       insert some code to run before AC_INIT.
+       [Denis Barbier]
+
     *) Install libraries in subdirectories (13-Aug-2001):
        As with <use>, double colons are replaced by slashes in <load>
        attributes, which allows putting libraries in subdirectories.

@@ -6,10 +6,12 @@
 SHELL = /bin/sh
 
 top_srcdir      = @top_srcdir@
+srcdir          = @srcdir@
+top_builddir    = ..
 VPATH           = @srcdir@
-PROGDIR         = $(top_srcdir)/src
+PROGDIR         = $(top_builddir)/src
 PROGRAM         = $(PROGDIR)/mp4h
-FLAGS           = -X 0
+FLAGS           = -X 0 -I $(srcdir) -D srcdir="$(srcdir)"
 DEPS            = list-tags
 TIDY            = @TIDY@
 
@@ -43,18 +45,18 @@ install:
 # ------------------------------------------------
 
 mp4h.html: mp4h.mp4h html.out $(PROGRAM) $(DEPS)
-	$(PROGRAM) $(FLAGS) -D format=html mp4h.mp4h > $@
+	$(PROGRAM) $(FLAGS) -D format=html $(srcdir)/mp4h.mp4h > $@
 	-$(TIDY) $(TIDYOPT) -m $@
 
 mp4h.pod: mp4h.mp4h pod.out $(PROGRAM) $(DEPS)
-	$(PROGRAM) $(FLAGS) -D format=pod mp4h.mp4h \
+	$(PROGRAM) $(FLAGS) -D format=pod $(srcdir)/mp4h.mp4h \
         | sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
 
 mp4h.texi: mp4h.mp4h texinfo.out $(PROGRAM) $(DEPS)
 	#   Generate table of contents for Info navigation
-	$(PROGRAM) $(FLAGS) -D format=texinfo -D info:gentoc=1 mp4h.mp4h |\
+	$(PROGRAM) $(FLAGS) -D format=texinfo -D info:gentoc=1 $(srcdir)/mp4h.mp4h |\
    grep '@remove@' | sed -e 's/@remove@//' -e 's/=LT=/</g' > mp4h.chp
-	$(PROGRAM) $(FLAGS) -D format=texinfo mp4h.mp4h > $@
+	$(PROGRAM) $(FLAGS) -D format=texinfo $(srcdir)/mp4h.mp4h > $@
 
 # ------------------------------------------------
 #   PROGRAM

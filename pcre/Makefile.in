@@ -51,7 +51,7 @@ chartables.c: dftables
 	./dftables >chartables.c
 
 dftables: dftables.c maketables.c pcre.h internal.h
-	$(CC) -o dftables $(CFLAGS) $(DEFS) dftables.c
+	$(CC) -o dftables $(CFLAGS) $(DEFS) $(srcdir)/dftables.c
 
 # We deliberately omit dftables and chartables.c from 'make clean'; once made
 # chartables.c shouldn't change, and if people have edited the tables by hand,

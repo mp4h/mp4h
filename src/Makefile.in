@@ -6,7 +6,7 @@
 SHELL = /bin/sh
 
 top_srcdir      = @top_srcdir@
-top_builddir    = @top_srcdir@
+top_builddir    = ..
 srcdir          = @srcdir@
 VPATH           = @srcdir@
 
@@ -17,20 +17,20 @@ datadir         = @datadir@
 #   DEFINITIONS
 # ------------------------------------------------
 
-CONFIG_HEADER = ../config.h
+CONFIG_HEADER = $(top_builddir)/config.h
 
 CC      = @CC@
 AR      = ar
 RANLIB  = @RANLIB@
 
-DEFS     = @DEFS@ -I. -I$(srcdir) -I..
+DEFS     = @DEFS@ -I. -I$(srcdir) -I$(top_builddir)
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS  = @LDFLAGS@ @WITH_MODULES_TRUE@ -export-dynamic
 LIBTOOL  = @LIBTOOL@
 INCLTDL  = @INCLTDL@
 LIBLTDL  = @LIBLTDL@
 INCLUDES = -I$(top_srcdir)/lib -I$(top_srcdir)/pcre $(INCLTDL)
-LDADD    = $(LIBLTDL) ../lib/libmp4h.a ../pcre/libpcre.a
+LDADD    = $(LIBLTDL) $(top_builddir)/lib/libmp4h.a $(top_builddir)/pcre/libpcre.a
 CFLAGS   = @CFLAGS@
 COMPILE  = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
 CCLD     = $(CC)
@@ -65,11 +65,11 @@ mp4h: $(OBJECTS) $(LDADD)
 	@rm -f $@
 	$(LINK) $(OBJECTS) $(LDADD) $(LIBS)
 
-../lib/libmp4h.a:
-	cd ../lib && $(MAKE) libmp4h.a
+$(top_builddir)/lib/libmp4h.a:
+	cd $(top_builddir)/lib && $(MAKE) libmp4h.a
 
-../pcre/libpcre.a:
-	cd ../pcre && $(MAKE) all
+$(top_builddir)/pcre/libpcre.a:
+	cd $(top_builddir)/pcre && $(MAKE) all
 
 install:
 	@:
@@ -89,7 +89,7 @@ distclean: clean
 # ------------------------------------------------
 
 check: all
-	cd ../tests && $(MAKE) $@
+	cd $(top_builddir)/tests && $(MAKE) $@
 
 test: check
 
@@ -101,19 +101,19 @@ depend:
 	$(MAKE) clean
 	$(MAKE) CPPFLAGS=-MM >> Makefile.in
 
-mp4h.o: mp4h.c mp4h.h ../lib/obstack.h version.c
-builtin.o: builtin.c mp4h.h ../lib/obstack.h builtin.h ../pcre/pcre.h \
+mp4h.o: mp4h.c mp4h.h $(top_srcdir)/lib/obstack.h version.c
+builtin.o: builtin.c mp4h.h $(top_srcdir)/lib/obstack.h builtin.h $(top_srcdir)/pcre/pcre.h \
  version.c
-debug.o: debug.c mp4h.h ../lib/obstack.h
-devel.o: devel.c mp4h.h ../lib/obstack.h
-freeze.o: freeze.c mp4h.h ../lib/obstack.h
-input.o: input.c mp4h.h ../lib/obstack.h
-macro.o: macro.c mp4h.h ../lib/obstack.h
-module.o: module.c mp4h.h ../lib/obstack.h builtin.h ../pcre/pcre.h \
- version.c ../libltdl/ltdl.h
-output.o: output.c mp4h.h ../lib/obstack.h
-path.o: path.c mp4h.h ../lib/obstack.h
-symtab.o: symtab.c mp4h.h ../lib/obstack.h
-version.o: version.c ../src/version.c
+debug.o: debug.c mp4h.h $(top_srcdir)/lib/obstack.h
+devel.o: devel.c mp4h.h $(top_srcdir)/lib/obstack.h
+freeze.o: freeze.c mp4h.h $(top_srcdir)/lib/obstack.h
+input.o: input.c mp4h.h $(top_srcdir)/lib/obstack.h
+macro.o: macro.c mp4h.h $(top_srcdir)/lib/obstack.h
+module.o: module.c mp4h.h $(top_srcdir)/lib/obstack.h builtin.h $(top_srcdir)/pcre/pcre.h \
+ version.c $(top_srcdir)/libltdl/ltdl.h
+output.o: output.c mp4h.h $(top_srcdir)/lib/obstack.h
+path.o: path.c mp4h.h $(top_srcdir)/lib/obstack.h
+symtab.o: symtab.c mp4h.h $(top_srcdir)/lib/obstack.h
+version.o: version.c $(top_srcdir)/src/version.c
 
 ##EOF##

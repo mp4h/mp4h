@@ -80,10 +80,10 @@ mp4h-config: mp4h-config.src
         -e 's|\@mandir\@|$(mandir)|g' \
         -e 's|\@CC\@|$(CC)|g' \
         -e 's|\@CFLAGS\@|$(CFLAGS)|g' \
-          < mp4h-config.src >$@ && chmod a+x $@
+          < $? >$@ && chmod a+x $@
 
 mp4h-config.1: mp4h-config.src
-	cp mp4h-config.src mp4h-config.pod
+	cp $? mp4h-config.pod
 	pod2man --section=1 --center="Web Tools" --release="Web Tools" \
             mp4h-config.pod |\
             sed -e 's|\@VERSION\@|$(MP4H_VERSION)|g' > $@
@@ -100,7 +100,7 @@ install: all
 	$(INSTALL_SCRIPT) mp4h-config $(bindir)/mp4h-config
 	$(INSTALL_DATA) mp4h-config.1 $(mandir)/man1/mp4h-config.1
 	$(INSTALL_DATA) doc/mp4h.1 $(mandir)/man1/mp4h.1
-	$(INSTALL_DATA) src/mp4h.h $(includedir)/mp4h.h
+	$(INSTALL_DATA) $(top_srcdir)/src/mp4h.h $(includedir)/mp4h.h
 	@dir=packages; target='$@'; $(RECURS_TARGET)
 	@WITH_MODULES_TRUE@@dir=modules; target='$@'; $(RECURS_TARGET)
 
