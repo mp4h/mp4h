@@ -228,9 +228,9 @@ chapter on macro expansion for further details).
 <pseudo-func foo />
 <tag:description define-tag complex>
 <var name />
-[attributes=verbatim]
 [endtag=required]
 [whitespace=delete]
+[attributes=verbatim]
 </tag:description>
 
 <para>
@@ -259,11 +259,6 @@ present in the former.
 
 <pseudo-func foo />
 <attributes:description>
-<attributes:item "whitespace=delete" />
-Some spaces are suppressed in replacement text, in particular any
-leading or trailing spaces, and newlines not enclosed within angle
-brackets.
-
 <attributes:item "endtag=required" />
 Define a complex tag
 
@@ -278,6 +273,33 @@ Define a complex tag
 <define-tag bar endtag=required>;;;
 body is: %body</define-tag>
 <bar>Here it is</bar>
+</example>
+
+<attributes:item "whitespace=delete" />
+Remove some spaces in replacement text, in particular any leading or
+trailing spaces.  All newlines are also removed, except those enclosed
+in angle brackets which do not form a valid tag. All these removals are
+performed before substitution of the <value % />-sequences.
+
+<undef bar />
+<example>
+<define-tag bar endtag=required whitespace=delete>
+<!-- Here is
+     a comment -->
+How is %%body expanded ? Have a look below:
+%body
+
+<img
+   src="foo.png"
+   alt="Logo" />
+
+And finish with some extra newlines
+
+</define-tag>
+<bar>
+Body
+function
+</bar>
 </example>
 
 <attributes:item "attributes=verbatim" />
