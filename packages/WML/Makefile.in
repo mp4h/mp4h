@@ -19,9 +19,7 @@ MKDIR           = $(SHTOOL) mkdir -f -p -m 755
 
 prefix          = @prefix@
 exec_prefix     = $(prefix)
-bindir          = $(prefix)/bin
-datadir         = @datadir@
-pkgdatadir      = $(datadir)/@PACKAGE@
+pkgdatadir      = @pkgdatadir@
 mandir          = $(prefix)/man
 manext          = 3
 

@@ -10,6 +10,12 @@
 
   Changes between 1.0.5 and SNAP:
 
+    *) Add support for loadable modules (12-Jul-2000):
+       This stage was easy because GNU m4 1.4n already has such
+       support.  Work has to be done to provide a nice API to
+       module developers.
+       [Denis Barbier]
+
     *) Allow trailing slash in empty complex tags (12-Jul-2000):
        It is now possible to write <foo/> even if `foo' has been
        declared as being complex.

@@ -14,7 +14,7 @@
 
                       ----------------
 
-   Mp4h is a text processor specially designed for HTML documents.
+   Mp4h is a text processor specifically designed for HTML documents.
    It has two ancestors: Meta-HTML <URL:http://www.metahtml.org/>
    and GNU m4 <URL:http://www.gnu.org/software/m4/>. The former
    inspired mp4h syntax whereas source code is derived from the
@@ -23,6 +23,10 @@
    Mp4h syntax is immediately familiar to HTML programmers. Users
    can define their own tags, and programming constructs like loops,
    arrays, conditionals make mp4h very powerful.
+
+   Mp4h is extendable to fit every needs.  It can of course load
+   new macro definitions put in package files, but also dynamically
+   load shared libraries containing compiled macro definitions.
 
 -- 
 Denis Barbier

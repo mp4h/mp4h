@@ -1,0 +1,85 @@
+##
+##  Makefile -- mp4h Makefile for modules
+##
+
+@SET_MAKE@
+SHELL = /bin/sh
+
+top_srcdir      = @top_srcdir@
+top_builddir    = @top_srcdir@
+srcdir          = @srcdir@
+prefix          = @prefix@
+exec_prefix     = @exec_prefix@
+pkglibdir       = @pkglibdir@
+
+VPATH           = @srcdir@
+
+# ------------------------------------------------
+#   DEFINITIONS
+# ------------------------------------------------
+
+SHELL           = /bin/sh
+SHTOOL          = $(top_srcdir)/shtool
+CC              = @CC@
+CFLAGS          = @CFLAGS@
+CPPFLAGS        = @CPPFLAGS@
+DEFS            = @DEFS@ -I. -I$(srcdir) -I..
+INCLUDES        = -I$(top_srcdir)/lib  -I$(top_srcdir)/src
+LDFLAGS         = @LDFLAGS@
+LIBS            = @LIBS@
+LIBTOOL         = @LIBTOOL@
+
+#   installation tools
+SHTOOL          = $(top_srcdir)/shtool
+#   libtool does not like this definition
+#INSTALL         = $(SHTOOL) install -c -m 644
+INSTALL         = @INSTALL@
+RM              = rm -f
+
+OBJ         = test.o
+LOBJ        = test.lo
+
+MODULES     = test.la
+
+.SUFFIXES: .o .lo
+
+.c.o:
+	$(LIBTOOL) --quiet --mode=compile $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $<
+
+.c.lo:
+	$(LIBTOOL) --quiet --mode=compile $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $<
+
+# ------------------------------------------------
+#   THE DEFAULT TARGETS
+# ------------------------------------------------
+
+all: $(MODULES)
+
+test.la: $(OBJ) $(LOBJ)
+	$(LIBTOOL) --quiet --mode=link $(CC) -o $@ $(LOBJ) \
+	    -module -rpath $(pkglibdir) -avoid-version
+
+test check install:
+
+INSTALL_LA_FILES = \
+   echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $(pkglibdir)/$$p"; \
+   $(LIBTOOL) --mode=install $(INSTALL) $$p $(pkglibdir)/$$p
+
+install:
+	@list='$(MODULES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    $(INSTALL_LA_FILES); \
+	  else :; fi; \
+	done
+# ------------------------------------------------
+#   CLEANUP
+# ------------------------------------------------
+
+clean:
+	-rm -f *.o *.lo *.la core
+	-rm -rf .libs
+
+distclean: clean
+	-rm -f Makefile
+
+##EOF##

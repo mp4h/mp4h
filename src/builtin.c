@@ -50,7 +50,7 @@ DECLARE (mp4h_timer);
 DECLARE (mp4h_mp4h_l10n);
 #endif
 DECLARE (mp4h_mp4h_output_radix);
-#if !defined(HAVE_FILE_FUNCS) || !defined (HAVE_LOCALE_H)
+#if !defined(HAVE_FILE_FUNCS) || !defined (HAVE_LOCALE_H) || !defined(WITH_MODULES)
 DECLARE (mp4h_unsupported);
 #endif
 
@@ -115,6 +115,9 @@ DECLARE (mp4h_neq);
 DECLARE (mp4h_include);
 DECLARE (mp4h___include);
 DECLARE (mp4h_use);
+#ifdef WITH_MODULES
+DECLARE (mp4h_loadmodule);
+#endif
 DECLARE (mp4h_comment);
 DECLARE (mp4h_set_eol_comment);
 DECLARE (mp4h_set_quotes);
@@ -259,6 +262,11 @@ builtin_tab[] =
   { "include",          FALSE,   FALSE,   mp4h_include },
   { "__include",        TRUE,     TRUE,   mp4h___include },
   { "use",              FALSE,    TRUE,   mp4h_use },
+#ifdef WITH_MODULES
+  { "loadmodule",       FALSE,    TRUE,   mp4h_loadmodule },
+#else
+  { "loadmodule",       FALSE,    TRUE,   mp4h_unsupported },
+#endif
   { "comment",          TRUE,     TRUE,   mp4h_comment },
   { "set-eol-comment",  FALSE,    TRUE,   mp4h_set_eol_comment },
   { "set-quotes",       FALSE,    TRUE,   mp4h_set_quotes },
@@ -317,19 +325,17 @@ builtin_tab[] =
 
 /*   Local functions  */
 static void push_builtin_table __P ((builtin *));
-static void install_builtin_table __P ((builtin *));
-static boolean bad_argc __P ((token_data *, int, int, int));
-static void dump_args __P ((struct obstack *, int, token_data **, const char *));
-static boolean safe_strtod __P ((const char *, const char *, double *));
-static boolean safe_strtol __P ((const char *, const char *, long int *));
-static const char *predefined_attribute __P ((const char *, int *, token_data **, boolean));
-static void quote_name_value __P ((struct obstack *, char *));
-static void matching_attributes __P ((struct obstack *, int, token_data **, boolean, char *));
 static void set_trace __P ((symbol *, const char *));
 static void generic_set_hook __P ((MP4H_BUILTIN_PROTO, boolean, int));
 static void math_relation __P ((MP4H_BUILTIN_PROTO, mathrel_type));
 static void mathop_functions __P ((MP4H_BUILTIN_PROTO, mathop_type));
 static void updowncase __P ((struct obstack *, int, token_data **, boolean));
+
+/*  These ones are local too, but may be declared by loadable modules */
+static boolean safe_strtod __P ((const char *, const char *, double *));
+static boolean safe_strtol __P ((const char *, const char *, long int *));
+static void quote_name_value __P ((struct obstack *, char *));
+static void matching_attributes __P ((struct obstack *, int, token_data **, boolean, char *));
 static void substitute __P ((struct obstack *, const char *, const char *, regmatch_t *));
 static void string_regexp __P ((struct obstack *, int, token_data **, int, const char *));
 static void subst_in_string __P ((struct obstack *, int, token_data **, int));
@@ -477,7 +483,7 @@ define_builtin (const char *name, const builtin *bp, boolean traced)
 /*------------------------------.
 | Install a new builtin_table.  |
 `------------------------------*/
-static void
+void
 install_builtin_table (builtin *table)
 {
   const builtin *bp;
@@ -652,7 +658,7 @@ xregcomp (regex_t *preg, const char *pattern, int cflags)
 | applicable.                                                             |
 `------------------------------------------------------------------------*/
 
-static boolean
+boolean
 bad_argc (token_data *name, int argc, int min, int max)
 {
   boolean isbad = FALSE;
@@ -793,7 +799,7 @@ shipout_string (struct obstack *obs, const char *s, int len)
 | separated by SEP.                                         |
 `----------------------------------------------------------*/
 
-static void
+void
 dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
 {
   int i;
@@ -821,7 +827,7 @@ dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
 | value associated with the key named ``key''.                              |
 `--------------------------------------------------------------------------*/
 
-static const char *
+const char *
 predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
                       boolean lowercase)
 {
@@ -1197,7 +1203,7 @@ mp4h_timer (MP4H_BUILTIN_ARGS)
   obstack_grow (obs, buf, strlen (buf));
 }
 
-#if !defined(HAVE_FILE_FUNCS) || !defined (HAVE_LOCALE_H)
+#if !defined(HAVE_FILE_FUNCS) || !defined (HAVE_LOCALE_H) || !defined(WITH_MODULES)
 static void
 mp4h_unsupported (MP4H_BUILTIN_ARGS)
 {
@@ -2689,6 +2695,22 @@ mp4h_use (MP4H_BUILTIN_ARGS)
 
   xfree (filename);
 }
+
+/*-------------------------------------.
+| Loading external module at runtime.  |
+`-------------------------------------*/
+#ifdef WITH_MODULES
+
+static void
+mp4h_loadmodule (MP4H_BUILTIN_ARGS)
+{
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  module_load (ARG(1), obs);
+}
+
+#endif
 
 /*-----------------------------.
 | Discards its body contents.  |

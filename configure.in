@@ -16,6 +16,9 @@ AC_SUBST(VERSION)
 AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE")
 AC_DEFINE_UNQUOTED(VERSION, "$VERSION")
 
+MAINTAINER_MODE_TRUE='#'
+AC_SUBST(MAINTAINER_MODE_TRUE)
+
 if test x$datadir = 'x${prefix}/share'; then
     if test x$prefix = xNONE; then
         PKGDATADIR="$ac_default_prefix/share/mp4h"
@@ -26,14 +29,34 @@ else
     PKGDATADIR="$datadir/mp4h"
 fi
 AC_DEFINE_UNQUOTED(PKGDATADIR, "$PKGDATADIR")
+pkgdatadir="$PKGDATADIR"
+AC_SUBST(pkgdatadir)
+
+if test x$libdir = 'x${exec_prefix}/lib'; then
+    if test x$prefix = xNONE; then
+        PKGLIBDIR="$ac_default_prefix/lib/mp4h"
+    else
+        PKGLIBDIR="$prefix/lib/mp4h"
+    fi
+else
+    PKGLIBDIR="$libdir/mp4h"
+fi
+AC_DEFINE_UNQUOTED(PKGLIBDIR, "$PKGLIBDIR") 
+pkglibdir="$PKGLIBDIR"
+AC_SUBST(pkglibdir)
 
 AC_ARG_PROGRAM
+AC_PROG_INSTALL
 
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 
+AM_WITH_DMALLOC
+AM_WITH_MODULES
+
+echo ''
+$shtool echo -e "Checking for %Bheaders and libraries%b"
 AC_AIX
 AC_MINIX
 AC_ISC_POSIX
@@ -53,8 +76,6 @@ AC_FUNC_VPRINTF
 AC_REPLACE_FUNCS(strtol obstack xmalloc xstrdup)
 AC_CHECK_FUNC(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
 
-AM_WITH_DMALLOC
-
 AC_MSG_CHECKING([for HTML postprocessing])
 AC_ARG_WITH(tidy,dnl
 [  --with-tidy=PATH        post-process HTML documentation with tidy],[dnl
@@ -67,12 +88,30 @@ AC_MSG_RESULT([no])
 ])
 AC_SUBST(TIDY)
 
-AC_OUTPUT(
+echo ''
+$shtool echo -e "Checking for %Bloadable modules%b support"
+AC_LIBLTDL_CONVENIENCE
+AC_ENABLE_SHARED
+AC_DISABLE_STATIC
+AC_LIBTOOL_DLOPEN
+AC_PROG_LIBTOOL
+AC_SUBST(INCLTDL)
+AC_SUBST(LIBLTDL)
+AC_CONFIG_SUBDIRS(libltdl)
+
+AC_OUTPUT([
    Makefile
    lib/Makefile
+   libltdl/Makefile
    src/Makefile
    packages/Makefile
    packages/WML/Makefile
+   modules/Makefile
    doc/Makefile
    tests/Makefile
-)
+])
+
+echo ''
+$shtool echo -e "Now please type %Bmake%b to compile mp4h"
+echo ''
+

@@ -11,29 +11,20 @@ SHELL           = /bin/sh
 
 top_srcdir      = @top_srcdir@
 srcdir          = @srcdir@
-VPATH           = @srcdir@
-
-SHTOOL          = $(top_srcdir)/etc/shtool
-INSTALL_PROGRAM = $(SHTOOL) install -c -m 755 -s
-INSTALL_SCRIPT  = $(SHTOOL) install -c -m 755
-INSTALL_DATA    = $(SHTOOL) install -c -m 644
-MKDIR           = $(SHTOOL) mkdir -f -p -m 755
-VERSION_TOOL    = $(SHTOOL) version
-FIXPERM         = $(SHTOOL) fixperm
-
 prefix          = @prefix@
-exec_prefix     = $(prefix)
-bindir          = $(prefix)/bin
-libsubdir       = @libsubdir@
-libdir          = $(prefix)/lib$(libsubdir)
-mandir          = $(prefix)/man
-catdir          = @catdir@
-tmpdir          = @tmpdir@
+VPATH           = @srcdir@
 
 RM              = rm -f
 
+SDP     =
 SUBDIRS = \
    WML
+
+RECURS_TARGET = \
+   echo "===> $(SDP)$$dir ($$target)"; \
+   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" prefix=$(prefix) $$target) \
+   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+   echo "<=== $(SDP)$$dir"
 
 # ------------------------------------------------
 #   THE DEFAULT TARGET
@@ -42,10 +33,7 @@ all install clean:
 	@set -e; \
    set dummy $(MAKEFLAGS); amf=$$2; \
    for dir in $(SUBDIRS); do \
-      echo "===> $$dir ($@)"; \
-      (cd $$dir && $(MAKE) $@) \
-      || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
-      echo "<=== $$dir"; \
+      target='$@'; $(RECURS_TARGET); \
    done && test -z "$$fail"
 
 distclean:

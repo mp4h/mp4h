@@ -573,6 +573,7 @@ void expand_user_macro __P ((struct obstack *, symbol *, int, token_data **,
 
 const builtin *find_builtin_by_addr __P ((builtin_func *));
 const builtin *find_builtin_by_name __P ((const char *));
+void install_builtin_table __P ((builtin *));
 
 
 /* File: path.c  --- path search for include files.  */
@@ -631,17 +632,15 @@ void reload_frozen_state __P ((const char *));
 
 #ifdef WITH_MODULES
 
-typedef void module_init_t (struct obstack *obs);
-typedef void module_finish_t (void);
+typedef void module_init_t __P ((struct obstack *));
+typedef void module_finish_t __P ((void));
 
-typedef voidstar module_func (const char *);
+typedef voidstar module_func __P ((const char *));
 
-void module_init (void);
-void module_unload_all (void);
+void module_load __P ((const char *, struct obstack *));
+void module_unload_all __P ((void));
 
-builtin *module_load (const char *modname, struct obstack *obs);
-
-#endif /* WITH_MODULES */
+#endif
 
 
 /* Debugging the memory allocator.  */
