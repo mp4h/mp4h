@@ -21,7 +21,7 @@
     *) New tags to affect attributes (01-Jul-2000):
        The <attributes-extract> and <attributes-remove> tags allow
        extraction and removal of specific attributes from %attributes.
-       And <attributes-print> prints the list of attributes with quotes
+       And <attributes-quote> prints the list of attributes with quotes
        around attribute values.
        [Denis Barbier, Ralf S. Engelschall]
 

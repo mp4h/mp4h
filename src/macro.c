@@ -576,32 +576,7 @@ expand_macro (symbol *sym, read_type expansion)
       for (i = 1; i < argc; i++)
         {
           obstack_1grow (obs_expansion, ' ');
-          if (expansion == READ_ATTR_ASIS || expansion == READ_BODY)
-            shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-          else
-            {
-              /*  Attributes are put back on stack.
-                  The first idea is to write
-                    obstack_1grow (obs_expansion, CHAR_BGROUP);
-                    shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-                    obstack_1grow (obs_expansion, CHAR_EGROUP);
-                  But this does not work because if string is `%attributes'
-                  then further expansion will be wrong.
-              */
-              if (strlen (TOKEN_DATA_TEXT (argv[i])) == 0)
-                {
-                  obstack_1grow (obs_expansion, CHAR_BGROUP);
-                  obstack_1grow (obs_expansion, CHAR_EGROUP);
-                }
-              else if (strchr (TOKEN_DATA_TEXT (argv[i]), ' '))
-                {
-                  obstack_1grow (obs_expansion, CHAR_BGROUP);
-                  shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-                  obstack_1grow (obs_expansion, CHAR_EGROUP);
-                }
-              else
-                shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-            }
+          shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
         }
       if (!SYMBOL_CONTAINER (sym) && slash)
         {
