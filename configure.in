@@ -46,14 +46,11 @@ pkglibdir="$PKGLIBDIR"
 AC_SUBST(pkglibdir)
 
 AC_ARG_PROGRAM
-AC_PROG_INSTALL
 
 AC_PROG_CC
 AC_PROG_CPP
+AC_PROG_RANLIB
 AC_PROG_MAKE_SET
-
-AM_WITH_DMALLOC
-AM_WITH_MODULES
 
 echo ''
 $shtool echo -e "Checking for %Bheaders and libraries%b"
@@ -76,6 +73,8 @@ AC_FUNC_VPRINTF
 AC_REPLACE_FUNCS(strtol obstack xmalloc xstrdup)
 AC_CHECK_FUNC(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
 
+AM_WITH_DMALLOC
+
 AC_MSG_CHECKING([for HTML postprocessing])
 AC_ARG_WITH(tidy,dnl
 [  --with-tidy=PATH        post-process HTML documentation with tidy],[dnl
@@ -88,21 +87,39 @@ AC_MSG_RESULT([no])
 ])
 AC_SUBST(TIDY)
 
-echo ''
-$shtool echo -e "Checking for %Bloadable modules%b support"
-AC_LIBLTDL_CONVENIENCE
-AC_ENABLE_SHARED
-AC_DISABLE_STATIC
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
-AC_SUBST(INCLTDL)
-AC_SUBST(LIBLTDL)
-AC_CONFIG_SUBDIRS(libltdl)
+AM_WITH_MODULES
+if test ".$with_modules" = .yes; then
+    WITH_MODULES_TRUE= WITH_MODULES_FALSE='#'
+else
+    WITH_MODULES_TRUE='#' WITH_MODULES_FALSE=
+fi
+AC_SUBST(WITH_MODULES_TRUE)
+AC_SUBST(WITH_MODULES_FALSE)
+
+mp4h_libs="$LIBS"
+
+if test ".$with_modules" = .yes; then
+    echo ''
+    $shtool echo -e "Checking for %Bloadable modules%b support"
+    AC_PROG_INSTALL
+    AC_LIBLTDL_CONVENIENCE
+    AC_ENABLE_SHARED
+    AC_DISABLE_STATIC
+    AC_LIBTOOL_DLOPEN
+    AC_PROG_LIBTOOL
+    AC_SUBST(INCLTDL)
+    AC_SUBST(LIBLTDL)
+    AC_CONFIG_SUBDIRS(libltdl)
+else
+    #   Remove recursive call to configure in libltdl
+    no_recursion=yes
+    #   Restore libraries
+    LIBS="$mp4h_libs"
+fi
 
 AC_OUTPUT([
    Makefile
    lib/Makefile
-   libltdl/Makefile
    src/Makefile
    packages/Makefile
    packages/WML/Makefile
