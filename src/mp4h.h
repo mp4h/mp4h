@@ -345,6 +345,7 @@ void input_init __P ((void));
 int peek_input __P ((void));
 token_type next_token __P ((token_data *, read_type));
 void skip_line __P ((void));
+void skip_buffer __P ((void));
 void input_close __P ((void));
 
 /* push back input */

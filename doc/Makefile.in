@@ -7,6 +7,7 @@ SHELL   = /bin/sh
 RM      = rm -f
 
 SUBDIRS = en fr
+SDP     =
 
 # ------------------------------------------------
 #   THE DEFAULT TARGETS
@@ -19,10 +20,10 @@ all-recursive clean-recursive distclean-recursive realclean-recursive:
 	set dummy $(MAKEFLAGS); amf=$$2; \
 	for dir in $(SUBDIRS); do \
 	    target=`echo $@ | sed s/-recursive//`; \
-	    echo "===> $$dir ($$target)"; \
+	    echo "===> $(SDP)$$dir ($$target)"; \
 	    (cd $$dir && $(MAKE) $$target) \
 	    || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
-	    echo "<=== $$dir"; \
+	    echo "<=== $(SDP)$$dir"; \
 	done && test -z "$$fail"
 
 all: all-recursive

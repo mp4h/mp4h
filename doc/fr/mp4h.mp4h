@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.8.3>
+<set-var version=0.8.4>
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -1398,6 +1398,26 @@ la plus interne.
   <ifeq <get-var i> 5 <break>>;;;
 </while>
 </example>
+
+<tag:description return>
+[up=numéro]
+<var chaîne>
+</tag:description>
+
+<para>
+Cette commande fait sortir de la commande la plus interne.
+Éventuellement, un message est affiché dans le texte. Mais comme cette
+commande modifie le processus normal de lecture, son emploi peut
+engendrer des erreurs très difficiles à détecter.
+</para>
+
+<attributes:description>
+<attributes:item "up=<var numéro>">
+Avec cet attribut, on peut choisir le nombre de fonctions à terminer.
+Par défaut, seule la fonction la plus interne est terminée (c'est-à-dire
+up=1).  Si une valeur négative est spécifiée, toutes les fonctions
+actuelles sont terminées.
+</attributes:description>
 
 <tag:description warning>
 </tag:description>

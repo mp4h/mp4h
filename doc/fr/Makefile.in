@@ -28,8 +28,8 @@ all: mp4h.html mp4h.1
 #   Do not rebuild HTML documentation
 mp4h.html: mp4h.mp4h $(INCDIR)/html.out
 	LC_CTYPE=fr_FR; export LC_CTYPE; \
-	PATH=$(PROGDIR):$(PATH) mp4h -D format=html -I $(INCDIR) mp4h.mp4h > tmp-$@
-	tidy $(TIDYOPT) tmp-$@ > $@ && $(RM) tmp-$@
+	PATH=$(PROGDIR):$(PATH) mp4h -D format=html -I $(INCDIR) mp4h.mp4h > $@
+	tidy $(TIDYOPT) -m $@
 
 mp4h.pod: mp4h.mp4h $(INCDIR)/pod.out $(PROGRAM) $(DEPS)
 	PATH=$(PROGDIR):$(PATH) mp4h -D format=pod -I $(INCDIR) mp4h.mp4h \

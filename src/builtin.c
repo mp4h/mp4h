@@ -42,7 +42,9 @@ DECLARE (mp4h___file__);
 DECLARE (mp4h___line__);
 DECLARE (mp4h___version__);
 DECLARE (mp4h_timer);
+#ifndef HAVE_FILE_FUNCS
 DECLARE (mp4h_unsupported);
+#endif
 
   /*  debug functions  */
 DECLARE (mp4h_debugmode);
@@ -69,6 +71,7 @@ DECLARE (mp4h_while);
 DECLARE (mp4h_foreach);
 DECLARE (mp4h_var_case);
 DECLARE (mp4h_break);
+DECLARE (mp4h_return);
 DECLARE (mp4h_warning);
 DECLARE (mp4h_exit);
 DECLARE (mp4h_at_end_of_file);
@@ -195,6 +198,7 @@ builtin_tab[] =
   { "foreach",          TRUE,     TRUE,   mp4h_foreach },
   { "var-case",         FALSE,    FALSE,  mp4h_var_case },
   { "break",            FALSE,    TRUE,   mp4h_break },
+  { "return",           FALSE,    TRUE,   mp4h_return },
   { "warning",          FALSE,    TRUE,   mp4h_warning },
   { "exit",             FALSE,    TRUE,   mp4h_exit },
   { "at-end-of-file",   TRUE,     TRUE,   mp4h_at_end_of_file },
@@ -739,6 +743,7 @@ mp4h_timer (MP4H_BUILTIN_ARGS)
   obstack_grow (obs, buf, strlen (buf));
 }
 
+#ifndef HAVE_FILE_FUNCS
 static void
 mp4h_unsupported (MP4H_BUILTIN_ARGS)
 {
@@ -747,6 +752,7 @@ mp4h_unsupported (MP4H_BUILTIN_ARGS)
   sprintf (buf, "This routine is not implemented.\n");
   obstack_grow (obs, buf, strlen (buf));
 }
+#endif
 
 static void
 mp4h___version__ (MP4H_BUILTIN_ARGS)
@@ -1384,8 +1390,36 @@ mp4h_var_case (MP4H_BUILTIN_ARGS)
 static void
 mp4h_break (MP4H_BUILTIN_ARGS)
 {
-    xfree (SYMBOL_TEXT (&varbreak));
-    SYMBOL_TEXT (&varbreak) = xstrdup ("true");
+  xfree (SYMBOL_TEXT (&varbreak));
+  SYMBOL_TEXT (&varbreak) = xstrdup ("true");
+}
+
+/*------------------------------------.
+| Immediately exits from inner macro.  |
+`------------------------------------*/
+static void
+mp4h_return (MP4H_BUILTIN_ARGS)
+{
+  int i, levels=1;
+  const char *up;
+  struct obstack *st;
+
+  up = predefined_attribute ("up", &argc, argv, TRUE);
+  if (up)
+    numeric_arg (argv[0], up, TRUE, &levels);
+
+  if (levels < 0)
+    levels = expansion_level;
+
+  for (i=0; i<levels; i++)
+    skip_buffer ();
+
+  if (argc>1)
+    {
+      st = push_string_init ();
+      obstack_grow (st, ARG (1), strlen (ARG (1)));
+      push_string_finish (0);
+    }
 }
 
 /*-----------------------------.
@@ -1394,7 +1428,7 @@ mp4h_break (MP4H_BUILTIN_ARGS)
 static void
 mp4h_warning (MP4H_BUILTIN_ARGS)
 {
-    MP4HERROR ((warning_status, 0,
+  MP4HERROR ((warning_status, 0,
       _("Warning:%s:%d: %s"),
            CURRENT_FILE_LINE, ARG (1)));
 }
@@ -1689,6 +1723,7 @@ mp4h_get_hook (MP4H_BUILTIN_ARGS)
     obstack_grow (obs, hook, strlen (hook));
 }
 
+#if 0
 static void
 mp4h_get_hook_after (MP4H_BUILTIN_ARGS)
 {
@@ -1705,6 +1740,7 @@ mp4h_get_hook_after (MP4H_BUILTIN_ARGS)
     obstack_grow (obs, SYMBOL_HOOK_END (sym),
                          strlen (SYMBOL_HOOK_END (sym)));
 }
+#endif
 
 
 /*  Math functions  */
@@ -2078,13 +2114,16 @@ static void
 mp4h_or (MP4H_BUILTIN_ARGS)
 {
   int i;
+  register char *cp;
 
   for (i=1; i<argc; i++)
-    if (strlen (ARG (i)) > 0)
-      {
-        obstack_grow (obs, ARG (i), strlen (ARG (i)));
-        break;
-      }
+    for (cp = ARG (i); *cp != '\0'; cp++)
+      if (*cp != CHAR_BGROUP && *cp != CHAR_EGROUP &&
+          *cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE)
+        {
+          obstack_grow (obs, ARG (i), strlen (ARG (i)));
+          return;
+        }
 }
 
 
@@ -2292,15 +2331,23 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
   int startpos;                 /* start position of match */
   int length;                   /* length of first argument */
   int match_length = 0;         /* length of pattern match */
+  int regexp_len;
 
   victim = ARG (1);
   regexp = ARG (2);
+  if (*regexp == CHAR_BGROUP || *regexp == CHAR_LQUOTE)
+    regexp++;
+
+  regexp_len = strlen (regexp);
+  if (*(regexp+regexp_len-1) == CHAR_EGROUP
+     || *(regexp+regexp_len-1) == CHAR_RQUOTE)
+    regexp_len--;
 
   buf.buffer = NULL;
   buf.allocated = 0;
   buf.fastmap = NULL;
   buf.translate = NULL;
-  msg = re_compile_pattern (regexp, strlen (regexp), &buf);
+  msg = re_compile_pattern (regexp, regexp_len, &buf);
 
   if (msg != NULL)
     {
@@ -2383,6 +2430,7 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   int matchpos;                 /* start position of match */
   int offset;                   /* current match offset */
   int length;                   /* length of first argument */
+  int regexp_len;
 
   if (bad_argc (argv[0], argc, 2, 4))
     return;
@@ -2390,14 +2438,22 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   regexp = TOKEN_DATA_TEXT (argv[2]);
   replacement = ARG (3);
 
+  if (*regexp == CHAR_BGROUP || *regexp == CHAR_LQUOTE)
+    regexp++;
+
+  regexp_len = strlen (regexp);
+  if (*(regexp+regexp_len-1) == CHAR_EGROUP
+     || *(regexp+regexp_len-1) == CHAR_RQUOTE)
+    regexp_len--;
+
   buf.buffer = NULL;
   buf.allocated = 0;
   buf.fastmap = NULL;
   buf.translate = NULL;
   if (singleline)
-    msg = re_compile_pattern_nl (regexp, strlen (regexp), &buf);
+    msg = re_compile_pattern_nl (regexp, regexp_len, &buf);
   else
-    msg = re_compile_pattern (regexp, strlen (regexp), &buf);
+    msg = re_compile_pattern (regexp, regexp_len, &buf);
 
   if (msg != NULL)
     {
@@ -3667,7 +3723,7 @@ void
 expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                    token_data **argv, read_type expansion)
 {
-  const unsigned char *text;
+  const unsigned char *text, *save;
   int i;
   boolean unexpanded;
   char sep[2];
@@ -3685,6 +3741,7 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
       unexpanded = FALSE;
       sep[0] = ' ';
       
+      save = text;
       if (*text == '#')
         {
           shipout_int (obs, argc - 1);
@@ -3712,12 +3769,10 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
           char *endp;
           i = (int)strtol (text, &endp, 10) + 1;
           text = endp;
+          obstack_1grow (obs, CHAR_BGROUP);
           if (i < argc)
-            {
-              obstack_1grow (obs, CHAR_BGROUP);
-              obstack_grow (obs, ARG (i), strlen (ARG (i)));
-              obstack_1grow (obs, CHAR_EGROUP);
-            }
+            obstack_grow (obs, ARG (i), strlen (ARG (i)));
+          obstack_1grow (obs, CHAR_EGROUP);
         }
       else if (strncmp (text, "body", 4) == 0
                || strncmp (text, "xbody", 5) == 0
@@ -3762,7 +3817,15 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
           else
             text += 11;
         }
+      else if (strncmp (text, "name", 4) == 0)
+        {
+          obstack_grow (obs, SYMBOL_NAME (sym), strlen (SYMBOL_NAME (sym)));
+          text += 4;
+        }
       else
-        obstack_1grow (obs, '%');
+        {
+          obstack_1grow (obs, '%');
+          text = save;
+        }
     }
 }

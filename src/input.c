@@ -727,6 +727,17 @@ skip_line (void)
     ;
   unget_input (ch);
 }
+
+/*------------------------------------------------------------------------.
+| skip_buffer () discards current buffer.  This function is called by     |
+| <return> to exit current function.                                      |
+`------------------------------------------------------------------------*/
+
+void
+skip_buffer (void)
+{
+  pop_input ();
+}
 
 
 /*---------------------------------------------------------------------.
