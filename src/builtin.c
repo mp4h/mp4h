@@ -318,7 +318,7 @@ static int array_member __P ((const char *, symbol *, boolean));
 static int sort_function __P ((const void *, const void *));
 
 /*  This symbol controls breakings of flow statements.  */
-symbol varbreak;
+static symbol varbreak;
 
 /*  Stack preserve/restore variables.  */
 static var_stack *vs = NULL;
@@ -635,7 +635,7 @@ bad_argc (token_data *name, int argc, int min, int max)
 | If the conversion fails, print error message for macro MACRO.  Return     |
 | TRUE iff conversion succeeds.                                             |
 `--------------------------------------------------------------------------*/
-const char *
+static const char *
 skip_space (const char *arg)
 {
   while (IS_SPACE (*arg))
@@ -643,7 +643,7 @@ skip_space (const char *arg)
   return arg;
 }
 
-boolean
+static boolean
 numeric_arg (token_data *macro, const char *arg, boolean warn, int *valuep)
 {
   char *endp;
@@ -705,7 +705,7 @@ safe_strtol (const char *name, const char *nptr, long int *value)
 | expanding to numbers.                                                 |
 `----------------------------------------------------------------------*/
 
-void
+static void
 shipout_int (struct obstack *obs, int val)
 {
   char buf[128];
@@ -760,6 +760,8 @@ dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
 
       obstack_1grow (obs, CHAR_BGROUP);
       if (*ARG (i) == '"' && *(ARG (i) + strlen (ARG (i))) == '"')
+        obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 2));
+      else if (*ARG (i) == CHAR_QUOTE && *(ARG (i) + strlen (ARG (i))) == CHAR_QUOTE)
         obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 2));
       else
         obstack_grow (obs, ARG (i), strlen (ARG (i)));
@@ -2800,8 +2802,7 @@ mp4h_subst_in_string (MP4H_BUILTIN_ARGS)
   const char *singleline; boolean s;
 
   singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
-  s = (singleline
-       && (*singleline == '\0' || strcmp (singleline, "true") == 0));
+  s = (singleline && strcmp (singleline, "true") == 0);
   subst_in_string (obs, argc, argv, s);
 }
 
@@ -2819,8 +2820,7 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
   struct obstack temp_obs;
 
   singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
-  s = (singleline
-       && (*singleline == '\0' || strcmp (singleline, "true") == 0));
+  s = (singleline && strcmp (singleline, "true") == 0);
 
   if (bad_argc (argv[0], argc, 3, 4))
     return;
@@ -2858,7 +2858,7 @@ mp4h_string_compare (MP4H_BUILTIN_ARGS)
   if (bad_argc (argv[0], argc, 2, 3))
     return;
 
-  if (caseless)
+  if (caseless && strcmp (caseless, "true") == 0)
     result = strcasecmp (ARG (1), ARG (2));
   else
     result = strcmp (ARG (1), ARG (2));
@@ -2922,7 +2922,7 @@ mp4h_string_eq (MP4H_BUILTIN_ARGS)
         obstack_grow (obs, "true", 4);
       return;
     }
-  if (caseless)
+  if (caseless && strcmp (caseless, "true") == 0)
     {
       if (strcasecmp (ARG (1), ARG (2)) == 0)
         obstack_grow (obs, "true", 4);
@@ -2949,7 +2949,7 @@ mp4h_string_neq (MP4H_BUILTIN_ARGS)
         obstack_grow (obs, "true", 4);
       return;
     }
-  if (caseless)
+  if (caseless && strcmp (caseless, "true") == 0)
     {
       if (strcasecmp (ARG (1), ARG (2)) != 0)
         obstack_grow (obs, "true", 4);
@@ -2986,7 +2986,7 @@ mp4h_char_offsets (MP4H_BUILTIN_ARGS)
       return;
     }
   c = ARG (2)[0];
-  if (caseless)
+  if (caseless && strcmp (caseless, "true") == 0)
     {
       for (cp = ARG (1); *cp != '\0'; cp++)
         {
@@ -3117,7 +3117,8 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
               }
             
             /*  Remove special quote characters. */
-            if (*value == CHAR_LQUOTE && *(value+strlen(value)-1) == CHAR_RQUOTE)
+            if ((*value == CHAR_LQUOTE && *(value+strlen(value)-1) == CHAR_RQUOTE)
+             || (*value == CHAR_QUOTE  && *(value+strlen(value)-1) == CHAR_QUOTE))
               {
                 *(value+strlen(value)-1) = '\0';
                 value++;

@@ -93,16 +93,11 @@ enum mathrel_type
 typedef enum mathop_type mathop_type;
 typedef enum mathrel_type mathrel_type;
 
-const char *skip_space __P ((const char *arg));
-
 typedef struct var_stack var_stack;
 struct var_stack
 {
     var_stack *prev;
     char *text;
 };
-
-boolean numeric_arg __P ((token_data *macro, const char *arg, boolean, int *valuep));
-void shipout_int __P ((struct obstack *obs, int val));
 
 #endif /* BUILTIN_H */
