@@ -255,7 +255,7 @@ performed if this command was still defined.
 </para>
 
 <tag:description let>
-<var new> <var old>
+<var new>=<var old>
 </tag:description>
 
 <para>
@@ -484,7 +484,7 @@ Change decrement amount.
 </tag:description>
 
 <para>
-Copie a variable into another.
+Copy a variable into another.
 </para>
 
 <example>
@@ -1206,7 +1206,7 @@ certainly unwanted.
 </para>
 
 <attributes:description>
-<attributes:item "separator=<var chaîne>">
+<attributes:item "separator=<var string>">
 By default arguments are put aside.  This attribute define a separator
 inserted between arguments.
 </attributes:description>
@@ -1228,7 +1228,7 @@ noexpand> tag.
 </tag:description>
 
 <para>
-Annule l'effet de la balise <command noexpand>.
+Cancels the <command noexpand> tag.
 </para>
 
 <pseudo-func foo>
@@ -1849,9 +1849,11 @@ definitions above, <full-command bar> can not be an attribute since it
 must be finished by <full-command /bar>.
 But this is valid:
 <code><foo <foo>></code>
+
 or even
 <code><foo <foo name=src url=ici>></code>
-In these examples, the <command foo> has only one argument.
+
+In these examples, the <command foo> tag has only one argument.
 </para>
 
 <para>
