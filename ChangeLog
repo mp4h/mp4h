@@ -12,7 +12,7 @@
 
     *) Upgrade to PCRE 3.7 (08-Nov-2001):
        Upstream do allow various definitions of newline char, I keep
-       stuck with `\n' in internal.h since I know exactly how to
+       stuck with `\n' in internal.h until I know exactly how to
        incorporate this option.
        [Denis Barbier]
 
