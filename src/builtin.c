@@ -1404,11 +1404,7 @@ mp4h_bp_file_exists (MP4H_BUILTIN_ARGS)
 static void
 mp4h_bp_real_path (MP4H_BUILTIN_ARGS)
 {
-  const char *pathname, *cp;
-  char *username;
-  int i;
-  size_t l;
-  struct passwd *pw;
+  const char *pathname;
   char resolvedname[MAXPATHLEN];
 
   CHECK_SAFETY_LEVEL(1);

@@ -212,7 +212,6 @@ library_load (const char *libname, struct obstack *obs)
   const char *lib_name = libname;
   const char *save_path = NULL;
   char *cp, *new_search_path;
-  builtin *bp;
 
   /*  If it contains a slash, leading dir is appended to search path.  */
   cp = strrchr(libname, '/');

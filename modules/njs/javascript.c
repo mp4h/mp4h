@@ -18,9 +18,6 @@
 #define mp4h_init_module                javascript_LTX_mp4h_init_module
 #define mp4h_finish_module              javascript_LTX_mp4h_finish_module
 
-module_init_t mp4h_init_module;         /* initialisation function */
-module_finish_t mp4h_finish_module;     /* cleanup function */
-
 DECLARE(javascript);         /* declare javascript as implementing a builtin */
 
 #undef DECLARE
@@ -78,6 +75,7 @@ int
 output_func(void *context, unsigned char *buffer, unsigned int amount)
 {
     obstack_grow(javascript_obs, buffer, amount);
+    return 0;
 }
 
 void
