@@ -56,7 +56,7 @@ expand_input (void)
   token_type t;
   token_data td;
 
-  while ((t = next_token (&td, READ_NORMAL)) != TOKEN_EOF)
+  while ((t = next_token (&td, READ_NORMAL, FALSE)) != TOKEN_EOF)
     expand_token ((struct obstack *) NULL, READ_NORMAL, t, &td);
 }
 
@@ -154,7 +154,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
   /* Skip leading white space.  */
   do
     {
-      t = next_token (&td, expansion);
+      t = next_token (&td, expansion, FALSE);
     }
   while (t == TOKEN_SPACE);
 
@@ -237,7 +237,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
         }
 
       *last_char_ptr = LAST_CHAR (TOKEN_DATA_TEXT (&td));
-      t = next_token (&td, expansion);
+      t = next_token (&td, expansion, in_string);
     }
 }
 
@@ -267,7 +267,7 @@ collect_arguments (char *symbol_name, read_type expansion,
 
   ch = peek_input ();
   if (IS_CLOSE (ch))
-    (void) next_token (&td, READ_BODY);
+    (void) next_token (&td, READ_BODY, FALSE);
   else if (IS_SPACE(ch) || IS_ESCAPE(ch) || ch == '/')
     {
       do
@@ -320,7 +320,7 @@ collect_body (char *symbol_name, read_type expansion,
 
   while (1)
     {
-      t = next_token (&td, expansion);
+      t = next_token (&td, expansion, FALSE);
       text = TOKEN_DATA_TEXT (&td);
       switch (t)
         {                                /* TOKSW */
@@ -362,7 +362,7 @@ collect_body (char *symbol_name, read_type expansion,
                   /*  gobble closing bracket */
                   do
                     {
-                      t = next_token (&td, expansion);
+                      t = next_token (&td, expansion, FALSE);
                     }
                   while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)))
                     ;
@@ -381,7 +381,7 @@ collect_body (char *symbol_name, read_type expansion,
               else
                 {
                   newsym = lookup_symbol (text, SYMBOL_LOOKUP);
-                  if (newsym)
+                  if (newsym && !(exp_flags & EXP_NOWARN_NEST))
                     MP4HERROR ((warning_status, 0,
                       _("Warning:%s:%d: `</%s>' found when `</%s>' expected"),
                            CURRENT_FILE_LINE, text, symbol_name));
@@ -390,7 +390,7 @@ collect_body (char *symbol_name, read_type expansion,
                   /*  gobble closing bracket */
                   do
                     {
-                      t = next_token (&td, expansion);
+                      t = next_token (&td, expansion, FALSE);
                       obstack_grow (bodyptr, TOKEN_DATA_TEXT (&td),
                               strlen(TOKEN_DATA_TEXT (&td)) );
                     }
@@ -529,7 +529,7 @@ expand_macro (symbol *sym, read_type expansion)
           else if (LAST_CHAR (cp) == '/')
             LAST_CHAR (cp) = '\0';
         }
-      else
+      else if (!(exp_flags & EXP_NOWARN_SLASH))
         MP4HERROR ((warning_status, 0,
           _("Warning:%s:%d: `<%s>' requires a trailing slash"),
                CURRENT_FILE_LINE, SYMBOL_NAME (sym)));

@@ -209,6 +209,8 @@ unsigned short syntax_table[256];
 STRING eolcomm;
 STRING lquote, rquote;
 
+boolean visible_quotes;
+
 
 
 /*---------------------------------------------------------------------.
@@ -830,11 +832,12 @@ input_init (void)
   eolcomm.string = xstrdup (DEF_EOLCOMM);
   eolcomm.length = strlen (eolcomm.string);
 
-  lquote.string = xstrdup (DEF_LQUOTE);
-  lquote.length = strlen (lquote.string);
+  lquote.string  = xstrdup (DEF_LQUOTE);
+  lquote.length  = strlen (lquote.string);
 
-  rquote.string = xstrdup (DEF_RQUOTE);
-  rquote.length = strlen (rquote.string);
+  rquote.string  = xstrdup (DEF_RQUOTE);
+  rquote.length  = strlen (rquote.string);
+  visible_quotes = FALSE;
 
   for (ch = 256; --ch > 0; )
     {
@@ -950,7 +953,7 @@ set_syntax (int code, const char *chars)
 `-------------------------------------------------------------------------*/
 
 token_type
-next_token (token_data *td, read_type expansion)
+next_token (token_data *td, read_type expansion, boolean in_string)
 {
   int ch;
   token_type type = TOKEN_NONE;
@@ -995,7 +998,7 @@ next_token (token_data *td, read_type expansion)
         {
           if (lquote.length > 0 && MATCH (ch, lquote.string))
             {
-              if (expansion == READ_ATTR_VERB
+              if (visible_quotes || expansion == READ_ATTR_VERB
                   || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
                 obstack_grow (&token_stack, lquote.string, lquote.length);
               while ((ch = next_char ()) != CHAR_EOF)
@@ -1004,7 +1007,7 @@ next_token (token_data *td, read_type expansion)
                     break;
                   obstack_1grow (&token_stack, ch);
                 }
-              if (expansion == READ_ATTR_VERB
+              if (visible_quotes || expansion == READ_ATTR_VERB
                   || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
                 obstack_grow (&token_stack, rquote.string, rquote.length);
               type = TOKEN_STRING;
@@ -1168,10 +1171,10 @@ next_token (token_data *td, read_type expansion)
                 obstack_1grow (&token_stack, '\t');
               else if (ch == 'r')
                 obstack_1grow (&token_stack, '\r');
-              /*
-              else if (ch == '"')
+              else if (ch == '"' && in_string)
                 obstack_1grow (&token_stack, CHAR_QUOTE);
-              */
+              else if (ch == '\\' && in_string)
+                obstack_1grow (&token_stack, CHAR_ESCAPE);
               else
                 {
                   obstack_1grow (&token_stack, '\\');
@@ -1183,11 +1186,9 @@ next_token (token_data *td, read_type expansion)
 
             case READ_ATTR_QUOT:
               ch = next_char();
-              /*
-              if (ch == '"')
+              if (ch == '"' && in_string)
                 obstack_1grow (&token_stack, CHAR_QUOTE);
               else
-              */
                 {
                   obstack_1grow (&token_stack, '\\');
                   obstack_1grow (&token_stack, ch);
@@ -1315,7 +1316,7 @@ lex_debug (void)
   token_type t;
   token_data td;
 
-  while ((t = next_token (&td, READ_NORMAL)) != TOKEN_EOF)
+  while ((t = next_token (&td, READ_NORMAL, FALSE)) != TOKEN_EOF)
     print_token ("lex", t, &td);
 }
 #endif

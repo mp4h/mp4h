@@ -58,6 +58,8 @@ int warning_status = 0;
 int nesting_limit = 250;
 
 /* Flags to control how expansion is performed.  */
+#define DEFAULT_EXPANSION_FLAGS 0
+
 int exp_flags = DEFAULT_EXPANSION_FLAGS;
 
 /* Name of frozen file to digest after initialization.  */
@@ -107,6 +109,14 @@ xfree (voidstar p)
 | Print a usage message and exit with STATUS.  |
 `---------------------------------------------*/
 
+#define HELP_EXP_FLAGS(n,str) \
+    do                        \
+      {                       \
+        printf(" %c %4d %s\n", \
+                ((DEFAULT_EXPANSION_FLAGS & n) ? '*' : ' '), n, str);  \
+      }                       \
+    while (0)
+
 static void
 usage (int status)
 {
@@ -137,15 +147,16 @@ Preprocessor features:\n\
 \n\
 Parser features:\n\
   -X, --expansion=NUMBER       set parser behaviour according to the bits\n\
-                               of NUMBER, with\n\
-  1  do not parse unknown tags\n\
-  2  unknown tags are assumed being complex\n\
-  4  an unknown tag whose name ends with a star is assumed simple\n\
-  8  remove the trailing star in tag name\n\
- 16  remove the trailing slash in tag attributes\n\
-"),
-             stdout);
-      printf("  Default is NUMBER=%d\n", DEFAULT_EXPANSION_FLAGS);
+                               of NUMBER, with (starred values are default)\n\
+"), stdout);
+      HELP_EXP_FLAGS(    1, "do not parse unknown tags");
+      HELP_EXP_FLAGS(    2, "unknown tags are assumed being complex");
+      HELP_EXP_FLAGS(    4, "an unknown tag whose name ends with a star is assumed simple");
+      HELP_EXP_FLAGS(    8, "remove the trailing star in tag name");
+      HELP_EXP_FLAGS(   16, "remove the trailing slash in tag attributes");
+      HELP_EXP_FLAGS( 1024, "suppress warnings about bad nested tags");
+      HELP_EXP_FLAGS( 2048, "suppress warnings about missing trailing slash");
+
       fputs (_("\
 \n\
 Limits control:\n\

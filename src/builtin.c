@@ -44,6 +44,7 @@ DECLARE (mp4h___version__);
 DECLARE (mp4h_lb);
 DECLARE (mp4h_rb);
 DECLARE (mp4h_dq);
+DECLARE (mp4h_bs);
 DECLARE (mp4h_timer);
 #ifdef HAVE_LOCALE_H
 DECLARE (mp4h_mp4h_l10n);
@@ -177,6 +178,7 @@ builtin_tab[] =
   { "lb",               FALSE,    TRUE,   mp4h_lb },
   { "rb",               FALSE,    TRUE,   mp4h_rb },
   { "dq",               FALSE,    TRUE,   mp4h_dq },
+  { "bs",               FALSE,    TRUE,   mp4h_bs },
   { "timer",            FALSE,    TRUE,   mp4h_timer },
 #ifdef HAVE_LOCALE_H
   { "mp4h-l10n",        FALSE,    TRUE,   mp4h_mp4h_l10n },
@@ -1013,6 +1015,12 @@ static void
 mp4h_dq (MP4H_BUILTIN_ARGS)
 {
   add_1char_protected (obs, '"');
+}
+
+static void
+mp4h_bs (MP4H_BUILTIN_ARGS)
+{
+  add_1char_protected (obs, '\\');
 }
 
 
@@ -2372,6 +2380,11 @@ mp4h_set_eol_comment (MP4H_BUILTIN_ARGS)
 static void
 mp4h_set_quotes (MP4H_BUILTIN_ARGS)
 {
+  const char *display;
+
+  display = predefined_attribute ("display", &argc, argv, TRUE);
+  visible_quotes = (display && strcmp (display, "visible") == 0);
+
   if (argc == 1)
     {
       xfree (lquote.string);
@@ -2866,7 +2879,8 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
 static void
 mp4h_subst_in_string (MP4H_BUILTIN_ARGS)
 {
-  const char *singleline; boolean s;
+  const char *singleline;
+  boolean s;
 
   singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
   s = (singleline && strcmp (singleline, "true") == 0);

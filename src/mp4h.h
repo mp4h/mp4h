@@ -181,9 +181,6 @@ extern int frozen_dump;                 /* -F */
 /* Error handling.  */
 #define MP4HERROR(Arglist) (error Arglist)
 
-/* Default -X option.  */
-#define DEFAULT_EXPANSION_FLAGS 0
-
 
 /* File: debug.c  --- debugging and tracing function.  */
 
@@ -352,6 +349,9 @@ struct token_data
                         (1 << 3)  /* Remove trailing star in tag name */
 #define EXP_REMOVE_TRAILING_SLASH \
                         (1 << 4)  /* Remove trailing slash in simple tag attributes */
+#define EXP_NOWARN_NEST (1 << 10) /* Suppress warning about bad nested tags */
+#define EXP_NOWARN_SLASH \
+                        (1 << 11) /* Suppress warning about missing trailing slash */
 
 extern int exp_flags;
 
@@ -362,7 +362,7 @@ typedef int read_type;
 void input_init __P ((void));
 void input_deallocate __P ((void));
 int peek_input __P ((void));
-token_type next_token __P ((token_data *, read_type));
+token_type next_token __P ((token_data *, read_type, boolean));
 void skip_line __P ((void));
 void skip_buffer __P ((void));
 void input_close __P ((void));
@@ -395,6 +395,7 @@ extern STRING eolcomm;
 #define CHAR_BGROUP '\3'
 #define CHAR_EGROUP '\4'
 #define CHAR_QUOTE  '\5'
+#define CHAR_ESCAPE '\6'
 
 #define DEF_EOLCOMM  ";;;"
 #define DEF_LQUOTE  "<@["
@@ -530,6 +531,8 @@ struct builtin
 };
 
 typedef struct builtin builtin;
+
+extern boolean visible_quotes;
 
 void locale_init __P ((void));
 void initialize_builtin __P ((symbol *));

@@ -281,7 +281,7 @@ symtab_debug (void)
   symbol *s;
   int delete;
 
-  while ((t = next_token (&td, READ_NORMAL)) != TOKEN_EOF)
+  while ((t = next_token (&td, READ_NORMAL, FALSE)) != TOKEN_EOF)
     {
       if (t != TOKEN_WORD)
         continue;
