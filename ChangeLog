@@ -10,6 +10,9 @@
 
   Changes between 0.9.5 and SNAP:
 
+    *) Fix compilation bug in src/builtin.c (01-Jun-2000):
+       [<gaa@ulticom.com>]
+
     *) Provide a way to read tokens without parsing (01-Jun-2000):
        All characters between <@[ and ]@> are read without parsing,
        this is very useful to read malformed mp4h tags.  These

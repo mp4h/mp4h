@@ -806,14 +806,11 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
             for (lower=tag_attr->text; *lower != '\0'; lower++)
               *lower = tolower (*lower);
 
-          if (remove)
-            {
-              /* remove this attribute from argv[].  */
-              for (j=i+1; j<=*ptr_argc; j++)
-                argv[j-1] = argv[j];
+          /* remove this attribute from argv[].  */
+          for (j=i+1; j<=*ptr_argc; j++)
+            argv[j-1] = argv[j];
 
-              (*ptr_argc)--;
-            }
+          (*ptr_argc)--;
         }
       i++;
     }
