@@ -674,7 +674,7 @@ expand_unknown_tag (char *name, read_type expansion)
   argv = (token_data **) obstack_finish (&argptr);
 
   /*  When this tag is no more processed, remove the trailing slash.  */
-  if (!(exp_flags & EXP_LEAVE_TRAILING_SLASH) &&
+  if ((exp_flags & EXP_REMOVE_TRAILING_SLASH) &&
       expansion == READ_NORMAL && slash)
     {
       cp = TOKEN_DATA_TEXT (argv[argc-1]);

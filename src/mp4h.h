@@ -345,12 +345,12 @@ struct token_data
 #define EXP_STAR_COMPLEX (1 << 2)  /* HTML tags whose last char is an asterisk
                                       are by default simple tags, they become
                                       complex when this flag is set.  */
-#define EXP_LEAVE_TRAILING_SLASH \
-                         (1 << 3)  /* Do not remove trailing slash in simple tag attributes */
-#define EXP_KEEP_BSLASH  (1 << 4)  /* By default, only 'n', 'r', 't', '"' and
-                                      '\\' are escaped, but a backslash before
-                                      any other character is removed. When this
-                                      flag is set, it is not.  */
+#define EXP_REMOVE_TRAILING_SLASH \
+                         (1 << 3)  /* Remove trailing slash in simple tag attributes */
+#define EXP_STD_BSLASH   (1 << 4)  /* By default, only 'n', 'r', 't', '"' and
+                                      '\\' are escaped.  When this flag is
+				      set, backslashes are interpreted as in
+				      printf.  */
 #define EXP_UNM_BREAK    (1 << 5)  /* An unmatched end tag closes all previous
                                       unmatched begin tags.  */
 #define EXP_NOWARN_NEST  (1 << 10) /* Suppress warning about bad nested tags */

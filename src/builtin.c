@@ -248,7 +248,7 @@ builtin_tab[] =
 
       /*  page functions  */
   { "include",          FALSE,   FALSE,   mp4h_include },
-  { "%%include",        TRUE,     TRUE,   mp4h___include },
+  { "__include",        TRUE,     TRUE,   mp4h___include },
   { "comment",          TRUE,     TRUE,   mp4h_comment },
   { "set-eol-comment",  FALSE,    TRUE,   mp4h_set_eol_comment },
   { "set-quotes",       FALSE,    TRUE,   mp4h_set_quotes },
@@ -2330,14 +2330,14 @@ mp4h_include (MP4H_BUILTIN_ARGS)
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  obstack_grow (obs, "<%%include ", 11);
+  obstack_grow (obs, "<__include ", 11);
   obstack_grow (obs, ARG (1), strlen (ARG (1)));
   if (verbatim && strcmp (verbatim, "true") == 0)
     obstack_grow (obs, " verbatim=true", 14);
   obstack_1grow (obs, '>');
   if (alt)
     obstack_grow (obs, alt, strlen (alt));
-  obstack_grow (obs, "</%%include>", 12);
+  obstack_grow (obs, "</__include>", 12);
 }
 
 static void

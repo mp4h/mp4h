@@ -58,7 +58,7 @@ int warning_status = 0;
 int nesting_limit = 250;
 
 /* Flags to control how expansion is performed.  */
-#define DEFAULT_EXPANSION_FLAGS 3122
+#define DEFAULT_EXPANSION_FLAGS 3114
 
 int exp_flags = DEFAULT_EXPANSION_FLAGS;
 
@@ -113,7 +113,7 @@ xfree (voidstar p)
     do                        \
       {                       \
         printf(" %c %4d %s\n", \
-                ((DEFAULT_EXPANSION_FLAGS & n) ? '*' : ' '), n, str);  \
+                ((exp_flags & n) ? '*' : ' '), n, str);  \
       }                       \
     while (0)
 
@@ -152,8 +152,8 @@ Parser features:\n\
       HELP_EXP_FLAGS(    1, "do not parse unknown tags");
       HELP_EXP_FLAGS(    2, "unknown tags are assumed being simple");
       HELP_EXP_FLAGS(    4, "trailing star in tag name do not make this tag simple");
-      HELP_EXP_FLAGS(    8, "leave the trailing slash in tag attributes");
-      HELP_EXP_FLAGS(   16, "backslashes are preserved before unescaped chars");
+      HELP_EXP_FLAGS(    8, "remove the trailing slash in tag attributes");
+      HELP_EXP_FLAGS(   16, "interpret backslashes as printf");
       HELP_EXP_FLAGS(   32, "an unmatched end tag closes all previous unmatched begin tags");
       HELP_EXP_FLAGS( 1024, "suppress warnings about bad nested tags");
       HELP_EXP_FLAGS( 2048, "suppress warnings about missing trailing slash");

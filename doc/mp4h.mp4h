@@ -113,15 +113,15 @@ NUMBER is a combination of
 <option 1>do not parse unknown tags</option>
 <option 2>unknown tags are assumed being simple</option>
 <option 4>trailing star in tag name do not make this tag simple</option>
-<option 8>leave the trailing slash in tag attributes</option>
-<option 16>backslashes are preserved before unescaped characters</option>
+<option 8>remove the trailing slash in tag attributes</option>
+<option 16>interpret backslashes as printf</option>
 <option 32>an unmatched end tag closes all previous unmatched begin tags</option>
 <option 1024>suppress warnings about bad nested tags</option>
 <option 2048>suppress warnings about missing trailing slash</option>
 </option-list>
 </para>
 <para>
-In version <get-var version />, default value is 3122=2+16+32+1024+2048.
+In version <get-var version />, default value is 3114=2+8+32+1024+2048.
 </para>
 
 <subsection "Limits control" />

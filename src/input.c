@@ -1178,7 +1178,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                 obstack_1grow (&token_stack, CHAR_QUOTE);
               else
                 {
-                  if (exp_flags & EXP_KEEP_BSLASH)
+                  if (!(exp_flags & EXP_STD_BSLASH))
                     obstack_1grow (&token_stack, '\\');
                   obstack_1grow (&token_stack, ch);
                 }
@@ -1187,6 +1187,18 @@ next_token (token_data *td, read_type expansion, boolean in_string)
               break;
 
             case READ_ATTR_VERB:
+              ch = next_char();
+              if (ch == '"' && in_string)
+                obstack_1grow (&token_stack, CHAR_QUOTE);
+              else
+                {
+                  obstack_1grow (&token_stack, '\\');
+                  obstack_1grow (&token_stack, ch);
+                }
+
+              type = TOKEN_STRING;
+              break;
+
             case READ_ATTR_ASIS:
               obstack_1grow (&token_stack, ch);
               ch = next_char();
