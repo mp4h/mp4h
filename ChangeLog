@@ -10,6 +10,10 @@
 
   Changes between 1.0.2 and SNAP:
 
+    *) Fix frozen state files mechanism (24-Jun-2000):
+       Frozen state files are unusable in mp4h-1.0.2.
+       [Denis Barbier]
+
     *) Parse bad formed closing tags (24-Jun-2000):
        With previous versions, closing tags with attributes confuse
        mp4h.  They are now accepted, even if not desirable in input

@@ -66,6 +66,7 @@ produce_frozen_state (const char *name)
   int h;
   symbol *sym;
   const builtin *bp;
+  int number[2];
 
   if (file = fopen (name, "w"), !file)
     {
@@ -123,12 +124,16 @@ produce_frozen_state (const char *name)
                 {
                   fputc (SYMBOL_CONTAINER (sym) ? '1' : '0', file);
                   fputc (SYMBOL_EXPAND_ARGS (sym) ? '1' : '0', file);
-                  fprintf (file, "B%d,%d\n",
-                       (int) strlen (SYMBOL_NAME (sym)),
-                       (int) strlen (SYMBOL_HOOK_BEGIN (sym)));
-                  fprintf (file, "E%d,%d\n",
-                       (int) strlen (SYMBOL_NAME (sym)),
-                       (int) strlen (SYMBOL_HOOK_END (sym)));
+                  fputc ('\n', file);
+                  number[0] = (SYMBOL_HOOK_BEGIN (sym) ?
+                          strlen (SYMBOL_HOOK_BEGIN (sym)) : 0);
+                  number[1] = (SYMBOL_HOOK_END (sym) ?
+                          strlen (SYMBOL_HOOK_END (sym)) : 0);
+                  fprintf (file, "%d,%d\n", number[0], number[1]);
+                  if (SYMBOL_HOOK_BEGIN (sym))
+                    fputs (SYMBOL_HOOK_BEGIN (sym), file);
+                  if (SYMBOL_HOOK_END (sym))
+                    fputs (SYMBOL_HOOK_END (sym), file);
                   fputc ('\n', file);
                 }
               break;
@@ -222,7 +227,7 @@ reload_frozen_state (const char *name)
   int allocated[2];
   int number[2];
   const builtin *bp;
-  symbol *var;
+  symbol *sym, *var;
   boolean container, expand_args;
 
   file = path_search (name, (char **)NULL);
@@ -379,6 +384,56 @@ reload_frozen_state (const char *name)
 
             define_user_macro (string[0], string[1], SYMBOL_INSERT,
                     container, expand_args, FALSE);
+
+            sym = lookup_symbol (string[0], SYMBOL_LOOKUP);
+
+            /* Add hooks.  */
+
+            GET_CHARACTER;
+            GET_NUMBER (number[0]);
+            VALIDATE (',');
+            GET_CHARACTER;
+            GET_NUMBER (number[1]);
+            VALIDATE ('\n');
+            lineno++;
+
+            if (number[0] > 0)
+              {
+                if (number[0] + 1 > allocated[0])
+                  {
+                    free (string[0]);
+                    allocated[0] = number[0] + 1;
+                    string[0] = xmalloc ((size_t) allocated[0]);
+                  }
+                if (!fread (string[0], (size_t) number[0], 1, file))
+                  MP4HERROR ((EXIT_FAILURE, 0, _("Premature end of frozen file")));
+
+                string[0][number[0]] = '\0';
+
+                SYMBOL_HOOK_BEGIN (sym) = xstrdup (string[0]);
+
+              }
+
+            if (number[1] > 0)
+              {
+                if (number[1] + 1 > allocated[1])
+                  {
+                    free (string[1]);
+                    allocated[1] = number[1] + 1;
+                    string[1] = xmalloc ((size_t) allocated[1]);
+                  }
+                if (!fread (string[1], (size_t) number[1], 1, file))
+                  MP4HERROR ((EXIT_FAILURE, 0, _("Premature end of frozen file")));
+
+                string[1][number[1]] = '\0';
+
+                SYMBOL_HOOK_END (sym) = xstrdup (string[1]);
+
+              }
+            GET_CHARACTER;
+            VALIDATE ('\n');
+            lineno++;
+
             break;
 
           default:
