@@ -94,6 +94,7 @@ DECLARE (mp4h_neq);
 
   /*  page functions  */
 DECLARE (mp4h_include);
+DECLARE (mp4h___include);
 DECLARE (mp4h_comment);
 
   /*  relational operators  */
@@ -212,7 +213,8 @@ builtin_tab[] =
   { "max",              FALSE,    TRUE,   mp4h_max },
 
       /*  page functions  */
-  { "include",          FALSE,    TRUE,   mp4h_include },
+  { "include",          FALSE,   FALSE,   mp4h_include },
+  { "%%include",        FALSE,    TRUE,   mp4h___include },
   { "comment",          TRUE,     TRUE,   mp4h_comment },
 
       /*  relational operators  */
@@ -1784,7 +1786,33 @@ mp4h_include (MP4H_BUILTIN_ARGS)
   FILE *fp;
   char *filename = NULL;
 
-  alt = predefined_attribute ("alt", &argc, argv, TRUE);
+  alt = predefined_attribute ("alt", &argc, argv, FALSE);
+  verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  obstack_grow (obs, "<%%include ", 11);
+  obstack_grow (obs, ARG (1), strlen (ARG (1)));
+  if (alt)
+    {
+      obstack_grow (obs, " alt=", 5);
+      obstack_1grow (obs, CHAR_LQUOTE);
+      obstack_grow (obs, alt, strlen (alt));
+      obstack_1grow (obs, CHAR_RQUOTE);
+     }
+  if (verbatim)
+      obstack_grow (obs, " verbatim=true", 14);
+  obstack_1grow (obs, '>');
+}
+
+static void
+mp4h___include (MP4H_BUILTIN_ARGS)
+{
+  const char *alt, *verbatim;
+  FILE *fp;
+  char *filename = NULL;
+
+  alt = predefined_attribute ("alt", &argc, argv, FALSE);
   verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
 
   if (bad_argc (argv[0], argc, 2, 2))
@@ -2667,11 +2695,11 @@ generic_variable (struct obstack *obs, int argc, token_data **argv,
                 xfree (old_value);
               }
 
-            if (verbatim)
-              obstack_1grow (obs, 1);
+            if (verbatim && expansion_level > 1)
+              obstack_1grow (obs, CHAR_LQUOTE);
             obstack_grow (obs, value, strlen (value));
-            if (verbatim)
-              obstack_1grow (obs, 2);
+            if (verbatim && expansion_level > 1)
+              obstack_1grow (obs, CHAR_RQUOTE);
             xfree (value);
           }
         break;
