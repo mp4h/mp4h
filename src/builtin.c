@@ -372,7 +372,7 @@ static int encoding_strlen __P ((char *));
 static void substitute __P ((struct obstack *, const char *, const char *, int *));
 static void string_regexp __P ((struct obstack *, int, token_data **, int, const char *));
 static void subst_in_string __P ((struct obstack *, int, token_data **, int));
-static void generic_variable __P ((MP4H_BUILTIN_PROTO, symbol_lookup, boolean));
+static void generic_variable_lookup __P ((MP4H_BUILTIN_PROTO, boolean));
 static int array_size __P ((symbol *));
 static char *array_value __P ((symbol *, int, int *));
 static int array_member __P ((const char *, symbol *, boolean));
@@ -628,7 +628,7 @@ define_user_macro (const char *name, char *text, symbol_lookup mode,
 | It is also used from main ().                                             |
 `--------------------------------------------------------------------------*/
 
-void
+static void
 define_user_entity (const char *name, char *text, symbol_lookup mode)
 {
   symbol *s;
@@ -3743,265 +3743,85 @@ mp4h_bp_match (MP4H_BUILTIN_ARGS)
 `----------------------------------------------------------------*/
 
 static void
-generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
+generic_variable_lookup (MP4H_BUILTIN_ARGS, boolean verbatim)
 {
-  char *value, *cp, *ptr_index, *old_value;
+  char *cp, *ptr_index;
   symbol *var, *index_var;
-  register int i;
-  register int j;
-  int length, istep;
+  int i;
+  int length;
   int array_index;
-  boolean newline;
 
   if (argc < 2)
     return;
 
-  switch (mode)
+  for (i = 1; i < argc; i++)
     {
-      case SYMBOL_INSERT:
-        for (i = 1; i < argc; i++)
-          {
-            array_index = -1;
-            istep = 0;
-            value = strchr (ARG (i), '=');
-            if (value == NULL)
-              {
-                /*  Look for spaces like in <set-var i = 0> */
-                if (i+1 < argc && *(ARG (i+1)) == '=')
-                  {
-                    istep++;
-                    if (i+2 < argc && *(ARG (i+1) +1) == '\0')
-                      {
-                        istep++;
-                        value = ARG (i+2);
-                      }
-                    else
-                      value = ARG (i+1) + 1;
-                  }
-                else
-                  value = ARG (i) + strlen (ARG (i));
-              }
-            else
-              {
-                *value = '\0';
-                value++;
-              }
-            
-            /*  Remove special quote characters. */
-            remove_special_chars (value, FALSE);
-
-            ptr_index = strchr (ARG (i), ']');
-            if (ptr_index != NULL)
-              {
-                if (*(ptr_index-1) == '[')
-                  {
-                    *(ptr_index-1) = '\0';
-                    ptr_index = NULL;
-                  }
-                else
-                  {
-                    *ptr_index = '\0';
-                    ptr_index = strchr (ARG (i), '[');
-                    if (!ptr_index)
-                      {
-                        MP4HERROR ((warning_status, 0, _("\
+      array_index = -1;
+      ptr_index = strchr (ARG (i), ']');
+      if (ptr_index != NULL)
+        {
+          if (*(ptr_index-1) == '[')
+            {
+              *(ptr_index-1) = '\0';
+              ptr_index = NULL;
+            }
+          else
+            {
+              *ptr_index = '\0';
+              ptr_index = strchr (ARG (i), '[');
+              if (!ptr_index)
+                {
+                  MP4HERROR ((warning_status, 0, _("\
 Warning:%s:%d: wrong index declaration in <%s>"),
-                             CURRENT_FILE_LINE, ARG (0)));
-                        return;
-                      }
-                    *ptr_index = '\0';
-                    ptr_index++;
-                    if (!numeric_arg (argv[0], ptr_index, FALSE, &array_index))
-                      {
-                        /*   Maybe there is an implicit index like in
-                               <set-var foo[i]=bar>.  */
-                        index_var = lookup_variable (ptr_index, SYMBOL_LOOKUP);
-                        if (index_var)
-                          {
-                            if (!numeric_arg (argv[0], SYMBOL_TEXT (index_var),
-                                        FALSE, &array_index))
-                                index_var = NULL;
-                          }
-                        if (!index_var)
-                          {
-                            MP4HERROR ((warning_status, 0, _("\
+                       CURRENT_FILE_LINE, ARG (0)));
+                  return;
+                }
+              *ptr_index = '\0';
+              ptr_index++;
+              if (!numeric_arg (argv[0], ptr_index, FALSE, &array_index))
+                {
+                  /*   Maybe there is an implicit index like in
+                         <get-var foo[i]>.  */
+                  index_var = lookup_variable (ptr_index, SYMBOL_LOOKUP);
+                  if (index_var)
+                    {
+                      if (!numeric_arg (argv[0], SYMBOL_TEXT (index_var),
+                                  FALSE, &array_index))
+                          index_var = NULL;
+                    }
+                  if (!index_var)
+                    {
+                      MP4HERROR ((warning_status, 0, _("\
 Warning:%s:%d: wrong index declaration in <%s>"),
-                                 CURRENT_FILE_LINE, ARG (0)));
-                            return;
-                          }
-                      }
-                  }
-              }
-            var = lookup_variable (ARG (i), SYMBOL_INSERT);
-            if (ptr_index == NULL)
-              {
-                /*  simple value.  */
-                if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-                  xfree ((voidstar) SYMBOL_TEXT (var));
-                SYMBOL_TEXT (var) = xstrdup (value);
-              }
-            else if (array_index < 0)
-              {
-                /*  Illegal value */
-                SYMBOL_TEXT (var) = (char *) xmalloc (1);
-                *(SYMBOL_TEXT (var)) = '\0';
-              }
-            else
-              {
-                /*  an index has been specified.  */
-                if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-                  old_value = SYMBOL_TEXT (var);
-                else
-                  old_value = xstrdup ("");
+                           CURRENT_FILE_LINE, ARG (0)));
+                      return;
+                    }
+                }
+              if (array_index < 0)
+                continue;
+            }
+        }
 
-                length = strlen (old_value) + strlen (value) + array_index;
-                SYMBOL_TEXT (var) = (char *) xmalloc (length + 1);
-                *(SYMBOL_TEXT (var)) = '\0';
+      var = lookup_variable (ARG (i), SYMBOL_LOOKUP);
+      if (var == NULL)
+        return;
 
-                if (array_index == 0)
-                  {
-                    strcat (SYMBOL_TEXT (var), value);
-                    cp = strchr (old_value, '\n');
-                    if (cp)
-                      strcat (SYMBOL_TEXT (var), cp);
-                  }
-                else
-                  {
-                    cp = old_value;
-                    for (j=0; j<array_index; j++)
-                      {
-                        cp = strchr (cp, '\n');
-                        if (!cp)
-                          {
-                            /*  Add newlines before value at the bottom  */
-                            strcat (SYMBOL_TEXT (var), old_value);
-                            for (; j<array_index; j++)
-                              strcat (SYMBOL_TEXT (var), "\n");
-                            strcat (SYMBOL_TEXT (var), value);
-                          }
-                        else
-                          cp++;
-                      }
-                    if (cp)
-                      {
-                        newline = ('\n' == *cp);
-                        *cp  = '\0';
-                        strcat (SYMBOL_TEXT (var), old_value);
-                        strcat (SYMBOL_TEXT (var), value);
-                        if (newline)
-                          {
-                            strcat (SYMBOL_TEXT (var), "\n");
-                            cp++;
-                          }
-                        else if (*cp == '\0')
-                          cp = NULL;
-                        else
-                          cp = strchr (cp + 1, '\n');
-                        if (cp)
-                          strcat (SYMBOL_TEXT (var), cp);
-                      }
-                  }
+      if (array_index < 0)
+        {
+          cp = SYMBOL_TEXT (var);
+          length = strlen (cp);
+        }
+      else
+        cp = array_value (var, array_index, &length);
 
-                xfree ((voidstar) old_value);
-              }
-
-            SYMBOL_TYPE (var) = TOKEN_TEXT;
-            i += istep;
-          }
-        break;
-
-      case SYMBOL_LOOKUP:
-        for (i = 1; i < argc; i++)
-          {
-            array_index = -1;
-            ptr_index = strchr (ARG (i), ']');
-            if (ptr_index != NULL)
-              {
-                if (*(ptr_index-1) == '[')
-                  {
-                    *(ptr_index-1) = '\0';
-                    ptr_index = NULL;
-                  }
-                else
-                  {
-                    *ptr_index = '\0';
-                    ptr_index = strchr (ARG (i), '[');
-                    if (!ptr_index)
-                      {
-                        MP4HERROR ((warning_status, 0, _("\
-Warning:%s:%d: wrong index declaration in <%s>"),
-                             CURRENT_FILE_LINE, ARG (0)));
-                        return;
-                      }
-                    *ptr_index = '\0';
-                    ptr_index++;
-                    if (!numeric_arg (argv[0], ptr_index, FALSE, &array_index))
-                      {
-                        /*   Maybe there is an implicit index like in
-                               <get-var foo[i]>.  */
-                        index_var = lookup_variable (ptr_index, SYMBOL_LOOKUP);
-                        if (index_var)
-                          {
-                            if (!numeric_arg (argv[0], SYMBOL_TEXT (index_var),
-                                        FALSE, &array_index))
-                                index_var = NULL;
-                          }
-                        if (!index_var)
-                          {
-                            MP4HERROR ((warning_status, 0, _("\
-Warning:%s:%d: wrong index declaration in <%s>"),
-                                 CURRENT_FILE_LINE, ARG (0)));
-                            return;
-                          }
-                      }
-                    if (array_index < 0)
-                      continue;
-                  }
-              }
-
-            var = lookup_variable (ARG (i), SYMBOL_LOOKUP);
-            if (var == NULL)
-              return;
-
-            old_value = xstrdup (SYMBOL_TEXT (var));
-            value = old_value;
-            cp = strchr (value, '\n');
-            if (array_index == 0)
-              {
-                if (cp)
-                  *cp = '\0';
-              }
-            else if (array_index > 0)
-              {
-                /*   Note that array_index>0 here.  */
-                for (j=0; j<array_index; j++)
-                  {
-                    cp = strchr (value, '\n');
-                    if (!cp)
-                      break;
-                    value = cp + 1;
-                  }
-                if (!cp)
-                  break;
-
-                cp = strchr (cp + 1, '\n');
-                if (cp)
-                  *cp = '\0';
-              }
-
-            if (verbatim)
-              obstack_1grow (obs, CHAR_LQUOTE);
-            obstack_grow (obs, value, strlen (value));
-            if (verbatim)
-              obstack_1grow (obs, CHAR_RQUOTE);
-            xfree ((voidstar) old_value);
-          }
-        break;
-
-      default:
-        MP4HERROR ((warning_status, 0,
-          _("INTERNAL ERROR: Illegal mode to generic_variable ()")));
-        abort ();
+      if (cp)
+        {
+          if (verbatim)
+            obstack_1grow (obs, CHAR_LQUOTE);
+          obstack_grow (obs, cp, length);
+          if (verbatim)
+            obstack_1grow (obs, CHAR_RQUOTE);
+        }
     }
 }
 
@@ -4028,14 +3848,161 @@ mp4h_bp_set_var_x (MP4H_BUILTIN_ARGS)
 
 /*----------------------------------------------------------------------.
 | Define a variable.  Argument is evaluated or not depending on whether |
-| the 'expand attributes' flag is on in the builtin_tab above. This     |
-| function thus duplicates for both set-var and set-var-varbatim tags.  |
+| the 'expand attributes' flag is on in the builtin_tab above.          |
 `----------------------------------------------------------------------*/
 static void
 mp4h_bp_set_var (MP4H_BUILTIN_ARGS)
 {
-  /* verbatim argument is actually ignored for SYMBOL_INSERT */
-  generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_INSERT, FALSE);
+  char *value, *cp, *ptr_index, *old_value, *new_value;
+  symbol *var, *index_var;
+  register int i;
+  register int j;
+  int length, istep, size;
+  int array_index;
+  boolean newline;
+
+  if (argc < 2)
+    return;
+
+  for (i = 1; i < argc; i++)
+    {
+      array_index = -1;
+      istep = 0;
+      value = strchr (ARG (i), '=');
+      if (value == NULL)
+        {
+          /*  Look for spaces like in <set-var i = 0> */
+          if (i+1 < argc && *(ARG (i+1)) == '=')
+            {
+              istep++;
+              if (i+2 < argc && *(ARG (i+1) +1) == '\0')
+                {
+                  istep++;
+                  value = ARG (i+2);
+                }
+              else
+                value = ARG (i+1) + 1;
+            }
+          else
+            value = ARG (i) + strlen (ARG (i));
+        }
+      else
+        {
+          *value = '\0';
+          value++;
+        }
+      
+      /*  Remove special quote characters. */
+      remove_special_chars (value, FALSE);
+
+      ptr_index = strchr (ARG (i), ']');
+      if (ptr_index != NULL)
+        {
+          if (*(ptr_index-1) == '[')
+            {
+              *(ptr_index-1) = '\0';
+              ptr_index = NULL;
+            }
+          else
+            {
+              *ptr_index = '\0';
+              ptr_index = strchr (ARG (i), '[');
+              if (!ptr_index)
+                {
+                  MP4HERROR ((warning_status, 0, _("\
+Warning:%s:%d: wrong index declaration in <%s>"),
+                       CURRENT_FILE_LINE, ARG (0)));
+                  return;
+                }
+              *ptr_index = '\0';
+              ptr_index++;
+              if (!numeric_arg (argv[0], ptr_index, FALSE, &array_index))
+                {
+                  /*   Maybe there is an implicit index like in
+                         <set-var foo[i]=bar>.  */
+                  index_var = lookup_variable (ptr_index, SYMBOL_LOOKUP);
+                  if (index_var)
+                    {
+                      if (!numeric_arg (argv[0], SYMBOL_TEXT (index_var),
+                                  FALSE, &array_index))
+                          index_var = NULL;
+                    }
+                  if (!index_var)
+                    {
+                      MP4HERROR ((warning_status, 0, _("\
+Warning:%s:%d: wrong index declaration in <%s>"),
+                           CURRENT_FILE_LINE, ARG (0)));
+                      return;
+                    }
+                }
+            }
+        }
+
+      var = lookup_variable (ARG (i), SYMBOL_INSERT);
+      if (ptr_index == NULL)
+        {
+          /*  single value.  */
+          if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+            xfree ((voidstar) SYMBOL_TEXT (var));
+          SYMBOL_TEXT (var) = xstrdup (value);
+        }
+      else if (array_index >= 0)
+        {
+          /*  an index has been specified.  */
+          if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+            old_value = xstrdup(SYMBOL_TEXT (var));
+          else
+            old_value = xstrdup("");
+
+          length = strlen (old_value) + strlen (value) + array_index;
+          new_value = (char *) xmalloc (length + 1);
+          *new_value = '\0';
+
+          if (array_index == 0)
+            {
+              strcat (new_value, value);
+              cp = strchr (old_value, '\n');
+              if (cp)
+                strcat (new_value, cp);
+            }
+          else
+            {
+              size = array_size (var);
+              if (size < array_index)
+                {
+                  strcat (new_value, old_value);
+                  for (j = size; j<=array_index; j++)
+                    strcat (new_value, "\n");
+                  strcat (new_value, value);
+                }
+              else
+                {
+                  cp = array_value (var, array_index, 0) + 1;
+                  newline = ('\n' == *cp);
+                  strncat (new_value, old_value, cp - 1 - SYMBOL_TEXT (var));
+                  strcat (new_value, value);
+                  if (newline)
+                    {
+                      strcat (new_value, "\n");
+                      cp++;
+                    }
+                  else if (*cp == '\0')
+                    cp = NULL;
+                  else
+                    cp = strchr (cp + 1, '\n');
+                  if (cp)
+                    strcat (new_value, cp);
+                }
+            }
+
+          xfree ((voidstar) old_value);
+          xfree ((voidstar) SYMBOL_TEXT (var));
+          SYMBOL_TEXT (var) = new_value;
+        }
+
+      SYMBOL_TYPE (var) = TOKEN_TEXT;
+      i += istep;
+    }
 }
 
 /*------------------------------.
@@ -4044,7 +4011,7 @@ mp4h_bp_set_var (MP4H_BUILTIN_ARGS)
 static void
 mp4h_bp_get_var (MP4H_BUILTIN_ARGS)
 {
-  generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_LOOKUP, FALSE);
+  generic_variable_lookup (MP4H_BUILTIN_RECUR, FALSE);
 }
 
 /*--------------------------------------------------------------.
@@ -4053,7 +4020,7 @@ mp4h_bp_get_var (MP4H_BUILTIN_ARGS)
 static void
 mp4h_bp_get_var_once (MP4H_BUILTIN_ARGS)
 {
-  generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_LOOKUP, TRUE);
+  generic_variable_lookup (MP4H_BUILTIN_RECUR, TRUE);
 }
 
 /*----------------------.
@@ -4351,6 +4318,7 @@ array_size (symbol *var)
 
 /*------------------------------------.
 | Returns the nth value of an array.  |
+| Returns NULL if array is too small. |
 `------------------------------------*/
 static char *
 array_value (symbol *var, int offset, int *length)
@@ -4358,31 +4326,33 @@ array_value (symbol *var, int offset, int *length)
   char *cp, *value;
   int i;
 
-  value = SYMBOL_TEXT (var);
-  for (i=0; i<offset; i++)
+  value = NULL;
+  if (offset == 0)
+    value = SYMBOL_TEXT (var);
+  else if (offset > 0)
     {
-      cp = strchr (value, '\n');
-      if (cp == NULL)
-        break;
-      value = cp + 1;
+      value = SYMBOL_TEXT (var);
+      for (i=0; i<offset; i++)
+        {
+          value = strchr (value, '\n');
+          if (!value)
+            break;
+          value++;
+        }
     }
 
-  if (value)
+  if (length != NULL)
     {
-      cp = strchr (value, '\n');
-      if (length != NULL)
+      if (value)
         {
+          cp = strchr (value, '\n');
           if (cp != NULL)
             *length = (int) (cp - value);
           else
             *length = strlen (value);
         }
-    }
-  else
-    {
-      if (length != NULL)
+      else
         *length = 0;
-      value = SYMBOL_TEXT (var);
     }
 
   return value;
@@ -4515,18 +4485,25 @@ mp4h_bp_array_push (MP4H_BUILTIN_ARGS)
     return;
 
   var = lookup_variable (ARG (1), SYMBOL_INSERT);
-  if (SYMBOL_TYPE (var) != TOKEN_TEXT || *(SYMBOL_TEXT (var)) == '\0')
+  if (SYMBOL_TYPE (var) != TOKEN_TEXT)
     {
       SYMBOL_TEXT (var) = xstrdup (ARG (2));
       SYMBOL_TYPE (var) = TOKEN_TEXT;
     }
   else
     {
-      old_value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (2)) + 2);
-      sprintf (old_value, "%s\n%s", SYMBOL_TEXT (var), ARG (2));
-      xfree ((voidstar) SYMBOL_TEXT (var));
-      SYMBOL_TEXT (var) = xstrdup (old_value);
-      xfree ((voidstar) old_value);
+      if (*(SYMBOL_TEXT (var)) == '\0')
+        {
+          xfree ((voidstar) SYMBOL_TEXT (var));
+          SYMBOL_TEXT (var) = xstrdup (ARG (2));
+        }
+      else
+        {
+          old_value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (2)) + 2);
+          sprintf (old_value, "%s\n%s", SYMBOL_TEXT (var), ARG (2));
+          xfree ((voidstar) SYMBOL_TEXT (var));
+          SYMBOL_TEXT (var) = old_value;
+        }
     }
 }
 
