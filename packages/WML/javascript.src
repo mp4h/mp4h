@@ -13,18 +13,19 @@
 <preserve defer src version language type />
 <set-var defer=* />
 <set-var %attributes />
-<defvar language "JavaScript<get-var version>" />
+<defvar language "JavaScript<get-var version />" />
 <defvar type "text/javascript" />
 <script type="<get-var type />" language="<get-var language />"<dnl />
    <ifeq "<get-var src />" "" "" " src=\"<get-var src />\"" /><dnl />
    <ifeq "<get-var defer />" "*" "" " defer" />>
 <group "
 <!-- Hiding the code
-<subst-in-string "%Ubody" "^\n*(.*)\n*$" "\\1">
+<subst-in-string "%Ubody" "^\n*(.*[^\n])\n*$" "\\1" singleline=true />
 // done hiding -->
 " />
 </script>
 <restore  defer src version language type />
+</define-tag>
 
 ##EOF##
 __END__

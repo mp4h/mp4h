@@ -14,7 +14,7 @@
 <subst-in-var body "(gopher://[^  ]*)" "<a href=\"\\1\">\\1</a>" />
 <subst-in-var body "(telnet://[^  ]*)" "<a href=\"\\1\">\\1</a>" />
 <subst-in-var body "(news://[^  ]*)" "<a href=\"\\1\">\\1</a>" />
-<subst-in-var body "(mailto://[^  ]*)" "<a href=\"\\1\">\\1</a>" />
+<subst-in-var body "(mailto:([^  ]*))" "<a href=\"\\1\">\\2</a>" />
 <get-var body />
 <restore body />
 </define-tag>

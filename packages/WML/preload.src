@@ -7,6 +7,8 @@
 ;;;  Copyright (c) 2000 Denis Barbier
 ;;;
 
+<use WML:javascript />
+
 <set-var __pl:count=0 />
 
 <define-tag preload whitespace=delete>
@@ -14,13 +16,13 @@
 <set-var via=size />
 <set-var %attributes />
 <increment __pl:count />
-<when <string-eq "<get-var via>" "size" /> />
-<img name=preload_img_<get-var __pl:count />
-     src="<get-var src />"
-     width=1 height=1 alt="" />
+<when <string-eq "<get-var via />" "size" />>
+<img name="preload_img_<get-var __pl:count />" ;;;
+     src="<get-var src />" ;;;
+     width="1" height="1" alt="" />
 </when>
 <when <string-eq "<get-var via />" "js" />>
-<copy-var src __pl:src>
+<copy-var src __pl:src />
 ;;;  the group tag prevents deletion of newlines
 <group "
 <javascript>

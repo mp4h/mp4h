@@ -6,6 +6,8 @@
 ;;;  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
 ;;;
 
+<use WML:javascript />
+
 <set-var __ro:count=1 />
 
 <define-tag rollover whitespace=delete>
@@ -53,15 +55,15 @@ if (document.images) {
 }
 </javascript>
 " />
-<a href="<get-var href />" 
-   <if <get-var target /> "target=\"<get-var target />\"" />
-   onMouseOver="ro_imgOver('ro_img_<get-var name />', '<get-var hint />'); return true"
-   onMouseOut="ro_imgNormal('ro_img_<get-var name />'); return true"
+<a href="<get-var href />";;;
+   <if <get-var target /> " target=\"<get-var target />\"" /> ;;;
+   onMouseOver="ro_imgOver('ro_img_<get-var name />', '<get-var hint />'); return true" ;;;
+   onMouseOut="ro_imgNormal('ro_img_<get-var name />'); return true";;;
 ><img ;;;
-   name=ro_img_<get-var name /> ;;;
+   name="ro_img_<get-var name />" ;;;
    src="<get-var src />" ;;;
    alt="<get-var alt />" ;;;
-   border=0 ;;;
+   border="0";;;
 /></a>
 <restore  name src oversrc href alt target hint />
 </define-tag>
