@@ -521,12 +521,16 @@ typedef void hack_symbol ();
 
 #define HASHMAX 509             /* default, overridden by -Hsize */
 
+extern symbol **sym_tab;
+extern symbol **var_tab;
+extern symbol **file_tab;
 extern symbol **symtab;
 
 void symtab_init __P ((void));
 void symtab_deallocate __P ((void));
 symbol *lookup_symbol __P ((const char *, symbol_lookup));
 symbol *lookup_variable __P ((const char *, symbol_lookup));
+symbol *lookup_file __P ((const char *, symbol_lookup));
 void hack_all_symbols __P ((hack_symbol *, const char *));
 
 

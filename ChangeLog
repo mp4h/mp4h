@@ -8,16 +8,25 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 1.0.3 and SNAP:
+  Changes between 1.0.3 and 1.0.4:
+
+    *) Internal change in hash tables (08-Jul-2000):
+       Until now, variables and macros shared the same hash table.
+       They now have their own tables, which should speed up
+       symbol searches.
+       A new table is used to store names of loaded package files,
+       in order to prevent loading a file more than once.
+       [Denis Barbier]
 
     *) Add support for third-party packages (08-Jul-2000):
        The new <use> tag is similar to the synonym Perl command.
-       Files are searched in directories listed in MP4HPATH if this
-       environment variable exists; then they are searched under
+       Files are searched in directories specified with the -I
+       command-line flag, then in directories listed in MP4HPATH
+       if this environment variable exists, last under
        /usr/local/share/mp4h (or any other location specified at
-       configure time), then in all directories specified with the
-       -I command-line flag.
-       Filename in <use> does not include the .mp4hp suffix.
+       configure time).
+       Package files have a .mp4hp suffix, which is removed when
+       calling <use>.
        If filename contains colons, they are replaced by slashes and
        so represent directory names.
        [Denis Barbier]

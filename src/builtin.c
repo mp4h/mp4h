@@ -832,9 +832,7 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
               next->text = (char *) xmalloc (special_chars + strlen (cp+1) + 1);
               if (special_chars)
                 strncpy (next->text, TOKEN_DATA_TEXT (argv[i]), special_chars);
-              else
-                *(next->text) = '\0';
-              strcat (next->text, cp+1);
+              strcpy (next->text+special_chars, cp+1);
             }
           else
             next->text = xstrdup (key);
@@ -2593,20 +2591,27 @@ mp4h___include (MP4H_BUILTIN_ARGS)
   xfree (filename);
 }
 
-/*---------------------------------------------------------.
-| Read and parse a package.  This file is searched in the  |
-| directories specified by the -I option.                  |
-`---------------------------------------------------------*/
+/*-------------------------------------------------.
+| Read and parse a package if not already loaded.  |
+`-------------------------------------------------*/
 static void
 mp4h_use (MP4H_BUILTIN_ARGS)
 {
   FILE *fp;
-  char *filename = NULL;
-  char *real_filename = NULL;
+  char *filename = NULL, *real_filename = NULL;
+  symbol *sym;
   char *cp;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
+
+  sym = lookup_file (ARG (1), SYMBOL_LOOKUP);
+  if (sym)
+    {
+      if (debug_level & DEBUG_TRACE_PATH)
+        DEBUG_MESSAGE1 (_("Module `%s' already loaded -- Skipped"), ARG (1));
+      return;
+    }
 
   real_filename = xmalloc (strlen (ARG (1)) + 7);
   strcpy (real_filename, ARG (1));
@@ -2627,6 +2632,8 @@ mp4h_use (MP4H_BUILTIN_ARGS)
       xfree (real_filename);
       return;
     }
+
+  lookup_file (ARG (1), SYMBOL_INSERT);
 
   push_file (fp, filename);
 
@@ -3467,10 +3474,6 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
 
   if (argc < 2)
     return;
-
-  /*  Variables are stored in the symbol table. To prevent conflicts
-      with names, the character '<' is prepended to variable names,
-      since this character is forbidden in normal symbol names.  */
 
   switch (mode)
     {

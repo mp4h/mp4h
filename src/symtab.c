@@ -48,18 +48,35 @@
 `----------------------------------------------------------------------*/
 
 /* Pointer to symbol table.  */
+symbol **sym_tab;
+
+/* Pointer to variable table.  */
+symbol **var_tab;
+
+/* Pointer to file table.  */
+symbol **file_tab;
+
+/* Any of previous pointers.  */
 symbol **symtab;
+
+static void
+hash_table_init (symbol **s)
+{
+  int i;
+  for (i = hash_table_size; --i >= 0;)
+    *s++ = NULL;
+}
 
 void
 symtab_init (void)
 {
-  int i;
-  symbol **s;
-
-  s = symtab = (symbol **) xmalloc (hash_table_size * sizeof (symbol *));
-
-  for (i = hash_table_size; --i >= 0;)
-    *s++ = NULL;
+  var_tab = (symbol **) xmalloc (hash_table_size * sizeof (symbol *));
+  file_tab = (symbol **) xmalloc (hash_table_size * sizeof (symbol *));
+  sym_tab = (symbol **) xmalloc (hash_table_size * sizeof (symbol *));
+  hash_table_init (var_tab);
+  hash_table_init (file_tab);
+  hash_table_init (sym_tab);
+  symtab = sym_tab;
 }
 
 /*--------------------------------------------.
@@ -78,14 +95,14 @@ free_symbol (symbol *sym)
 }
 
 void
-symtab_deallocate (void)
+hash_table_free (symbol **s)
 {
   int h;
   symbol *sym, *next;
 
   for (h = 0; h < hash_table_size; h++)
     {
-      for (sym = symtab[h]; sym != NULL; )
+      for (sym = s[h]; sym != NULL; )
         {
           next = SYMBOL_NEXT (sym);
           free_symbol (sym);
@@ -93,7 +110,15 @@ symtab_deallocate (void)
         }
     }
 
-  xfree (symtab);
+  xfree (s);
+}
+
+void
+symtab_deallocate (void)
+{
+  hash_table_free (var_tab);
+  hash_table_free (file_tab);
+  hash_table_free (sym_tab);
 }
 
 /*--------------------------------------------------.
@@ -131,8 +156,8 @@ hash (const char *s)
 | on the list.                                                            |
 `------------------------------------------------------------------------*/
 
-symbol *
-lookup_symbol (const char *name, symbol_lookup mode)
+static symbol *
+generic_lookup (const char *name, symbol_lookup mode)
 {
   int h, cmp = 1;
   symbol *sym, *prev;
@@ -214,26 +239,25 @@ lookup_symbol (const char *name, symbol_lookup mode)
   return sym;
 }
 
-/*----------------------------------------------------------------------.
-| The variables are stored in the same tables than symbols, but a '<'   |
-| is prepended to prevent conflicts between variables and symbols.      |
-`----------------------------------------------------------------------*/
+symbol *
+lookup_symbol (const char *name, symbol_lookup mode)
+{
+  symtab = sym_tab;
+  return generic_lookup (name, mode);
+}
 
 symbol *
 lookup_variable (const char *name, symbol_lookup mode)
 {
-  char *internal_name;
-  symbol *var;
+  symtab = var_tab;
+  return generic_lookup (name, mode);
+}
 
-  internal_name = xmalloc (strlen (name) + 2);
-  *internal_name = '<';
-  strcpy (internal_name+1, name);
-  if (strncmp (internal_name+strlen (name)-1, "[]", 2) == 0)
-      *(internal_name+strlen (name)-1) = '\0';
-
-  var = lookup_symbol (internal_name, mode);
-  xfree (internal_name);
-  return var;
+symbol *
+lookup_file (const char *name, symbol_lookup mode)
+{
+  symtab = file_tab;
+  return generic_lookup (name, mode);
 }
 
 /*----------------------------------------------------------------------.

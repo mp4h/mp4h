@@ -94,7 +94,6 @@ void
 include_env_init (void)
 {
   search_path_env_init (&dirpath, getenv ("MP4HPATH"));
-  search_path_env_init (&dirpath, PKGDATADIR);
 }
 
 
