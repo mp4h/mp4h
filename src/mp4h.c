@@ -58,7 +58,7 @@ int warning_status = 0;
 int nesting_limit = 250;
 
 /* Flags to control how expansion is performed.  */
-int exp_flags = 0;
+int exp_flags = DEFAULT_EXPANSION_FLAGS;
 
 /* Name of frozen file to digest after initialization.  */
 const char *frozen_file_to_read = NULL;
@@ -137,11 +137,12 @@ Preprocessor features:\n\
 \n\
 Parser features:\n\
   -X, --expansion=NUMBER       set parser behaviour according to the bits\n\
-                               of NUMBER (default is NUMBER=0), with\n\
+                               of NUMBER, with\n\
   1  do not parse unknown tags\n\
   2  unknown tags are assumed being complex\n\
   4  an unknown tag whose name ends with a star is assumed simple\n"),
              stdout);
+      printf("  Default is NUMBER=%d\n", DEFAULT_EXPANSION_FLAGS);
       fputs (_("\
 \n\
 Limits control:\n\
@@ -194,6 +195,7 @@ static const struct option long_options[] =
   {"arglength", required_argument, NULL, 'l'},
   {"debug", optional_argument, NULL, 'd'},
   {"error-output", required_argument, NULL, 'o'},
+  {"expansion", required_argument, NULL, 'X'},
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
   {"hashsize", required_argument, NULL, 'H'},
@@ -312,7 +314,7 @@ main (int argc, char *const *argv)
         if (exp_flags < 0)
           {
             error (0, 0, _("Bad expansion flags: `%s'"), optarg);
-            exp_flags = 0;
+            exp_flags = DEFAULT_EXPANSION_FLAGS;
           }
         break;
 

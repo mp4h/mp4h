@@ -181,6 +181,9 @@ extern int frozen_dump;                 /* -F */
 /* Error handling.  */
 #define MP4HERROR(Arglist) (error Arglist)
 
+/* Default -X option.  */
+#define DEFAULT_EXPANSION_FLAGS 0
+
 
 /* File: debug.c  --- debugging and tracing function.  */
 
