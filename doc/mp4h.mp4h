@@ -1897,7 +1897,7 @@ This is similar to using the <m4 /> undivert macro with a filename as argument.
 
 
 <tag:description use>
-<var package />
+name=<var package />
 </tag:description>
 
 <para>
