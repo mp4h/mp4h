@@ -58,7 +58,6 @@ exec_external (MP4H_BUILTIN_ARGS)
              CURRENT_FILE_LINE, ARG (0)));
       return;
     }
-fprintf(stderr, "%s\n", type); fflush(stderr);
 
   if (bad_argc (argv[0], argc, 1, 1))
     return;
