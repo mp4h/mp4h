@@ -274,8 +274,15 @@ file_clean(void)
                     isp->u.u_f.name, isp->u.u_f.lineno);
 
   fclose (isp->u.u_f.file);
-  xfree (current_file);
-  current_file = xstrdup (isp->u.u_f.name);
+  /*  A common mistake is to forget closing some complex tags, which
+      result in an error `file: EOF when reading body of...'
+      If file name has been changed by <__file__>, this name
+      should appear in error message instead of real file name.  */
+  if (isp->prev != NULL)
+    {
+      xfree (current_file);
+      current_file = xstrdup (isp->u.u_f.name);
+    }
   xfree (isp->u.u_f.name);
   current_line = isp->u.u_f.lineno;
   output_current_line = isp->u.u_f.out_lineno;
