@@ -74,6 +74,7 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
         token_data *td)
 {
   symbol *sym;
+  boolean append_semicolon;
   char *text = TOKEN_DATA_TEXT (td);
 
   switch (t)
@@ -98,8 +99,11 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
     case TOKEN_WORD:
       if (IS_TAG(*text))
         text++;
+      else
+        MP4HERROR ((warning_status, 0,
+          _("INTERNAL ERROR: macro has no leading '<' in expand_token ()")));
 
-      /* macro names must begin with a letter, an underscore or a %.
+      /* macro names must begin with a letter or an underscore.
          If another character is found, this string is not a
          macro.   */
 
@@ -132,21 +136,31 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
       break;
 
     case TOKEN_ENTITY:
-      /* entity names must begin with a letter, an underscore or a %.
+      /* entity names must begin with a letter or an underscore.
          If another character is found, this string is not an
          entity.   */
 
       if (IS_ENTITY(*text))
         text++;
+      else
+        MP4HERROR ((warning_status, 0,
+          _("INTERNAL ERROR: entity has no leading '&' in expand_token ()")));
+
       if (IS_ALPHA (*text))
         {
+          append_semicolon = FALSE;
           if (LAST_CHAR (text) == ';')
-            LAST_CHAR (text) = '\0';
+            {
+              LAST_CHAR (text) = '\0';
+              append_semicolon = TRUE;
+            }
 
           sym = lookup_entity (text, SYMBOL_LOOKUP);
           if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID)
             {
               shipout_text (obs, TOKEN_DATA_TEXT (td));
+              if (append_semicolon)
+                obstack_1grow (obs, ';');
             }
           else
             expand_entity (sym, expansion);
