@@ -282,14 +282,14 @@ void
 remove_special_chars (char *s, boolean restore_quotes)
 {
   int offset = 0;
-  register char *cp;
+  register unsigned char *cp = (unsigned char *) s;
 
   /*  For efficiency reason, this loop is divided into 2 parts.
       Until a special character is removed, there is nothing to do.
       After that, string is shifyed.  */
   if (restore_quotes)
     {
-      for (cp=s; *cp != '\0' && !(IS_GROUP ((unsigned char) *cp)); cp++)
+      for ( ; *cp != '\0' && !(IS_GROUP (*cp)); cp++)
         {
           if (*cp == CHAR_QUOTE)
             *cp = '"';
@@ -297,7 +297,7 @@ remove_special_chars (char *s, boolean restore_quotes)
     }
   else
     {
-      for (cp=s; *cp != '\0' && !(IS_GROUP ((unsigned char) *cp)); cp++)
+      for ( ; *cp != '\0' && !(IS_GROUP (*cp)); cp++)
         ;
     }
 
@@ -306,7 +306,7 @@ remove_special_chars (char *s, boolean restore_quotes)
 
   for ( ; *cp != '\0'; cp++)
     {
-      if (IS_GROUP ((unsigned char) *cp))
+      if (IS_GROUP (*cp))
         offset++;
       else if ((*cp == CHAR_QUOTE) && restore_quotes)
         *(cp-offset) = '"';
@@ -322,13 +322,12 @@ remove_special_chars (char *s, boolean restore_quotes)
 `----------------------------------------------------*/
 
 static void
-remove_stars_and_slash (unsigned char *s)
+remove_stars_and_slash (char *s)
 {
   int offset;
-  register unsigned char *cp;
+  register unsigned char *cp = (unsigned char *) s;
 
   offset = 0;
-  cp = s;
   if (*s == '*' && after_left_angle &&
           !(exp_flags & EXP_LEAVE_LEADING_STAR))
     {
@@ -343,7 +342,7 @@ remove_stars_and_slash (unsigned char *s)
           if (exp_flags & EXP_REMOVE_TRAILING_SLASH)
             {
               offset++;
-              if (cp > s && IS_SPACE(*(cp-1)))
+              if (cp > (unsigned char *) s && IS_SPACE(*(cp-1)))
                 offset++;
             }
           else
@@ -480,7 +479,7 @@ shipout_text (struct obstack *obs, char *text)
      and trailing slash in attributes */
   if (!(exp_flags & (EXP_LEAVE_TRAILING_STAR | EXP_LEAVE_TRAILING_STAR))
       || (exp_flags & EXP_REMOVE_TRAILING_SLASH))
-    remove_stars_and_slash ((unsigned char *)text);
+    remove_stars_and_slash (text);
 
   if (*text == '\0')
     {
