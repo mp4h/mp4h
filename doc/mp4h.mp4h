@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h />
-<set-var version=1.2.1 />
+<set-var version=<__version__/> />
 <set-var title="mp4h - Macro Processor for HTML Documents" />
 
 <defvar srcdir "." />
