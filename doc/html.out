@@ -2,8 +2,8 @@
 ;;;
 ;;;    Sectioning
 ;;;
-<define-tag section><h2>%attributes</h2></define-tag>
-<define-tag subsection><h3>%attributes</h3></define-tag>
+<define-tag section endtag=required><h2>%body</h2></define-tag>
+<define-tag subsection endtag=required><h3>%body</h3></define-tag>
 
 ;;;
 ;;;    Set text in typewriter or bold face font

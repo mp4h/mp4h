@@ -2,9 +2,9 @@
 ;;;
 ;;;    Sectioning
 ;;;
-<define-tag section>=head1 <upcase %attributes />
+<define-tag section endtag=required>=head1 <upcase %body />
 </define-tag>
-<define-tag subsection>=head2 %attributes
+<define-tag subsection endtag=required>=head2 %body
 </define-tag>
 
 ;;;

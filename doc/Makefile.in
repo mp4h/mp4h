@@ -15,6 +15,20 @@ TIDY            = @TIDY@
 
 RM              = rm -f
 
+.SUFFIXES:
+.SUFFIXES: .info .ps .dvi .texi .1 .pod
+.texi.info:
+	makeinfo $<
+.texi.dvi:
+	texi2dvi $<
+.dvi.ps:
+	dvips -o $@ $<
+.pod.1:
+	pod2man --section=1 \
+            --center="HTML Tools" \
+            --release="HTML Tools" \
+        $< > $@
+
 # ------------------------------------------------
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
@@ -28,7 +42,7 @@ install:
 #   DOCUMENTATION
 # ------------------------------------------------
 
-mp4h.html: mp4h.mp4h html.out
+mp4h.html: mp4h.mp4h html.out $(PROGRAM) $(DEPS)
 	$(PROGRAM) $(FLAGS) -D format=html mp4h.mp4h > $@
 	$(TIDY) $(TIDYOPT) -m $@
 
@@ -36,11 +50,18 @@ mp4h.pod: mp4h.mp4h pod.out $(PROGRAM) $(DEPS)
 	$(PROGRAM) $(FLAGS) -D format=pod mp4h.mp4h \
         | sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
 
-mp4h.1: mp4h.pod
-	pod2man --section=1 \
-            --center="HTML Tools" \
-            --release="HTML Tools" \
-        mp4h.pod > $@
+mp4h.texi: mp4h.mp4h pod.out $(PROGRAM) $(DEPS)
+	#   Generate table of contents for Info navigation
+	$(PROGRAM) $(FLAGS) -D format=texinfo -D info:gentoc=1 mp4h.mp4h |\
+   grep '@remove@' | sed \
+     -e 's/@remove@//' \
+     -e '1s/^/<set-var ext:chap="/' -e '$$s/$$/"\/>/' > mp4h.chp
+	$(PROGRAM) $(FLAGS) -D format=texinfo -D info:gentoc=2 mp4h.mp4h |\
+   grep '@remove@' | sed \
+     -e 's/@remove@//' -e 's/=LT=/</g' \
+     -e '1s/^/<set-var dummy="/' -e '$$s/$$/"\/>/' >> mp4h.chp
+	$(PROGRAM) $(FLAGS) -D format=texinfo mp4h.mp4h > $@
+
 
 # ------------------------------------------------
 #   PROGRAM
@@ -54,7 +75,10 @@ $(PROGRAM):
 # ------------------------------------------------
 
 clean:
-	$(RM) *.pod *.1 *.html *.info *.texinfo
+	$(RM) *.pod *.1
+	$(RM) *.html
+	$(RM) *.info *.texi *.chp *.cp *.fn *.vr *.tp *.ky *.pg
+	$(RM) *.aux *.log *.toc *.dvi *.ps
 
 distclean: clean
 	$(RM) Makefile

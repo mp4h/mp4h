@@ -3589,12 +3589,17 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                   }
               }
             var = lookup_variable (ARG (i), SYMBOL_INSERT);
-            if (array_index == -1)
+            if (ptr_index == NULL)
               {
                 /*  simple value.  */
                 if (SYMBOL_TYPE (var) == TOKEN_TEXT)
                   xfree (SYMBOL_TEXT (var));
                 SYMBOL_TEXT (var) = xstrdup (value);
+              }
+            else if (array_index < 0)
+              {
+                /*  Illegal value */
+                SYMBOL_TEXT (var) = NULL;
               }
             else
               {
@@ -3696,6 +3701,8 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                             return;
                           }
                       }
+                    if (array_index < 0)
+                      continue;
                   }
               }
 

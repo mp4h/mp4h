@@ -10,6 +10,15 @@
 
   Changes between 1.0.5 and SNAP:
 
+    *) Fix driver for Info documentation (11-Jul-2000):
+       This driver is just an example to determine if it is worth trying
+       to write Info files.
+       [Denis Barbier]
+
+    *) Forbid negative indices in arrays (11-Jul-2000):
+       A negative index returns an empty value.
+       [Denis Barbier]
+
     *) Improve <attributes-extract> and <attributes-remove> (10-Jul-2000):
        These functions now accept matches against regular expressions,
        and new examples in documentation explain how to define a macro

@@ -25,7 +25,7 @@
 <set-eol-comment "###" />
 
 <header />
-<section "Introduction" />
+<section alt="Brief history and goals of mp4h" />Introduction</section>
 
 <para>
 The <mp4h/> software is a macro-processor specifically designed to deal
@@ -64,7 +64,7 @@ simply use a post-processor like
 <URL src="http://www.w3.org/People/Raggett/tidy/" name="tidy" />.
 </para>
 
-<section "Command line options" />
+<section alt="Invoking mp4h" />Command line options</section>
 
 <para>
 Optional arguments are enclosed within square brackets.
@@ -81,7 +81,7 @@ Options are described below.  If no filename is specified, or if its
 name is <file - />, then characters are read on standard input.
 </para>
 
-<subsection "Operation modes" />
+<subsection/>Operation modes</subsection>
 
 <option-list>
 <option --help>display an help message and exit</option>
@@ -90,7 +90,7 @@ name is <file - />, then characters are read on standard input.
 <option -Q --quiet --silent>suppress some warnings for builtins</option>
 </option-list>
 
-<subsection "Preprocessor features" />
+<subsection/>Preprocessor features</subsection>
 
 <option-list>
 <option -I --include=<optmand DIRECTORY />>###
@@ -101,7 +101,7 @@ set variable NAME to VALUE, or empty</option>
 delete builtin COMMAND</option>
 </option-list>
 
-<subsection "Parser features" />
+<subsection/>Parser features</subsection>
 
 <option-list>
 <option -X --expansion=<optmand NUMBER />>###
@@ -127,7 +127,7 @@ NUMBER is a combination of
 In version <get-var version />, default value is 3114=2+8+32+1024+2048.
 </para>
 
-<subsection "Limits control" />
+<subsection/>Limits control</subsection>
 
 <option-list>
 <option -H --hashsize=<optmand PRIME />>###
@@ -136,7 +136,7 @@ set symbol lookup hash table size (default 509)</option>
 change artificial nesting limit (default 250)</option>
 </option-list>
 
-<subsection "Debugging" />
+<subsection/>Debugging</subsection>
 
 <option-list>
 <option -d --debug=<optmand FLAGS />>###
@@ -165,7 +165,7 @@ Flags are any of:
 </option-list>
 </para>
 
-<section "Description" />
+<section alt="List of primitives" />Description</section>
 
 <para>
 The <mp4h/> software is a macro-processor, which means that keywords are
@@ -183,7 +183,7 @@ following three colons is discarded until end of line, like
 ###    Defining new macros
 ###
 
-<subsection "Function Macros" />
+<subsection/>Function Macros</subsection>
 
 <note>
 All examples in this documentation are processed through <mp4h/> with
@@ -204,7 +204,7 @@ following form:
 
 whereas a complex tag looks like:
 
-<code><name [attributs]>
+<code><name [attributes]>
 body
 </name></code>
 
@@ -531,7 +531,7 @@ before the prefix in order not to mix them with XML namespaces.
 ###    Variable functions
 ###
 
-<subsection "Variables" />
+<subsection/>Variables</subsection>
 
 <para>
 Variables are a special case of simple tags, because they do not accept
@@ -769,7 +769,7 @@ If it is a macro name, one of the following messages is printed:
 ###    String functions
 ###
 
-<subsection "String Functions" />
+<subsection/>String Functions</subsection>
 
 <tag:description string-length>
 <var string />
@@ -1068,7 +1068,7 @@ Prints actual regexp type.
 ###    Array functions
 ###
 
-<subsection "Arrays" />
+<subsection/>Arrays</subsection>
 
 <para>
 With <mp4h/> one can easily deal with string arrays. Variables can be
@@ -1257,7 +1257,7 @@ Reverse sort order
 ###    Numerical operators
 ###
 
-<subsection "Numerical operators" />
+<subsection/>Numerical operators</subsection>
 
 <para>
 These operators perform basic arithmetic operations.  When all operands
@@ -1374,7 +1374,7 @@ Returns <true/> if arguments are not equal.
 ###    Relational operators
 ###
 
-<subsection "Relational operators" />
+<subsection/>Relational operators</subsection>
 
 <tag:description not>
 <var string />
@@ -1406,11 +1406,11 @@ Returns the first non empty argument.
 ###    Flow functions
 ###
 
-<subsection "Flow functions" />
+<subsection/>Flow functions</subsection>
 
 <tag:description group verbatim>
-<var statement />
-[<var statement />] ...
+<var expression />
+[<var expression />] ...
 [separator=<var string />]
 </tag:description>
 
@@ -1452,8 +1452,8 @@ certainly unwanted.
 </para>
 
 <tag:description compound complex>
-<var statement />
-[<var statement />] ...
+<var expression />
+[<var expression />] ...
 [separator=<var string />]
 </tag:description>
 
@@ -1704,7 +1704,7 @@ expanded after end of input.
 ###    File functions
 ###
 
-<subsection "File functions" />
+<subsection/>File functions</subsection>
 
 <tag:description directory-contents>
 <var dirname />
@@ -1804,7 +1804,7 @@ Delimiters are also written into output.
 ###    Debugging
 ###
 
-<subsection "Debugging" />
+<subsection/>Debugging functions</subsection>
 
 <para>
 When constructs become complex it could be hard to debug them.
@@ -1872,7 +1872,7 @@ These macros are no more traced.
 ###    Miscellaneous
 ###
 
-<subsection "Miscellaneous" />
+<subsection/>Miscellaneous</subsection>
 
 <tag:description __file__>
 [<var name />]
@@ -1982,7 +1982,7 @@ the decimal point. Default is to print numbers in the "%6.f" format.
 </example>
 <mp4h-output-radix 6 />
 
-<section "External packages" />
+<section alt="Extending mp4h with external pacages" />External packages</section>
 <para>
 It is possible to include external files with the <command include />
 command.  Files are first searched in current directory, then in
@@ -1999,7 +1999,7 @@ first, package name has no suffix; and more important, a package cannot
 be loaded more than once.
 </para>
 
-<section "Macro expansion" />
+<section alt="Details about macro expansion" />Macro expansion</section>
 
 <para>
 This part describes internal mechanism of macro expansion.
@@ -2008,7 +2008,7 @@ It must be as precise and exhaustive as possible so
 if you have any suggestion.
 </para>
 
-<subsection "Basics" />
+<subsection/>Basics</subsection>
 
 Let us begin with some examples:
 <pseudo-func foo />
@@ -2142,7 +2142,7 @@ These features are in the current <mp4h/> version but may disappear in
 future releases.
 </note>
 
-<subsection "Attributes" />
+<subsection/>Attributes</subsection>
 
 <pseudo-func foo />
 <para>
@@ -2184,7 +2184,7 @@ backslash <value "<bs/>" />.
 </example>
 </para>
 
-<subsection "Macro evaluation" />
+<subsection/>Macro evaluation</subsection>
 
 <para>
 Macros are characterized by
@@ -2286,7 +2286,7 @@ expansion with
 </example>
 </para>
 
-<subsection "Expansion flags" />
+<subsection/>Expansion flags</subsection>
 <para>
 When you want to embed some server-side scripting language in your
 pages, you face up some weird problems, like in
@@ -2427,7 +2427,7 @@ to find default value. Current value matches HTML syntax, and it will
 tend to zero when XHTML syntax becomes more familiar.
 </para>
 
-<section "Author" />
+<section/>Author</section>
 <para>
 <URL src="mailto:barbier@imacs.polytechnique.fr"
      name="Denis Barbier" />
@@ -2437,7 +2437,7 @@ Mp4h has its own
 <URL src="http://www.engelschall.com/sw/mp4h/" name="homepage" />.
 </para>
 
-<section "Thanks" />
+<section/>Thanks</section>
 <para>
 Sincere thanks to Brian J. Fox for writing <Meta-HTML/> and Rene
 Seindal for maintaining this wonderful macro parser called GNU <m4/>.
