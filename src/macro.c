@@ -380,10 +380,28 @@ collect_body (char *symbol_name, read_type expansion,
               else
                 {
                   newsym = lookup_symbol (text, SYMBOL_LOOKUP);
-                  if (newsym && !(exp_flags & EXP_NOWARN_NEST))
-                    MP4HERROR ((warning_status, 0,
-                      _("Warning:%s:%d: `</%s>' found when `</%s>' expected"),
-                           CURRENT_FILE_LINE, text, symbol_name));
+                  if (newsym)
+                    {
+                      if (!(exp_flags & EXP_NOWARN_NEST))
+                        MP4HERROR ((warning_status, 0,
+                          _("Warning:%s:%d: `</%s>' found when `</%s>' expected"),
+                               CURRENT_FILE_LINE, text, symbol_name));
+                      if (exp_flags & EXP_UNM_BREAK)
+                        {
+                          /*  Premature end of body parsing.  */
+                          obstack_1grow (bodyptr, '\0');
+                          TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
+                          TOKEN_DATA_TEXT (&td) = obstack_finish (bodyptr);
+                          tdp = (token_data *) obstack_copy (bodyptr,
+                              (voidstar) &td, sizeof (td));
+                          obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
+
+                          /*  Push read input back on the stack  */
+                          unget_string (text-2);
+
+                          return;
+                        }
+                    }
                   obstack_grow (bodyptr, TOKEN_DATA_TEXT (&td),
                           strlen(TOKEN_DATA_TEXT (&td)) );
                   /*  gobble closing bracket */
@@ -654,11 +672,6 @@ expand_unknown_tag (char *name, read_type expansion)
     collect_body (symbol_name, expansion, &argptr, &body);
 
   argv = (token_data **) obstack_finish (&argptr);
-
-  /*  When this tag is no more processed, remove the trailing star.  */
-  if (!(exp_flags & EXP_LEAVE_TRAILING_STAR) &&
-      expansion == READ_NORMAL && LAST_CHAR (symbol_name) == '*')
-    LAST_CHAR (symbol_name) = '\0';
 
   /*  When this tag is no more processed, remove the trailing slash.  */
   if (!(exp_flags & EXP_LEAVE_TRAILING_SLASH) &&

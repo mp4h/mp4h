@@ -313,6 +313,7 @@ static void dump_args __P ((struct obstack *, int, token_data **, const char *))
 static boolean safe_strtod __P ((const char *, const char *, double *));
 static boolean safe_strtol __P ((const char *, const char *, long int *));
 static const char *predefined_attribute __P ((const char *, int *, token_data **, boolean));
+static void remove_special_chars __P ((char *));
 static void set_trace __P ((symbol *, const char *));
 static void generic_set_hook __P ((MP4H_BUILTIN_PROTO, boolean, int));
 static void math_relation __P ((MP4H_BUILTIN_PROTO, mathrel_type));
@@ -838,6 +839,24 @@ clear_tag_attr (void)
       xfree (tag_attr);
       tag_attr = pa;
     }
+}
+
+void
+remove_special_chars (char *s)
+{
+  int offset;
+  register char *cp;
+
+  offset = 0;
+  for (cp=s; *cp != '\0'; cp++)
+    {
+      if (*cp == CHAR_LQUOTE || *cp == CHAR_RQUOTE
+       || *cp == CHAR_BGROUP || *cp == CHAR_EGROUP)
+        offset++;
+      else
+        *(cp-offset) = *cp;
+    }
+  *(cp-offset) = '\0';
 }
 
 
@@ -2448,8 +2467,23 @@ mp4h_frozen_dump (MP4H_BUILTIN_ARGS)
 static void
 mp4h_not (MP4H_BUILTIN_ARGS)
 {
-  if (argc <= 2 && *(ARG (1)) == '\0')
-    obstack_grow (obs, "true", 4);
+  int i;
+
+  if (argc < 2)
+    {
+      obstack_grow (obs, "true", 4);
+      return;
+    }
+
+  for (i=1; i<argc; i++)
+    {
+      remove_special_chars (ARG (i));
+      if (*(ARG (i)) == '\0')
+        {
+          obstack_grow (obs, "true", 4);
+          return;
+        }
+    }
 }
 
 /*-----------------------------------------------------------.
@@ -2459,18 +2493,39 @@ mp4h_not (MP4H_BUILTIN_ARGS)
 static void
 mp4h_and (MP4H_BUILTIN_ARGS)
 {
-  int i, j;
+  int i;
+  char *quote;
 
   if (argc == 1)
     return;
 
-  j = 0;
-  for (i=1; i<argc; i++)
-    if (*(ARG (i)) == '\0')
-      j = i;
+  quote = NULL;
+  for (i=argc-1; i>0; i--)
+    {
+      quote = strchr (ARG (i), CHAR_LQUOTE);
+      remove_special_chars (ARG (i));
+      if (*(ARG (i)) != '\0')
+        break;
+    }
   
-  if (j>0)
-    obstack_grow (obs, ARG (j), strlen (ARG (j)));
+  if (i>0)
+    {
+      if (obs)
+        {
+          if (quote)
+            obstack_1grow (obs, CHAR_LQUOTE);
+          else
+            obstack_1grow (obs, CHAR_BGROUP);
+        }
+      obstack_grow (obs, ARG (i), strlen (ARG (i)));
+      if (obs)
+        {
+          if (quote)
+            obstack_1grow (obs, CHAR_RQUOTE);
+          else
+            obstack_1grow (obs, CHAR_EGROUP);
+        }
+    }
 }
 
 /*--------------------------------------------.
@@ -2480,16 +2535,32 @@ static void
 mp4h_or (MP4H_BUILTIN_ARGS)
 {
   int i;
-  register char *cp;
+  char *quote;
 
   for (i=1; i<argc; i++)
-    for (cp = ARG (i); *cp != '\0'; cp++)
-      if (*cp != CHAR_BGROUP && *cp != CHAR_EGROUP &&
-          *cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE)
+    {
+      quote = strchr (ARG (i), CHAR_LQUOTE);
+      remove_special_chars (ARG (i));
+      if (*ARG (i) != '\0')
         {
+          if (obs)
+            {
+              if (quote)
+                obstack_1grow (obs, CHAR_LQUOTE);
+              else
+                obstack_1grow (obs, CHAR_BGROUP);
+            }
           obstack_grow (obs, ARG (i), strlen (ARG (i)));
+          if (obs)
+            {
+              if (quote)
+                obstack_1grow (obs, CHAR_RQUOTE);
+              else
+                obstack_1grow (obs, CHAR_EGROUP);
+            }
           return;
         }
+    }
 }
 
 
@@ -2688,8 +2759,8 @@ static void
 string_regexp (struct obstack *obs, int argc, token_data **argv,
                const char *action)
 {
-  const char *victim;           /* first argument */
-  const char *regexp;           /* regular expression */
+  char *victim;                 /* first argument */
+  char *regexp;                 /* regular expression */
 
   struct re_pattern_buffer buf; /* compiled regular expression */
   struct re_registers regs;     /* for subexpression matches */
@@ -2700,13 +2771,12 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
   int regexp_len;
 
   victim = ARG (1);
-  regexp = ARG (2);
-  if (*regexp == CHAR_BGROUP || *regexp == CHAR_LQUOTE)
-    regexp++;
+  remove_special_chars (victim);
+  length = strlen (victim);
 
+  regexp = ARG (2);
+  remove_special_chars (regexp);
   regexp_len = strlen (regexp);
-  if (LAST_CHAR (regexp) == CHAR_EGROUP || LAST_CHAR (regexp) == CHAR_RQUOTE)
-    regexp_len--;
 
   buf.buffer = NULL;
   buf.allocated = 0;
@@ -2722,7 +2792,6 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
       return;
     }
 
-  length = strlen (victim);
   startpos = re_search (&buf, victim, length, 0, length, &regs);
 
   if (startpos  == -2)
@@ -2785,8 +2854,8 @@ static void
 subst_in_string (struct obstack *obs, int argc, token_data **argv,
         boolean singleline)
 {
-  const char *victim;           /* first argument */
-  const char *regexp;           /* regular expression */
+  char *victim;                 /* first argument */
+  char *regexp;                 /* regular expression */
   const char *replacement;      /* string replacement */
 
   struct re_pattern_buffer buf; /* compiled regular expression */
@@ -2800,15 +2869,13 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   if (bad_argc (argv[0], argc, 2, 4))
     return;
 
-  regexp = TOKEN_DATA_TEXT (argv[2]);
-  replacement = ARG (3);
+  victim = ARG (1);
+  remove_special_chars (victim);
+  length = strlen (victim);
 
-  if (*regexp == CHAR_BGROUP || *regexp == CHAR_LQUOTE)
-    regexp++;
-
+  regexp = ARG (2);
+  remove_special_chars (regexp);
   regexp_len = strlen (regexp);
-  if (LAST_CHAR (regexp) == CHAR_EGROUP || LAST_CHAR (regexp) == CHAR_RQUOTE)
-    regexp_len--;
 
   buf.buffer = NULL;
   buf.allocated = 0;
@@ -2827,9 +2894,6 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
       xfree (buf.buffer);
       return;
     }
-
-  victim = TOKEN_DATA_TEXT (argv[1]);
-  length = strlen (victim);
 
   offset = 0;
   matchpos = 0;
@@ -3157,7 +3221,7 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
   register int i;
   register int j;
   int length, istep;
-  int array_index, offset;
+  int array_index;
 
   if (argc < 2)
     return;
@@ -3198,21 +3262,7 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
               }
             
             /*  Remove special quote characters. */
-            if ((*value == CHAR_LQUOTE && LAST_CHAR (value) == CHAR_RQUOTE)
-             || (*value == CHAR_QUOTE  && LAST_CHAR (value) == CHAR_QUOTE))
-              {
-                value++;
-                offset = 0;
-                for (cp=value; *cp != '\0'; cp++)
-                  {
-                    if (*cp == CHAR_LQUOTE || *cp == CHAR_RQUOTE
-                     || *cp == CHAR_BGROUP || *cp == CHAR_EGROUP)
-                      offset++;
-                    else
-                      *(cp-offset) = *cp;
-                  }
-                *(cp-offset) = '\0';
-              }
+            remove_special_chars (value);
 
             ptr_index = strchr (ARG (i), ']');
             if (ptr_index != NULL && *(ptr_index-1) != '[')

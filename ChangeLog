@@ -8,10 +8,23 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 0.9.5 and SNAP:
+  Changes between 0.9.5 and 0.9.6:
 
-    *) Change default behaviour (08-Jun-2000):
-       Expansion flags are renamed to reflect current policy.
+    *) Fix string substitution (14-Jun-2000):
+       With some complex expressions, string substitution did not
+       work properly.
+       [Denis Barbier]
+
+    *) Fix logical operators (14-Jun-2000):
+       With some complex expressions, <and>, <or> and <not> logical
+       operators did not work properly.
+       [Denis Barbier]
+
+    *) Change default behaviour (13-Jun-2000):
+       The removal of trailing star in tag name is suppressed, because
+       it cannot deal with all cases.  The only right approach is to
+       use a post-processor.
+       Escaping mechanism has also been reviewed.
        [Denis Barbier]
 
     *) Remove French documentation (07-Jun-2000):

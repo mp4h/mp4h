@@ -695,22 +695,19 @@ unget_input (int ch)
     push_single(ch);
 }
 
-/*------------------------------------------------------------------------.
-| skip_line () simply discards all immediately following characters, upto |
-| the first newline.  All whitespaces following this newline are also     |
-| discarded.                                                              |
-`------------------------------------------------------------------------*/
+/*---------------------------------------------------------------.
+| The function unget_string () puts back a string on the input   |
+| stack, using the unget_input () subroutine.  This function is  |
+| global because it is called by collect_body ().                |
+`---------------------------------------------------------------*/
 
 void
-skip_line (void)
+unget_string (char *text)
 {
-  int ch;
+  char *cp;
 
-  while ((ch = next_char ()) != CHAR_EOF && ch != '\n')
-    ;
-  while ((ch = next_char ()) != CHAR_EOF && (ch == '\t' || ch == ' '))
-    ;
-  unget_input (ch);
+  for (cp=text + strlen (text) - 1; cp>=text; cp--)
+    unget_input (*cp);
 }
 
 /*------------------------------------------------------------------------.
@@ -720,7 +717,7 @@ skip_line (void)
 `------------------------------------------------------------------------*/
 
 void
-read_chars_until (const char *tagname, struct obstack *obs)
+skip_line (void)
 {
   int ch;
 
@@ -1009,8 +1006,12 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                 }
               if (visible_quotes || expansion == READ_ATTR_VERB
                   || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
-                obstack_grow (&token_stack, rquote.string, rquote.length);
-              type = TOKEN_STRING;
+                {
+                  obstack_grow (&token_stack, rquote.string, rquote.length);
+                  type = TOKEN_STRING;
+                }
+              else
+                type = TOKEN_QUOTED;
             }
           else
             {
@@ -1096,7 +1097,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
       else if (IS_RQUOTE(ch))
         {
           MP4HERROR ((EXIT_FAILURE, 0,
-             _("INTERNAL ERROR: CHAR_QUOTE found.")));
+             _("INTERNAL ERROR: CHAR_RQUOTE found.")));
         }
       else if (IS_LQUOTE(ch))             /* QUOTED STRING */
         {
@@ -1171,13 +1172,14 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                 obstack_1grow (&token_stack, '\t');
               else if (ch == 'r')
                 obstack_1grow (&token_stack, '\r');
+              else if (ch == '\\')
+                obstack_1grow (&token_stack, ch);
               else if (ch == '"' && in_string)
                 obstack_1grow (&token_stack, CHAR_QUOTE);
-              else if (ch == '\\' && in_string)
-                obstack_1grow (&token_stack, CHAR_ESCAPE);
               else
                 {
-                  obstack_1grow (&token_stack, '\\');
+                  if (exp_flags & EXP_KEEP_BSLASH)
+                    obstack_1grow (&token_stack, '\\');
                   obstack_1grow (&token_stack, ch);
                 }
 

@@ -359,8 +359,6 @@ shipout_text (struct obstack *obs, char *text, int length)
   for (cp=text, i=0; i<length; cp++, i++)
     if (*cp == CHAR_QUOTE)
       *cp = '"';
-    else if (*cp == CHAR_ESCAPE)
-      *cp = '\\';
 
   /* Output TEXT to a file, or in-memory diversion buffer.  */
 

@@ -26,7 +26,8 @@ all: $(PROGRAM) mp4h.html mp4h.1
 # ------------------------------------------------
 
 mp4h.html: mp4h.mp4h html.out
-	$(PROGRAM) $(FLAGS) -D format=html mp4h.mp4h > $@
+	$(PROGRAM) $(FLAGS) -D format=html mp4h.mp4h \
+        | sed -e 's/\(<[a-zA-Z]*\)\*/\1/g' > $@
 	$(TIDY) $(TIDYOPT) -m $@
 
 mp4h.pod: mp4h.mp4h pod.out $(PROGRAM) $(DEPS)

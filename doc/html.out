@@ -216,7 +216,7 @@
 <subst-in-var verb-body "<" "&lt;" />
 <subst-in-var verb-body ">" "&gt;" />
 <set-var body=%body />
-<subst-in-var body "<([a-z]*)[*]" "<\1" />
+<subst-in-var body "<([a-z]*)[*]" "<\\1" />
 <subst-in-var body "&" "&amp;" />
 <subst-in-var body "<" "&lt;" />
 <subst-in-var body ">" "&gt;" />

@@ -15,6 +15,7 @@ doc/html.out
 doc/list-tags
 doc/mp4h.mp4h
 doc/pod.out
+doc/qqq
 doc/texinfo.out
 lib/COPYING.LIB
 lib/Makefile.in
@@ -42,6 +43,8 @@ src/mp4h.c
 src/mp4h.h
 src/output.c
 src/path.c
+src/qaz
+src/qqq
 src/symtab.c
 src/version.c
 tests/Makefile.in

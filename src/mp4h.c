@@ -58,7 +58,7 @@ int warning_status = 0;
 int nesting_limit = 250;
 
 /* Flags to control how expansion is performed.  */
-#define DEFAULT_EXPANSION_FLAGS 0
+#define DEFAULT_EXPANSION_FLAGS 3122
 
 int exp_flags = DEFAULT_EXPANSION_FLAGS;
 
@@ -147,13 +147,14 @@ Preprocessor features:\n\
 \n\
 Parser features:\n\
   -X, --expansion=NUMBER       set parser behaviour according to the bits\n\
-                               of NUMBER, with (default is 0)\n\
+                               of NUMBER, with (default flags marked with a star)\n\
 "), stdout);
       HELP_EXP_FLAGS(    1, "do not parse unknown tags");
       HELP_EXP_FLAGS(    2, "unknown tags are assumed being simple");
       HELP_EXP_FLAGS(    4, "trailing star in tag name do not make this tag simple");
-      HELP_EXP_FLAGS(    8, "leave the trailing star in tag name");
-      HELP_EXP_FLAGS(   16, "leave the trailing slash in tag attributes");
+      HELP_EXP_FLAGS(    8, "leave the trailing slash in tag attributes");
+      HELP_EXP_FLAGS(   16, "backslashes are preserved before unescaped chars");
+      HELP_EXP_FLAGS(   32, "an unmatched end tag closes all previous unmatched begin tags");
       HELP_EXP_FLAGS( 1024, "suppress warnings about bad nested tags");
       HELP_EXP_FLAGS( 2048, "suppress warnings about missing trailing slash");
 

@@ -151,13 +151,13 @@ This documentation describes <get-var package /> version <get-var version />.
 <define-tag example endtag=required attributes=verbatim whitespace=delete>
 <set-var-verbatim verb-body=%ubody />
 <subst-in-var verb-body "^\n+" "" singleline=true />
-<subst-in-var verb-body "^(.)" "   \1" />
+<subst-in-var verb-body "^" "   " />
 <set-var body=%body />
-<subst-in-var body "<([a-z]*)[*]" "<\1" />
+<subst-in-var body "<([a-z]*)[*]" "<\\1" />
 <subst-in-var body "<three-colon/>[^\n]*\n[ \t]*" "" singleline=true />
 <subst-in-var body "<three-colon/>$" "" />
 <subst-in-var body "^\n+" "" singleline=true />
-<subst-in-var body "^(.)" "   \1" />
+<subst-in-var body "^" "   " />
 <group "Source:
 
 <get-var-once verb-body />
@@ -181,7 +181,7 @@ Output:
 ;;;
 <define-tag code endtag=required attributes=verbatim whitespace=delete>
 <set-var-verbatim verb-body=%ubody />
-<subst-in-var verb-body "^(.)" "   \1" />
+<subst-in-var verb-body "^" "   " />
 <get-var-once verb-body />
 </define-tag>
 

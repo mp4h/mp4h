@@ -5,7 +5,7 @@
 
 <mp4h-l10n LC_ALL=C />
 <set-var package=mp4h />
-<set-var version=0.9a603 />
+<set-var version=0.9.6 />
 <set-var title="mp4h - A Macro Processeur for HTML Documents" />
 
 <include <get-var format />.out
@@ -113,13 +113,16 @@ NUMBER is a combination of
 <option 1>do not parse unknown tags</option>
 <option 2>unknown tags are assumed being simple</option>
 <option 4>trailing star in tag name do not make this tag simple</option>
-<option 8>leave the trailing star in tag name</option>
-<option 16>leave the trailing slash in tag attributes</option>
+<option 8>leave the trailing slash in tag attributes</option>
+<option 16>backslashes are preserved before unescaped characters</option>
+<option 32>an unmatched end tag closes all previous unmatched begin tags</option>
 <option 1024>suppress warnings about bad nested tags</option>
 <option 2048>suppress warnings about missing trailing slash</option>
 </option-list>
 </para>
-and default value is 0.
+<para>
+In version <get-var version />, default value is 3122=2+16+32+1024+2048.
+</para>
 
 <subsection "Limits control" />
 
@@ -666,7 +669,7 @@ Replace a regular expression in a string by a replacement text.
 <example>
 <set-var foo="abcdefghijk" />
 <subst-in-string <get-var foo /> "[c-e]" />
-<subst-in-string <get-var foo /> "([c-e])" "\1 " />
+<subst-in-string <get-var foo /> "([c-e])" "\\1 " />
 </example>
 
 <attributes:description>
@@ -839,11 +842,11 @@ regular expressions. By default extended regular expressions are used.
 <example>
 <set-var foo="abcdefghijk" />
 <set-regexp-syntax type=basic />
-<subst-in-string <get-var foo /> "([c-e]+)" ":\1:" />
-<subst-in-string <get-var foo /> "\([c-e]\{1,\}\)" ":\1:" />
+<subst-in-string <get-var foo /> "([c-e]+)" ":\\1:" />
+<subst-in-string <get-var foo /> "\([c-e]\{1,\}\)" ":\\1:" />
 <set-regexp-syntax type=extended />
-<subst-in-string <get-var foo /> "([c-e]+)" ":\1:" />
-<subst-in-string <get-var foo /> "\([c-e]\{1,\}\)" ":\1:" />
+<subst-in-string <get-var foo /> "([c-e]+)" ":\\1:" />
+<subst-in-string <get-var foo /> "\([c-e]\{1,\}\)" ":\\1:" />
 </example>
 
 <tag:description get-regexp-syntax>
@@ -1934,7 +1937,7 @@ Unlike HTML single quotes can not replace doube quotes for this purpose.
 
 <para>
 If double quotes appear in an argument, they must be escaped by a
-backslash <value "\\" />.
+backslash <value "<bs/>" />.
 <example>
   <set-var text="Text with double quotes \" inside" />
   <get-var text />
@@ -1996,7 +1999,7 @@ We would like that inner tags are removed.
 <increment _text:tt />
 <ifeq <get-var _text:tt /> 1 "<tt*>" />
 %body
-<ifeq <get-var _text:tt /> 1 "</tt>" />
+<ifeq <get-var _text:tt /> 1 "</tt*>" />
 <decrement _text:tt />
 </define-tag>
 <para>
@@ -2009,7 +2012,7 @@ are inside such an environment:
 <increment _text:tt />
 <ifeq <get-var _text:tt /> 1 "<tt*>" />
 %body
-<ifeq <get-var _text:tt /> 1 "</tt>" />
+<ifeq <get-var _text:tt /> 1 "</tt*>" />
 <decrement _text:tt />
 </define-tag>
 </code>
