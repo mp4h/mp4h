@@ -10,6 +10,11 @@
 
   Changes between 1.2.0 and ???:
 
+    *) Fix documentation (26-Aug-2001):
+       There was a documentation bug with example defining the <mail2>
+       tag.
+       [Rajendra Gokhale <rvg@creato.org>]
+
     *) Minor change in top level Makefile.in (26-Aug-2001):
        The `clean' and `distclean' targets are unconditionnally processed
        through the modules/ directory.

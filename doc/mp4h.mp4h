@@ -438,6 +438,7 @@ names matching any of <var name1 />, <var name2 />....
 </define-tag>
 <img id="logo" src="logo.gif" name="Logo" alt="Our logo" />
 </example>
+<undef img />
 
 <tag:description attributes-remove>
 <var name1 />
@@ -456,6 +457,7 @@ names matching any of <var name1 />, <var name2 />....
 </define-tag>
 <img id="logo" src="logo.gif" name="Logo" alt="Our logo" />
 </example>
+<undef img />
 
 <note>
 The two previous functions are special, because unlike all other macros,
