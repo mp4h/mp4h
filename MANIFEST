@@ -50,6 +50,7 @@ ltconfig
 ltmain.sh
 modules/Makefile.in
 modules/test.c
+mp4h-config.src
 packages/Makefile.in
 packages/WML/Makefile
 packages/WML/Makefile.in

@@ -106,6 +106,7 @@ install: all
 # ------------------------------------------------
 
 clean: clean-recursive
+	-$(RM) mp4h-config mp4h-config.1 mp4h-config.pod
 
 distclean: clean distclean-recursive
 	-$(RM) Makefile
