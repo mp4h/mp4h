@@ -13,7 +13,7 @@ VPATH           = @srcdir@
 
 CC     = @CC@
 CFLAGS = @CFLAGS@
-DEFS   = -I. -I$(srcdir) -I..
+DEFS   = -I. -I$(srcdir) -I.. -DSUPPORT_UTF8
 RANLIB = @RANLIB@
 
 #---------------------------------------------------------------------------#
