@@ -40,6 +40,7 @@ RM              = rm -f
 SOURCES     = javascript.c mp4h-js.c
 MODULE      = javascript
 LOBJ        = $(SOURCES:.c=.lo)
+LARCHIVE    = $(MODULE).la
 
 .SUFFIXES: .c .o .lo
 
@@ -53,9 +54,9 @@ LOBJ        = $(SOURCES:.c=.lo)
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
 
-all: $(MODULE).la
+all: $(LARCHIVE)
 
-$(MODULE).la: $(LOBJ)
+$(LARCHIVE): $(LOBJ)
 	$(LIBTOOL) --quiet --mode=link `$(mp4h_config) --cc` -o $@ $(LOBJ) \
 	    -module -rpath `$(mp4h_config) --pkglibdir` -avoid-version
 
@@ -66,8 +67,8 @@ INSTALL_LA_FILES = \
    echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
    $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
 
-install-mod:
-	@list='$(MODULES)'; for p in $$list; do \
+install:
+	@list='$(LARCHIVE)'; for p in $$list; do \
 	  if test -f $$p; then \
 	    $(INSTALL_LA_FILES); \
 	  else :; fi; \
