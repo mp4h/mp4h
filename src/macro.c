@@ -508,7 +508,9 @@ expand_macro (symbol *sym, read_type expansion)
       for (i = 1; i < argc; i++)
         {
           obstack_1grow (obs_expansion, ' ');
+          obstack_1grow (obs_expansion, CHAR_BGROUP);
           shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+          obstack_1grow (obs_expansion, CHAR_EGROUP);
         }
       obstack_1grow (obs_expansion, '>');
       if (SYMBOL_CONTAINER (sym))

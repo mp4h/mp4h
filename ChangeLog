@@ -8,6 +8,11 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.8.5 and 0.8.4:
+
+    *) Fix bug with some nested expressions (27-Mar-2000):
+       [Nobuyuki Tsuchimura <tutimura@nn.iij4u.or.jp>]
+
   Changes between 0.8.4 and 0.8.3:
 
     *) Change in grouping (25-Mar-2000):

@@ -1307,12 +1307,15 @@ mp4h_ifneq (MP4H_BUILTIN_ARGS)
 static void
 mp4h_when (MP4H_BUILTIN_ARGS)
 {
-  if (bad_argc (argv[0], argc, 0, 2))
-    return;
   if (argc == 1)
     return;
 
-  if (strlen (ARG (1)) > 0)
+  /*
+       This test succeeds if one of these 2 clauses is true
+          a) there are at least 2 arguments
+          b) first argument is non empty.
+  */
+  if (argc > 2 || strlen (ARG (1)) > 0)
     obstack_grow (obs, ARGBODY, strlen (ARGBODY));
 }
 
@@ -2150,9 +2153,7 @@ mp4h_frozen_dump (MP4H_BUILTIN_ARGS)
 static void
 mp4h_not (MP4H_BUILTIN_ARGS)
 {
-  bad_argc (argv[0], argc, 0, 2);
-
-  if (strlen (ARG (1)) == 0)
+  if (argc <= 2 && strlen (ARG (1)) == 0)
     obstack_grow (obs, "true", 4);
 }
 
