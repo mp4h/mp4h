@@ -3,4 +3,4 @@
 <set-var c="a">
 <set-var d="list">
 <array-concat foo a b c d>
-<get-var foo[]>
+<get-var foo>

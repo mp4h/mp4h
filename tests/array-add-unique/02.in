@@ -1,6 +1,6 @@
-<set-var a[]="zero
+<set-var a="zero
 one
 two">
-<array-add-unique THREE a caseless=true>
-<array-add-unique ONE a caseless=true>
-<get-var a[]>
+<array-add-unique a THREE caseless=true>
+<array-add-unique a ONE caseless=true>
+<get-var a>

@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.8.5>
+<set-var version=0.9.0>
 <set-var title="MP4H - A Macro Processeur for HTML Documents">
 
 <include <get-var format>.out
@@ -302,6 +302,20 @@ Before</set-hook>
 <set-hook foo position=after>
 After</set-hook>
 <foo 1 2 3 4>
+</example>
+
+<tag:description get-hook>
+<var name>
+[position=[before|after]
+</tag:description>
+
+<para>
+Print current hooks of a macro.
+</para>
+
+<example>
+Text inserted with position=before:<get-hook foo position=before>!
+Text inserted with position=after:<get-hook foo position=after>!
 </example>
 
 ###
@@ -843,9 +857,9 @@ variable.
 <array-size digits>
 </example>
 
-<tag:description array-append>
-<var value>
+<tag:description array-push>
 <var name>
+<var value>
 </tag:description>
 
 <para>
@@ -854,13 +868,21 @@ array.
 </para>
 
 <example>
-<array-append "10\n11\n12" digits>
+<array-push digits "10\n11\n12">
 <get-var digits>
 </example>
 
-<tag:description array-add-unique>
-<var value>
+<tag:description array-pop>
 <var name>
+</tag:description>
+
+<para>
+Remove the toplevel vale of an array and returns this string.
+</para>
+
+<tag:description array-add-unique>
+<var name>
+<var value>
 [caseless=true]
 </tag:description>
 
@@ -870,7 +892,7 @@ in this variable.
 </para>
 
 <example>
-<array-add-unique 2 digits>
+<array-add-unique digits 2>
 <get-var digits>
 </example>
 
@@ -895,8 +917,8 @@ Concatenates all arrays into the first one.
 </example>
 
 <tag:description array-member>
-<var value>
 <var name>
+<var value>
 [caseless=true]
 </tag:description>
 
@@ -905,7 +927,7 @@ If value is contained in array, returns its index otherwise returns -1.
 </para>
 
 <example>
-<array-member 11 digits>
+<array-member digits 11>
 </example>
 
 <attributes:description>
@@ -914,8 +936,8 @@ Comparison is case insensitive.
 </attributes:description>
 
 <tag:description array-shift>
-<var offset>
 <var name>
+<var offset>
 [start=<var start>]
 </tag:description>
 
@@ -925,9 +947,9 @@ If offset is positive, first indexes are filled with empty strings.
 </para>
 
 <example>
-<array-shift 2 digits>
+<array-shift digits 2>
 Now: <get-var digits>
-<array-shift -4 digits>
+<array-shift digits -4>
 And: <get-var digits>
 </example>
 
@@ -935,7 +957,7 @@ And: <get-var digits>
 <attributes:item "start=<var start>">
 Change origin of shifts (default is 0).
 <example>
-<array-shift -2 digits start=2><get-var digits>
+<array-shift digits -2 start=2><get-var digits>
 </example>
 </attributes:description>
 
@@ -1591,6 +1613,22 @@ this instruction.
 Prints the version of <mp4h>.
 </para>
 
+<tag:description dnl>
+</tag:description>
+
+<para>
+Discard all characters until newline is reached. This macro ensures that
+following string is a comment and does not depend of the value of
+comment characters.
+</para>
+
+<example>
+<dnl>This is a comment
+foo
+<dnl>This is a comment
+bar
+</example>
+
 <tag:description date>
 [epoch]
 </tag:description>
@@ -1619,6 +1657,37 @@ The number of clock ticks since the beginning of generation of
 this documentation by <mp4h> is:
 <timer>
 </example>
+
+<tag:description mp4h-l10n>
+<var name>=<var value>
+</tag:description>
+
+<para>
+Set locale-specific variables.  By default, the portable "C" locale is
+selected.
+</para>
+
+<example>
+<mp4h-l10n LC_NUMERIC=fr_FR>
+<add 1,2 3,4>
+</example>
+<mp4h-l10n LC_ALL=C>
+
+<tag:description mp4h-output-radix>
+<var number>
+</tag:description>
+
+<para>
+Change the output format of floats by setting the number of digits after
+the decimal point. Default is to print numbers in the "%6.f" format.
+</para>
+
+<example>
+<add 1.2 3.4>
+<mp4h-output-radix 2>
+<add 1.2 3.4>
+</example>
+<mp4h-output-radix 6>
 
 <section "Macro expansion">
 

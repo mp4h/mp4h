@@ -42,7 +42,9 @@ DECLARE (mp4h___file__);
 DECLARE (mp4h___line__);
 DECLARE (mp4h___version__);
 DECLARE (mp4h_timer);
+#ifdef HAVE_LOCALE_H
 DECLARE (mp4h_mp4h_l10n);
+#endif
 DECLARE (mp4h_mp4h_output_radix);
 #ifndef HAVE_FILE_FUNCS
 DECLARE (mp4h_unsupported);
@@ -168,7 +170,11 @@ builtin_tab[] =
   { "__line__",         FALSE,    TRUE,   mp4h___line__ },
   { "__version__",      FALSE,    TRUE,   mp4h___version__ },
   { "timer",            FALSE,    TRUE,   mp4h_timer },
+#ifdef HAVE_LOCALE_H
   { "mp4h-l10n",        FALSE,    TRUE,   mp4h_mp4h_l10n },
+#else
+  { "mp4h-l10n",        FALSE,    TRUE,   mp4h_unsupported },
+#endif
   { "mp4h-output-radix",FALSE,    TRUE,   mp4h_mp4h_output_radix },
   { "date",             FALSE,    TRUE,   mp4h_date },
 
@@ -888,6 +894,8 @@ locale_init (void)
 #endif
 }
 
+#ifdef HAVE_LOCALE_H
+
 /*---------------------------.
 | Change locale attributes.  |
 `---------------------------*/
@@ -895,37 +903,44 @@ locale_init (void)
 static void
 mp4h_mp4h_l10n (MP4H_BUILTIN_ARGS)
 {
-  int category = -1;
+  char *cp;
+  int i;
+  int category;
 
-#ifdef HAVE_LOCALE_H
-  if (strcmp (ARG (1), "LC_ALL") == 0)
-    category = LC_ALL;
-  else if (strcmp (ARG (1), "LC_COLLATE") == 0)
-    category = LC_COLLATE;
-  else if (strcmp (ARG (1), "LC_CTYPE") == 0)
-    category = LC_CTYPE;
-  else if (strcmp (ARG (1), "LC_MONETARY") == 0)
-    category = LC_MONETARY;
-  else if (strcmp (ARG (1), "LC_NUMERIC") == 0)
-    category = LC_NUMERIC;
-  else if (strcmp (ARG (1), "LC_TIME") == 0)
-    category = LC_TIME;
-  
-  if (category == -1)
-    MP4HERROR ((warning_status, 0,
-    _("Warning:%s:%d: unknown locale `%s'"), CURRENT_FILE_LINE, ARG (1)));
-  else
+  for (i=1; i<argc; i++)
     {
-      setlocale (category, ARG (2));
-      my_locale = localeconv ();
-      decimal_point = my_locale->decimal_point;
+      category = -1;
+      cp = strchr (ARG (i), '=');
+      if (cp)
+        {
+          *cp = '\0';
+          if (strcmp (ARG (i), "LC_ALL") == 0)
+            category = LC_ALL;
+          else if (strcmp (ARG (i), "LC_COLLATE") == 0)
+            category = LC_COLLATE;
+          else if (strcmp (ARG (i), "LC_CTYPE") == 0)
+            category = LC_CTYPE;
+          else if (strcmp (ARG (i), "LC_MONETARY") == 0)
+            category = LC_MONETARY;
+          else if (strcmp (ARG (i), "LC_NUMERIC") == 0)
+            category = LC_NUMERIC;
+          else if (strcmp (ARG (i), "LC_TIME") == 0)
+            category = LC_TIME;
+        }
+
+      if (category == -1)
+        MP4HERROR ((warning_status, 0,
+        _("Warning:%s:%d: unknown locale `%s'"), CURRENT_FILE_LINE, ARG (i)));
+      else
+        {
+          setlocale (category, cp+1);
+          my_locale = localeconv ();
+          decimal_point = my_locale->decimal_point;
+        }
     }
-#else
-  MP4HERROR ((warning_status, 0,
-    _("Warning:%s:%d: locales are not supported on your system"),
-              CURRENT_FILE_LINE));
-#endif
 }
+
+#endif /* HAVE_LOCALE_H */
 
 /*----------------------------------------------.
 | Set output radix used when printing numbers.  |
@@ -951,14 +966,13 @@ mp4h_timer (MP4H_BUILTIN_ARGS)
   obstack_grow (obs, buf, strlen (buf));
 }
 
-#ifndef HAVE_FILE_FUNCS
+#if !defined(HAVE_FILE_FUNCS) || !defined (HAVE_LOCALE_H)
 static void
 mp4h_unsupported (MP4H_BUILTIN_ARGS)
 {
-  char buf[128];
-
-  sprintf (buf, "This routine is not implemented.\n");
-  obstack_grow (obs, buf, strlen (buf));
+  MP4HERROR ((warning_status, 0,
+    _("Error:%s:%d: The <%s> tag is not implemented on your OS\n"),
+         CURRENT_FILE_LINE, ARG (0)));
 }
 #endif
 
@@ -3681,9 +3695,9 @@ mp4h_array_member (MP4H_BUILTIN_ARGS)
   caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
   if (! bad_argc (argv[0], argc, 3, 3))
     {
-      var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
+      var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
       if (var != NULL)
-        result = array_member (ARG (1), var, (caseless != NULL));
+        result = array_member (ARG (2), var, (caseless != NULL));
     }
   shipout_int (obs, result);
 }
@@ -3703,27 +3717,27 @@ mp4h_array_add_unique (MP4H_BUILTIN_ARGS)
   if (bad_argc (argv[0], argc, 3, 3))
     return;
 
-  var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
+  var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
   if (var == NULL)
     {
-      var = lookup_variable (ARG (2), SYMBOL_INSERT);
-      SYMBOL_TEXT (var) = xstrdup (ARG (1));
+      var = lookup_variable (ARG (1), SYMBOL_INSERT);
+      SYMBOL_TEXT (var) = xstrdup (ARG (2));
       SYMBOL_TYPE (var) = TOKEN_TEXT;
     }
   else if (SYMBOL_TYPE (var) != TOKEN_TEXT || *(SYMBOL_TEXT (var)) == '\0')
     {
-      SYMBOL_TEXT (var) = xstrdup (ARG (1));
+      SYMBOL_TEXT (var) = xstrdup (ARG (2));
       SYMBOL_TYPE (var) = TOKEN_TEXT;
     }
   else
     {
-      exists = array_member (ARG (1), var, (caseless != NULL));
+      exists = array_member (ARG (2), var, (caseless != NULL));
       if (exists == -1)
         {
-          value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (1)) + 2);
+          value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (2)) + 2);
           strcpy (value, SYMBOL_TEXT (var));
           strcat (value, "\n");
-          strcat (value, ARG (1));
+          strcat (value, ARG (2));
           xfree (SYMBOL_TEXT (var));
           SYMBOL_TEXT (var) = xstrdup (value);
           xfree (value);
@@ -3740,24 +3754,21 @@ mp4h_array_push (MP4H_BUILTIN_ARGS)
   symbol *var;
   char *old_value;
 
-  if (bad_argc (argv[0], argc, 3, 3))
+  if (bad_argc (argv[0], argc, 2, 3))
     return;
 
-  var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
-  if (var == NULL)
-    var = lookup_variable (ARG (2), SYMBOL_INSERT);
-
+  var = lookup_variable (ARG (1), SYMBOL_INSERT);
   if (SYMBOL_TYPE (var) != TOKEN_TEXT || *(SYMBOL_TEXT (var)) == '\0')
     {
-      SYMBOL_TEXT (var) = xstrdup (ARG (1));
+      SYMBOL_TEXT (var) = xstrdup (ARG (2));
       SYMBOL_TYPE (var) = TOKEN_TEXT;
     }
   else
     {
-      old_value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (1)) + 2);
+      old_value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (2)) + 2);
       strcpy (old_value, SYMBOL_TEXT (var));
       strcat (old_value, "\n");
-      strcat (old_value, ARG (1));
+      strcat (old_value, ARG (2));
       xfree (SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xstrdup (old_value);
     }
@@ -3769,31 +3780,27 @@ mp4h_array_push (MP4H_BUILTIN_ARGS)
 static void
 mp4h_array_pop (MP4H_BUILTIN_ARGS)
 {
-  symbol *var, *stack;
+  symbol *var;
   char *cp;
 
-  if (bad_argc (argv[0], argc, 3, 3))
+  if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  stack = lookup_variable (ARG (2), SYMBOL_LOOKUP);
-  if (stack == NULL)
+  var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
+  if (var == NULL)
     return;
 
-  var = lookup_variable (ARG (1), SYMBOL_INSERT);
-  cp = strrchr (SYMBOL_TEXT (stack), '\n');
+  cp = strrchr (SYMBOL_TEXT (var), '\n');
   if (cp)
     {
       *cp = '\0';
-      SYMBOL_TEXT (var) = xstrdup (cp + 1);
+      shipout_string (obs, cp+1, 0);
     }
   else
     {
-      if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-        xfree (SYMBOL_TEXT (var));
-      SYMBOL_TEXT (var) = xstrdup (SYMBOL_TEXT (stack));
-      *(SYMBOL_TEXT (stack)) = '\0';
+      shipout_string (obs, SYMBOL_TEXT (var), 0);
+      *(SYMBOL_TEXT (var)) = '\0';
     }
-  SYMBOL_TYPE (var) = TOKEN_TEXT;
 }
 
 /*-----------------------------------------------------------------.
@@ -3815,16 +3822,17 @@ mp4h_array_shift (MP4H_BUILTIN_ARGS)
   if (bad_argc (argv[0], argc, 3, 4))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), TRUE, &offset))
-    return;
-
-  var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
+  var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
   if (var == NULL)
     {
       MP4HERROR ((warning_status, 0,
         _("Warning:%s:%d: the variable `%s' is not defined in <%s>"),
-             CURRENT_FILE_LINE, ARG (2), ARG (0)));
+             CURRENT_FILE_LINE, ARG (1), ARG (0)));
     }
+
+  if (!numeric_arg (argv[0], ARG (2), TRUE, &offset))
+    return;
+
   if (SYMBOL_TYPE (var) != TOKEN_TEXT)
     {
       SYMBOL_TYPE (var) = TOKEN_TEXT;

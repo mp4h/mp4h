@@ -8,7 +8,20 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 0.8.6 and SNAP:
+  Changes between 0.8.5 and 0.9.0:
+
+    *) Customization of number output format (01-Apr-2000):
+       [Denis Barbier]
+
+    *) Add support for localization (01-Apr-2000):
+       New <mp4h-l10n> macro defines locale settings.
+       By default, locale is set to C.
+       [Denis Barbier]
+
+    *) Change arguments of array functions (01-Apr-2000):
+       To be more intuitive, first argument of all array-related
+       macros is now the name of the variable containing the array.
+       [Denis Barbier]
 
     *) Change some array functions (31-Mar-2000):
        The <array-append> tag is replaced by <array-push> and

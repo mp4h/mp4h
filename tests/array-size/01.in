@@ -1,4 +1,4 @@
-<set-var array[]=>
+<set-var array=>
 <array-size array>
-<set-var array[]="this">
+<set-var array="this">
 <array-size array>

@@ -1,6 +1,6 @@
-<set-var foo[]="This
+<set-var foo="This
 is
 a
 list">
 <sort foo sortorder=reverse>
-<get-var foo[]>
+<get-var foo>

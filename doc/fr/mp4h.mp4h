@@ -3,8 +3,9 @@
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
+<mp4h-l10n LC_CTYPE=fr_FR>
 <set-var package=mp4h>
-<set-var version=0.8.5>
+<set-var version=0.9.0>
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -323,6 +324,20 @@ Avant</set-hook>
 <set-hook foo position=after>
 Après</set-hook>
 <foo 1 2 3 4>
+</example>
+
+<tag:description get-hook>
+<var nom>
+[position=[before|after]
+</tag:description>
+
+<para>
+Affiche le texte ajouté à cette commande avec <command set-hook>.
+</para>
+
+<example>
+Texte inséré avec position=before:<get-hook foo position=before>!
+Texte inséré avec position=after:<get-hook foo position=after>!
 </example>
 
 ###
@@ -885,9 +900,9 @@ taille est le nombre de lignes présentes dans la variable.
 <array-size chiffres>
 </example>
 
-<tag:description array-append>
-<var valeur>
+<tag:description array-push>
 <var nom>
+<var valeur>
 </tag:description>
 
 <para>
@@ -895,13 +910,21 @@ Ajoute une ou plusieurs lignes à la fin du tableau.
 </para>
 
 <example>
-<array-append "10\n11\n12" chiffres>
+<array-push chiffres "10\n11\n12">
 <get-var chiffres>
 </example>
 
-<tag:description array-add-unique>
-<var valeur>
+<tag:description array-pop>
 <var nom>
+</tag:description>
+
+<para>
+Enlève la dernière ligne du tableau et l'affiche.
+</para>
+
+<tag:description array-add-unique>
+<var nom>
+<var valeur>
 [caseless=true]
 </tag:description>
 
@@ -911,7 +934,7 @@ dans ce tableau.
 </para>
 
 <example>
-<array-add-unique 2 chiffres>
+<array-add-unique chiffres 2>
 <get-var chiffres>
 </example>
 
@@ -938,8 +961,8 @@ en premier.
 </example>
 
 <tag:description array-member>
-<var valeur>
 <var nom>
+<var valeur>
 [caseless=true]
 </tag:description>
 
@@ -949,7 +972,7 @@ valeur, sinon retourne <value -1>.
 </para>
 
 <example>
-<array-member 11 chiffres>
+<array-member chiffres 11>
 </example>
 
 <attributes:description>
@@ -959,8 +982,8 @@ des caractères.
 </attributes:description>
 
 <tag:description array-shift>
-<var offset>
 <var nom>
+<var offset>
 [start=<var début>]
 </tag:description>
 
@@ -973,9 +996,9 @@ premières valeurs sont remplies par des lignes vides.
 </para>
 
 <example>
-<array-shift 2 chiffres>
+<array-shift chiffres 2>
 Maintenant: <get-var chiffres>
-<array-shift -4 chiffres>
+<array-shift chiffres -4>
 Et là: <get-var chiffres>
 </example>
 
@@ -983,7 +1006,7 @@ Et là: <get-var chiffres>
 <attributes:item "start=<var début>">
 Indique le point de départ à partir duquel le décalage s'opère.
 <example>
-<array-shift -2 chiffres start=2><get-var chiffres>
+<array-shift chiffres -2 start=2><get-var chiffres>
 </example>
 </attributes:description>
 
@@ -1672,6 +1695,23 @@ dernière ligne du bloc qui contient cette instrction.
 Affiche le numéro de version de <mp4h>.
 </para>
 
+<tag:description dnl>
+</tag:description>
+
+<para>
+Le texte après cette balise est ignoré jusqu'au prochain saut de ligne.
+Cela permet de mettre un commentaire qui sera ignoré même si les
+caractères pour les commentaires ont été redéfinies avec la commande
+<command set-eol-comment>.
+</para>
+
+<example>
+<dnl>Ceci est un commentaire
+foo
+<dnl>Ceci est un commentaire
+bar
+</example>
+
 <tag:description date>
 [epoch]
 </tag:description>
@@ -1701,6 +1741,38 @@ Depuis le début de la compilation de cette documentation par <mp4h>,
 voici le nombre de cycles d'horloge écoulés:
 <timer>
 </example>
+
+<tag:description mp4h-l10n>
+<var nom>=<var valeur>
+</tag:description>
+
+<para>
+Redéfinit la localisation courante. Par défaut, le programme est lancé
+avec la localisation «C».
+</para>
+
+<example>
+<mp4h-l10n LC_NUMERIC=fr_FR>
+<add 1,2 3,4>
+</example>
+
+<tag:description mp4h-output-radix>
+<var number>
+</tag:description>
+
+<para>
+Change le format d'affichage des nombres réels, en spécifiant le nombre
+de chiffres affichés après la virgule. Il y a par défaut six chiffres
+après la virgule.
+</para>
+
+<example>
+<mp4h-l10n LC_NUMERIC=C>
+<add 1.2 3.4>
+<mp4h-output-radix 2>
+<add 1.2 3.4>
+</example>
+<mp4h-output-radix 6>
 
 <section "Schéma d'expansion des macros">
 

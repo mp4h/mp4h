@@ -1,8 +1,8 @@
-<set-var a[]="zero
+<set-var a="zero
 un
 deux">
 <set-var a[0]="ZERO">
 <set-var a[1]="UN">
 <set-var a[2]="DEUX">
 <set-var a[5]="CINQ">
-<get-var a[]>
+<get-var a>

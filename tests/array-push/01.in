@@ -1,5 +1,5 @@
 <set-var a="zero
 one
 two">
-<array-push three a>
+<array-push a three>
 <get-var a>
