@@ -172,7 +172,7 @@ maintainer-clean-hdr:
 mostlyclean-libLTLIBRARIES:
 
 clean-libLTLIBRARIES:
-	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	-test -z "$(LTLIBRARIES)" || rm -f $(LTLIBRARIES)
 
 distclean-libLTLIBRARIES:
 
