@@ -359,6 +359,7 @@ main (int argc, char *const *argv)
 
   input_init ();
   output_init ();
+  include_env_init ();
   symtab_init ();
   locale_init ();
 

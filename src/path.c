@@ -58,6 +58,25 @@ search_path_add (struct search_path_info *info, const char *dir)
   info->list_end = path;
 }
 
+static void
+search_path_env_init (struct search_path_info *info, const char *path)
+{
+  char *path_end;
+
+  if (info == NULL || path == NULL)
+    return;
+
+  do
+    {
+      path_end = strchr (path, ':');
+      if (path_end)
+        *path_end = '\0';
+      search_path_add (info, path);
+      path = path_end + 1;
+    }
+  while (path_end);
+}
+
 
 void
 include_init (void)
@@ -69,6 +88,14 @@ include_init (void)
 
 
 /* Functions for normal input path search */
+
+void
+include_env_init (void)
+{
+  search_path_env_init (&dirpath, PKGPATH);
+  search_path_env_init (&dirpath, getenv ("MP4HPATH"));
+}
+
 
 void
 add_include_directory (const char *dir)

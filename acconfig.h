@@ -8,4 +8,6 @@
 /* Define to 1 for better use of the debugging malloc library.  */
 #undef WITH_DMALLOC
 
+/* Default location for mp4h packages */
+#undef PKGPATH
 

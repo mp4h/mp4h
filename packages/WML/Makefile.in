@@ -1,0 +1,86 @@
+##
+##  packages/WML/Makefile
+##
+
+# ------------------------------------------------
+#   DEFINITIONS
+# ------------------------------------------------
+
+@SET_MAKE@
+SHELL = /bin/sh
+
+top_srcdir      = @top_srcdir@
+srcdir          = @srcdir@
+VPATH           = @srcdir@
+
+SHTOOL          = $(top_srcdir)/shtool
+INSTALL_DATA    = $(SHTOOL) install -c -m 644
+MKDIR           = $(SHTOOL) mkdir -f -p -m 755
+
+prefix          = @prefix@
+exec_prefix     = $(prefix)
+bindir          = $(prefix)/bin
+datadir         = @datadir@
+pkgdatadir      = $(datadir)/@PACKAGE@
+mandir          = $(prefix)/man
+manext          = 3
+
+# ------------------------------------------------
+#   TARGETS
+# ------------------------------------------------
+
+all:
+	@set -e; \
+	files=`echo *.src`; \
+	for file in $$files; do \
+	    base=`echo $$file | sed -e 's/\.src$$//g'`; \
+	    name="WML:$$base"; \
+	    if ls -1t $$base.mp4hp $$base.src 2>/dev/null \
+	       | sed 1q | grep "^$$base.mp4hp\$$" >/dev/null 2>&1; then \
+	        :; \
+	    else \
+	        echo "Creating $$name"; \
+	        sed -e '/^=head1/,/^=cut/d' -e '/^##EOF##/,$$d' \
+                   <$$base.src >$$base.mp4hp; \
+	        cp $$base.src $$name.pod; \
+	        pod2man --section=1 \
+	            --center="EN Tools" \
+	            --release="EN Tools" \
+	                $$name.pod >$$base.$(manext); \
+	        rm -f $$name.pod; \
+	    fi; \
+	done
+
+install:
+	@if [ ! -d "$(mandir)/man$(manext)" ]; then \
+	        echo "$(MKDIR) $(mandir)/man$(manext)"; \
+	        $(MKDIR) $(mandir)/man$(manext); \
+	else :; \
+	fi
+	@set -e; \
+	files=`echo *.mp4hp`; \
+	for file in $$files; do \
+	    base=`echo $$file | sed -e 's/\.mp4hp$$//g'`; \
+	    dir=`echo $$file | sed -e 's/[a-zA-Z0-9_]*.mp4hp$$//g'`; \
+	    name="WML:$$base"; \
+	    if [ ! -d "$(pkgdatadir)/WML/$$dir" ]; then \
+	        echo "$(MKDIR) $(pkgdatadir)/WML/$$dir"; \
+	        $(MKDIR) $(pkgdatadir)/WML/$$dir; \
+	    else :; \
+	    fi; \
+          echo "$(INSTALL_DATA) $$file $(pkgdatadir)/WML/$$file"; \
+          $(INSTALL_DATA) $$file $(pkgdatadir)/WML/$$file; \
+          echo "$(INSTALL_DATA) $$base.$(manext) $(mandir)/man$(manext)/$$name.$(manext)"; \
+          $(INSTALL_DATA) $$base.$(manext) $(mandir)/man$(manext)/$$name.$(manext); \
+	done
+
+clean:
+	-rm -f *.mp4hp
+	-rm -f *.$(manext)
+
+distclean: clean
+	-rm -f Makefile
+
+realclean: distclean
+
+##EOF##

@@ -16,6 +16,17 @@ AC_SUBST(VERSION)
 AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE")
 AC_DEFINE_UNQUOTED(VERSION, "$VERSION")
 
+if test x$datadir = 'x${prefix}/share'; then
+    if test x$prefix = xNONE; then
+        PKGPATH="$ac_default_prefix/share/mp4h"
+    else
+        PKGPATH="$prefix/share/mp4h"
+    fi
+else
+    PKGPATH="$datadir/mp4h"
+fi
+AC_DEFINE_UNQUOTED(PKGPATH, "$PKGPATH")
+
 AC_ARG_PROGRAM
 
 AC_PROG_CC
@@ -60,6 +71,8 @@ AC_OUTPUT(
    Makefile
    lib/Makefile
    src/Makefile
+   packages/Makefile
+   packages/WML/Makefile
    doc/Makefile
    tests/Makefile
 )

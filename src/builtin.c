@@ -114,6 +114,7 @@ DECLARE (mp4h_neq);
   /*  page functions  */
 DECLARE (mp4h_include);
 DECLARE (mp4h___include);
+DECLARE (mp4h_use);
 DECLARE (mp4h_comment);
 DECLARE (mp4h_set_eol_comment);
 DECLARE (mp4h_set_quotes);
@@ -257,6 +258,7 @@ builtin_tab[] =
       /*  page functions  */
   { "include",          FALSE,   FALSE,   mp4h_include },
   { "__include",        TRUE,     TRUE,   mp4h___include },
+  { "use",              FALSE,    TRUE,   mp4h_use },
   { "comment",          TRUE,     TRUE,   mp4h_comment },
   { "set-eol-comment",  FALSE,    TRUE,   mp4h_set_eol_comment },
   { "set-quotes",       FALSE,    TRUE,   mp4h_set_quotes },
@@ -2587,6 +2589,46 @@ mp4h___include (MP4H_BUILTIN_ARGS)
 
   if (verbatim && strcmp (verbatim, "true") == 0)
     read_file_verbatim (obs);
+
+  xfree (filename);
+}
+
+/*---------------------------------------------------------.
+| Read and parse a package.  This file is searched in the  |
+| directories specified by the -I option.                  |
+`---------------------------------------------------------*/
+static void
+mp4h_use (MP4H_BUILTIN_ARGS)
+{
+  FILE *fp;
+  char *filename = NULL;
+  char *real_filename = NULL;
+  char *cp;
+
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  real_filename = xmalloc (strlen (ARG (1)) + 6);
+  strcpy (real_filename, ARG (1));
+  strcat (real_filename, ".mp4hp");
+
+  for (cp=real_filename; *cp != '\0'; cp++)
+    {
+      if (*cp == ':')
+        *cp = '/';
+    }
+
+  fp = path_search (real_filename, &filename);
+  if (fp == NULL)
+    {
+      MP4HERROR ((warning_status, errno,
+        _("Warning:%s:%d: Cannot open %s"),
+             CURRENT_FILE_LINE, ARG (1)));
+      xfree (real_filename);
+      return;
+    }
+
+  push_file (fp, filename);
 
   xfree (filename);
 }
