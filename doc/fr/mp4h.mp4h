@@ -3,20 +3,22 @@
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
-<include "version">
+<set-var package=mp4h>
+<set-var version=0.5.6>
+<set-var title="MP4H - Un macro processeur pour HTML">
 
-<if <not <get-var format>>
-  <exit status=1
-        message="This file has to be compiled with one of the following lines
-   ../../src/mp4h -D format=html mp4h.mp4h > mp4h.html
-   ../../src/mp4h -D format=pod mp4h.mp4h > mp4h.pod
-">>
+<include <get-var format>.out
+;;;    alt=<exit status=1
+;;;        message="This file has to be compiled with one of the following lines
+;;;   ../../src/mp4h -D format=html mp4h.mp4h > mp4h.html
+;;;   ../../src/mp4h -D format=pod mp4h.mp4h > mp4h.pod
+;;;">
+>
 
-<include <get-var format>.out>
 <include list-tags>
 
 <header>
-<section "Description">
+<section "Introduction">
 
 <para>
 Le programme <mp4h> est un macro-processeur spécialement conçu pour
@@ -1290,23 +1292,70 @@ par <mp4h>.
 ;;;    Debugging
 ;;;
 
-<subsection "Debugging">
+<subsection "Aide au déboguage">
 
-<tag:description debugmode>
-<var string>
-</tag:description>
+<para>
+Lorsque les constructions deviennent complexes, il peut être ardu de comprendre
+ce qui cloche dans ce qu'on a écrit. Les fonctions ci-dessous permettent
+d'afficher certaines informations. Le déboguage reste cependant délicat, et est
+une partie de <mp4h> à améliorer.
+</para>
 
 <tag:description function-def>
 <var nom>
 </tag:description>
 
+<para>
+Affiche le texte de remplacement de la fonction. Par exemple, la commande qui
+affiche les exemples à été définie ainsi:
+<example>
+<function-def example>
+</example>
+
+</para>
+
+<tag:description debugmode>
+<var string>
+</tag:description>
+
+<para>
+Cette commande prend le même argument que l'option <option d>.
+</para>
+
 <tag:description debugging-on>
 <var nom>
+[<var nom>] ...
 </tag:description>
+
+<para>
+Les commandes dont les noms sont passés en argument sont «tracées»,
+c'est-à-diree que les informations demandées au travers de l'option <option d>
+et de la commande <commande debugmode> sont affichées lors de chaque appel de
+la fonction.
+</para>
 
 <tag:description debugging-off>
 <var nom>
+[<var nom>] ...
 </tag:description>
+
+<para>
+Fonction inverse de la précédente.
+</para>
+
+<undef test>
+<example>
+<define-tag test whitespace=delete>
+<set-var i=1>
+<set-var j=<multiply 4 <get-var i>>>
+<get-var j>
+</define-tag>
+<test>
+<debugging-on test>
+<test>
+<debugging-off test>
+<test>
+</example>
 
 ;;;
 ;;;    Misc
@@ -1339,13 +1388,13 @@ par <mp4h>.
 Quand une balise n'est pas suivie par un espace ou un signe supérieur,
 la lecture et l'affichage des symboles peuvent être erronés ou même
 entrainer l'arrêt du programme. Par exemple, ce commentaire
-<pre>
+<code>
     <html:comment>this is a comment</html:comment>
-</pre>
+</code>
 peut entrainer des problèmes tandis que celui-ci
-<pre>
+<code>
     <html:comment> this is a comment</html:comment>
-</pre>
+</code>
 est correct.
 </para>
 
@@ -1354,10 +1403,10 @@ Dans la même veine, il est fréquent d'avoir des problèmes quand du code
 perl est à l'intérieur des pages HTML pour être exécuté par le serveur.
 Les lignes suivantes sont des exemples des problèmes rencontrés avec
 <mp4h>:
-<pre>
+<code>
     $x = 1 if $x<=0;
     @articles = sort {$a <=> $b} @files;
-</pre>
+</code>
 </para>
 
 <footer>

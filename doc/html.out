@@ -20,6 +20,7 @@
 <define-tag left-angle>&lt;</define-tag>
 <define-tag right-angle>&gt;</define-tag>
 <define-tag true><tt>true</tt></define-tag>
+<define-tag option><tt>-%attributes</tt></define-tag>
 
 ;;;
 ;;;    Alias for writing URLs
@@ -71,16 +72,10 @@
 <set-var list-attributes[]="%body">
 <subst-in-var list-attributes "^\n" "">
 <table border=2>
-<tr>
-<th>Name</th>
-<th>Complex</th>
-<th><group "Verbatim attributes"></th>
-<th>Attributes</th>
-</tr>
 <tr valign=top>
+<td align=center><if <get-var complex> "" "/"></td>
+<td align=center><if <get-var verbatim> "" "V"></td>
 <td align=center>%0</td>
-<td align=center><if <get-var complex> N Y></td>
-<td align=center><if <get-var verbatim> N Y></td>
 <td>
   <table>
     <foreach attr list-attributes>

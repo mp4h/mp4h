@@ -8,6 +8,12 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.5.6 and SNAP:
+
+    *) Fix <function-def> (07-Feb-2000):
+       Replacement text was not protected against expansion.
+       [Denis Barbier]
+
   Changes between 0.5.5 and 0.5.6:
 
     *) Rearranging documentation hierarchy (06-Feb-2000):

@@ -11,6 +11,7 @@
 
 <check-tag mp4h>
 <check-tag Meta-HTML>
+<check-tag m4>
 <check-tag WML>
 <check-tag URL>
 
@@ -19,15 +20,17 @@
 <check-tag subsection>
 
 <check-tag code>
-<check-tag commande>
 <check-tag var>
+<check-tag value>
+<check-tag commande>
+<check-tag left-angle>
+<check-tag right-angle>
+<check-tag true>
+<check-tag option>
 
 <check-tag tag:description>
 <check-tag attributes:description>
 <check-tag attributes:item>
 <check-tag example>
 
-<check-tag left-angle>
-<check-tag right-angle>
-<check-tag true>
 

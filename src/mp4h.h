@@ -196,6 +196,8 @@ extern FILE *debug;
 #define DEBUG_TRACE_ARGS 1
 /* e: show expansion in trace output */
 #define DEBUG_TRACE_EXPANSION 2
+/* q: quote args and expansion in trace output */
+#define DEBUG_TRACE_QUOTE 4
 /* t: trace all macros -- overrides trace{on,off} */
 #define DEBUG_TRACE_ALL 8
 /* l: add line numbers to trace output */

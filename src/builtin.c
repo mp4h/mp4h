@@ -862,7 +862,9 @@ mp4h_function_def (MP4H_BUILTIN_ARGS)
   switch (SYMBOL_TYPE (s))
     {
     case TOKEN_TEXT:
+      obstack_1grow (obs, CHAR_LQUOTE);
       shipout_string (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
+      obstack_1grow (obs, CHAR_RQUOTE);
       break;
 
     case TOKEN_FUNC:
