@@ -67,7 +67,7 @@ INSTALL_LA_FILES = \
    echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
    $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
 
-install:
+install-mod:
 	@list='$(MODULES)'; for p in $$list; do \
 	  if test -f $$p; then \
 	    $(INSTALL_LA_FILES); \

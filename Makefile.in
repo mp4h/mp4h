@@ -184,7 +184,7 @@ _BUILDDIST = \
     echo "Creating tarball..."; \
     cd $(top_srcdir) && \
     $(TARBALL) -u $(NAME) -g mp4h -c '$(GZIP) --best' \
-        -e 'CVS,\.cvsignore,core,mp4h-.*,debian' \
+        -e 'CVS,\.cvsignore,core,mp4h-.*\.tar\.gz,debian' \
         -o $${_tarball} $${_distname} .; \
     echo "Done"; \
     cd $$_cwd && ls -l $${_tarball}

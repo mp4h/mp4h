@@ -50,6 +50,8 @@ ltconfig
 ltmain.sh
 modules/Makefile.in
 modules/test.c
+modules/test.mp4h
+modules/test.ok
 mp4h-config.src
 packages/Makefile.in
 packages/WML/Makefile
@@ -65,6 +67,7 @@ src/Makefile.in
 src/builtin.c
 src/builtin.h
 src/debug.c
+src/devel.c
 src/freeze.c
 src/input.c
 src/macro.c

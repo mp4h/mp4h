@@ -56,8 +56,22 @@ mp4h_finish_module(void)
 }
 
 /* The functions for builtins can be static */
+
+/* This test function prints its attributes in reverse order.  */
 static void
 test (MP4H_BUILTIN_ARGS)
 {
-  dump_args (obs, argc, argv, NULL);
+  const char *separator;
+  register int i;
+
+  separator = predefined_attribute ("separator", &argc, argv, FALSE);
+  for (i=argc-1; i>0; i--)
+    {
+      if (i < argc-1 && separator)
+        obstack_grow (obs, separator, strlen (separator));
+
+      obstack_1grow (obs, CHAR_BGROUP);
+      obstack_grow (obs, ARG (i), strlen (ARG (i)));
+      obstack_1grow (obs, CHAR_EGROUP);
+    }
 }
