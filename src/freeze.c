@@ -358,7 +358,7 @@ reload_frozen_state (const char *name)
 
             bp = find_builtin_by_name (string[1]);
             if (bp)
-              define_builtin (string[0], bp, SYMBOL_PUSHDEF, 0);
+              define_builtin (string[0], bp, 0);
             else
               MP4HERROR ((warning_status, 0, _("\
 `%s' from frozen file not found in builtin table!"),

@@ -430,17 +430,15 @@ initialize_builtin (symbol *sym)
 
 /*-------------------------------------------------------------------------.
 | Install a builtin macro with name NAME, bound to the C function given in |
-| BP.  MODE is SYMBOL_INSERT or SYMBOL_PUSHDEF.  TRACED defines whether    |
-| NAME is to be traced.                                                    |
+| BP.  TRACED defines whether  NAME is to be traced.                       |
 `-------------------------------------------------------------------------*/
 
 void
-define_builtin (const char *name, const builtin *bp, symbol_lookup mode,
-                boolean traced)
+define_builtin (const char *name, const builtin *bp, boolean traced)
 {
   symbol *sym;
 
-  sym = lookup_symbol (name, mode);
+  sym = lookup_symbol (name, SYMBOL_INSERT);
   initialize_builtin (sym);
   SYMBOL_TYPE (sym)        = TOKEN_FUNC;
   SYMBOL_FUNC (sym)        = bp->func;
@@ -461,7 +459,7 @@ install_builtin_table (builtin *table)
   push_builtin_table (table);
 
   for (bp = table; bp->name != NULL; bp++)
-    define_builtin (bp->name, bp, SYMBOL_INSERT, FALSE);
+    define_builtin (bp->name, bp, FALSE);
 }
 
 void
@@ -1429,16 +1427,16 @@ mp4h_ifeq (MP4H_BUILTIN_ARGS)
   
   obstack_grow (obs, "<when <string-eq ", 17);
   dump_args (obs, (argc < 3 ? argc : 3), argv, " ");
-  obstack_grow (obs, ">>", 2);
+  obstack_grow (obs, ">><group separator=\" \" ", 23);
   obstack_grow (obs, ARG (3), strlen (ARG (3)));
-  obstack_grow (obs, "</when>", 7);
+  obstack_grow (obs, "></when>", 8);
   if (argc>4)
     {
       obstack_grow (obs, "<when <string-neq ", 18);
       dump_args (obs, 3, argv, " ");
-      obstack_grow (obs, ">>", 2);
+      obstack_grow (obs, ">><group separator=\" \" ", 23);
       obstack_grow (obs, ARG (4), strlen (ARG (4)));
-      obstack_grow (obs, "</when>", 7);
+      obstack_grow (obs, "></when>", 8);
     }
 }
 
@@ -1779,7 +1777,7 @@ mp4h_define_tag (MP4H_BUILTIN_ARGS)
       if (bp == NULL)
         return;
       else
-        define_builtin (ARG (1), bp, SYMBOL_INSERT, TOKEN_DATA_FUNC_TRACED (argv[argc]));
+        define_builtin (ARG (1), bp, TOKEN_DATA_FUNC_TRACED (argv[argc]));
       break;
 
     default:
@@ -1830,7 +1828,7 @@ mp4h_let (MP4H_BUILTIN_ARGS)
       bp = find_builtin_by_addr (SYMBOL_FUNC (s));
       if (bp == NULL)
         return;
-      define_builtin (ARG (1), bp, SYMBOL_INSERT, SYMBOL_TRACED (s));
+      define_builtin (ARG (1), bp, SYMBOL_TRACED (s));
       break;
     case TOKEN_TEXT:
       define_user_macro (ARG (1), SYMBOL_TEXT (s), SYMBOL_INSERT,

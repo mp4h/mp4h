@@ -326,17 +326,19 @@ struct token_data
   u;
 };
 
-#define TOKEN_DATA_TYPE(Td)             ((Td)->type)
-#define TOKEN_DATA_TEXT(Td)             ((Td)->u.u_t.text)
-#define TOKEN_DATA_FUNC(Td)             ((Td)->u.u_f.func)
-#define TOKEN_DATA_FUNC_TRACED(Td)      ((Td)->u.u_f.traced)
+#define TOKEN_DATA_TYPE(Td)         ((Td)->type)
+#define TOKEN_DATA_TEXT(Td)         ((Td)->u.u_t.text)
+#define TOKEN_DATA_FUNC(Td)         ((Td)->u.u_f.func)
+#define TOKEN_DATA_FUNC_TRACED(Td)  ((Td)->u.u_f.traced)
 
 /* The status of processing. */
-#define READ_NORMAL    1                     /* normal expansion of macros */
-#define READ_ATTRIBUTE (READ_NORMAL << 1)    /* when reading macro arguments */
-#define READ_ATTR_VERB (READ_ATTRIBUTE << 1) /* attributes are not expanded */
-#define READ_BODY      (READ_ATTR_VERB << 1) /* when reading body function */
-#define READ_ATTR_BODY (READ_BODY << 1)
+#define READ_NORMAL    (1 << 0)  /* normal expansion of macros */
+#define READ_ATTRIBUTE (1 << 1)  /* when reading macro arguments */
+#define READ_ATTR_VERB (1 << 2)  /* attributes are not expanded */
+#define READ_ATTR_ASIS (1 << 3)  /* attributes are printed as is */
+#define READ_BODY      (1 << 4)  /* when reading body function */
+#define READ_ATTR_BODY (1 << 5)  /* when reading attributes of tags
+                                    within another body function  */
 
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
@@ -388,10 +390,7 @@ extern unsigned short syntax_table[256];
 
 #define SYNTAX_IGNORE   (0x0001)
 #define SYNTAX_SPACE    (0x0002)
-#define SYNTAX_OPEN     (0x0003)
 #define SYNTAX_CLOSE    (0x0004)
-#define SYNTAX_COMMA    (0x0005)
-#define SYNTAX_DOLLAR   (0x0006) /* not used yet */
 #define SYNTAX_ACTIVE   (0x0007)
 #define SYNTAX_ESCAPE   (0x0008)
 
@@ -401,38 +400,25 @@ extern unsigned short syntax_table[256];
 #define SYNTAX_NUM      (0x0020)
 #define SYNTAX_ALNUM    (SYNTAX_ALPHA|SYNTAX_NUM)
 
-/* These are bit masks to AND with other categories.  
-   See input.c for details. */
-#define SYNTAX_LQUOTE   (0x0100)
-#define SYNTAX_RQUOTE   (0x0200)
-#define SYNTAX_BGROUP   (0x0400)
-#define SYNTAX_EGROUP   (0x0800)
-
 /* These bits define the syntax code of a character */
-#define SYNTAX_VALUE    (0x00FF|SYNTAX_LQUOTE|SYNTAX_BGROUP|SYNTAX_EGROUP)
+#define SYNTAX_VALUE    (0x00FF)
 #define SYNTAX_MASKS    (0xFF00)
 
 #define IS_OTHER(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_OTHER)
 #define IS_IGNORE(ch) ((syntax_table[(int)(ch)]) == SYNTAX_IGNORE)
 #define IS_SPACE(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_SPACE)
-
-#define IS_OPEN(ch)   ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_OPEN)
 #define IS_CLOSE(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_CLOSE)
-#define IS_COMMA(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_COMMA)
-#define IS_DOLLAR(ch) ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_DOLLAR)
 #define IS_ACTIVE(ch) ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ACTIVE)
-
 #define IS_ESCAPE(ch) ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ESCAPE)
 #define IS_ALPHA(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ALPHA)
 #define IS_NUM(ch)    ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_NUM)
 #define IS_ALNUM(ch)  ((((syntax_table[(int)(ch)]) & SYNTAX_ALNUM) != 0) \
                           || ch == ':' || ch == '*' || ch == '-')
 
-#define IS_LQUOTE(ch) (syntax_table[(int)(ch)] & SYNTAX_LQUOTE)
-#define IS_RQUOTE(ch) (syntax_table[(int)(ch)] & SYNTAX_RQUOTE)
-#define IS_BGROUP(ch) (syntax_table[(int)(ch)] & SYNTAX_BGROUP)
-#define IS_EGROUP(ch) (syntax_table[(int)(ch)] & SYNTAX_EGROUP)
-
+#define IS_LQUOTE(ch) (ch == CHAR_LQUOTE)
+#define IS_RQUOTE(ch) (ch == CHAR_RQUOTE)
+#define IS_BGROUP(ch) (ch == CHAR_BGROUP)
+#define IS_EGROUP(ch) (ch == CHAR_EGROUP)
 
 void set_syntax __P ((int, const char *));
 void set_syntax_internal __P ((int, int));
@@ -460,9 +446,7 @@ enum symbol_lookup
 {
   SYMBOL_LOOKUP,
   SYMBOL_INSERT,
-  SYMBOL_DELETE,
-  SYMBOL_PUSHDEF,
-  SYMBOL_POPDEF
+  SYMBOL_DELETE
 };
 
 /* Symbol table entry.  */
@@ -533,8 +517,7 @@ void initialize_builtin __P ((symbol *));
 void builtin_init __P ((void));
 void builtin_deallocate __P ((void));
 void clear_tag_attr __P ((void));
-void define_builtin __P ((const char *, const builtin *, symbol_lookup,
-                          boolean));
+void define_builtin __P ((const char *, const builtin *, boolean));
 void set_regexp_extended __P ((boolean));
 void init_break __P ((void));
 void define_user_macro __P ((const char *, char *, symbol_lookup,

@@ -208,21 +208,6 @@ lookup_symbol (const char *name, symbol_lookup mode)
       sym = NULL;
       break;
 
-    case SYMBOL_POPDEF:
-
-       /* Delete the first occurence of a symbol with NAME.  */
-
-      if (cmp != 0)
-        sym = NULL;
-      if (sym == NULL)
-        break;
-      if (SYMBOL_NEXT (sym) != NULL && cmp == 0)
-        SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
-      *spp = SYMBOL_NEXT (sym);
-      free_symbol (sym);
-      sym = NULL;
-      break;
-
     default:
       MP4HERROR ((warning_status, 0,
         _("INTERNAL ERROR: Illegal mode to symbol_lookup ()")));

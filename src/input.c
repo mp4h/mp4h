@@ -72,26 +72,18 @@ static void lex_debug __P ((void));
 
    The input is read character by character and grouped together
    according to a syntax table.  The character groups are (definitions
-   are all in mp4h.h, those marked with a * are not yet in use):
+   are all in mp4h.h:
 
    SYNTAX_IGNORE        *Character to be deleted from input as if not present
-   SYNTAX_OTHER         Any character with no special meaning to m4
+   SYNTAX_OTHER         Any character with no special meaning to mp4h
    SYNTAX_SPACE         Whitespace (ignored when leading macro arguments)
    SYNTAX_CLOSE         Close list of macro arguments
-   SYNTAX_COMMA         Separates macro arguments
-   SYNTAX_DOLLAR        *Indicates macro argument in user macros
    SYNTAX_ACTIVE        This caracter is a macro name by itself
 
    SYNTAX_ESCAPE        Use this character to prefix all macro names
    SYNTAX_ALPHA         Alphabetic characters (can start macro names)
    SYNTAX_NUM           Numeric characters
    SYNTAX_ALNUM         Alphanumeric characters (can form macro names)
-
-   (These are bit masks)
-   SYNTAX_LQUOTE        A single characters left quote
-   SYNTAX_RQUOTE        A single characters right quote
-   SYNTAX_BGROUP        Begins a group
-   SYNTAX_EGROUP        Ends a group
 
    Besides adding new facilities, the use of a syntax table will reduce
    the number of calls to next_token ().  Now groups of OTHER, NUM and
@@ -101,22 +93,11 @@ static void lex_debug __P ((void));
    comments are used, because otherwise the quote and comment characters
    will not show up in the syntax-table.
 
-   Default '\n' is both ECOMM and SPACE, depending on the context.  To
-   solve the problem of quotes and comments that have diffent syntax
-   code based on the context, the [LR]QUOTE and [BE]COMM codes are bit
-   masks to add to an ordinary code.  If a character is made a quote it
-   will be recognised if the basis code does not have precedence.
-
-   When changing quotes and comment delimiters only the bits are
-   removed, and the characters are therefore reverted to its old
-   category code.
-
    The precedence as implemented by next_token () is:
 
    SYNTAX_IGNORE        *Filtered out below next_token ()
    SYNTAX_ESCAPE        Reads macro name iff set, else next
    SYNTAX_ALPHA         Reads macro name
-   SYNTAX_LQUOTE        Reads all until balanced SYNTAX_RQUOTE
 
    SYNTAX_OTHER and SYNTAX_NUM
                         Reads all SYNTAX_OTHER and SYNTAX_NUM 
@@ -847,12 +828,6 @@ input_init (void)
   set_syntax_internal(SYNTAX_ACTIVE, '\\');
   set_syntax_internal(SYNTAX_ACTIVE, '"');
 
-  /* Default quotes delimiters are always one character long.  */
-  set_syntax_internal(SYNTAX_LQUOTE, CHAR_LQUOTE);
-  set_syntax_internal(SYNTAX_RQUOTE, CHAR_RQUOTE);
-  set_syntax_internal(SYNTAX_BGROUP, CHAR_BGROUP);
-  set_syntax_internal(SYNTAX_EGROUP, CHAR_EGROUP);
-
   /* this function is defined in builtin.c and initializes the
      varbreak symbol.  */
   init_break ();
@@ -862,9 +837,11 @@ input_init (void)
   
 }
 
-/*----------------------.
-| Deallocate obstacks.  |
-`----------------------*/
+/*---------------------------------------------------------.
+| Deallocate obstacks.                                     |
+| This function is not necessary, but freeing memory when  |
+| program  stops helps finding memory leaks.               |
+`---------------------------------------------------------*/
 
 void
 input_deallocate (void)
@@ -931,10 +908,11 @@ set_syntax (int code, const char *chars)
 
 /*-------------------------------------------------------------------------.
 | Parse and return a single token from the input stream.  A token can      |
-| either be TOKEN_EOF, if the input_stack is empty; it can be TOKEN_STRING |
+| either be TOKEN_EOF, if the input_stack is empty; it can be TOKEN_QUOTED |
 | for a quoted string; TOKEN_WORD for something that is a potential macro  |
-| name; and TOKEN_SIMPLE for any single character that is not a part of    |
-| any of the previous types.                                               |
+| name; TOKEN_STRING for a list of alphanumeric characters; and            |
+| TOKEN_SIMPLE for any single character that is not a part of any of the   |
+| previous types.                                                          |
 |                                                                          |
 | Next_token () return the token type, and passes back a pointer to the    |
 | token data through TD.  The token text is collected on the obstack       |
@@ -1116,53 +1094,8 @@ next_token (token_data *td, read_type expansion)
 
             case READ_ATTR_VERB:
             case READ_ATTR_BODY:
-              if (expansion == READ_ATTR_BODY)
-                obstack_1grow (&token_stack, '"');
-              else
-                obstack_1grow (&token_stack, CHAR_BGROUP);
-              while (1)
-                {
-                  ch = next_char ();
-                  if (ch == CHAR_EOF)
-                    MP4HERROR ((EXIT_FAILURE, 0,
-                       _("ERROR:%s:%d: EOF in string"), CURRENT_FILE_LINE));
-
-                  if (ch == '"')
-                    break;
-                  else if (ch == '\\')
-                    {
-                      if (expansion == READ_ATTR_VERB)
-                        {
-                          ch = next_char ();
-                          if (ch == 'n')
-                            obstack_1grow (&token_stack, '\n');
-                          else if (ch == 't')
-                            obstack_1grow (&token_stack, '\t');
-                          else if (ch == 'r')
-                            obstack_1grow (&token_stack, '\r');
-                          else if (ch == '"')
-                            obstack_1grow (&token_stack, CHAR_QUOTE);
-                          else if (ch == CHAR_EOF)
-                            MP4HERROR ((EXIT_FAILURE, 0,
-                              _("ERROR:%s:%d: EOF in string"), CURRENT_FILE_LINE));
-                          else
-                            obstack_1grow (&token_stack, ch);
-                        }
-                      else
-                        {
-                          obstack_1grow (&token_stack, ch);
-                          ch = next_char ();
-                          obstack_1grow (&token_stack, ch);
-                        }
-                    }
-                  else
-                    obstack_1grow (&token_stack, ch);
-                }
-              if (expansion == READ_ATTR_BODY)
-                obstack_1grow (&token_stack, '"');
-              else
-                obstack_1grow (&token_stack, CHAR_EGROUP);
-              type = TOKEN_STRING;
+              obstack_1grow (&token_stack, '"');
+              type = TOKEN_QUOTE;
               break;
 
             default:
@@ -1176,14 +1109,20 @@ next_token (token_data *td, read_type expansion)
           switch (expansion)
           {
             case READ_NORMAL:
-            case READ_ATTR_VERB:
-            case READ_ATTR_BODY:
             case READ_BODY:
               obstack_1grow (&token_stack, ch);
               type = TOKEN_SIMPLE;
               break;
 
+            case READ_ATTR_BODY:
+              obstack_1grow (&token_stack, ch);
+              ch = next_char();
+              obstack_1grow (&token_stack, ch);
+              type = TOKEN_STRING;
+              break;
+
             case READ_ATTRIBUTE:
+            case READ_ATTR_VERB:
               ch = next_char();
               if (ch == 'n')
                 obstack_1grow (&token_stack, '\n');

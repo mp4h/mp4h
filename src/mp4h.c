@@ -235,7 +235,6 @@ main (int argc, char *const *argv, char *const *envp)
 
   debug_init ();
   include_init ();
-  locale_init ();
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);
@@ -354,6 +353,7 @@ main (int argc, char *const *argv, char *const *envp)
   input_init ();
   output_init ();
   symtab_init ();
+  locale_init ();
 
   if (frozen_file_to_read)
     reload_frozen_state (frozen_file_to_read);

@@ -124,13 +124,12 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
 
 
 /*-------------------------------------------------------------------------.
-| This function parses one argument to a macro call.  It expects the first |
-| left parenthesis, or the separating comma to have been read by the       |
-| caller.  It skips leading whitespace, and reads and expands tokens,      |
-| until it finds a comma or an right parenthesis at the same level of      |
-| parentheses.  It returns a flag indicating whether the argument read are |
-| the last for the active macro call.  The argument are build on the       |
-| obstack OBS, indirectly through expand_token ().                         |
+| This function parses one argument to a macro call.  It skips leading     |
+| whitespace and reads and expands tokens until it finds a space outside   |
+| of any group, or a right angle bracket.  It returns a flag indicating    |
+| whether the argument read are the last for the active macro call.  The   |
+| argument read are the last for the active macro call.  The argument are  |
+| on the obstack OBS, indirectly through expand_token ().                  |
 `-------------------------------------------------------------------------*/
 
 static boolean
@@ -183,28 +182,27 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
 
         case TOKEN_BGROUP:
           group_level++;
-          if (expansion == READ_ATTR_BODY)
-            obstack_1grow (obs, CHAR_BGROUP);
           break;
 
         case TOKEN_EGROUP:
-          if (expansion == READ_ATTR_BODY)
-            obstack_1grow (obs, CHAR_EGROUP);
           group_level--;
           break;
 
         case TOKEN_QUOTE:
           if (group_level == 0)
             in_string = !in_string;
+          if (expansion_level > 1)
+            obstack_grow (obs, TOKEN_DATA_TEXT (&td),
+                    strlen (TOKEN_DATA_TEXT (&td)));
           break;
 
         case TOKEN_QUOTED:
         case TOKEN_STRING:
-          if (expansion_level > 0 && t == TOKEN_QUOTED)
+          if (t == TOKEN_QUOTED)
             obstack_1grow (obs, CHAR_LQUOTE);
           obstack_grow (obs, TOKEN_DATA_TEXT (&td),
                   strlen (TOKEN_DATA_TEXT (&td)));
-          if (expansion_level > 0 && t == TOKEN_QUOTED)
+          if (t == TOKEN_QUOTED)
             obstack_1grow (obs, CHAR_RQUOTE);
           break;
 
@@ -284,7 +282,9 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
 }
 
 /*-----------------------------------------------------------------.
-| Collect the body of a container tag. No expansion is performed.  |
+| Collect the body of a container tag. No expansion is performed,  |
+| but when a macro is found its arguments are collected.  This is  |
+| necessary to deal with nested expressions.                       |
 `-----------------------------------------------------------------*/
 static void
 collect_body (symbol *sym, struct obstack *argptr, struct obstack *bodyptr)
@@ -434,11 +434,12 @@ call_macro (symbol *sym, struct obstack *obs, int argc, token_data **argv,
 static void
 expand_macro (symbol *sym, read_type expansion)
 {
-  struct obstack arguments, argptr, save_argptr, body;
+  struct obstack arguments, argptr, body;
   token_data **argv;
   int argc, i;
   struct obstack *obs_expansion;
   const char *expanded;
+  char *cp;
   boolean traced;
   int my_call_id;
   read_type attr_expansion;
@@ -470,14 +471,22 @@ expand_macro (symbol *sym, read_type expansion)
     attr_expansion = READ_ATTRIBUTE;
 
   collect_arguments (sym, attr_expansion, &argptr, &arguments);
-  save_argptr = argptr;
   argc = obstack_object_size (&argptr) / sizeof (token_data *);
-  argv = (token_data **) obstack_finish (&argptr);
 
   if (SYMBOL_CONTAINER (sym))
     {
-      collect_body (sym, &save_argptr, &body);
-      argv = (token_data **) obstack_finish (&save_argptr);
+      collect_body (sym, &argptr, &body);
+      argv = (token_data **) obstack_finish (&argptr);
+    }
+  else
+    {
+      argv = (token_data **) obstack_finish (&argptr);
+      cp = TOKEN_DATA_TEXT (argv[argc-1]);
+      /*   Remove a possible trailing slash from list of arguments.  */
+      if (*cp == '/' && *(cp+1) == '\0')
+        argc--;
+      else if (*(cp + strlen (cp) - 1) == '/')
+        *(cp + strlen (cp) - 1) = '\0';
     }
 
   if (traced)
