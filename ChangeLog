@@ -10,6 +10,10 @@
 
   Changes between 0.9.5 and SNAP:
 
+    *) Remove French documentation (07-Jun-2000):
+       English version is now the only one maintained.
+       [Denis Barbier]
+
     *) Remove trailing star in tag name (04-Jun-2000):
        Because of new parsing scheme, complex HTML tags must be well
        nested.  When this is not the case, e.g. only begin or end tag is
@@ -20,8 +24,8 @@
        [Denis Barbier]
 
     *) New tags added (04-Jun-2000):
-       Tags <lb/>, <rb/> and <dq/> allow protection of the following
-       special characters: `<', `>' and '"'.
+       Tags <lb/>, <rb/>, <dq/> and <bs/> allow protection of the
+       following special characters: `<', `>', '"' and '\'.
        [Denis Barbier]
 
     *) Add -X flag to test parser (03-Jun-2000):

@@ -17,7 +17,7 @@
 <increment _text:tt />
 <ifeq <get-var _text:tt /> 1 "<tt*>" />
 %body
-<ifeq <get-var _text:tt /> 1 "</tt>" />
+<ifeq <get-var _text:tt /> 1 "</tt*>" />
 <decrement _text:tt />
 </define-tag>
 
@@ -25,7 +25,7 @@
 <increment _text:b />
 <ifeq <get-var _text:b /> 1 "<b*>" />
 %body
-<ifeq <get-var _text:b /> 1 "</b>" />
+<ifeq <get-var _text:b /> 1 "</b*>" />
 <decrement _text:b />
 </define-tag>
 
@@ -42,7 +42,7 @@
 <define-tag value><texttt>%attributes</texttt></define-tag>
 <define-tag command><texttt>%attributes</texttt></define-tag>
 <define-tag full-command><texttt>&lt;%attributes&gt;</texttt></define-tag>
-<define-tag slash><texttt>/</texttt></define-tag>
+<define-tag slash><texttt>S</texttt></define-tag>
 <define-tag true><texttt>true</texttt></define-tag>
 <define-tag optflag><texttt>-%attributes</texttt></define-tag>
 <define-tag file><texttt>%attributes</texttt></define-tag>
@@ -102,10 +102,10 @@
 <subst-in-var list-attributes "^\n+" singleline=true />
 <subst-in-var list-attributes "\n+$" singleline=true />
 <para><a name="tag-%0">&nbsp;</a></para>
-<box bdwidth=3 bdcolor="#ff0000" bgcolor="#ffffff" summary="<lang:tag-syntax %0 />">
+<box bdwidth=3 bdcolor="#ff0000" bgcolor="#ffffff" summary="Syntax of the `%0' tag">
 <table border=0 summary="">
 <tr valign=top>
-<td align=center><if <get-var complex /> "&nbsp;" "<a href=<dq/>#noteattr<dq/>><tag:slash/></a>" /></td>
+<td align=center><if <get-var complex /> "<a href=<dq/>#noteattr<dq/>><tag:slash/></a>" "&nbsp;" /></td>
 <td align=center><if <get-var verbatim /> "&nbsp;" "<a href=<dq/>#noteattr<dq/>><tag:V/></a>" /></td>
 <td align=center>%0</td>
 <td>
@@ -195,7 +195,7 @@
 ;;;    Notes
 ;;;
 <define-tag note endtag=required>;;;
-<para><textbf><lang:note/>:</textbf> %body</para></define-tag>
+<para><textbf>Note:</textbf> %body</para></define-tag>
 
 ;;;
 ;;;    Lists
@@ -216,6 +216,7 @@
 <subst-in-var verb-body "<" "&lt;" />
 <subst-in-var verb-body ">" "&gt;" />
 <set-var body=%body />
+<subst-in-var body "<([a-z]*)[*]" "<\1" />
 <subst-in-var body "&" "&amp;" />
 <subst-in-var body "<" "&lt;" />
 <subst-in-var body ">" "&gt;" />
@@ -224,11 +225,11 @@
 <subst-in-var body "<three-colon/>$" "" />
 <subst-in-var body "^\n+" "" singleline=true />
 <table border=2 cellpadding=0 cellspacing=0 width="80%" summary="">
-    <tr><th bgcolor="#ccccff" align=left>&nbsp;&nbsp;&nbsp;<lang:example-source/></th></tr>
+    <tr><th bgcolor="#ccccff" align=left>&nbsp;&nbsp;&nbsp;Source</th></tr>
     <tr><td bgcolor="#ccff99" width="80%"><dnl/>
       <pre><get-var-once verb-body /></pre><dnl/>
     </td></tr>
-    <tr><th bgcolor="#ccccff" align=left>&nbsp;&nbsp;&nbsp;<lang:example-output/></th></tr>
+    <tr><th bgcolor="#ccccff" align=left>&nbsp;&nbsp;&nbsp;Output</th></tr>
     <tr><td bgcolor="#ff99cc" width="80%"><dnl/>
       <pre><get-var-once body /></pre><dnl/>
     </td></tr>

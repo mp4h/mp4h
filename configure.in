@@ -59,7 +59,5 @@ AC_OUTPUT(
    lib/Makefile
    src/Makefile
    doc/Makefile
-   doc/en/Makefile
-   doc/fr/Makefile
    tests/Makefile
 )

@@ -3,44 +3,57 @@
 ##
 
 @SET_MAKE@
-SHELL   = /bin/sh
-RM      = rm -f
+SHELL = /bin/sh
 
-SUBDIRS = en fr
-SDP     =
+top_srcdir      = @top_srcdir@
+VPATH           = @srcdir@
+PROGDIR         = $(top_srcdir)/src
+PROGRAM         = $(PROGDIR)/mp4h
+FLAGS           = -X 6
+DEPS            = list-tags
+TIDY            = @TIDY@
+
+RM              = rm -f
 
 # ------------------------------------------------
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
 
-default: all
+all: $(PROGRAM) mp4h.html mp4h.1
 
-#   Build only English documentation
-all:
-	@set -e; \
-	set dummy $(MAKEFLAGS); amf=$$2; \
-	for dir in en; do \
-	     echo "===> $(SDP)$$dir ($@)"; \
-	     (cd $$dir && $(MAKE) $@) \
-	     || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
-	     echo "<=== $(SDP)$$dir"; \
-	done && test -z "$$fail"
+# ------------------------------------------------
+#   DOCUMENTATION
+# ------------------------------------------------
 
-clean-recursive distclean-recursive realclean-recursive:
-	-@set dummy $(MAKEFLAGS); amf=$$2; \
-	for dir in $(SUBDIRS); do \
-	    target=`echo $@ | sed s/-recursive//`; \
-	    echo "===> $(SDP)$$dir ($$target)"; \
-	    (cd $$dir && $(MAKE) $$target) \
-	    || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
-	    echo "<=== $(SDP)$$dir"; \
-	done && test -z "$$fail"
+mp4h.html: mp4h.mp4h html.out
+	$(PROGRAM) $(FLAGS) -D format=html mp4h.mp4h > $@
+	$(TIDY) $(TIDYOPT) -m $@
 
-clean: clean-recursive
+mp4h.pod: mp4h.mp4h pod.out $(PROGRAM) $(DEPS)
+	$(PROGRAM) $(FLAGS) -D format=pod mp4h.mp4h \
+	| sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
 
-realclean: realclean-recursive
+mp4h.1: mp4h.pod
+	pod2man --section=1 \
+            --center="HTML Tools" \
+            --release="HTML Tools" \
+        mp4h.pod > $@
 
-distclean: distclean-recursive
+# ------------------------------------------------
+#   PROGRAM
+# ------------------------------------------------
+
+$(PROGRAM):
+	cd $(PROGDIR) && $(MAKE)
+
+# ------------------------------------------------
+#   CLEANUP
+# ------------------------------------------------
+
+clean:
+	$(RM) *.pod *.1 *.html *.info *.texinfo
+
+distclean: clean
 	$(RM) Makefile
 
 ##EOF##

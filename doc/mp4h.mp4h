@@ -5,15 +5,15 @@
 
 <mp4h-l10n LC_ALL=C />
 <set-var package=mp4h />
-<set-var version=0.9a601 />
+<set-var version=0.9a603 />
 <set-var title="mp4h - A Macro Processeur for HTML Documents" />
 
 <include lang.en />
 <include <get-var format />.out
     alt=<exit status=1
         message="This file has to be compiled with one of the following lines
-   ../../src/mp4h -D format=html mp4h.mp4h -I .. > mp4h.html
-   ../../src/mp4h -D format=pod mp4h.mp4h -I .. > mp4h.pod
+   ../src/mp4h -D format=html mp4h.mp4h > mp4h.html
+   ../src/mp4h -D format=pod mp4h.mp4h > mp4h.pod
 " />
 />
 
@@ -148,7 +148,9 @@ As <mp4h/> has been specially designed for HTML documents, its syntax is
 very similar to HTML, with tags and attributes.  An important feature
 has no equivalent in HTML: comments until end of line.  All text
 following three colons is discarded until end of line, like
+
 <code>;;;  This is a comment</code>
+
 </para>
 
 ###
@@ -163,16 +165,20 @@ As with HTML, macro names are case insensitive.  In this documentation,
 only lowercase letters are used.
 There are two kinds of tags: simple and complex. A simple tag has the
 following form:
+
 <code><name [attributes] /></code>
+
 whereas a complex tag looks like:
+
 <code><name [attributs]>
 body
 </name></code>
+
 </para>
 
 <para>
 <anchor name="noteattr" />
-In macro descriptions below, a slash indicates a complex tag, and a V
+In macro descriptions below, a slash indicates a simple tag, and a V
 letter that attributes are read verbatim (without expansion) (see the
 chapter on macro expansion for further details).
 </para>
@@ -196,11 +202,15 @@ command name. Replacement text is the function body.
 
 Even if spaces have usually few incidence on HTML syntax, it is
 important to note that
+
 <code><define-tag foo>bar</define-tag></code>
+
 and
+
 <code><define-tag foo>
 bar
 </define-tag></code>
+
 are not equivalent, the latter form contains two newlines that were not
 present in the former.
 </para>
@@ -635,7 +645,7 @@ Replace a regular expression in a string by a replacement text.
 <example>
 <set-var foo="abcdefghijk" />
 <subst-in-string <get-var foo /> "[c-e]" />
-<subst-in-string <get-var foo /> "([c-e])" "\\1 " />
+<subst-in-string <get-var foo /> "([c-e])" "\1 " />
 </example>
 
 <attributes:description>
@@ -808,11 +818,11 @@ regular expressions. By default extended regular expressions are used.
 <example>
 <set-var foo="abcdefghijk" />
 <set-regexp-syntax type=basic />
-<subst-in-string <get-var foo /> "([c-e]+)" ":\\1:" />
-<subst-in-string <get-var foo /> "\\([c-e]\\{1,\\}\\)" ":\\1:" />
+<subst-in-string <get-var foo /> "([c-e]+)" ":\1:" />
+<subst-in-string <get-var foo /> "\([c-e]\{1,\}\)" ":\1:" />
 <set-regexp-syntax type=extended />
-<subst-in-string <get-var foo /> "([c-e]+)" ":\\1:" />
-<subst-in-string <get-var foo /> "\\([c-e]\\{1,\\}\\)" ":\\1:" />
+<subst-in-string <get-var foo /> "([c-e]+)" ":\1:" />
+<subst-in-string <get-var foo /> "\([c-e]\{1,\}\)" ":\1:" />
 </example>
 
 <tag:description get-regexp-syntax>
@@ -836,12 +846,14 @@ Prints actual regexp type.
 With <mp4h/> one can easily deal with string arrays. Variables can be
 treated as a single value or as a newline separated list of strings.
 Thus after defining
+
 <code>
 <set-var digits="0
 1
 2
 3" />
 </code>
+
 one can view its content or one of these values:
 <set-var digits="0\n1\n2\n3" />
 <example>
@@ -1465,7 +1477,7 @@ Returns a newline separated list of files contained in a given directory.
 </para>
 
 <example>
-<directory-contents . matching=".*\\.mp4h$" />
+<directory-contents . matching=".*\.mp4h$" />
 </example>
 
 <tag:description file-exists>
@@ -1857,9 +1869,11 @@ attribute must be a valid <mp4h/> entity. For instance with the
 definitions above, <full-command bar /> can not be an attribute since it
 must be finished by <full-command /bar />.
 But this is valid:
+
 <code><foo <foo/> /></code>
 
 or even
+
 <code><foo <foo name=src url=ici /> /></code>
 
 In these examples, the <command foo /> tag has only one argument.
@@ -1869,8 +1883,10 @@ In these examples, the <command foo /> tag has only one argument.
 Under certain circumstances it is necessary to group multiple statements
 into a single one. This can be done with double quotes or with the
 <command group /> primitive, e.g.
+
 <code><foo "This is the 1st attribute"
            <group and the second /> /></code>
+
 </para>
 
 <note>
@@ -1919,11 +1935,13 @@ By default attributes are evaluated before any replacement.
 </define-tag>
 <para>
 Consider the following example, to change text in typewriter font:
+
 <code>
 <define-tag text-tt endtag=required whitespace=delete>
 <tt>%body</tt>
 </define-tag>
 </code>
+
 </para>
 
 <para>
@@ -1945,6 +1963,7 @@ We would like that inner tags are removed.
 <para>
 First idea is to use an auxiliary variable to know whether we still
 are inside such an environment:
+
 <code>
 <set-var _text:tt=0 />
 <define-tag text-tt endtag=required whitespace=delete>
@@ -1955,6 +1974,7 @@ are inside such an environment:
 <decrement _text:tt />
 </define-tag>
 </code>
+
 <example>
 <text-tt>This is an <text-tt>example</text-tt></text-tt>
 </example>
@@ -1985,9 +2005,8 @@ expansion with
 
 <section "Author" />
 <para>
-Denis Barbier
 <URL src="mailto:barbier@imacs.polytechnique.fr"
-     name="<lb/>barbier@imacs.polytechnique.fr<rb/>" />
+     name="Denis Barbier" />
 </para>
 
 

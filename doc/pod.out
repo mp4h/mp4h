@@ -53,7 +53,7 @@
 
 =head1 VERSION
 
-<document-version />
+This documentation describes <get-var package /> version <get-var version />.
 
 </define-tag>
 
@@ -82,7 +82,7 @@
 =over 2
 
 =item * %0 ;;;
-   <if <get-var complex /> "" "<tag:slash/>" />;;;
+   <if <get-var complex /> "<tag:slash/>" />;;;
    <if <get-var verbatim /> "" "<tag:V/>" />
 
 <foreach attr list-attributes>;;;
@@ -123,7 +123,7 @@
 ;;;    Notes
 ;;;
 <define-tag note endtag=required>;;;
-<para>B_LT_<lang:note/>:_GT_ %body</para></define-tag>
+<para>B_LT_Note:_GT_ %body</para></define-tag>
 
 ;;;
 ;;;    Lists
@@ -153,15 +153,16 @@
 <subst-in-var verb-body "^\n+" "" singleline=true />
 <subst-in-var verb-body "^(.)" "   \1" />
 <set-var body=%body />
+<subst-in-var body "<([a-z]*)[*]" "<\1" />
 <subst-in-var body "<three-colon/>[^\n]*\n[ \t]*" "" singleline=true />
 <subst-in-var body "<three-colon/>$" "" />
 <subst-in-var body "^\n+" "" singleline=true />
 <subst-in-var body "^(.)" "   \1" />
-<group "<lang:example-source/>:
+<group "Source:
 
 <get-var-once verb-body />
 
-<lang:example-output/>:
+Output:
 
 <get-var-once body />
 
