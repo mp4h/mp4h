@@ -5,7 +5,7 @@
 
 <mp4h-l10n LC_ALL=C />
 <set-var package=mp4h />
-<set-var version=1.0a601 />
+<set-var version=1.0.6 />
 <set-var title="mp4h - A Macro Processor for HTML Documents" />
 
 <include <get-var format />.out
@@ -878,6 +878,14 @@ Otherwise they represent the beginning and end of lines.
 <subst-in-string <get-var foo /> ".$" "" singleline=true />
 </example>
 
+<note>
+Regular expression support is provided by the PCRE (Perl Compatible
+Regular Expressions) library package, which is open source software,
+copyright by the University of Cambridge.
+This is a very nice piece of software, latest versions are available at
+<URL src="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/" />.
+</note>
+
 <tag:description subst-in-var>
 <var name />
 <var regexp />
@@ -1029,39 +1037,6 @@ Comparison is case insensitive.
 <example>
 1:<char-offsets "abcdAbCdaBcD" a />
 2:<char-offsets "abcdAbCdaBcD" a caseless=true />
-</example>
-
-<tag:description set-regexp-syntax>
-[type=basic|extended]
-</tag:description>
-
-<para>
-This command controls which regular expressions are used in the macros
-described above.  There are only two possible values: basic and
-extended.
-The former are basic regular expressions and the latter are extended
-regular expressions. By default extended regular expressions are used.
-</para>
-
-<example>
-<set-var foo="abcdefghijk" />
-<set-regexp-syntax type=basic />
-<subst-in-string <get-var foo /> "([c-e]+)" ":\\1:" />
-<subst-in-string <get-var foo /> "\\([c-e]\\{1,\\}\\)" ":\\1:" />
-<set-regexp-syntax type=extended />
-<subst-in-string <get-var foo /> "([c-e]+)" ":\\1:" />
-<subst-in-string <get-var foo /> "\\([c-e]\\{1,\\}\\)" ":\\1:" />
-</example>
-
-<tag:description get-regexp-syntax>
-</tag:description>
-
-<para>
-Prints actual regexp type.
-</para>
-
-<example>
-<get-regexp-syntax />
 </example>
 
 ###

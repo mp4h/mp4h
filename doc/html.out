@@ -66,6 +66,7 @@
 <preserve name />
 <preserve src />
 <set-var %attributes />
+<defvar name <get-var src /> />
 <a href="<get-var src />"><texttt><get-var name /></texttt></a>
 <restore src />
 <restore name />

@@ -8,7 +8,16 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 1.0.5 and SNAP:
+  Changes between 1.0.5 and 1.0.6:
+
+    *) Use of the PCRE library (20-Jul-2000):
+       This library is copyrighted by University of Cambridge.
+       With this library, Perl regular expressions may now be
+       used instead of POSIX regular expressions.
+       Current implementation in mp4h is quite weak, because we use
+       the POSIX compatibility mode instead of native API.  Moreover
+       one test of the test suite fails.
+       [Denis Barbier]
 
     *) Fix some bugs with quotes (19-Jul-2000):
        Quotes have two functions: group multiple words into a single
