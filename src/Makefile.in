@@ -21,14 +21,14 @@ RANLIB  = @RANLIB@
 
 DEFS     = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
-LDFLAGS  = @LDFLAGS@ -lm
+LDFLAGS  = @LDFLAGS@
 INCLUDES = -I$(top_srcdir)/lib 
 LDADD    = ../lib/libmp4h.a
 CFLAGS   = @CFLAGS@
 COMPILE  = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
 CCLD     = $(CC)
 LINK     = $(CCLD) $(CFLAGS) $(LDFLAGS) -o $@
-LIBS     = @LIBS@
+LIBS     = @LIBS@ -lm
 
 SOURCES = mp4h.c builtin.c debug.c freeze.c input.c \
     macro.c output.c path.c symtab.c version.c

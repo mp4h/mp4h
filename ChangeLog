@@ -12,7 +12,7 @@
 
     *) Add <return> tag (20-Mar-2000):
        This tag exits from inner macro.
-       [Denis Barbier]
+       [Uwe Mindrup <uwe@mindrup.de>]
 
     *) Add %name in replacement text (20-Mar-2000):
        This special string expands to the macro name when found in
