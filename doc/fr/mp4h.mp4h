@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.8.4>
+<set-var version=0.8.5>
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -254,8 +254,8 @@ sont insérés sans développement.
 <example>
 <define-tag bar>quux</define-tag>
 <define-tag foo attributes=verbatim endtag=required>
-Corps: %ubody
-Attributs: %uattributes
+Corps: %Ubody
+Attributs: %Uattributes
 </define-tag>
 <foo txt="<bar>">Et voila</foo>
 </example>
@@ -1077,7 +1077,7 @@ cas contraire, le résultat est un réel.
 
 <example>
 <define-tag factorielle whitespace=delete>
-<ifeq %0 1 1 <multiply %0 <factorielle <substract %0 1>>>>
+<ifeq %0 1 1 <multiply %0 "<factorielle <substract %0 1>>">>
 </define-tag>
 <factorielle 6>
 </example>

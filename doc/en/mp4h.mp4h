@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.8.4>
+<set-var version=0.8.5>
 <set-var title="MP4H - A Macro Processeur for HTML Documents">
 
 <include <get-var format>.out
@@ -233,8 +233,8 @@ expansion.
 <example>
 <define-tag bar>quux</define-tag>
 <define-tag foo attributes=verbatim endtag=required>
-Body: %ubody
-Attributes: %uattributes
+Body: %Ubody
+Attributes: %Uattributes
 </define-tag>
 <foo txt="<bar>">Here we go</foo>
 </example>
@@ -1028,7 +1028,7 @@ operators are self-explanatory.
 
 <example>
 <define-tag factorial whitespace=delete>
-<ifeq %0 1 1 <multiply %0 <factorial <substract %0 1>>>>
+<ifeq %0 1 1 <multiply %0 "<factorial <substract %0 1>>">>
 </define-tag>
 <factorial 6>
 </example>
