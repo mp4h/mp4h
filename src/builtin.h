@@ -79,7 +79,7 @@
 #    ifdef _POSIX_PATH_MAX
 #       define MAXPATHLEN (_POSIX_PATH_MAX+1)
 #    else
-#       define MAXPATHLEN 1024	/* Err on the large side. */
+#       define MAXPATHLEN 4096	/* Err on the large side. */
 #    endif
 #  endif
 #endif
