@@ -112,8 +112,10 @@ if test ".$with_modules" = .yes; then
     AC_SUBST(INCLTDL)
     AC_SUBST(LIBLTDL)
     AC_CONFIG_SUBDIRS(libltdl)
-    AC_CHECK_HEADER(njs/jig.h, do_module_njs=1)
-    AC_CHECK_HEADER(mozilla/jsapi.h, do_module_mozjs=1)
+    AC_CHECK_HEADER(njs/jig.h,
+        [AC_CHECK_LIB(njs, js_free, do_module_njs=1)])
+    AC_CHECK_HEADER(mozilla/jsapi.h,
+        [AC_CHECK_LIB(js, JS_NewRuntime, do_module_mozjs=1)])
 else
     #   Remove recursive call to configure in libltdl
     no_recursion=yes
