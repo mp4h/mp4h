@@ -280,7 +280,7 @@ n'est effectuée si la commande est déjà définie.
 </para>
 
 <tag:description let>
-<var nouveau> <var ancien>
+<var nouveau>=<var ancien>
 </tag:description>
 
 <para>
