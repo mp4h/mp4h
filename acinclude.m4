@@ -125,7 +125,8 @@ esac
 AC_DEFUN(AM_WITH_DMALLOC,
 [AC_MSG_CHECKING(if malloc debugging is wanted)
 AC_ARG_WITH(dmalloc,
-[  --with-dmalloc          use dmalloc, as in http://www.dmalloc.com],
+[  --with-dmalloc          use dmalloc, as in
+                          ftp://ftp.letters.com/src/dmalloc/dmalloc.tar.gz],
 [if test "$withval" = yes; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(WITH_DMALLOC,1,
@@ -136,7 +137,6 @@ else
   AC_MSG_RESULT(no)
 fi], [AC_MSG_RESULT(no)])
 ])
-
 # Written by René Seindal (rene@seindal.dk)
 #
 # This file can be copied and used freely without restrictions.  It can
@@ -149,8 +149,8 @@ fi], [AC_MSG_RESULT(no)])
 AC_DEFUN(AM_WITH_MODULES,
   [AC_MSG_CHECKING(if support for loadable modules is requested)
   AC_ARG_ENABLE(modules,
-  [  --disable-modules       disable support for dynamic modules],
-  [use_modules=$enableval], [use_modules=yes])
+  [  --enable-modules        enable support for dynamic modules],
+  [use_modules=$enableval], [use_modules=no])
   AC_MSG_RESULT($use_modules)
 
   if test "$use_modules" = yes; then
@@ -158,7 +158,7 @@ AC_DEFUN(AM_WITH_MODULES,
     with_modules=no
 
     dnl Test for dlopen in libc
-    AC_CHECK_FUNCS(dlopen)
+    AC_CHECK_FUNCS([dlopen])
     if test "$ac_cv_func_dlopen" = yes; then
        with_modules=yes
     fi
