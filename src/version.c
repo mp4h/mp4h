@@ -8,7 +8,7 @@
 #ifndef _SRC_VERSION_C_
 #define _SRC_VERSION_C_
 
-#define MP4H_VERSION 0x1000259
+#define MP4H_VERSION 0x100025A
 
 typedef struct {
     const int   v_hex;
@@ -32,14 +32,14 @@ extern mp4h_version_t mp4h_version;
 #undef  _SRC_VERSION_C_AS_HEADER_
 
 mp4h_version_t mp4h_version = {
-    0x1000259,
-    "1.0a601",
-    "1.0a601 (11-Jul-2000)",
-    "This is mp4h, Version 1.0a601 (11-Jul-2000)",
-    "mp4h 1.0a601 (11-Jul-2000)",
-    "mp4h/1.0a601",
-    "@(#)mp4h 1.0a601 (11-Jul-2000)",
-    "$Id: mp4h 1.0a601 (11-Jul-2000) $"
+    0x100025A,
+    "1.0a602",
+    "1.0a602 (13-Jul-2000)",
+    "This is mp4h, Version 1.0a602 (13-Jul-2000)",
+    "mp4h 1.0a602 (13-Jul-2000)",
+    "mp4h/1.0a602",
+    "@(#)mp4h 1.0a602 (13-Jul-2000)",
+    "$Id: mp4h 1.0a602 (13-Jul-2000) $"
 };
 
 #endif /* _SRC_VERSION_C_AS_HEADER_ */

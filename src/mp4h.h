@@ -473,7 +473,6 @@ extern int output_current_line;
 void output_init __P ((void));
 void output_deallocate __P ((void));
 void shipout_text __P ((struct obstack *, char *));
-void shipout_string __P ((struct obstack *obs, const char *s, int len));
 void make_diversion __P ((int));
 void insert_diversion __P ((int));
 void insert_file __P ((FILE *));
@@ -575,6 +574,17 @@ void expand_user_macro __P ((struct obstack *, symbol *, int, token_data **,
 const builtin *find_builtin_by_addr __P ((builtin_func *));
 const builtin *find_builtin_by_name __P ((const char *));
 void install_builtin_table __P ((builtin *));
+
+
+/* File: devel.c  --- global functions for writing builtins and modules.  */
+
+boolean bad_argc __P ((token_data *, int, int, int));
+boolean numeric_arg __P ((token_data *, const char *, boolean, int *));
+void shipout_int __P ((struct obstack *, int));
+void shipout_long __P ((struct obstack *, long));
+void shipout_string __P ((struct obstack *, const char *, int));
+void dump_args __P ((struct obstack *, int, token_data **, const char *));
+const char * predefined_attribute __P ((const char *, int *, token_data **, boolean));
 
 
 /* File: path.c  --- path search for include files.  */

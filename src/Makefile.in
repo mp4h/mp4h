@@ -38,8 +38,8 @@ CCLD     = $(CC)
 @WITH_MODULES_TRUE@LINK     = $(LIBTOOL) --quiet --mode=link $(CCLD) $(CFLAGS) $(LDFLAGS) -o $@
 LIBS     = @LIBS@ -lm
 
-SOURCES = mp4h.c builtin.c debug.c freeze.c input.c \
-    macro.c output.c path.c symtab.c version.c module.c
+SOURCES = mp4h.c builtin.c debug.c devel.c freeze.c input.c \
+    macro.c module.c output.c path.c symtab.c version.c
 HEADERS = mp4h.h builtin.h
 OBJECTS = $(SOURCES:.c=.o)
 
