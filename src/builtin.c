@@ -854,6 +854,11 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
   return (found ? tag_attr->text : NULL );
 }
 
+/*--------------------------------------------------------------------------.
+| Clear stack containing predefined attributes.  This function is called    |
+| after macro has been evaluated.                                           |
+`--------------------------------------------------------------------------*/
+
 void
 clear_tag_attr (void)
 {
@@ -867,6 +872,11 @@ clear_tag_attr (void)
       tag_attr = pa;
     }
 }
+
+/*----------------------------------------------------------------.
+| Quote name=value pair.  This function must be called only when  |
+| text is sent to output.                                         |
+`----------------------------------------------------------------*/
 
 static void
 quote_name_value (struct obstack *obs, char *pair)
@@ -922,6 +932,11 @@ quote_name_value (struct obstack *obs, char *pair)
     obstack_grow (obs, equal_ptr+1+strlen (equal_ptr+1)-special_chars,
             special_chars);
 }
+
+/*---------------------------------------------------------.
+| Extract from ARGV the attributes whose names are listed  |
+| in ARG (1).                                              |
+`---------------------------------------------------------*/
 
 static void
 matching_attributes (struct obstack *obs, int argc, token_data **argv, char *list)
