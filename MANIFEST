@@ -47,7 +47,6 @@ src/mp4h.c
 src/mp4h.h
 src/output.c
 src/path.c
-src/qqq.wml
 src/symtab.c
 src/version.c
 tests/Makefile
@@ -74,6 +73,8 @@ tests/array-shift/04.in
 tests/array-shift/04.ok
 tests/array-size/01.in
 tests/array-size/01.ok
+tests/capitalize/01.in
+tests/capitalize/01.ok
 tests/char-offsets/01.in
 tests/char-offsets/01.ok
 tests/char-offsets/02.in
