@@ -1,0 +1,49 @@
+##
+##  Makefile -- MP4H Documentation
+##
+
+@SET_MAKE@
+SHELL = /bin/sh
+
+top_srcdir      = @top_srcdir@
+srcdir          = @srcdir@
+tmpdir          = @tmpdir@
+VPATH           = @srcdir@
+LONG_VERSION    = @LONG_VERSION@
+
+RM              = rm -f
+
+GENMAN = \
+    sed -e 's|\@LONG_VERSION\@|$(LONG_VERSION)|g' < $< | ../src/mp4h > $@
+
+# ------------------------------------------------
+#   THE DEFAULT TARGETS
+# ------------------------------------------------
+
+all: mp4h.html
+
+# ------------------------------------------------
+#   DOCUMENTATION
+# ------------------------------------------------
+
+mp4h.html: mp4h.mp4h macros.inc ../src/mp4h
+	$(GENMAN)
+
+# ------------------------------------------------
+#   PROGRAM
+# ------------------------------------------------
+
+../src/mp4h:
+	cd .. && $(MAKE)
+
+# ------------------------------------------------
+#   CLEANUP
+# ------------------------------------------------
+
+clean:
+	$(RM) *.1
+
+distclean: clean
+	$(RM) Makefile
+
+##EOF##

@@ -1,0 +1,4 @@
+<string-neq "foo" "foo">
+<string-neq "foo" "FOO">
+<string-neq "foo" "bar">
+<string-neq "foo" "BAR">

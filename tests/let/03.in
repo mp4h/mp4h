@@ -1,0 +1,6 @@
+<define-tag foo type=complex>
+attr: %attributes
+body: %body
+</define-tag>
+<let quux foo>
+<quux 1 2 3>bar baz</quux>

@@ -1,0 +1,3 @@
+<set-var foo=10>
+<increment foo>
+<get-var foo>

@@ -1,0 +1,4 @@
+<ifneq "*" "*" a b>
+<ifneq "*" "*" a>
+<ifneq "*" "1" a b>
+<ifneq "*" "1" a>

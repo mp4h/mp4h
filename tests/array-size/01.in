@@ -1,0 +1,4 @@
+<set-var array[]=>
+<array-size array>
+<set-var array[]="this">
+<array-size array>

@@ -1,0 +1,119 @@
+;;;
+;;;  mp4h.pod -- Documentation for mp4h
+;;;
+
+<set-var package=mp4h>
+<set-var version="@LONG_VERSION@">
+<set-var title="MP4H - A Macro Processor for HTML">
+
+<include macros.inc>
+
+<header>
+<section "Description">
+
+The <mp4h> program is a macro processor specifically designed for HTML
+documents.  One can define and use its own tags very easily.
+
+This software was originally written as a piece of a more complex
+program, <WML> (Website Meta Language
+<URL http://www.engelschall.com/sw/wml/>).
+<WML> used <Meta-HTML> (<URL http://www.metahtml.org/> written
+by Brian J. Fox) to perform macro substitutions.  For license reasons,
+it was difficult to hack <Meta-HTML> into <WML>, so a replacement for
+this program was needed. 
+
+Then I pick up GNU <m4> <URL http://www.gnu.org/software/m4/>,
+written by René Seindal, because of its numerous advantages : this software is
+stable, robust, well documented and runs fast.  This version of <mp4h>
+is derived from GNU <m4> 1.4n, which is a development version.
+
+<section "General description">
+
+;;;
+;;;    Definition of new macros
+;;;
+
+<subsection "Macro functions">
+
+<tag:description define-tag complex>
+macro-name
+[attributes=verbatim]
+[type=simple|complex]
+</tag:description>
+
+<para>
+This function defines a new tag.
+</para>
+
+<example>
+<define-tag foo>bar</define-tag>
+<foo>
+</example>
+
+<example>
+<define-tag foo type=complex>body is: %body</define-tag>
+<foo>Here it is</foo>
+</example>
+
+<tag:description preserve>
+name
+</tag:description>
+
+<tag:description restore>
+name
+</tag:description>
+
+<tag:description let>
+new old
+</tag:description>
+
+<tag:description undef>
+name
+</tag:description>
+
+;;;
+;;;    Debugging
+;;;
+
+<subsection "Debugging">
+
+<tag:description debugmode>
+name
+</tag:description>
+
+<tag:description function-def>
+name
+</tag:description>
+
+<tag:description debugging-on>
+name
+</tag:description>
+
+<tag:description debugging-off>
+name
+</tag:description>
+
+;;;
+;;;    Variable functions
+;;;
+
+<tag:description set-var>
+name=value
+</tag:description>
+
+<section Bugs>
+
+<para>
+When a tag name is not followed by a space or a closing bracket,
+expansion is wrong.  For instance, this comment
+<pre>
+    &lt;!--this is a comment --&gt;
+</pre>
+will cause trouble whereas this one
+<pre>
+    &lt;!-- this is a comment --&gt;
+</pre>
+is correctly parsed.
+</para>
+
+<footer>

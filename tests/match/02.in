@@ -1,0 +1,4 @@
+<match "abcdefghij" "def" action=endpos>
+<match "abcdefghij" "d.f" action=endpos>
+<match "abcdefghij" "[fed]+" action=endpos>
+<match "abcdefghij" "[xyz]" action=endpos>

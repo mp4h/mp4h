@@ -1,0 +1,7 @@
+<when true>
+a
+</when>
+<set-var a=foo>
+<when <get-var foo>>
+b
+</when>

@@ -1,0 +1,52 @@
+# Configure template for GNU m4.
+# Copyright (C) 1991-1998 Free Software Foundation, Inc.
+# Process this file with autoconf to produce a configure script.
+
+AC_INIT(src/mp4h.c)
+AC_CONFIG_HEADER(config.h)
+
+shtool=./shtool
+PACKAGE=MP4H
+VERSION="`$shtool version -l c -d short src/version.c`"
+LONG_VERSION="`$shtool version -l c -d long src/version.c`"
+$shtool echo -e "Configuring for %B$PACKAGE $LONG_VERSION %b"
+
+tmpdir=${TMPDIR-/tmp}
+AC_SUBST(tmpdir)
+AC_SUBST(PACKAGE)
+AC_SUBST(VERSION)
+AC_SUBST(LONG_VERSION)
+AC_DEFINE_UNQUOTED(PACKAGE, $PACKAGE)
+AC_DEFINE_UNQUOTED(VERSION, $VERSION)
+
+AC_ARG_PROGRAM
+
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+
+AC_AIX
+AC_ISC_POSIX
+AC_MINIX
+AC_C_CONST
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS(limits.h locale.h memory.h siginfo.h string.h unistd.h)
+AC_TYPE_SIGNAL
+AC_TYPE_SIZE_T
+
+AC_CHECK_FUNCS(mkstemp sigaction sigaltstack sigstack sigvec strerror tmpfile)
+
+AC_FUNC_ALLOCA
+AC_FUNC_VPRINTF
+AC_REPLACE_FUNCS(strtol obstack xmalloc xstrdup)
+AC_CHECK_FUNC(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
+
+AC_OUTPUT(
+   Makefile
+   lib/Makefile
+   src/Makefile
+   doc/Makefile
+   tests/Makefile
+)

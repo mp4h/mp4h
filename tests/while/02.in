@@ -1,0 +1,4 @@
+<set-var letters="abcdef">
+<while <get-var letters>>
+<get-var letters><subst-in-var letters ".$" "">
+</while>

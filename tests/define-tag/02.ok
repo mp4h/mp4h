@@ -1,0 +1,17 @@
+<foo>
+
+
+bar    baz
+
+
+bar 3 2 1 baz
+
+
+bar  3 1 2 baz
+
+
+bar  3 1 &" 2 baz
+
+
+bar 3 2 1 \& baz
+

@@ -1,0 +1,5 @@
+<set-var a[]="zero
+one
+two">
+<array-member THREE a caseless=true>
+<array-member ONE a caseless=true>

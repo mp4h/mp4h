@@ -1,0 +1,7 @@
+<define-tag foo>
+bar
+%attributes
+baz
+</define-tag>
+<let quux foo>
+<quux 1 2 3>

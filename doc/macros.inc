@@ -1,0 +1,109 @@
+
+<set-var package=mp4g>
+<set-var version="@LONG_VERSION@">
+
+;;;
+;;;    Sectioning
+;;;
+<define-tag section><h2>%attributes</h2></define-tag>
+<define-tag subsection><h3>%attributes</h3></define-tag>
+
+;;;
+;;;    Common names
+;;;
+<define-tag program><B>%attributes</B></define-tag>
+<define-tag mp4h><program mp4h></define-tag>
+<define-tag WML><program WML></define-tag>
+<define-tag m4><program m4></define-tag>
+<define-tag Meta-HTML><program Meta-HTML></define-tag>
+
+;;;
+;;;    Alias for writing URLs
+;;;
+<define-tag URL><tt>&lt;URL:%attributes&gt;</tt></define-tag>
+
+;;;
+;;;    Header of the HTML document
+;;;
+<define-tag header>
+<html>
+<head>
+<meta name="Author"    content="Denis Barbier">
+<meta name="Generator" content="mp4h <mp4h:varsion>">
+<meta name="Created"   content="29-Nov-1999">
+<set-var fileinfo[]="<get-file-properties mp4h.mp4h>">;;;
+<meta name="Modified"  content="<epoch <get-var fileinfo[3]>>">
+<title><get-var title></title>
+</head>
+<body>
+
+<h1><get-var title></h1>
+</define-tag>
+
+;;;
+;;;    Footer of the HTML document
+;;;
+<define-tag footer>;;;
+</body>
+</html>
+</define-tag>
+
+;;;
+;;;    Description of MP4H tags
+;;;
+<define-tag tag:description type=complex whitespace=delete>
+<preserve complex>
+<preserve verbatim>
+<set-var complex=*>
+<set-var verbatim=*>
+<set-var %attributes>
+<set-var list-attributes[]="%body">
+<subst-in-var list-attributes "^\n" "">
+<table border=2>
+<tr>
+<th>Name</th>
+<th>Complex</th>
+<th><concat "Verbatim arguments"></th>
+<th>Attributes</th>
+</tr>
+<tr valign=top>
+<td align=center>%0</td>
+<td align=center><if <get-var complex> N Y></td>
+<td align=center><if <get-var verbatim> N Y></td>
+<td>
+  <table>
+    <foreach attr list-attributes>
+      <tr><td><tt><get-var attr></tt></td></tr>
+    </foreach>
+  </table>
+</td>
+</tr>
+</table>
+<restore verbatim>
+<restore complex>
+</define-tag>
+
+;;;
+;;;    Paragraphs
+;;;
+<define-tag para type=complex><p>%body</p></define-tag>
+
+;;;
+;;;    Example of MP4H code
+;;;
+<define-tag example type=complex attributes=verbatim>
+<set-var-verbatim verb-body=%ubody>;;;
+<subst-in-var verb-body "&" "&amp;">;;;
+<subst-in-var verb-body "<" "&lt;">;;;
+<subst-in-var verb-body ">" "&gt;">;;;
+<table border=2 cellpadding=0 cellspacing=0>
+    <tr><th bgcolor="#ccccff">Source</th></tr>
+    <tr><td bgcolor="#ccff99"><pre><get-var verb-body></pre></td></tr>
+    <tr><th bgcolor="#ccccff">Output</th></tr>
+    <tr>
+        <td bgcolor="#ff99cc">%body</td>
+    </tr>
+</table>
+</define-tag>
+
+

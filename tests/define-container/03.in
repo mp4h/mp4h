@@ -1,0 +1,10 @@
+<foo>
+<define-tag foo type=complex>
+bar
+%body
+baz
+First: !%0!
+All attributes: !%attributes!
+</define-tag>
+<foo 1 2 3>And the result is</foo>
+<foo "1 2 3">%body</foo>

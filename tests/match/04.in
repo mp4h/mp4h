@@ -1,0 +1,4 @@
+<match "abcdefghij" "def"    "DEF" action=delete>
+<match "abcdefghij" "d.f"    "DEF" action=delete>
+<match "abcdefghij" "[fed]+" "DEF" action=delete>
+<match "abcdefghij" "[xyz]"  "DEF" action=delete>

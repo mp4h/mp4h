@@ -1,0 +1,4 @@
+<string-eq "foo" "foo">
+<string-eq "foo" "FOO">
+<string-eq "foo" "bar">
+<string-eq "foo" "BAR">

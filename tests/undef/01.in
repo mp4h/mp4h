@@ -1,0 +1,6 @@
+<define-tag foo>
+bar
+</define-tag>
+<foo>
+<undef foo>
+<foo>

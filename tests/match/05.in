@@ -1,0 +1,4 @@
+<match "abcdefghij" "def"    "DEF" action=extract>
+<match "abcdefghij" "d.f"    "DEF" action=extract>
+<match "abcdefghij" "[fed]+" "DEF" action=extract>
+<match "abcdefghij" "[xyz]"  "DEF" action=extract>

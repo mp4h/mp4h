@@ -1,0 +1,9 @@
+<foo>
+<define-tag foo>
+bar %2 %1 %0 baz
+</define-tag>
+<foo>
+<foo 1 2 3>
+<foo "1 2" 3>
+<foo "1 &\" 2" 3>
+<foo "1 \\"& 2 3>

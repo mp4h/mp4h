@@ -1,0 +1,5 @@
+<set-var foo=bar>
+<string-eq <get-var foo> "foo" caseless=true>
+<string-eq <get-var foo> "FOO" caseless=true>
+<string-eq <get-var foo> "bar" caseless=true>
+<string-eq <get-var foo> "BAR" caseless=true>

@@ -1,0 +1,6 @@
+<set-var foo=bar>
+<var-case
+     foo="bar" "<set-var result=yes>"
+     foo="baz" "<set-var result=no>"
+>
+<get-var result>

@@ -1,0 +1,203 @@
+##
+##  Makefile -- MP4H Makefile
+##
+
+@SET_MAKE@
+SHELL = /bin/sh
+
+top_srcdir      = @top_srcdir@
+srcdir          = @srcdir@
+VPATH           = @srcdir@
+
+# ------------------------------------------------
+#   DEFINITIONS
+# ------------------------------------------------
+
+SUBDIRS         = lib src doc tests
+
+#   installation tools
+SHTOOL          = $(top_srcdir)/shtool
+INSTALL_PROGRAM = $(SHTOOL) install -c -s -m 755
+INSTALL_DATA    = $(SHTOOL) install -c -m 644
+MKDIR           = $(SHTOOL) mkdir -p -f -m 755
+VERSION_TOOL    = $(SHTOOL) version
+TARBALL         = $(SHTOOL) tarball -t
+FIXPERM         = $(SHTOOL) fixperm
+RM              = rm -f
+
+prefix          = @prefix@
+exec_prefix     = @exec_prefix@
+bindir          = @bindir@
+mandir          = ${exec_prefix}/man
+tmpdir          = @tmpdir@
+
+# ------------------------------------------------
+#   THE DEFAULT TARGETS
+# ------------------------------------------------
+
+all: shtool lib/libmp4h.a src/mp4h doc/mp4h.1
+
+# ------------------------------------------------
+#   THE PROGRAM
+# ------------------------------------------------
+
+src/mp4h: lib/libmp4h.a
+	@echo "==> src (all)"; \
+	cd src && $(MAKE) all; \
+	echo "<== src"
+
+# ------------------------------------------------
+#   THE LIBRARY
+# ------------------------------------------------
+
+lib/libmp4h.a:
+	@echo "==> lib (all)"; \
+	cd lib && $(MAKE) all; \
+	echo "<== lib"
+
+# ------------------------------------------------
+#   THE DOCUMENTATION
+# ------------------------------------------------
+
+doc/mp4h.1:
+	@echo "==> doc (all)"; \
+	cd doc && $(MAKE) all; \
+	echo "<== doc"
+
+# ------------------------------------------------
+#   TEST SUITE
+# ------------------------------------------------
+
+test: all
+	@echo "==> tests ($@)"; \
+	cd tests && $(MAKE) $@; \
+	echo "<== tests"
+
+check: test
+
+# ------------------------------------------------
+#   INSTALLATION
+# ------------------------------------------------
+
+install: all
+	$(MKDIR) $(bindir)
+	$(MKDIR) $(mandir)/man1
+	$(INSTALL_PROGRAM) mp4h $(bindir)/mp4h
+	$(INSTALL_DATA) mp4h.1 $(mandir)/man1/mp4h.1
+
+# ------------------------------------------------
+#   CLEANUP
+# ------------------------------------------------
+
+clean: clean-recursive
+
+distclean: clean distclean-recursive
+	-$(RM) config.cache config.log config.status config.h
+	-$(RM) Makefile
+
+# ------------------------------------------------
+#   RECURSIVE CALLS
+# ------------------------------------------------
+
+all-recursive install-recursive:
+	-@set -e; \
+	set dummy $(MAKEFLAGS); amf=$$2; \
+	target=`echo $@ | sed s/-recursive//`; \
+	for dir in $(SUBDIRS); do \
+	    if [ -f $$dir/Makefile ]; then \
+	        echo "===> $$dir ($$target)"; \
+	        (cd $$dir && $(MAKE) $$target prefix=$(prefix)) \
+	        || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+	        echo "<=== $$dir"; \
+	    else :; \
+	    fi; \
+	done && test -z "$$fail"
+
+clean-recursive distclean-recursive:
+	@target=`echo $@ | sed s/-recursive//`; \
+	for dir in $(SUBDIRS); do \
+	    if [ -f $$dir/Makefile ]; then \
+	        echo "===> $$dir ($$target)"; \
+	        (cd $$dir && $(MAKE) $$target); \
+	        echo "<=== $$dir"; \
+	    else :; \
+	    fi; \
+	done
+
+# ------------------------------------------------
+#   THE CONFIGURATION SUPPORT
+# ------------------------------------------------
+
+configure: configure.in 
+	$(RM) configure
+	autoconf
+	chmod 770 configure
+
+shtool:
+	shtoolize -o $@ install mkdir version echo fixperm tarball
+
+# ------------------------------------------------
+#   THE RELEASE STUFF
+# ------------------------------------------------
+
+GZIP = gzip      # where to find GNU Zip
+NAME = barbier   # name of maintainer who rolls the tarball
+
+NEWVERS = \
+    $(VERSION_TOOL) -l c -p MP4H $$OPT src/version.c; \
+    V=`$(VERSION_TOOL) -l c -d long src/version.c`;\
+    sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
+
+UPDATEVERS = \
+    V=`$(VERSION_TOOL) -l c -d short src/version.c`;\
+    $(VERSION_TOOL) -l c -p MP4H -s $$V src/version.c; \
+    V=`$(VERSION_TOOL) -l c -d long src/version.c`;\
+    sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README
+
+_GETDISTINFO = \
+    _version=`$(VERSION_TOOL) -l c -d short src/version.c`; \
+    _date=`date '+%Y%m%d_%H%M'`;
+
+_BUILDDIST = \
+    _cwd=`pwd`; \
+    echo "Creating tarball..."; \
+    cd $(top_srcdir) && \
+    $(TARBALL) -u $(NAME) -g mp4h -c '$(GZIP) --best' \
+        -e 'CVS,\.cvsignore,mp4h-*' \
+        -o $${_tarball} $${_distname} .; \
+    echo "Done"; \
+    cd $$_cwd && ls -l $${_tarball}
+
+release: distclean fixperm
+	@$(_GETDISTINFO) \
+    _distname="mp4h-$${_version}"; \
+    _tarball="$${_distname}.tar.gz"; \
+    echo "Release Distribution: MP4H Version $$_version"; \
+    $(_BUILDDIST)
+
+snap: distclean fixperm
+	@$(_GETDISTINFO) \
+    _distname="mp4h-$${_version}-SNAP"; \
+    _tarball="$${_distname}.tar.gz"; \
+    echo "Snap of whole source tree: MP4H Version $$_version as of $$_date"; \
+    $(_BUILDDIST)
+
+new-version:
+	OPT=-iv; $(NEWVERS)
+
+new-revision:
+	OPT=-ir; $(NEWVERS)
+
+new-patchlevel:
+	OPT=-iP; $(NEWVERS)
+
+new-release:
+	OPT=-s$(R); $(NEWVERS)
+
+update-version:
+	$(UPDATEVERS)
+
+fixperm:
+	$(FIXPERM) *
+
+##EOF##

@@ -1,0 +1,6 @@
+<set-var a[]="zero
+one
+two">
+<array-add-unique three a>
+<array-add-unique one a>
+<get-var a[]>

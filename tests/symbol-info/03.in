@@ -1,0 +1,4 @@
+<set-var foo[]="foo
+bar
+baz">
+<symbol-info foo>

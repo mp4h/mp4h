@@ -1,0 +1,5 @@
+<set-var foo=foo>
+<ifneq <get-var foo> "foo" a b>
+<ifneq <get-var foo> "foo" a>
+<ifneq <get-var foo> "bar" a b>
+<ifneq <get-var foo> "bar" a>

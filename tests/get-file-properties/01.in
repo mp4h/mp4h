@@ -1,0 +1,2 @@
+<set-var stat[]=<get-file-properties 01.in>>
+<get-var stat[0]>

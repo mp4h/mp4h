@@ -1,0 +1,4 @@
+<ifeq "*" "*" a b>
+<ifeq "*" "*" a>
+<ifeq "*" "1" a b>
+<ifeq "*" "1" a>

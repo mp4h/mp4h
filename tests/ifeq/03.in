@@ -1,0 +1,5 @@
+<set-var foo=foo>
+<ifeq "<get-var foo>" "foo" a b>
+<ifeq "<get-var foo>" "foo" a>
+<ifeq "<get-var foo>" "bar" a b>
+<ifeq "<get-var foo>" "bar" a>

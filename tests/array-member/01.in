@@ -1,0 +1,5 @@
+<set-var a[]="zero
+one
+two">
+<array-member three a>
+<array-member one a>

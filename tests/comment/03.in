@@ -1,0 +1,8 @@
+<set-var a="foo">
+<comment>
+  <comment>
+    <set-var a="bar">
+  </comment>
+  <set-var a="baz">
+</comment>
+<get-var a>

@@ -1,0 +1,8 @@
+<foo>
+<define-tag foo>
+bar
+%attributes
+baz
+</define-tag>
+@<function-def foo>@
+@<function-def define-tag>@

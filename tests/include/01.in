@@ -1,0 +1,3 @@
+<set-var a="foo">
+<include "01.inc">
+<get-var a>

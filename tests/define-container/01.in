@@ -1,0 +1,7 @@
+<foo>
+<define-tag foo type=complex>
+bar
+</define-tag>
+<foo>
+And the result is
+</foo>
