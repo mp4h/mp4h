@@ -12,6 +12,7 @@ SHELL = /bin/sh
 # ------------------------------------------------
 
 PROGRAM = mp4h
+FLAGS   =
 
 SUBDIRS = \
    define-tag \
@@ -71,7 +72,7 @@ check: ../src/$(PROGRAM)
 	    for f in *.in; do \
 	      total=`expr $$total + 1`; \
 	      base=`echo $$f | sed -e 's,\.in$$,,'`; \
-	      ../../src/$(PROGRAM) $$f > $$base.out 2>/dev/null; \
+	      ../../src/$(PROGRAM) $(FLAGS) $$f > $$base.out 2>/dev/null; \
 	      if cmp $$base.ok $$base.out >/dev/null 2>&1; then \
 	          passed=`expr $$passed + 1`; \
 	          echo $$d/$$base | awk '{printf "%-30s [@@ok@@]\n", $$1}' \
