@@ -1088,6 +1088,7 @@ next_token (token_data *td, read_type expansion)
               break;
 
             case READ_ATTR_ASIS:
+            case READ_ATTR_QUOT:
               obstack_1grow (&token_stack, '"');
               type = TOKEN_QUOTE;
               break;
@@ -1118,6 +1119,20 @@ next_token (token_data *td, read_type expansion)
                 obstack_1grow (&token_stack, '\r');
               else if (ch == '"')
                 obstack_1grow (&token_stack, CHAR_QUOTE);
+              else
+                obstack_1grow (&token_stack, ch);
+
+              type = TOKEN_STRING;
+              break;
+
+            case READ_ATTR_QUOT:
+              ch = next_char();
+              if (ch == 'n')
+                obstack_1grow (&token_stack, '\n');
+              else if (ch == 't')
+                obstack_1grow (&token_stack, '\t');
+              else if (ch == 'r')
+                obstack_1grow (&token_stack, '\r');
               else
                 obstack_1grow (&token_stack, ch);
 

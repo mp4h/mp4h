@@ -197,9 +197,8 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
         case TOKEN_QUOTE:
           if (group_level == 0)
             in_string = !in_string;
-          if (expansion_level > 1)
-            obstack_grow (obs, TOKEN_DATA_TEXT (&td),
-                    strlen (TOKEN_DATA_TEXT (&td)));
+          obstack_grow (obs, TOKEN_DATA_TEXT (&td),
+                  strlen (TOKEN_DATA_TEXT (&td)));
           break;
 
         case TOKEN_QUOTED:
@@ -480,8 +479,8 @@ expand_macro (symbol *sym, read_type expansion)
   if (traced && (debug_level & DEBUG_TRACE_CALL))
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
 
-  if (expansion == READ_ATTR_ASIS || expansion == READ_BODY
-          || expansion == READ_ATTR_VERB)
+  if (expansion == READ_ATTR_ASIS || expansion == READ_ATTR_VERB
+      || expansion == READ_BODY)
     attr_expansion = READ_ATTR_ASIS;
   else if (! SYMBOL_EXPAND_ARGS (sym))
     attr_expansion = READ_ATTR_VERB;
@@ -514,7 +513,8 @@ expand_macro (symbol *sym, read_type expansion)
     trace_pre (SYMBOL_NAME (sym), my_call_id, argc, argv);
 
   obs_expansion = push_string_init ();
-  if (expansion == READ_NORMAL || expansion == READ_ATTRIBUTE)
+  if (expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
+          || expansion == READ_ATTR_QUOT)
     {
       if (expansion_level > 1)
         obstack_1grow (obs_expansion, CHAR_BGROUP);
@@ -586,22 +586,21 @@ expand_unknown_tag (char *name, read_type expansion)
   int argc, i;
   struct obstack *obs_expansion;
   const char *expanded;
-  read_type attr_expansion;
   char *symbol_name;
+  read_type attr_expansion;
 
   symbol_name = xstrdup (name);
+  expansion_level++;
 
   obstack_init (&arguments);
   obstack_init (&argptr);
 
-  if (expansion == READ_ATTR_ASIS || expansion == READ_BODY
-          || expansion == READ_ATTR_VERB)
-    attr_expansion = READ_ATTR_ASIS;
+  if (expansion == READ_NORMAL || expansion == READ_ATTRIBUTE)
+    attr_expansion = READ_ATTR_QUOT;
   else
-    attr_expansion = READ_ATTRIBUTE;
+    attr_expansion = READ_ATTR_ASIS;
 
-  (void) collect_arguments (symbol_name, attr_expansion, &argptr,
-                             &arguments);
+  (void) collect_arguments (symbol_name, attr_expansion, &argptr, &arguments);
   argc = obstack_object_size (&argptr) / sizeof (token_data *);
   argv = (token_data **) obstack_finish (&argptr);
 
@@ -616,11 +615,12 @@ expand_unknown_tag (char *name, read_type expansion)
     }
   obstack_1grow (obs_expansion, '>');
 
-  /*  Input must not be rescanned, so expansion is set to READ_BODY.  */
-  expanded = push_string_finish (READ_BODY);
+  /*  Input must not be rescanned, so expansion is set to READ_ATTR_ASIS.  */
+  expanded = push_string_finish (READ_ATTR_ASIS);
 
   obstack_free (&arguments, NULL);
   obstack_free (&argptr, NULL);
 
   xfree (symbol_name);
+  expansion_level--;
 }
