@@ -1,5 +1,5 @@
 <set-var a="abc\ndef\nghi" />
 <subst-in-var a ".$" "" singleline=true />
 <get-var a />
-<subst-in-var a ".$" "" />
+<subst-in-var a ".$" "" singleline=false />
 <get-var a />
