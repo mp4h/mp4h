@@ -1409,7 +1409,7 @@ mp4h_expand (MP4H_BUILTIN_ARGS)
   for (i=1; i<argc; i++)
     {
       offset = 0;
-      for (cp=ARG(i); *cp != '\0'; cp++)
+      for (cp=ARG (i); *cp != '\0'; cp++)
         {
           if (*cp == CHAR_LQUOTE || *cp == CHAR_RQUOTE)
             offset++;
@@ -1443,7 +1443,7 @@ mp4h_if (MP4H_BUILTIN_ARGS)
     {
       obstack_grow (obs, "<when <not ", 11);
       obstack_grow (obs, ARG (1), strlen (ARG (1)));
-      obstack_grow (obs, ">>", 2);
+      obstack_grow (obs, "/>>", 3);
       obstack_grow (obs, ARG (3), strlen (ARG (3)));
       obstack_grow (obs, "</when>", 7);
     }
@@ -1462,14 +1462,14 @@ mp4h_ifeq (MP4H_BUILTIN_ARGS)
   
   obstack_grow (obs, "<when <string-eq ", 17);
   dump_args (obs, (argc < 3 ? argc : 3), argv, " ");
-  obstack_grow (obs, ">>", 2);
+  obstack_grow (obs, "/>>", 3);
   obstack_grow (obs, ARG (3), strlen (ARG (3)));
   obstack_grow (obs, "</when>", 7);
   if (argc>4)
     {
       obstack_grow (obs, "<when <string-neq ", 18);
       dump_args (obs, 3, argv, " ");
-      obstack_grow (obs, ">>", 2);
+      obstack_grow (obs, "/>>", 3);
       obstack_grow (obs, ARG (4), strlen (ARG (4)));
       obstack_grow (obs, "</when>", 7);
     }
@@ -1488,14 +1488,14 @@ mp4h_ifneq (MP4H_BUILTIN_ARGS)
 
   obstack_grow (obs, "<when <string-neq ", 18);
   dump_args (obs, (argc < 3 ? argc : 3), argv, " ");
-  obstack_grow (obs, ">>", 2);
+  obstack_grow (obs, "/>>", 3);
   obstack_grow (obs, ARG (3), strlen (ARG (3)));
   obstack_grow (obs, "</when>", 7);
   if (argc>4)
     {
       obstack_grow (obs, "<when <string-eq ", 17);
       dump_args (obs, 3, argv, " ");
-      obstack_grow (obs, ">>", 2);
+      obstack_grow (obs, "/>>", 3);
       obstack_grow (obs, ARG (4), strlen (ARG (4)));
       obstack_grow (obs, "</when>", 7);
     }
@@ -1606,7 +1606,7 @@ mp4h_foreach (MP4H_BUILTIN_ARGS)
           obstack_1grow (obs, CHAR_LQUOTE);
           obstack_grow (obs, value, length);
           obstack_1grow (obs, CHAR_RQUOTE);
-          obstack_1grow (obs, '>');
+          obstack_grow (obs, "/>", 2);
           obstack_grow (obs, ARGBODY, strlen (ARGBODY));
         }
     }
@@ -1621,7 +1621,7 @@ mp4h_foreach (MP4H_BUILTIN_ARGS)
           obstack_1grow (obs, CHAR_LQUOTE);
           obstack_grow (obs, value, length);
           obstack_1grow (obs, CHAR_RQUOTE);
-          obstack_1grow (obs, '>');
+          obstack_grow (obs, "/>", 2);
           obstack_grow (obs, ARGBODY, strlen (ARGBODY));
         }
     }
@@ -1657,11 +1657,11 @@ mp4h_var_case (MP4H_BUILTIN_ARGS)
           cp++;
           obstack_grow (obs, "<when <string-eq <get-var ", 26);
           obstack_grow (obs, ARG (i), strlen (ARG (i)));
-          obstack_grow (obs, "> ", 2);
+          obstack_grow (obs, "/> ", 3);
           obstack_1grow (obs, '"');
           obstack_grow (obs, cp, strlen (cp));
           obstack_1grow (obs, '"');
-          obstack_grow (obs, ">>", 2);
+          obstack_grow (obs, "/>>", 3);
           obstack_grow (obs, ARG (i+1), strlen (ARG (i+1)));
           obstack_grow (obs, "</when>", 7);
         }
@@ -3143,7 +3143,7 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
   register int i;
   register int j;
   int length, istep;
-  int array_index;
+  int array_index, offset;
 
   if (argc < 2)
     return;
@@ -3187,8 +3187,17 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
             if ((*value == CHAR_LQUOTE && LAST_CHAR (value) == CHAR_RQUOTE)
              || (*value == CHAR_QUOTE  && LAST_CHAR (value) == CHAR_QUOTE))
               {
-                LAST_CHAR (value) = '\0';
                 value++;
+                offset = 0;
+                for (cp=value; *cp != '\0'; cp++)
+                  {
+                    if (*cp == CHAR_LQUOTE || *cp == CHAR_RQUOTE
+                     || *cp == CHAR_BGROUP || *cp == CHAR_EGROUP)
+                      offset++;
+                    else
+                      *(cp-offset) = *cp;
+                  }
+                *(cp-offset) = '\0';
               }
 
             ptr_index = strchr (ARG (i), ']');

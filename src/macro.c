@@ -309,7 +309,8 @@ collect_arguments (char *symbol_name, read_type expansion,
 | necessary to deal with nested expressions.                       |
 `-----------------------------------------------------------------*/
 static void
-collect_body (char *symbol_name, struct obstack *argptr, struct obstack *bodyptr)
+collect_body (char *symbol_name, read_type expansion,
+              struct obstack *argptr, struct obstack *bodyptr)
 {
   token_type t;
   token_data td;
@@ -319,7 +320,7 @@ collect_body (char *symbol_name, struct obstack *argptr, struct obstack *bodyptr
 
   while (1)
     {
-      t = next_token (&td, READ_BODY);
+      t = next_token (&td, expansion);
       text = TOKEN_DATA_TEXT (&td);
       switch (t)
         {                                /* TOKSW */
@@ -332,6 +333,10 @@ collect_body (char *symbol_name, struct obstack *argptr, struct obstack *bodyptr
 
         case TOKEN_BGROUP:
         case TOKEN_EGROUP:
+          break;
+
+        case TOKEN_QUOTE:
+          obstack_1grow (bodyptr, CHAR_QUOTE);
           break;
 
         case TOKEN_QUOTED:
@@ -357,7 +362,7 @@ collect_body (char *symbol_name, struct obstack *argptr, struct obstack *bodyptr
                   /*  gobble closing bracket */
                   do
                     {
-                      t = next_token (&td, READ_BODY);
+                      t = next_token (&td, expansion);
                     }
                   while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)))
                     ;
@@ -375,12 +380,17 @@ collect_body (char *symbol_name, struct obstack *argptr, struct obstack *bodyptr
                 }
               else
                 {
+                  newsym = lookup_symbol (text, SYMBOL_LOOKUP);
+                  if (newsym)
+                    MP4HERROR ((warning_status, 0,
+                      _("Warning:%s:%d: `</%s>' found when `</%s>' expected"),
+                           CURRENT_FILE_LINE, text, symbol_name));
                   obstack_grow (bodyptr, TOKEN_DATA_TEXT (&td),
                           strlen(TOKEN_DATA_TEXT (&td)) );
                   /*  gobble closing bracket */
                   do
                     {
-                      t = next_token (&td, READ_BODY);
+                      t = next_token (&td, expansion);
                       obstack_grow (bodyptr, TOKEN_DATA_TEXT (&td),
                               strlen(TOKEN_DATA_TEXT (&td)) );
                     }
@@ -397,16 +407,16 @@ collect_body (char *symbol_name, struct obstack *argptr, struct obstack *bodyptr
                     shipout_text (bodyptr, TOKEN_DATA_TEXT (&td),
                             strlen (TOKEN_DATA_TEXT (&td)));
                   else
-                    expand_unknown_tag (text, READ_ATTR_ASIS);
+                    expand_unknown_tag (text, expansion);
                 }
               else
-                expand_macro (newsym, READ_ATTR_ASIS);
+                expand_macro (newsym, expansion);
             }
           break;
 
         default:
           MP4HERROR ((warning_status, 0,
-            _("INTERNAL ERROR: Bad token type in collect_body ()")));
+            _("INTERNAL ERROR:%d: Bad token type in collect_body ()"), t));
           abort ();
         }
     }
@@ -505,7 +515,7 @@ expand_macro (symbol *sym, read_type expansion)
 
   if (SYMBOL_CONTAINER (sym))
     {
-      collect_body (SYMBOL_NAME (sym), &argptr, &body);
+      collect_body (SYMBOL_NAME (sym), READ_BODY, &argptr, &body);
       argv = (token_data **) obstack_finish (&argptr);
     }
   else
@@ -519,6 +529,10 @@ expand_macro (symbol *sym, read_type expansion)
           else if (LAST_CHAR (cp) == '/')
             LAST_CHAR (cp) = '\0';
         }
+      else
+        MP4HERROR ((warning_status, 0,
+          _("Warning:%s:%d: `<%s>' requires a trailing slash"),
+               CURRENT_FILE_LINE, SYMBOL_NAME (sym)));
     }
 
   if (traced)
@@ -561,6 +575,9 @@ expand_macro (symbol *sym, read_type expansion)
                 shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
             }
         }
+      if (!SYMBOL_CONTAINER (sym))
+        obstack_1grow (obs_expansion, '/');
+
       obstack_1grow (obs_expansion, '>');
       if (SYMBOL_CONTAINER (sym))
         {
@@ -598,9 +615,11 @@ expand_unknown_tag (char *name, read_type expansion)
   int argc, i;
   struct obstack *obs_expansion;
   const char *expanded;
-  char *symbol_name;
+  char *symbol_name, *cp;
   read_type attr_expansion;
   boolean slash;
+
+  expansion_level++;
 
   symbol_name = xstrdup (name);
 
@@ -616,21 +635,37 @@ expand_unknown_tag (char *name, read_type expansion)
   slash = collect_arguments (symbol_name, attr_expansion, &argptr, &arguments);
   argc  = obstack_object_size (&argptr) / sizeof (token_data *);
 
-  /*  This is a simple tag if either
+  /*  This tag is a simple tag if either
+         - tag name begins with a slash (i.e. this is an end tag)
          - tag name last character is a star
          - attributes are ended by a trailing slash
   */
+  if (*(symbol_name) == '/')
+    slash = TRUE;
+
   if ((!slash) && (exp_flags & EXP_INV_COMPLEX))
     slash = (LAST_CHAR (symbol_name) == '*');
 
   if ((!slash) && (exp_flags & EXP_COMPLEX))
-    collect_body (symbol_name, &argptr, &body);
+    collect_body (symbol_name, expansion, &argptr, &body);
 
   argv = (token_data **) obstack_finish (&argptr);
 
   /*  When this tag is no more processed, remove the trailing star.  */
-  if (expansion_level == 0 && LAST_CHAR (symbol_name) == '*')
+  if ((exp_flags & EXP_REMOVE_TRAILING_STAR) &&
+      expansion_level == 1 && LAST_CHAR (symbol_name) == '*')
     LAST_CHAR (symbol_name) = '\0';
+
+  /*  When this tag is no more processed, remove the trailing slash.  */
+  if ((exp_flags & EXP_REMOVE_TRAILING_SLASH) &&
+      expansion_level == 1 && slash)
+    {
+      cp = TOKEN_DATA_TEXT (argv[argc-1]);
+      if (*cp == '/' && *(cp+1) == '\0')
+        argc--;
+      else if (LAST_CHAR (cp) == '/')
+        LAST_CHAR (cp) = '\0';
+    }
 
   obs_expansion = push_string_init ();
   obstack_1grow (obs_expansion, '<');
@@ -639,19 +674,46 @@ expand_unknown_tag (char *name, read_type expansion)
   for (i = 1; i < argc; i++)
     {
       obstack_1grow (obs_expansion, ' ');
-      shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+      if (expansion == READ_NORMAL)
+        {
+          for (cp = TOKEN_DATA_TEXT (argv[i]); *cp != '\0'; cp++)
+            {
+              if (*cp == CHAR_QUOTE)
+                obstack_1grow (obs_expansion, '"');
+              else if (*cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE
+                    && *cp != CHAR_BGROUP && *cp != CHAR_EGROUP)
+                obstack_1grow (obs_expansion, *cp);
+            }
+        }
+      else
+        shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
     }
   obstack_1grow (obs_expansion, '>');
   if ((!slash) && (exp_flags & EXP_COMPLEX))
     {
-      shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[argc]), 0);
+      if (expansion == READ_NORMAL)
+        {
+          for (cp = TOKEN_DATA_TEXT (argv[argc]); *cp != '\0'; cp++)
+            {
+              if (*cp == CHAR_QUOTE)
+                obstack_1grow (obs_expansion, '"');
+              else if (*cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE
+                    && *cp != CHAR_BGROUP && *cp != CHAR_EGROUP)
+                obstack_1grow (obs_expansion, *cp);
+            }
+        }
+      else
+        shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[argc]), 0);
+
       obstack_grow (obs_expansion, "</", 2);
       shipout_string (obs_expansion, symbol_name, 0);
       obstack_1grow (obs_expansion, '>');
     }
 
-  /*  Input must not be rescanned, so expansion is set to READ_ATTR_ASIS.  */
-  expanded = push_string_finish (READ_ATTR_ASIS);
+  /*  Input must not be rescanned, so expansion is set to READ_BODY.  */
+  expanded = push_string_finish (READ_BODY);
+
+  --expansion_level;
 
   obstack_free (&arguments, NULL);
   obstack_free (&argptr, NULL);

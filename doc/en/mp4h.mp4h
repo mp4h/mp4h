@@ -3,68 +3,68 @@
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
-<mp4h-l10n LC_ALL=C>
-<set-var package=mp4h>
-<set-var version=0.9.5>
-<set-var title="mp4h - A Macro Processeur for HTML Documents">
+<mp4h-l10n LC_ALL=C />
+<set-var package=mp4h />
+<set-var version=0.9a601 />
+<set-var title="mp4h - A Macro Processeur for HTML Documents" />
 
-<include <get-var format>.out
+<include lang.en />
+<include <get-var format />.out
     alt=<exit status=1
         message="This file has to be compiled with one of the following lines
    ../../src/mp4h -D format=html mp4h.mp4h -I .. > mp4h.html
    ../../src/mp4h -D format=pod mp4h.mp4h -I .. > mp4h.pod
-">
->
+" />
+/>
 
-<include lang.en>
-<include list-tags>
+<include list-tags />
 
 ;;;
 ;;;   We need to change comment characters to view original source code
 ;;;
-<set-eol-comment "###">
+<set-eol-comment "###" />
 
-<header>
-<section "Introduction">
+<header />
+<section "Introduction" />
 
 <para>
-The <mp4h> software is a macro-processor specifically designed to deal
+The <mp4h/> software is a macro-processor specifically designed to deal
 with HTML documents.  It allows powerful programming constructs, with a
 syntax familiar to HTML authors.
 </para>
 
 <para>
 This software is based on
-<URL src="http://www.metahtml.org/" name="<Meta-HTML>">,
+<URL src="http://www.metahtml.org/" name="<Meta-HTML/>" />,
 written by Brian J. Fox,  Even if both syntaxes look similar, source
-code is completely different.  Indeed, a subset of <Meta-HTML> was used
-as a part of a more complex program, <WML>
-(<URL src="http://www.engelschall.com/sw/wml/" name="Website Meta Language">)
+code is completely different.  Indeed, a subset of <Meta-HTML/> was used
+as a part of a more complex program, <WML/>
+(<URL src="http://www.engelschall.com/sw/wml/" name="Website Meta Language" />)
 written by Ralf S. Engelschall and which i maintain since January 1999.
-For licensing reasons, it was hard to hack <Meta-HTML> and so i decided
+For licensing reasons, it was hard to hack <Meta-HTML/> and so i decided
 to write my own macro-processor.
 </para>
 
 <para>
 Instead of rewriting it from scratch, i preferred using another
 macro-processor engine. I chose
-<URL src="http://www.gnu.org/software/m4/" name="GNU <m4>">,
+<URL src="http://www.gnu.org/software/m4/" name="GNU <m4/>" />,
 written by René Seindal, because of its numerous advantages :
 this software is stable, robust and very well documented.
-This version of <mp4h> is derived from GNU <m4> version 1.4n, which is a
+This version of <mp4h/> is derived from GNU <m4/> version 1.4n, which is a
 development version.
 </para>
 
 <para>
-The <mp4h> software is not an HTML editor ; its unique goal is to
+The <mp4h/> software is not an HTML editor ; its unique goal is to
 provide an easy way to define its own macros inside HTML documents.
 There is no plan to add functionalities to automagically produce valid
 HTML documents, if you want to clean up your code or validate it,
 simply use a post-processor like
-<URL src="http://www.w3.org/People/Raggett/tidy/" name="tidy">.
+<URL src="http://www.w3.org/People/Raggett/tidy/" name="tidy" />.
 </para>
 
-<section "Command line options">
+<section "Command line options" />
 
 <para>
 Optional arguments are enclosed within square brackets.
@@ -78,48 +78,48 @@ Syntax call is
 <code>mp4h [options] [filename [filename] ...]</code>
 
 Options are described below.  If no filename is specified, or if its
-name is <file ->, then characters are read on standard input.
+name is <file - />, then characters are read on standard input.
 </para>
 
-<subsection "Operation modes">
+<subsection "Operation modes" />
 
 <option-list>
 <option --help>display an help message and exit</option>
-<option --version>output <mp4h> version information and exit</option>
+<option --version>output <mp4h/> version information and exit</option>
 <option -E --fatal-warnings>stop execution after first warning</option>
 <option -Q --quiet --silent>suppress some warnings for builtins</option>
 </option-list>
 
-<subsection "Preprocessor features">
+<subsection "Preprocessor features" />
 
 <option-list>
-<option -I --include=<optmand DIRECTORY>>###
+<option -I --include=<optmand DIRECTORY />>###
 search this directory second for includes</option>
-<option -D --define=<optmand NAME<optopt =VALUE>>>###
+<option -D --define=<optmand NAME<optopt =VALUE /> />>###
 enter NAME has having VALUE, or empty</option>
-<option -U --undefine=<optmand COMMAND>>###
+<option -U --undefine=<optmand COMMAND />>###
 delete builtin COMMAND</option>
 </option-list>
 
-<subsection "Limits control">
+<subsection "Limits control" />
 
 <option-list>
-<option -H --hashsize=<optmand PRIME>>###
+<option -H --hashsize=<optmand PRIME />>###
 set symbol lookup hash table size (default 509)</option>
-<option -L -nesting-limit=<optmand NUMBER>>###
+<option -L -nesting-limit=<optmand NUMBER />>###
 change artificial nesting limit (default 250)</option>
 </option-list>
 
-<subsection "Debugging">
+<subsection "Debugging" />
 
 <option-list>
-<option -d --debug=<optmand FLAGS>>###
+<option -d --debug=<optmand FLAGS />>###
 set debug level (no FLAGS implies `aeq')</option>
-<option -t --trace=<optmand NAME>>###
+<option -t --trace=<optmand NAME />>###
 trace NAME when it will be defined</option>
-<option -l --arglength=<optmand NUMBER>>###
+<option -l --arglength=<optmand NUMBER />>###
 restrict macro tracing size</option>
-<option -o --error-output=<optmand FILE>>###
+<option -o --error-output=<optmand FILE />>###
 redirect debug and trace output</option>
 </option-list>
 
@@ -139,12 +139,12 @@ Flags are any of:
 </option-list>
 </para>
 
-<section "Description">
+<section "Description" />
 
 <para>
-The <mp4h> software is a macro-processor, which means that keywords are
+The <mp4h/> software is a macro-processor, which means that keywords are
 replaced by other text.  This chapter describes all primitives.
-As <mp4h> has been specially designed for HTML documents, its syntax is
+As <mp4h/> has been specially designed for HTML documents, its syntax is
 very similar to HTML, with tags and attributes.  An important feature
 has no equivalent in HTML: comments until end of line.  All text
 following three colons is discarded until end of line, like
@@ -155,15 +155,15 @@ following three colons is discarded until end of line, like
 ###    Defining new macros
 ###
 
-<subsection "Function Macros">
+<subsection "Function Macros" />
 
 <para>
-The definition of new tags is the most common task provided by <mp4h>.
+The definition of new tags is the most common task provided by <mp4h/>.
 As with HTML, macro names are case insensitive.  In this documentation,
 only lowercase letters are used.
 There are two kinds of tags: simple and complex. A simple tag has the
 following form:
-<code><name [attributes]></code>
+<code><name [attributes] /></code>
 whereas a complex tag looks like:
 <code><name [attributs]>
 body
@@ -171,14 +171,15 @@ body
 </para>
 
 <para>
-<anchor name="noteattr">
+<anchor name="noteattr" />
 In macro descriptions below, a slash indicates a complex tag, and a V
 letter that attributes are read verbatim (without expansion) (see the
 chapter on macro expansion for further details).
 </para>
 
+<pseudo-func foo />
 <tag:description define-tag complex>
-<var name>
+<var name />
 [attributes=verbatim]
 [endtag=required]
 [whitespace=delete]
@@ -190,7 +191,7 @@ command name. Replacement text is the function body.
 
 <example>
 <define-tag foo>bar</define-tag>
-<foo>
+<foo />
 </example>
 
 Even if spaces have usually few incidence on HTML syntax, it is
@@ -204,46 +205,47 @@ are not equivalent, the latter form contains two newlines that were not
 present in the former.
 </para>
 
-<pseudo-func foo bar>
+<pseudo-func foo />
 <attributes:description>
-<attributes:item "whitespace=delete">
+<attributes:item "whitespace=delete" />
 Some spaces are suppressed in replacement text, in particular any
 leading or trailing spaces, and newlines not enclosed within angle
 brackets.
 
-<attributes:item "endtag=required">
+<attributes:item "endtag=required" />
 Define a complex tag
 
+<pseudo-func foo />
 <example>
 <define-tag foo>bar</define-tag>
-<foo>
+<foo />
 </example>
 
+<undef bar />
 <example>
-<define-tag foo endtag=required>;;;
+<define-tag bar endtag=required>;;;
 body is: %body</define-tag>
-<foo>Here it is</foo>
+<bar>Here it is</bar>
 </example>
-<undef foo>
 
-<attributes:item "attributes=verbatim">
+<attributes:item "attributes=verbatim" />
 By default attributes are expanded before text is replaced. If this
 attribute is used, attributes are inserted into replacement text without
 expansion.
 
+<pseudo-func foo />
 <example>
-<define-tag bar>quux</define-tag>
-<define-tag foo attributes=verbatim endtag=required>
+<define-tag foo>quux</define-tag>
+<define-tag bar attributes=verbatim endtag=required>
 Body: %Ubody
 Attributes: %Uattributes
 </define-tag>
-<foo txt="<bar>">Here we go</foo>
+<bar txt="<foo/>">Here we go</bar>
 </example>
-<undef foo bar>
 </attributes:description>
 
 <tag:description provide-tag complex>
-<var name>
+<var name />
 [attributes=verbatim]
 [endtag=required]
 [whitespace=delete]
@@ -255,7 +257,7 @@ performed if this command was still defined.
 </para>
 
 <tag:description let>
-<var new>=<var old>
+<var new />=<var old />
 </tag:description>
 
 <para>
@@ -263,29 +265,31 @@ Copy a function. This command is useful to save a macro definition
 before redefining it.
 </para>
 
+<pseudo-func foo bar />
 <example>
 <define-tag foo>one</define-tag>
-<let bar=foo>
+<let bar=foo />
 <define-tag foo>two</define-tag>
-<foo><bar>
+<foo/><bar/>
 </example>
 
 <tag:description undef>
-<var name>
+<var name />
 </tag:description>
 
 <para>
 Delete a command definition.
 </para>
 
+<pseudo-func foo />
 <example>
 <define-tag foo>one</define-tag>
-<undef foo>
-<foo>
+<undef foo />
+<foo/>
 </example>
 
 <tag:description set-hook complex>
-<var name>
+<var name />
 [position=[before|after]
 [action=insert|append|replace]
 </tag:description>
@@ -296,17 +300,18 @@ of existing macros without having to worry about its type, whether it is
 complex or not.
 </para>
 
+<pseudo-func foo />
 <example>
-<let foo=add>
+<let foo=add />
 <set-hook foo position=before>
 Before</set-hook>
 <set-hook foo position=after>
 After</set-hook>
-<foo 1 2 3 4>
+<foo 1 2 3 4 />
 </example>
 
 <tag:description get-hook>
-<var name>
+<var name />
 [position=[before|after]
 </tag:description>
 
@@ -315,15 +320,15 @@ Print current hooks of a macro.
 </para>
 
 <example>
-Text inserted with position=before:<get-hook foo position=before>!
-Text inserted with position=after:<get-hook foo position=after>!
+Text inserted with position=before:<get-hook foo position=before />!
+Text inserted with position=after:<get-hook foo position=after />!
 </example>
 
 ###
 ###    Variable functions
 ###
 
-<subsection "Variables">
+<subsection "Variables" />
 
 <para>
 Variables are a special case of simple tags, because they do not accept
@@ -335,8 +340,8 @@ will allow powerful manipulation functions as we will see below.
 </para>
 
 <tag:description set-var>
-<var name>[=<var value>]
-[<var name>[=<var value>]] ...
+<var name />[=<var value />]
+[<var name />[=<var value />]] ...
 </tag:description>
 
 <para>
@@ -344,8 +349,8 @@ This command sets variables.
 </para>
 
 <tag:description set-var-verbatim verbatim>
-<var name>[=<var value>]
-[<var name>[=<var value>]] ...
+<var name />[=<var value />]
+[<var name />[=<var value />]] ...
 </tag:description>
 
 <para>
@@ -353,8 +358,8 @@ As above but attributes are read verbatim.
 </para>
 
 <tag:description get-var>
-<var name>
-[<var name>] ...
+<var name />
+[<var name />] ...
 </tag:description>
 
 <para>
@@ -364,21 +369,21 @@ The first index of arrays is 0 by convention.
 </para>
 
 <example>
-<set-var version="0.10.1">
-This is version <get-var version>
+<set-var version="0.10.1" />
+This is version <get-var version />
 </example>
 
 <example>
 <set-var foo="0
 1
 2
-3">
-<get-var foo[2] foo[0] foo>
+3" />
+<get-var foo[2] foo[0] foo />
 </example>
 
 <tag:description get-var-once verbatim>
-<var name>
-[<var name>] ...
+<var name />
+[<var name />] ...
 </tag:description>
 
 <para>
@@ -387,16 +392,16 @@ As above but attributes are not expanded.
 
 <example>
 <define-tag foo>0.10.1</define-tag>
-<set-var version="<foo>">;;;
-Here is version <get-var version>
-<set-var-verbatim version="<foo>">;;;
-Here is version <get-var version>
-<set-var-verbatim version="<foo>">;;;
-Here is version <get-var-once version>
+<set-var version="<foo/>" />;;;
+Here is version <get-var version />
+<set-var-verbatim version="<foo/>" />;;;
+Here is version <get-var version />
+<set-var-verbatim version="<foo/>" />;;;
+Here is version <get-var-once version />
 </example>
 
 <tag:description preserve>
-<var name>
+<var name />
 </tag:description>
 
 <para>
@@ -408,7 +413,7 @@ this variable is reset to an empty string.
 </para>
 
 <tag:description restore>
-<var name>
+<var name />
 </tag:description>
 
 <para>
@@ -418,8 +423,8 @@ popped.
 </para>
 
 <tag:description unset-var>
-<var name>
-[<var name>] ...
+<var name />
+[<var name />] ...
 </tag:description>
 
 <para>
@@ -427,16 +432,16 @@ Undefine variables.
 </para>
 
 <tag:description var-exists>
-<var name>
+<var name />
 </tag:description>
 
 <para>
-Returns <true> when this variable exists.
+Returns <true/> when this variable exists.
 </para>
 
 <tag:description increment>
-<var name>
-[by=<var value>]
+<var name />
+[by=<var value />]
 </tag:description>
 
 <para>
@@ -445,20 +450,20 @@ increment is one.
 </para>
 
 <attributes:description>
-<attributes:item "by=<var value>">
+<attributes:item "by=<var value />" />
 Change increment amount.
 </attributes:description>
 
 <example>
-<set-var i=10>
-<get-var i>
-<increment i><get-var i>
-<increment i by="-3"><get-var i>
+<set-var i=10 />
+<get-var i />
+<increment i /><get-var i />
+<increment i by="-3" /><get-var i />
 </example>
 
 <tag:description decrement>
-<var name>
-[by=<var value>]
+<var name />
+[by=<var value />]
 </tag:description>
 
 <para>
@@ -467,20 +472,20 @@ decrement is one.
 </para>
 
 <attributes:description>
-<attributes:item "by=<var value>">
+<attributes:item "by=<var value />" />
 Change decrement amount.
 </attributes:description>
 
 <example>
-<set-var i=10>
-<get-var i>
-<decrement i><get-var i>
-<decrement i by="3"><get-var i>
+<set-var i=10 />
+<get-var i />
+<decrement i /><get-var i />
+<decrement i by="3" /><get-var i />
 </example>
 
 <tag:description copy-var>
-<var src>
-<var dest>
+<var src />
+<var dest />
 </tag:description>
 
 <para>
@@ -488,14 +493,14 @@ Copy a variable into another.
 </para>
 
 <example>
-<set-var i=10>
-<copy-var i j>
-<get-var j>
+<set-var i=10 />
+<copy-var i j />
+<get-var j />
 </example>
 
 <tag:description defvar>
-<var name>
-<var value>
+<var name />
+<var value />
 </tag:description>
 
 <para>
@@ -504,47 +509,47 @@ it is set to the second argument.
 </para>
 
 <example>
-<unset-var title>
-<defvar title "Title"><get-var title>
-<defvar title "New title"><get-var title>
+<unset-var title />
+<defvar title "Title" /><get-var title />
+<defvar title "New title" /><get-var title />
 </example>
 
 <tag:description symbol-info>
-<var name>
+<var name />
 </tag:description>
 
 <para>
 Show informations on symbols.  If it is a variable name, the <command
-STRING> word is printed as well as the number of lines contained within
+STRING /> word is printed as well as the number of lines contained within
 this variable.
 
 If it is a macro name, one of the following messages is printed:
-<command PRIM COMPLEX>, <command PRIM TAG>,
-<command USER COMPLEX> or <command USER TAG>
+<command PRIM COMPLEX />, <command PRIM TAG />,
+<command USER COMPLEX /> or <command USER TAG />
 </para>
 
-<unset-var x foo bar symbol-info define-tag>
-<pseudo-func foo bar>
+<unset-var x foo bar symbol-info define-tag />
+<pseudo-func foo bar />
 <example>
-<set-var x="0\n1\n2\n3\n4">
+<set-var x="0\n1\n2\n3\n4" />
 <define-tag foo>bar</define-tag>
 <define-tag bar endtag=required>quux</define-tag>
-<symbol-info x>
-<symbol-info symbol-info>
-<symbol-info define-tag>
-<symbol-info foo>
-<symbol-info bar>
+<symbol-info x />
+<symbol-info symbol-info />
+<symbol-info define-tag />
+<symbol-info foo />
+<symbol-info bar />
 </example>
-<undef bar>
+<undef bar />
 
 ###
 ###    String functions
 ###
 
-<subsection "String Functions">
+<subsection "String Functions" />
 
 <tag:description string-length>
-<var string>
+<var string />
 </tag:description>
 
 <para>
@@ -555,15 +560,15 @@ Prints the length of the string.
 <set-var foo="0
 1
 2
-3">;;;
-<string-length <get-var foo>>
-<set-var foo="0 1 2 3">;;;
-<set-var l=<string-length <get-var foo>>>;;;
-<get-var l>
+3" />;;;
+<string-length <get-var foo /> />
+<set-var foo="0 1 2 3" />;;;
+<set-var l=<string-length <get-var foo /> /> />;;;
+<get-var l />
 </example>
 
 <tag:description downcase>
-<var string>
+<var string />
 </tag:description>
 
 <para>
@@ -571,11 +576,11 @@ Convert to lowercase letters.
 </para>
 
 <example>
-<downcase "Does it work?">
+<downcase "Does it work?" />
 </example>
 
 <tag:description upcase>
-<var string>
+<var string />
 </tag:description>
 
 <para>
@@ -583,11 +588,11 @@ Convert to uppercase letters.
 </para>
 
 <example>
-<upcase "Does it work?">
+<upcase "Does it work?" />
 </example>
 
 <tag:description capitalize>
-<var string>
+<var string />
 </tag:description>
 
 <para>
@@ -596,12 +601,12 @@ word.
 </para>
 
 <example>
-<capitalize "Does it work?">
+<capitalize "Does it work?" />
 </example>
 
 <tag:description substring>
-<var string>
-[<var start> [<var end>]]
+<var string />
+[<var start /> [<var end />]]
 </tag:description>
 
 <para>
@@ -611,15 +616,15 @@ first character has a null index.
 </para>
 
 <example>
-<set-var foo="abcdefghijk">
-<substring <get-var foo> 4>
-<substring <get-var foo> 4 6>
+<set-var foo="abcdefghijk" />
+<substring <get-var foo /> 4 />
+<substring <get-var foo /> 4 6 />
 </example>
 
 <tag:description subst-in-string>
-<var string>
-<var regexp>
-[<var replacement>]
+<var string />
+<var regexp />
+[<var replacement />]
 [singleline=true]
 </tag:description>
 
@@ -628,28 +633,28 @@ Replace a regular expression in a string by a replacement text.
 </para>
 
 <example>
-<set-var foo="abcdefghijk">
-<subst-in-string <get-var foo> "[c-e]">
-<subst-in-string <get-var foo> "([c-e])" "\\1 ">
+<set-var foo="abcdefghijk" />
+<subst-in-string <get-var foo /> "[c-e]" />
+<subst-in-string <get-var foo /> "([c-e])" "\\1 " />
 </example>
 
 <attributes:description>
-<attributes:item "singleline=true">
-when this attribute is used, the <command ^> symbol represents the
-beginning of string and <command $> the end of string.
+<attributes:item "singleline=true" />
+when this attribute is used, the <command ^ /> symbol represents the
+beginning of string and <command $ /> the end of string.
 Otherwise they represent the beginning and end of lines.
 </attributes:description>
 
 <example>
-<set-var foo="abcdefghijk\nabcdefghijk\nabcdefghijk">
-<subst-in-string <get-var foo> ".$" "">
-<subst-in-string <get-var foo> ".$" "" singleline=true>
+<set-var foo="abcdefghijk\nabcdefghijk\nabcdefghijk" />
+<subst-in-string <get-var foo /> ".$" "" />
+<subst-in-string <get-var foo /> ".$" "" singleline=true />
 </example>
 
 <tag:description subst-in-var>
-<var name>
-<var regexp>
-[<var replacement>]
+<var name />
+<var regexp />
+[<var replacement />]
 [singleline=true]
 </tag:description>
 
@@ -658,58 +663,58 @@ Performs substitutions inside variable content.
 </para>
 
 <tag:description string-eq>
-<var string1>
-<var string2>
+<var string1 />
+<var string2 />
 [caseless=true]
 </tag:description>
 
 <para>
-Returns <true> if first two arguments are equal.
+Returns <true/> if first two arguments are equal.
 </para>
 
 <example>
-1:<string-eq "aAbBcC" "aabbcc">
-2:<string-eq "aAbBcC" "aAbBcC">
+1:<string-eq "aAbBcC" "aabbcc" />
+2:<string-eq "aAbBcC" "aAbBcC" />
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true">
+<attributes:item "caseless=true" />
 Comparison is case insensitive.
 </attributes:description>
 
 <example>
-1:<string-eq "aAbBcC" "aabbcc" caseless=true>
-2:<string-eq "aAbBcC" "aAbBcC" caseless=true>
+1:<string-eq "aAbBcC" "aabbcc" caseless=true />
+2:<string-eq "aAbBcC" "aAbBcC" caseless=true />
 </example>
 
 <tag:description string-neq>
-<var string1>
-<var string2>
+<var string1 />
+<var string2 />
 [caseless=true]
 </tag:description>
 
 <para>
-Returns <true> if the first two arguments are not equal.
+Returns <true/> if the first two arguments are not equal.
 </para>
 
 <example>
-1:<string-neq "aAbBcC" "aabbcc">
-2:<string-neq "aAbBcC" "aAbBcC">
+1:<string-neq "aAbBcC" "aabbcc" />
+2:<string-neq "aAbBcC" "aAbBcC" />
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true">
+<attributes:item "caseless=true" />
 Comparison is case insensitive.
 </attributes:description>
 
 <example>
-1:<string-neq "aAbBcC" "aabbcc" caseless=true>
-2:<string-neq "aAbBcC" "aAbBcC" caseless=true>
+1:<string-neq "aAbBcC" "aabbcc" caseless=true />
+2:<string-neq "aAbBcC" "aAbBcC" caseless=true />
 </example>
 
 <tag:description string-compare>
-<var string1>
-<var string2>
+<var string1 />
+<var string2 />
 [caseless=true]
 </tag:description>
 
@@ -719,57 +724,57 @@ greater or equal depending on this comparison.
 </para>
 
 <example>
-1:<string-compare "aAbBcC" "aabbcc">
-2:<string-compare "aAbBcC" "aAbBcC">
+1:<string-compare "aAbBcC" "aabbcc" />
+2:<string-compare "aAbBcC" "aAbBcC" />
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true">
+<attributes:item "caseless=true" />
 Comparison is case insensitive.
 </attributes:description>
 
 <example>
-1:<string-compare "aAbBcC" "aabbcc" caseless=true>
+1:<string-compare "aAbBcC" "aabbcc" caseless=true />
 </example>
 
 <tag:description match>
-<var string>
-<var regexp>
+<var string />
+<var regexp />
 [caseless=true]
 [action=report|extract|delete|startpos|endpos|length]
 </tag:description>
 
 <attributes:description>
-<attributes:item "caseless=true">
+<attributes:item "caseless=true" />
 Comparison is case insensitive.
-<attributes:item "action=report">
-Prints <true> if string contains regexp.
-<attributes:item "action=extract">
+<attributes:item "action=report" />
+Prints <true/> if string contains regexp.
+<attributes:item "action=extract" />
 Prints the expression matching regexp in string.
-<attributes:item "action=delete">
+<attributes:item "action=delete" />
 Prints the string without the expression matching regexp in string.
-<attributes:item "action=startpos">
+<attributes:item "action=startpos" />
 Prints the first char of the expression matching regexp in string.
-If there is no match, returns <value -1>.
-<attributes:item "action=endpos">
+If there is no match, returns <value -1 />.
+<attributes:item "action=endpos" />
 Prints the last char of the expression matching regexp in string.
-If there is no match, returns <value -1>.
-<attributes:item "action=length">
+If there is no match, returns <value -1 />.
+<attributes:item "action=length" />
 Prints the length of the expression matching regexp in string.
 </attributes:description>
 
 <example>
-1:<match "abcdefghijk" "[c-e]+">
-2:<match "abcdefghijk" "[c-e]+" action=extract>
-3:<match "abcdefghijk" "[c-e]+" action=delete>
-4:<match "abcdefghijk" "[c-e]+" action=startpos>
-5:<match "abcdefghijk" "[c-e]+" action=endpos>
-6:<match "abcdefghijk" "[c-e]+" action=length>
+1:<match "abcdefghijk" "[c-e]+" />
+2:<match "abcdefghijk" "[c-e]+" action=extract />
+3:<match "abcdefghijk" "[c-e]+" action=delete />
+4:<match "abcdefghijk" "[c-e]+" action=startpos />
+5:<match "abcdefghijk" "[c-e]+" action=endpos />
+6:<match "abcdefghijk" "[c-e]+" action=length />
 </example>
 
 <tag:description char-offsets>
-<var string>
-<var character>
+<var string />
+<var character />
 [caseless=true]
 </tag:description>
 
@@ -779,13 +784,13 @@ string.
 </para>
 
 <attributes:description>
-<attributes:item "caseless=true">
+<attributes:item "caseless=true" />
 Comparison is case insensitive.
 </attributes:description>
 
 <example>
-1:<char-offsets "abcdAbCdaBcD" a>
-2:<char-offsets "abcdAbCdaBcD" a caseless=true>
+1:<char-offsets "abcdAbCdaBcD" a />
+2:<char-offsets "abcdAbCdaBcD" a caseless=true />
 </example>
 
 <tag:description set-regexp-syntax>
@@ -801,13 +806,13 @@ regular expressions. By default extended regular expressions are used.
 </para>
 
 <example>
-<set-var foo="abcdefghijk">
-<set-regexp-syntax type=basic>
-<subst-in-string <get-var foo> "([c-e]+)" ":\\1:">
-<subst-in-string <get-var foo> "\\([c-e]\\{1,\\}\\)" ":\\1:">
-<set-regexp-syntax type=extended>
-<subst-in-string <get-var foo> "([c-e]+)" ":\\1:">
-<subst-in-string <get-var foo> "\\([c-e]\\{1,\\}\\)" ":\\1:">
+<set-var foo="abcdefghijk" />
+<set-regexp-syntax type=basic />
+<subst-in-string <get-var foo /> "([c-e]+)" ":\\1:" />
+<subst-in-string <get-var foo /> "\\([c-e]\\{1,\\}\\)" ":\\1:" />
+<set-regexp-syntax type=extended />
+<subst-in-string <get-var foo /> "([c-e]+)" ":\\1:" />
+<subst-in-string <get-var foo /> "\\([c-e]\\{1,\\}\\)" ":\\1:" />
 </example>
 
 <tag:description get-regexp-syntax>
@@ -818,35 +823,35 @@ Prints actual regexp type.
 </para>
 
 <example>
-<get-regexp-syntax>
+<get-regexp-syntax />
 </example>
 
 ###
 ###    Array functions
 ###
 
-<subsection "Arrays">
+<subsection "Arrays" />
 
 <para>
-With <mp4h> one can easily deal with string arrays. Variables can be
+With <mp4h/> one can easily deal with string arrays. Variables can be
 treated as a single value or as a newline separated list of strings.
 Thus after defining
 <code>
 <set-var digits="0
 1
 2
-3">
+3" />
 </code>
 one can view its content or one of these values:
-<set-var digits="0\n1\n2\n3">
+<set-var digits="0\n1\n2\n3" />
 <example>
-<get-var digits>
-<get-var digits[2]>
+<get-var digits />
+<get-var digits[2] />
 </example>
 </para>
 
 <tag:description array-size>
-<var name>
+<var name />
 </tag:description>
 
 <para>
@@ -855,12 +860,12 @@ variable.
 </para>
 
 <example>
-<array-size digits>
+<array-size digits />
 </example>
 
 <tag:description array-push>
-<var name>
-<var value>
+<var name />
+<var value />
 </tag:description>
 
 <para>
@@ -869,12 +874,12 @@ array.
 </para>
 
 <example>
-<array-push digits "10\n11\n12">
-<get-var digits>
+<array-push digits "10\n11\n12" />
+<get-var digits />
 </example>
 
 <tag:description array-pop>
-<var name>
+<var name />
 </tag:description>
 
 <para>
@@ -882,7 +887,7 @@ Remove the toplevel value of an array and returns this string.
 </para>
 
 <tag:description array-topvalue>
-<var name>
+<var name />
 </tag:description>
 
 <para>
@@ -890,12 +895,12 @@ Prints the last entry of an array.
 </para>
 
 <example>
-<array-topvalue digits>
+<array-topvalue digits />
 </example>
 
 <tag:description array-add-unique>
-<var name>
-<var value>
+<var name />
+<var value />
 [caseless=true]
 </tag:description>
 
@@ -905,18 +910,18 @@ in this variable.
 </para>
 
 <example>
-<array-add-unique digits 2>
-<get-var digits>
+<array-add-unique digits 2 />
+<get-var digits />
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true">
+<attributes:item "caseless=true" />
 Comparison is case insensitive.
 </attributes:description>
 
 <tag:description array-concat>
-<var name1>
-[<var name2>] ...
+<var name1 />
+[<var name2 />] ...
 </tag:description>
 
 <para>
@@ -924,14 +929,14 @@ Concatenates all arrays into the first one.
 </para>
 
 <example>
-<set-var foo="foo">
-<set-var bar="bar">
-<array-concat foo bar><get-var foo>
+<set-var foo="foo" />
+<set-var bar="bar" />
+<array-concat foo bar /><get-var foo />
 </example>
 
 <tag:description array-member>
-<var name>
-<var value>
+<var name />
+<var value />
 [caseless=true]
 </tag:description>
 
@@ -940,18 +945,18 @@ If value is contained in array, returns its index otherwise returns -1.
 </para>
 
 <example>
-<array-member digits 11>
+<array-member digits 11 />
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true">
+<attributes:item "caseless=true" />
 Comparison is case insensitive.
 </attributes:description>
 
 <tag:description array-shift>
-<var name>
-<var offset>
-[start=<var start>]
+<var name />
+<var offset />
+[start=<var start />]
 </tag:description>
 
 <para>
@@ -960,22 +965,22 @@ If offset is positive, first indexes are filled with empty strings.
 </para>
 
 <example>
-<array-shift digits 2>
-Now: <get-var digits>
-<array-shift digits -4>
-And: <get-var digits>
+<array-shift digits 2 />
+Now: <get-var digits />
+<array-shift digits -4 />
+And: <get-var digits />
 </example>
 
 <attributes:description>
-<attributes:item "start=<var start>">
+<attributes:item "start=<var start />" />
 Change origin of shifts (default is 0).
 <example>
-<array-shift digits -2 start=2><get-var digits>
+<array-shift digits -2 start=2 /><get-var digits />
 </example>
 </attributes:description>
 
 <tag:description sort>
-<var name>
+<var name />
 [caseless=true]
 [numeric=true]
 [sortorder=reverse]
@@ -987,24 +992,24 @@ alphabetically.
 </para>
 
 <example>
-<sort digits><get-var digits>
+<sort digits /><get-var digits />
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true">
+<attributes:item "caseless=true" />
 Comparison is case insensitive.
 
-<attributes:item "numeric=true">
+<attributes:item "numeric=true" />
 Sort lines numerically
 <example>
-<sort digits numeric=true><get-var digits>
+<sort digits numeric=true /><get-var digits />
 </example>
 
-<attributes:item "sortorder=reverse">
+<attributes:item "sortorder=reverse" />
 Reverse sort order
 <example>
-<sort digits numeric=true sortorder=reverse>;;;
-<get-var digits>
+<sort digits numeric=true sortorder=reverse />;;;
+<get-var digits />
 </example>
 </attributes:description>
 
@@ -1012,7 +1017,7 @@ Reverse sort order
 ###    Numerical operators
 ###
 
-<subsection "Numerical operators">
+<subsection "Numerical operators" />
 
 <para>
 These operators perform basic arithmetic operations.  When all operands
@@ -1021,56 +1026,57 @@ operators are self-explanatory.
 </para>
 
 <tag:description add>
-<var number1>
-<var number2>
-[<var number3>] ...
+<var number1 />
+<var number2 />
+[<var number3 />] ...
 </tag:description>
 
 <tag:description substract>
-<var number1>
-<var number2>
-[<var number3>] ...
+<var number1 />
+<var number2 />
+[<var number3 />] ...
 </tag:description>
 
 <tag:description multiply>
-<var number1>
-<var number2>
-[<var number3>] ...
+<var number1 />
+<var number2 />
+[<var number3 />] ...
 </tag:description>
 
 <tag:description divide>
-<var number1>
-<var number2>
-[<var number3>] ...
+<var number1 />
+<var number2 />
+[<var number3 />] ...
 </tag:description>
 
 <tag:description min>
-<var number1>
-<var number2>
-[<var number3>] ...
+<var number1 />
+<var number2 />
+[<var number3 />] ...
 </tag:description>
 
 <tag:description max>
-<var number1>
-<var number2>
-[<var number3>] ...
+<var number1 />
+<var number2 />
+[<var number3 />] ...
 </tag:description>
 
 <example>
-<add 1 2 3 4 5 6>
-<add 1 2 3 4 5 6.>
+<add 1 2 3 4 5 6 />
+<add 1 2 3 4 5 6. />
 </example>
 
+<pseudo-func factorial />
 <example>
 <define-tag factorial whitespace=delete>
-<ifeq %0 1 1 <multiply %0 "<factorial <substract %0 1>>">>
+<ifeq %0 1 1 <multiply %0 "<factorial <substract %0 1 /> />" /> />
 </define-tag>
-<factorial 6>
+<factorial 6 />
 </example>
 
 <tag:description modulo>
-<var number1>
-<var number2>
+<var number1 />
+<var number2 />
 </tag:description>
 
 <para>
@@ -1079,68 +1085,68 @@ than 2 arguments, and these arguments must be integers.
 </para>
 
 <example>
-<modulo 345 7>
+<modulo 345 7 />
 </example>
 
 <para>
-Those functions compare two numbers and returns <true> when this
+Those functions compare two numbers and returns <true/> when this
 comparison is true.  If one argument is not a number, comparison
 is false.
 </para>
 
 <tag:description gt>
-<var number1>
-<var number2>
+<var number1 />
+<var number2 />
 </tag:description>
 
 <para>
-Returns <true> if first argument is greater than second.
+Returns <true/> if first argument is greater than second.
 </para>
 
 <tag:description lt>
-<var number1>
-<var number2>
+<var number1 />
+<var number2 />
 </tag:description>
 
 <para>
-Returns <true> if first argument is lower than second.
+Returns <true/> if first argument is lower than second.
 </para>
 
 <tag:description eq>
-<var number1>
-<var number2>
+<var number1 />
+<var number2 />
 </tag:description>
 
 <para>
-Returns <true> if arguments are equal.
+Returns <true/> if arguments are equal.
 </para>
 
 <tag:description neq>
-<var number1>
-<var number2>
+<var number1 />
+<var number2 />
 </tag:description>
 
 <para>
-Returns <true> if arguments are not equal.
+Returns <true/> if arguments are not equal.
 </para>
 
 ###
 ###    Relational operators
 ###
 
-<subsection "Relational operators">
+<subsection "Relational operators" />
 
 <tag:description not>
-<var string>
+<var string />
 </tag:description>
 
 <para>
-Returns <true> if string is empty, otherwise returns an empty string.
+Returns <true/> if string is empty, otherwise returns an empty string.
 </para>
 
 <tag:description and>
-<var string>
-[<var string>] ...
+<var string />
+[<var string />] ...
 </tag:description>
 
 <para>
@@ -1148,8 +1154,8 @@ Returns the last argument if all arguments are non empty.
 </para>
 
 <tag:description or>
-<var string>
-[<var string>] ...
+<var string />
+[<var string />] ...
 </tag:description>
 
 <para>
@@ -1160,12 +1166,12 @@ Returns the first non empty argument.
 ###    Flow functions
 ###
 
-<subsection "Flow functions">
+<subsection "Flow functions" />
 
 <tag:description group verbatim>
-<var statement>
-[<var statement>] ...
-[separator=<var string>]
+<var statement />
+[<var statement />] ...
+[separator=<var string />]
 </tag:description>
 
 <para>
@@ -1175,10 +1181,10 @@ examples will be seen below with conditional operations.
 
 <para>
 A less intuitive but very helpful use of this macro is to preserve newlines
-when <attribute whitespace=delete> is specified.
+when <attribute whitespace=delete /> is specified.
 </para>
 
-<pseudo-func text1 text2 text3>
+<pseudo-func text1 text2 text3 />
 <example>
 <define-tag text1>
 Text on
@@ -1193,56 +1199,57 @@ whitespace=delete
 <define-tag text3 whitespace=delete>
 <group "Text on
 3 lines with
-whitespace=delete">
+whitespace=delete" />
 </define-tag>
-<text1>
-<text2>
-<text3>
+<text1 />
+<text2 />
+<text3 />
 </example>
 
 <para>
-Note that newlines are suppressed in <value text2> and result is
+Note that newlines are suppressed in <value text2 /> and result is
 certainly unwanted.
 </para>
 
 <attributes:description>
-<attributes:item "separator=<var string>">
+<attributes:item "separator=<var string />" />
 By default arguments are put aside.  This attribute define a separator
 inserted between arguments.
 </attributes:description>
 
 <tag:description noexpand verbatim>
-<var command>
-[<var command>] ...
+<var command />
+[<var command />] ...
 </tag:description>
 
 <para>
 Prints its arguments without expansion.  They will never be expanded
-unless the <command expand> tag is used to cancel this <command
-noexpand> tag.
+unless the <command expand /> tag is used to cancel this <command
+noexpand /> tag.
 </para>
 
 <tag:description expand>
-<var commande>
-[<var commande>] ...
+<var command />
+[<var command />] ...
 </tag:description>
 
 <para>
-Cancels the <command noexpand> tag.
+Cancels the <command noexpand /> tag.
 </para>
 
-<pseudo-func foo>
+<pseudo-func foo />
 <example>
-<subst-in-string "=LT=define-tag foo>bar</define-tag>" "=LT=" "<">
-<foo>
-<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT=" "<noexpand "<">">
-<foo>
+<subst-in-string "=LT=define-tag foo>bar</define-tag>" "=LT=" "<" />
+<foo/>
+<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT="
+   "<noexpand "<" />" />
+<foo/>
 </example>
 
 <tag:description if verbatim>
-<var string>
-<var then-clause>
-[<var else-clause>]
+<var string />
+<var then-clause />
+[<var else-clause />]
 </tag:description>
 
 <para>
@@ -1250,20 +1257,20 @@ If string is non empty, second argument is evaluated otherwise third
 argument is evaluated.
 </para>
 
-<pseudo-func test>
+<pseudo-func test />
 <example>
 <define-tag test whitespace=delete>
-<if %0 "yes" "no">
+<if %0 "yes" "no" />
 </define-tag>
-<test "string">
-<test "">
+<test "string" />
+<test "" />
 </example>
 
 <tag:description ifeq verbatim>
-<var string1>
-<var string2>
-<var then-clause>
-[<var else-clause>]
+<var string1 />
+<var string2 />
+<var then-clause />
+[<var else-clause />]
 </tag:description>
 
 <para>
@@ -1272,10 +1279,10 @@ otherwise fourth argument is evaluated.
 </para>
 
 <tag:description ifneq verbatim>
-<var string1>
-<var string2>
-<var then-clause>
-[<var else-clause>]
+<var string1 />
+<var string2 />
+<var then-clause />
+[<var else-clause />]
 </tag:description>
 
 <para>
@@ -1284,7 +1291,7 @@ evaluated otherwise fourth argument is evaluated.
 </para>
 
 <tag:description when complex>
-<var string>
+<var string />
 </tag:description>
 
 <para>
@@ -1292,7 +1299,7 @@ When argument is not empty, its body fuction is evaluated.
 </para>
 
 <tag:description while verbatim complex>
-<var cond>
+<var cond />
 </tag:description>
 
 <para>
@@ -1300,22 +1307,22 @@ While condition is true, body function is evaluated.
 </para>
 
 <example>
-<set-var i=10>
-<while <gt <get-var i> 0>>;;;
-  <get-var i> <decrement i>;;;
+<set-var i=10 />
+<while <gt <get-var i /> 0 />>;;;
+  <get-var i /> <decrement i />;;;
 </while>
 </example>
 
 <tag:description foreach complex>
-<var variable>
-<var array>
-[start=<var start>]
-[end=<var end>]
-[step=<var pas>]
+<var variable />
+<var array />
+[start=<var start />]
+[end=<var end />]
+[step=<var pas />]
 </tag:description>
 
 <para>
-This macro is similar to the <command foreach> Perl's macro:
+This macro is similar to the <command foreach /> Perl's macro:
 a variable loops over array values and function body is evaluated for each
 value.
 
@@ -1324,56 +1331,56 @@ array.
 </para>
 
 <example>
-<set-var x="1\n2\n3\n4\n5\n6">
-<foreach i x><get-var i> </foreach>
+<set-var x="1\n2\n3\n4\n5\n6" />
+<foreach i x><get-var i /> </foreach>
 </example>
 
 <attributes:description>
-<attributes:item "start=<var start>">
+<attributes:item "start=<var start />" />
 Skips first indexes.
 <example>
-<set-var x="1\n2\n3\n4\n5\n6">
-<foreach i x start=3><get-var i> </foreach>
+<set-var x="1\n2\n3\n4\n5\n6" />
+<foreach i x start=3><get-var i /> </foreach>
 </example>
 
-<attributes:item "end=<var end>">
+<attributes:item "end=<var end />" />
 Stops after index has reached that value.
 <example>
-<set-var x="1\n2\n3\n4\n5\n6">
-<foreach i x end=3><get-var i> </foreach>
+<set-var x="1\n2\n3\n4\n5\n6" />
+<foreach i x end=3><get-var i /> </foreach>
 </example>
 
-<attributes:item "step=<var step>">
+<attributes:item "step=<var step />" />
 Change index increment (default is 1).
 If step is negative, array is treated in reverse order.
 <example>
-<set-var x="1\n2\n3\n4\n5\n6">
-<foreach i x step=2><get-var i> </foreach>
-<foreach i x step=-2><get-var i> </foreach>
+<set-var x="1\n2\n3\n4\n5\n6" />
+<foreach i x step=2><get-var i /> </foreach>
+<foreach i x step=-2><get-var i /> </foreach>
 </example>
 </attributes:description>
 
 <tag:description var-case verbatim>
-<var var1>=<var value1> <var action1>
-[<var var2>=<var value2> <var action2> ...
+<var var1 />=<var value1 /> <var action1 />
+[<var var2 />=<var value2 /> <var action2 /> ...
 </tag:description>
 
-<pseudo-func test>
+<pseudo-func test />
 <para>
 This command performs multiple conditions with a single instruction.
 
 <example>
-<set-var i=0>
+<set-var i=0 />
 <define-tag test>
 <var-case
-  x=1   <group <increment i> x<get-var i>>
-  x=2   <group <decrement i> x<get-var i>>
-  y=1   <group <increment i> y<get-var i>>
-  y=2   <group <decrement i> y<get-var i>>
->
+  x=1   <group <increment i /> x<get-var i /> />
+  x=2   <group <decrement i /> x<get-var i /> />
+  y=1   <group <increment i /> y<get-var i /> />
+  y=2   <group <decrement i /> y<get-var i /> />
+/>
 </define-tag>
-<set-var x=1 y=2><test>
-<set-var x=0 y=2><test>
+<set-var x=1 y=2 /><test/>
+<set-var x=0 y=2 /><test/>
 </example>
 </para>
 
@@ -1381,20 +1388,20 @@ This command performs multiple conditions with a single instruction.
 </tag:description>
 
 <para>
-Breaks the innermost <command while> loop.
+Breaks the innermost <command while /> loop.
 </para>
 
 <example>
-<set-var i=10>
-<while <gt <get-var i> 0>>;;;
-  <get-var i> <decrement i>;;;
-  <ifeq <get-var i> 5 <break>>;;;
+<set-var i=10 />
+<while <gt <get-var i /> 0 />>;;;
+  <get-var i /> <decrement i />;;;
+  <ifeq <get-var i /> 5 <break/> />;;;
 </while>
 </example>
 
 <tag:description return>
 [up=number]
-<var string>
+<var string />
 </tag:description>
 
 <para>
@@ -1404,7 +1411,7 @@ so its use may become very hazardous in some situations.
 </para>
 
 <attributes:description>
-<attributes:item "up=<var number>">
+<attributes:item "up=<var number />" />
 This attribute determines how much levels have to be exited.  By default
 only one level is skipped.  If a negative value is put then all current
 macros are exited from.
@@ -1418,8 +1425,8 @@ Prints a warning on standard error.
 </para>
 
 <tag:description exit>
-[status=<var rc>]
-[message=<var string>]
+[status=<var rc />]
+[message=<var string />]
 </tag:description>
 
 <para>
@@ -1427,10 +1434,10 @@ Immediately exits program.
 </para>
 
 <attributes:description>
-<attributes:item "message=<var string>">
+<attributes:item "message=<var string />" />
 Prints a message to the standard error.
 
-<attributes:item "status=<var rc>">
+<attributes:item "status=<var rc />" />
 Selects the code returned by the program (-1 by default).
 </attributes:description>
 
@@ -1446,10 +1453,10 @@ expanded after end of input.
 ###    File functions
 ###
 
-<subsection "File functions">
+<subsection "File functions" />
 
 <tag:description directory-contents>
-<var dirname>
+<var dirname />
 [matching=regexp]
 </tag:description>
 
@@ -1458,19 +1465,19 @@ Returns a newline separated list of files contained in a given directory.
 </para>
 
 <example>
-<directory-contents . matching=".*\\.mp4h$">
+<directory-contents . matching=".*\\.mp4h$" />
 </example>
 
 <tag:description file-exists>
-<var filename>
+<var filename />
 </tag:description>
 
 <para>
-Returns <true> if file exists.
+Returns <true/> if file exists.
 </para>
 
 <tag:description get-file-properties>
-<var filename>
+<var filename />
 </tag:description>
 
 <para>
@@ -1479,12 +1486,12 @@ size, type, ctime, mtime, atime, owner and group.
 </para>
 
 <example>
-<get-file-properties <__file__>>
+<get-file-properties <__file__/> />
 </example>
 
 <tag:description include>
-<var filename>
-[alt=<var action>]
+<var filename />
+[alt=<var action />]
 [verbatim=true]
 </tag:description>
 
@@ -1493,11 +1500,11 @@ Read input from another file.
 </para>
 
 <attributes:description>
-<attributes:item "alt=<var action>">
+<attributes:item "alt=<var action />" />
 If file is not found, this alternate action is handled. If this atribute
 is not set and file is not found, then an error is raised.
 
-<attributes:item "verbatim=true">
+<attributes:item "verbatim=true" />
 File content is included without expansion.
 </attributes:description>
 
@@ -1509,7 +1516,7 @@ This tag does nothing, its body is simply discarded.
 </para>
 
 <tag:description set-eol-comment>
-[<var string>]
+[<var string />]
 </tag:description>
 
 <para>
@@ -1520,7 +1527,7 @@ Change comment characters.
 ###    Debugging
 ###
 
-<subsection "Debugging">
+<subsection "Debugging" />
 
 <para>
 When constructs become complex it could be hard to debug them.
@@ -1530,34 +1537,34 @@ future releases.
 </para>
 
 <tag:description function-def>
-<var name>
+<var name />
 </tag:description>
 
 <para>
 Prints the replacement text of a user defined macro. For instance, the
 macro used to generate all examples of this documentation is
 <example>
-<function-def example>
+<function-def example />
 </example>
 </para>
 
 <tag:description debugmode>
-<var string>
+<var string />
 </tag:description>
 
 <para>
-This comand acts like the <optflag d> flag but can be ynamically
+This comand acts like the <optflag d /> flag but can be ynamically
 changed.
 </para>
 
 <tag:description debugfile>
-<var filename>
+<var filename />
 </tag:description>
 
 <para>
 Selects a file where debugging messages are diverted.
 If this filename is empty, debugging messages are sent back to standard
-error, and if it is set to <file -> these messages are discarded.
+error, and if it is set to <file - /> these messages are discarded.
 </para>
 
 <note>
@@ -1566,18 +1573,18 @@ being processed.
 </note>
 
 <tag:description debugging-on>
-<var name>
-[<var name>] ...
+<var name />
+[<var name />] ...
 </tag:description>
 
 <para>
 Declare these macros traced, i.e. informations about these macros will
-be printed if <optflag d> flag or <command debugmode> macro are used.
+be printed if <optflag d /> flag or <command debugmode /> macro are used.
 </para>
 
 <tag:description debugging-off>
-<var name>
-[<var name>] ...
+<var name />
+[<var name />] ...
 </tag:description>
 
 <para>
@@ -1588,10 +1595,10 @@ These macros are no more traced.
 ###    Miscellaneous
 ###
 
-<subsection "Miscellaneous">
+<subsection "Miscellaneous" />
 
 <tag:description __file__>
-[<var name>]
+[<var name />]
 </tag:description>
 
 <para>
@@ -1601,7 +1608,7 @@ invocation of this macro.
 </para>
 
 <tag:description __line__>
-[<var number>]
+[<var number />]
 </tag:description>
 <para>
 Without argument this macro prints current number line in input file.
@@ -1610,7 +1617,7 @@ invocation of this macro.
 </para>
 
 <example>
-This is <__file__>, line <__line__>.
+This is <__file__/>, line <__line__/>.
 </example>
 
 <para>
@@ -1623,7 +1630,7 @@ this instruction.
 </tag:description>
 
 <para>
-Prints the version of <mp4h>.
+Prints the version of <mp4h/>.
 </para>
 
 <tag:description dnl>
@@ -1636,9 +1643,9 @@ comment characters.
 </para>
 
 <example>
-<dnl>This is a comment
+<dnl/>This is a comment
 foo
-<dnl>This is a comment
+<dnl/>This is a comment
 bar
 </example>
 
@@ -1652,9 +1659,9 @@ is no argument, current local time is printed.
 </para>
 
 <example>
-<date>
-<set-var info=<get-file-properties <__file__>>>
-<date <get-var info[2]>>
+<date/>
+<set-var info=<get-file-properties <__file__/> /> />
+<date <get-var info[2] /> />
 </example>
 
 <tag:description timer>
@@ -1667,12 +1674,12 @@ is the number of clock ticks, and so is dependant of your CPU.
 
 <example>
 The number of clock ticks since the beginning of generation of
-this documentation by <mp4h> is:
-<timer>
+this documentation by <mp4h/> is:
+<timer/>
 </example>
 
 <tag:description mp4h-l10n>
-<var name>=<var value>
+<var name />=<var value />
 </tag:description>
 
 <para>
@@ -1683,7 +1690,7 @@ to your system.
 </para>
 
 <tag:description mp4h-output-radix>
-<var number>
+<var number />
 </tag:description>
 
 <para>
@@ -1692,25 +1699,26 @@ the decimal point. Default is to print numbers in the "%6.f" format.
 </para>
 
 <example>
-<add 1.2 3.4>
-<mp4h-output-radix 2>
-<add 1.2 3.4>
+<add 1.2 3.4 />
+<mp4h-output-radix 2 />
+<add 1.2 3.4 />
 </example>
-<mp4h-output-radix 6>
+<mp4h-output-radix 6 />
 
-<section "Macro expansion">
+<section "Macro expansion" />
 
 <para>
 This part describes internal mechanism of macro expansion.
 It must be as precise and exhaustive as possible so
-<URL src="mailto:barbier@imacs.polytechnique.fr" name="contact me">
+<URL src="mailto:barbier@imacs.polytechnique.fr" name="contact me" />
 if you have any suggestion.
 </para>
 
-<subsection "Basics">
+<subsection "Basics" />
 
 Let us begin with some examples:
-<pseudo-func foo bar>
+<pseudo-func foo />
+<undef bar />
 <example>
 <define-tag foo>
 This is a simple tag
@@ -1718,38 +1726,39 @@ This is a simple tag
 <define-tag bar endtag=required>
 This is a complex tag
 </define-tag>
-<foo>
+<foo/>
 <bar>Body function</bar>
 </example>
-<undef bar>
+<undef foo bar />
 
-<pseudo-func href mail1 mail2>
-<pseudo-func outer inner1 inner2>
-<pseudo-func show-attributes>
-<pseudo-func show1 show2 bar>
+<pseudo-func href mail1 />
+<pseudo-func outer inner1 inner2 />
+<pseudo-func show-attributes />
+<pseudo-func show1 show2 bar />
+<undef mail2 />
 <para>
 User defined macros may have attributes like HTML tags. To handle these
 attributes in replacement text, following conventions have been adopted
-(mostly derived from <Meta-HTML>):
+(mostly derived from <Meta-HTML/>):
 <list>
-<item>Sequence <value %name> is replaced by the command name.
+<item/>Sequence <value %name /> is replaced by the command name.
 
-<item>Attributes are numbered from 0. In replacement text,
-<value %0> is replaced by first argument, <value %1>
+<item/>Attributes are numbered from 0. In replacement text,
+<value %0 /> is replaced by first argument, <value %1 />
 by the 2nd, etc.
 As there is no limitation on the number of arguments,
-<value %20> is the 21st argument and not the third followed by the 0
+<value %20 /> is the 21st argument and not the third followed by the 0
 letter.
 <example>
 <define-tag href>
 <a href="%0">%1</a>
 </define-tag>
-<href http://www.gimp.org "The Gimp">
+<href http://www.gimp.org "The Gimp" />
 </example>
 
-<item>Sequence <value %#> prints number of attributes.
+<item/>Sequence <value %# /> prints number of attributes.
 
-<item>Sequence <value %%> is replaced by <value %>, which is useful in
+<item/>Sequence <value %% /> is replaced by <value % />, which is useful in
 nested efinitions.
 <example>
 <define-tag outer>;;;
@@ -1760,55 +1769,54 @@ inner1, # attributes: %#;;;
 <define-tag inner2>;;;
 inner2, # attributes: %%#;;;
 </define-tag>;;;
-<inner1 %attributes and some others>
-<inner2 %attributes and some others>
+<inner1 %attributes and some others />
+<inner2 %attributes and some others />
 </define-tag>
-<outer list attributes>
+<outer list attributes />
 </example>
 
-<item>Sequence <value %attributes> is replaced by the space separated
+<item/>Sequence <value %attributes /> is replaced by the space separated
 list of attributes.
 <example>
 <define-tag mail1>
-<set-var %attributes>
-<get-var name>
-<get-var mail>
+<set-var %attributes />
+<get-var name />
+<get-var mail />
 </define-tag>
-<set-var name="" mail="">
-<mail1 name="Dr. Foo" mail="hello@foo.com">
+<set-var name="" mail="" />
+<mail1 name="Dr. Foo" mail="hello@foo.com" />
 </example>
 
-<item>Sequence <value %body> is replaced by the body of a complex macro.
+<item/>Sequence <value %body /> is replaced by the body of a complex macro.
 <example>
 <define-tag mail2 endtag=required whitespace=delete>
-<set-var %attributes>
-<a href="mailto:<get-var mail>">%body</a>
+<set-var %attributes />
+<a href="mailto:<get-var mail />">%body</a>
 </define-tag>
 <mail2 mail="hello@foo.com">
-<img src="photo.png" alt="Dr. Foo" border=0>
+<img src="photo.png" alt="Dr. Foo" border=0 />
 </mail2>
 </example>
-<undef mail2>
 
-<item>The two forms above accept modifiers. When <value %Aattributes>
-or <value %Abody> is used, a newline separated list of attributes is
+<item/>The two forms above accept modifiers. When <value %Aattributes />
+or <value %Abody /> is used, a newline separated list of attributes is
 printed.
 <example>
 <define-tag show-attributes whitespace=delete>
-<set-var list="%Aattributes" i=0>
+<set-var list="%Aattributes" i=0 />
 <foreach attr list>
-<group "%<get-var i>: <get-var attr>">
-<increment i>
+<group "%<get-var i />: <get-var attr />" />
+<increment i />
 </foreach>
 </define-tag>
-<show-attributes name="Dr. Foo" mail="hello@foo.com">
+<show-attributes name="Dr. Foo" mail="hello@foo.com" />
 </example>
 
-<item>Another alternate form is obtained by replacing <value A>
-by <value U>, in which case text is replaced but will not be
+<item/>Another alternate form is obtained by replacing <value A />
+by <value U />, in which case text is replaced but will not be
 expanded.
 This does make sense only when macro has been defined with
-<attribute attributes=verbatim>, otherwise attributes are expanded
+<attribute attributes=verbatim />, otherwise attributes are expanded
 before replacement.
 <example>
 <define-tag show1>
@@ -1820,48 +1828,49 @@ Before expansion: %Uattributes
 After expansion: %attributes
 </define-tag>
 <define-tag bar>and here %attributes</define-tag>
-<show1 <bar we go>>
-<show2 <bar we go>>
+<show1 <bar we go /> />
+<show2 <bar we go /> />
 </example>
 
-<item>Modifiers <value A> and <value U> can be combined.
+<item/>Modifiers <value A /> and <value U /> can be combined.
 </list>
 </para>
 
 <note>
-Input expansion is completely different in <Meta-HTML> and in <mp4h>.
-With <Meta-HTML> it is sometimes necessary to use other constructs like
-<value %xbody> and <value %qbody>.
-In order to improve compatibity with <Meta-HTML>, these constructs are
-recognized and are interpreted like <value %body>.
+Input expansion is completely different in <Meta-HTML/> and in <mp4h/>.
+With <Meta-HTML/> it is sometimes necessary to use other constructs like
+<value %xbody /> and <value %qbody />.
+In order to improve compatibity with <Meta-HTML/>, these constructs are
+recognized and are interpreted like <value %body />.
 Another feature provided for compatibility reason is the fact that for
-simple tags <value %body> and <value %attributes> are equivalent.
-These features are in the current <mp4h> version but may disappear in
+simple tags <value %body /> and <value %attributes /> are equivalent.
+These features are in the current <mp4h/> version but may disappear in
 future releases.
 </note>
 
-<subsection "Attributes">
+<subsection "Attributes" />
 
+<pseudo-func foo />
 <para>
 Attributes are separated by spaces, tabulations or newlines, and each
-attribute must be a valid <mp4h> entity. For instance with the
-definitions above, <full-command bar> can not be an attribute since it
-must be finished by <full-command /bar>.
+attribute must be a valid <mp4h/> entity. For instance with the
+definitions above, <full-command bar /> can not be an attribute since it
+must be finished by <full-command /bar />.
 But this is valid:
-<code><foo <foo>></code>
+<code><foo <foo/> /></code>
 
 or even
-<code><foo <foo name=src url=ici>></code>
+<code><foo <foo name=src url=ici /> /></code>
 
-In these examples, the <command foo> tag has only one argument.
+In these examples, the <command foo /> tag has only one argument.
 </para>
 
 <para>
 Under certain circumstances it is necessary to group multiple statements
 into a single one. This can be done with double quotes or with the
-<command group> primitive, e.g.
+<command group /> primitive, e.g.
 <code><foo "This is the 1st attribute"
-           <group and the second>></code>
+           <group and the second /> /></code>
 </para>
 
 <note>
@@ -1870,34 +1879,34 @@ Unlike HTML single quotes can not replace doube quotes for this purpose.
 
 <para>
 If double quotes appear in an argument, they must be escaped by a
-backslash <value "\\">.
+backslash <value "\\" />.
 <example>
-  <set-var text="Text with double quotes \" inside">
-  <get-var text>
+  <set-var text="Text with double quotes \" inside" />
+  <get-var text />
 </example>
 </para>
 
-<subsection "Macro evaluation">
+<subsection "Macro evaluation" />
 
 <para>
 Macros are characterized by
 <list>
-<item>name
-<item>container status (simple or complex)
-<item>if attributes are expanded or not
-<item>function type (primitive or user defined macro)
-<item>for primitives, adress of corresponding code in memory and for
+<item/>name
+<item/>container status (simple or complex)
+<item/>if attributes are expanded or not
+<item/>function type (primitive or user defined macro)
+<item/>for primitives, adress of corresponding code in memory and for
 user defined macros the replacement text
 </list>
 </para>
 
 <para>
-Characters are read on input until a <left-angle> is found.
+Characters are read on input until a <lb/> is found.
 Then macro name is read. After that attributes are read, verbatim or not
 depending on how this macro as been defined. And if this macro is
 complex, its body is read verbatim. When this is finished, some special
-sequences in replacement text are replaced (like <value %body>, <value
-%attributes>, <value %0>, <value %1>, etc.) and resulting text is put on
+sequences in replacement text are replaced (like <value %body />, <value
+%attributes />, <value %0 />, <value %1 />, etc.) and resulting text is put on
 input stack in order to be rescanned.
 </para>
 
@@ -1925,25 +1934,25 @@ This definition has a major drawback:
 We would like that inner tags are removed.
 </para>
 
-<set-var _text:tt=0>
+<set-var _text:tt=0 />
 <define-tag text-tt endtag=required whitespace=delete>
-<increment _text:tt>
-<ifeq <get-var _text:tt> 1 "<tt>">
+<increment _text:tt />
+<ifeq <get-var _text:tt /> 1 "<tt*>" />
 %body
-<ifeq <get-var _text:tt> 1 "</tt>">
-<decrement _text:tt>
+<ifeq <get-var _text:tt /> 1 "</tt>" />
+<decrement _text:tt />
 </define-tag>
 <para>
 First idea is to use an auxiliary variable to know whether we still
 are inside such an environment:
 <code>
-<set-var _text:tt=0>
+<set-var _text:tt=0 />
 <define-tag text-tt endtag=required whitespace=delete>
-<increment _text:tt>
-<ifeq <get-var _text:tt> 1 "<tt>">
+<increment _text:tt />
+<ifeq <get-var _text:tt /> 1 "<tt*>" />
 %body
-<ifeq <get-var _text:tt> 1 "</tt>">
-<decrement _text:tt>
+<ifeq <get-var _text:tt /> 1 "</tt>" />
+<decrement _text:tt />
 </define-tag>
 </code>
 <example>
@@ -1951,17 +1960,18 @@ are inside such an environment:
 </example>
 </para>
 
-<pseudo-func opt>
+<pseudo-func opt />
 <para>
 But if we use simple tags, as in the example below, our definition does
 not seem to work. It is because attributes are expanded before they are
 put into replacement text.
 <example>
 <define-tag opt><text-tt>%attributes</text-tt></define-tag>
-<opt "This is an <opt example>">
+<opt "This is an <opt example />" />
 </example>
 </para>
 
+<pseudo-func opt />
 <para>
 If we want to prevent this problem we have to forbid attributes
 expansion with
@@ -1969,22 +1979,22 @@ expansion with
 <define-tag opt attributes=verbatim>;;;
 <text-tt>%attributes</text-tt>;;;
 </define-tag>
-<opt "This is an <opt example>">
+<opt "This is an <opt example />" />
 </example>
 </para>
 
-<section "Author">
+<section "Author" />
 <para>
 Denis Barbier
 <URL src="mailto:barbier@imacs.polytechnique.fr"
-     name="<left-angle>barbier@imacs.polytechnique.fr<right-angle>">
+     name="<lb/>barbier@imacs.polytechnique.fr<rb/>" />
 </para>
 
 
-<section "Thanks">
+<section "Thanks" />
 <para>
-Sincere thanks to Brian J. Fox for writing <Meta-HTML> and Rene
-Seindal for maintaining this wonderful macro parser called GNU <m4>.
+Sincere thanks to Brian J. Fox for writing <Meta-HTML/> and Rene
+Seindal for maintaining this wonderful macro parser called GNU <m4/>.
 </para>
 
-<footer>
+<footer/>

@@ -4,7 +4,7 @@
 ;;;
 
 <define-tag document-version whitespace=delete>
-This documentation describes <mp4h> version <get-var version>.
+This documentation describes <get-var package /> version <get-var version />.
 </define-tag>
 
 <define-tag lang:example-source>Source</define-tag>

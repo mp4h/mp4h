@@ -348,6 +348,10 @@ struct token_data
 #define EXP_INV_COMPLEX (1 << 2)  /* HTML tags whose last char is an asterisk
                                      are complex HTML tags which are parsed
                                      like single ones  */
+#define EXP_REMOVE_TRAILING_STAR \
+                        (1 << 3)  /* Remove trailing star in tag name */
+#define EXP_REMOVE_TRAILING_SLASH \
+                        (1 << 4)  /* Remove trailing slash in simple tag attributes */
 
 extern int exp_flags;
 

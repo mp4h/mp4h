@@ -140,7 +140,10 @@ Parser features:\n\
                                of NUMBER, with\n\
   1  do not parse unknown tags\n\
   2  unknown tags are assumed being complex\n\
-  4  an unknown tag whose name ends with a star is assumed simple\n"),
+  4  an unknown tag whose name ends with a star is assumed simple\n\
+  8  remove the trailing star in tag name\n\
+ 16  remove the trailing slash in tag attributes\n\
+"),
              stdout);
       printf("  Default is NUMBER=%d\n", DEFAULT_EXPANSION_FLAGS);
       fputs (_("\
