@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.8.2>
+<set-var version=0.8.3>
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -304,6 +304,28 @@ Supprime la définition d'une commande.
 <define-tag foo>un</define-tag>
 <undef foo>
 <foo>
+</example>
+
+<tag:description set-hook complex>
+<var nom>
+[position=[before|after]
+[action=insert|append|replace]
+</tag:description>
+
+<para>
+Ajoute du texte à une commande déjà définie. Cela permet de modifier
+des commandes existantes, sans avoir à se préoccuper si cette commande
+est complexe ou non.
+</para>
+
+<undef foo>
+<example>
+<let foo add>
+<set-hook foo position=before>
+Avant</set-hook>
+<set-hook foo position=after>
+Après</set-hook>
+<foo 1 2 3 4>
 </example>
 
 ###

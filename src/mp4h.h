@@ -471,6 +471,8 @@ struct symbol
   boolean expand_args;
 
   char *name;
+  char *hook_begin;
+  char *hook_end;
   token_data data;
 };
 
@@ -479,6 +481,9 @@ struct symbol
 #define SYMBOL_SHADOWED(S)      ((S)->shadowed)
 #define SYMBOL_CONTAINER(S)     ((S)->container)
 #define SYMBOL_EXPAND_ARGS(S)   ((S)->expand_args)
+#define SYMBOL_NAME(S)          ((S)->name)
+#define SYMBOL_HOOK_BEGIN(S)    ((S)->hook_begin)
+#define SYMBOL_HOOK_END(S)      ((S)->hook_end)
 #define SYMBOL_NAME(S)          ((S)->name)
 #define SYMBOL_TYPE(S)          (TOKEN_DATA_TYPE (&(S)->data))
 #define SYMBOL_TEXT(S)          (TOKEN_DATA_TEXT (&(S)->data))

@@ -8,7 +8,13 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 0.8.2 and 0.8.1:
+  Changes between 0.8.3 and 0.8.2:
+
+    *) Add macro hooks (15-Mar-2000):
+       These hooks are provided to allow inserting text before or after
+       macro expansion. This way it becomes easy to transform primitives
+       or defined macros.
+       [Denis Barbier]
 
     *) Fix build failure on FreeBSD (15-Mar-2000):
        There was a bug in lib/xmalloc.c which causes a build failure

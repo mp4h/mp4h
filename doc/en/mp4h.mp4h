@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.8.2>
+<set-var version=0.8.3>
 <set-var title="MP4H - A Macro Processeur for HTML">
 
 <include <get-var format>.out
@@ -284,6 +284,28 @@ Delete a command definition.
 <define-tag foo>one</define-tag>
 <undef foo>
 <foo>
+</example>
+
+<tag:description set-hook complex>
+<var name>
+[position=[before|after]
+[action=insert|append|replace]
+</tag:description>
+
+<para>
+Add text to a predefined macro. This mechanism allows modifications
+of existing macros without having to worry about its type, whether it is
+complex or not.
+</para>
+
+<undef foo>
+<example>
+<let foo add>
+<set-hook foo position=before>
+Before</set-hook>
+<set-hook foo position=after>
+After</set-hook>
+<foo 1 2 3 4>
 </example>
 
 ###

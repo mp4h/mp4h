@@ -91,8 +91,9 @@ hash (const char *s)
 static void
 free_symbol (symbol *sym)
 {
-  if (SYMBOL_NAME (sym))
-    xfree (SYMBOL_NAME (sym));
+  xfree (SYMBOL_NAME (sym));
+  xfree (SYMBOL_HOOK_BEGIN (sym));
+  xfree (SYMBOL_HOOK_END (sym));
   if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
     xfree (SYMBOL_TEXT (sym));
   xfree ((voidstar) sym);
@@ -165,6 +166,8 @@ lookup_symbol (const char *name, symbol_lookup mode)
       SYMBOL_TYPE (sym) = TOKEN_VOID;
       SYMBOL_TRACED (sym) = SYMBOL_SHADOWED (sym) = FALSE;
       SYMBOL_NAME (sym) = xstrdup (lcname);
+      SYMBOL_HOOK_BEGIN (sym) = 0;
+      SYMBOL_HOOK_END (sym) = 0;
 
       SYMBOL_NEXT (sym) = *spp;
       (*spp) = sym;

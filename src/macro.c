@@ -408,6 +408,9 @@ void
 call_macro (symbol *sym, struct obstack *obs, int argc, token_data **argv,
                  read_type expansion)
 {
+  if (SYMBOL_HOOK_BEGIN (sym))
+    obstack_grow (obs, SYMBOL_HOOK_BEGIN (sym),
+                        strlen (SYMBOL_HOOK_BEGIN (sym)));
   switch (SYMBOL_TYPE (sym))
     {
     case TOKEN_FUNC:
@@ -423,6 +426,9 @@ call_macro (symbol *sym, struct obstack *obs, int argc, token_data **argv,
         _("INTERNAL ERROR: Bad symbol type in call_macro ()")));
       abort ();
     }
+  if (SYMBOL_HOOK_END (sym))
+    obstack_grow (obs, SYMBOL_HOOK_END (sym),
+                        strlen (SYMBOL_HOOK_END (sym)));
 }
 
 /*-------------------------------------------------------------------------.

@@ -78,6 +78,8 @@ DECLARE (mp4h_define_tag);
 DECLARE (mp4h_provide_tag);
 DECLARE (mp4h_let);
 DECLARE (mp4h_undef);
+DECLARE (mp4h_set_hook);
+DECLARE (mp4h_get_hook);
 
   /*  math functions  */
 DECLARE (mp4h_add);
@@ -202,6 +204,8 @@ builtin_tab[] =
   { "provide-tag",      TRUE,     TRUE,   mp4h_provide_tag },
   { "let",              FALSE,    TRUE,   mp4h_let },
   { "undef",            FALSE,    TRUE,   mp4h_undef },
+  { "set-hook",          TRUE,    TRUE,   mp4h_set_hook },
+  { "get-hook",         FALSE,    TRUE,   mp4h_get_hook },
 
       /*  numerical relational operators  */
   { "gt",               FALSE,    TRUE,   mp4h_gt },
@@ -1552,7 +1556,7 @@ mp4h_let (MP4H_BUILTIN_ARGS)
 static void
 mp4h_undef (MP4H_BUILTIN_ARGS)
 {
-  int i;
+  register int i;
 
   if (bad_argc (argv[0], argc, 2, 0))
     return;
@@ -1561,6 +1565,145 @@ mp4h_undef (MP4H_BUILTIN_ARGS)
     {
       lookup_symbol (ARG (i), SYMBOL_DELETE);
     }
+}
+
+static void
+generic_set_hook (MP4H_BUILTIN_ARGS, boolean before, int action)
+{
+  symbol *sym;
+  char *text;
+  char *hook;
+
+  sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
+  if (sym == NULL)
+    return;
+  if (before)
+    hook = SYMBOL_HOOK_BEGIN (sym);
+  else
+    hook = SYMBOL_HOOK_END (sym);
+  
+  if (!hook)
+    {
+      hook = "";
+      action = 0;
+    }
+
+  switch (action)
+    {
+      /*  Replace current hooks */
+      case 0:
+        if (before)
+          {
+            xfree (SYMBOL_HOOK_BEGIN (sym));
+            SYMBOL_HOOK_BEGIN (sym) = xstrdup (TOKEN_DATA_TEXT (argv[argc]));
+          }
+        else
+          {
+            xfree (SYMBOL_HOOK_END (sym));
+            SYMBOL_HOOK_END (sym) = xstrdup (TOKEN_DATA_TEXT (argv[argc]));
+          }
+        return;
+
+      /*  Insert before the current hooks */
+      case 1:
+        text = xmalloc (strlen (hook) + strlen (TOKEN_DATA_TEXT (argv[argc])));
+        strcpy (text, TOKEN_DATA_TEXT (argv[argc]));
+        strcat (text, hook);
+        break;
+
+      /*  Append after the current hooks */
+      case 2:
+        text = xmalloc (strlen (hook) + strlen (TOKEN_DATA_TEXT (argv[argc])));
+        strcpy (text, hook);
+        strcat (text, TOKEN_DATA_TEXT (argv[argc]));
+        break;
+
+      default:
+        MP4HERROR ((warning_status, 0,
+          _("INTERNAL ERROR: Illegal value in generic_set_hook ()")));
+      abort ();
+    }
+
+  if (before)
+    SYMBOL_HOOK_BEGIN (sym) = xstrdup (text);
+  else
+    SYMBOL_HOOK_END (sym) = xstrdup (text);
+  xfree (text);
+}
+
+static void
+mp4h_set_hook (MP4H_BUILTIN_ARGS)
+{
+  const char *action, *position;
+  symbol *sym;
+  boolean before = TRUE;
+  int iaction = 0;
+
+  action = predefined_attribute ("action", &argc, argv, TRUE);
+  position = predefined_attribute ("position", &argc, argv, TRUE);
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+  sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
+  if (sym == NULL)
+    return;
+
+  before = !(position && strcmp (position, "after") == 0);
+  if (action)
+    {
+      if (strcmp (action, "insert") == 0)
+        iaction = 1;
+      else if (strcmp (action, "append") == 0)
+        iaction = 2;
+      else
+        iaction = 0;
+    }
+  else
+    iaction = 0;
+  generic_set_hook (MP4H_BUILTIN_RECUR, before, iaction);
+}
+
+/*-----------------.
+| Retrieve hooks.  |
+`-----------------*/
+static void
+mp4h_get_hook (MP4H_BUILTIN_ARGS)
+{
+  symbol *sym;
+  const char *position;
+  char *hook;
+
+  position = predefined_attribute ("position", &argc, argv, TRUE);
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
+  if (sym == NULL)
+    return;
+
+  if (position && strcmp (position, "after") == 0)
+    hook = SYMBOL_HOOK_END (sym);
+  else
+    hook = SYMBOL_HOOK_BEGIN (sym);
+
+  if (hook)
+    obstack_grow (obs, hook, strlen (hook));
+}
+
+static void
+mp4h_get_hook_after (MP4H_BUILTIN_ARGS)
+{
+  symbol *sym;
+
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
+  if (sym == NULL)
+    return;
+
+  if (SYMBOL_HOOK_END (sym))
+    obstack_grow (obs, SYMBOL_HOOK_END (sym),
+                         strlen (SYMBOL_HOOK_END (sym)));
 }
 
 
@@ -2808,7 +2951,7 @@ Warning:%s:%d: wrong index declaration in <%s>"),
 static void
 mp4h_set_var (MP4H_BUILTIN_ARGS)
 {
-  generic_variable (obs, argc, argv, expansion, SYMBOL_INSERT, FALSE);
+  generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_INSERT, FALSE);
 }
 
 /*---------------------------------------------------.
@@ -2817,7 +2960,7 @@ mp4h_set_var (MP4H_BUILTIN_ARGS)
 static void
 mp4h_set_var_verbatim (MP4H_BUILTIN_ARGS)
 {
-  generic_variable (obs, argc, argv, expansion, SYMBOL_INSERT, TRUE);
+  generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_INSERT, TRUE);
 }
 
 /*------------------------------.
@@ -2826,7 +2969,7 @@ mp4h_set_var_verbatim (MP4H_BUILTIN_ARGS)
 static void
 mp4h_get_var (MP4H_BUILTIN_ARGS)
 {
-  generic_variable (obs, argc, argv, expansion, SYMBOL_LOOKUP, FALSE);
+  generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_LOOKUP, FALSE);
 }
 
 /*--------------------------------------------------------------.
@@ -2835,7 +2978,7 @@ mp4h_get_var (MP4H_BUILTIN_ARGS)
 static void
 mp4h_get_var_once (MP4H_BUILTIN_ARGS)
 {
-  generic_variable (obs, argc, argv, expansion, SYMBOL_LOOKUP, TRUE);
+  generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_LOOKUP, TRUE);
 }
 
 /*----------------------.
