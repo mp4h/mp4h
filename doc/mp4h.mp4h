@@ -418,15 +418,18 @@ Text inserted with position=after:<get-hook foo position=after />!
 
 <para>
 Like <value %attributes />, except that <value attr=value /> pairs are
-printed with double quotes surrounding attribute values.
+printed with double quotes surrounding attribute values, and a leading
+space is added if some text is printed.
 </para>
 
+<undef img />
 <example>
-<define-tag foo>
+<define-tag foo>;;;
 %attributes
-<attributes-quote %attributes />
+<img<attributes-quote %attributes />/>
 </define-tag>
 <foo id="logo" src="logo.gif" name="Logo" alt="Our logo" />
+<foo />
 </example>
 
 <tag:description attributes-extract>

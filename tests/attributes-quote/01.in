@@ -1,4 +1,4 @@
 <define-tag foo attributes=verbatim whitespace=delete>
-<foo* <attributes-quote %Uattributes />>Coucou</foo*>
+<foo*<attributes-quote %Uattributes />>Coucou</foo*>
 </define-tag>
 <foo q=<get-var q/> name="foo bar quux" />

@@ -10,8 +10,12 @@
 
   Changes between 1.2.1 and ???:
 
-    *) Change in handling invalid negative array indices (17-Oct-2001):
-       They have now no effect, they did formerly reset variable.
+    *) Leading space added by <attributes-quote> (18-Oct-2001):
+       This tag is useful for printing HTML output.  This change allows
+       writing <a<attributes-quote %attributes>> which prints <a> without
+       attributes and <a foo="bar"> instead.  It is now much more user
+       friendly because there is no need to first check whether there
+       are attributes in order to decide to add a leading space or not.
        [Denis Barbier]
 
     *) Fix memory leaks (15-Oct-2001):
