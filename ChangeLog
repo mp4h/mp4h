@@ -8,7 +8,13 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 0.9.4 and SNAP:
+  Changes between 0.9.4 and 0.9.5:
+
+    *) Change evaluation of unknown tags (22-May-2000):
+       Until now, unknown tags were treated like normal text, i.e. left
+       angle bracket lose their special meaning.  This has very
+       strange side effects when such tags appear in attributes.
+       [many people]
 
     *) Fix trailing slash (06-May-2000):
        When there was no attribute and no space before the slash sign,

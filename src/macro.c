@@ -34,8 +34,8 @@
 #include "mp4h.h"
 
 static void expand_macro __P ((symbol *, read_type));
+static void expand_unknown_tag __P ((char *, read_type));
 static void expand_token __P ((struct obstack *, read_type, token_type, token_data *));
-static void collect_body __P ((symbol *, struct obstack *, struct obstack *));
 
 /* Current recursion level in expand_macro ().  */
 int expansion_level = 0;
@@ -100,18 +100,18 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
 
       /* macro names must begin with a letter, an underscore or a %.
          If another character is found, this string is not a
-         macro, it could be ePerl delimiters.  */
+         macro.   */
 
-      if (! IS_ALPHA (*text))
+      if (IS_ALPHA (*text) || (*text == '/' && IS_ALPHA (*(text+1))))
         {
-          shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
-          break;
+          sym = lookup_symbol (text, SYMBOL_LOOKUP);
+          if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID)
+            expand_unknown_tag (text, expansion);
+          else
+            expand_macro (sym, expansion);
         }
-      sym = lookup_symbol (text, SYMBOL_LOOKUP);
-      if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID)
-        shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
       else
-        expand_macro (sym, expansion);
+        shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
       break;
 
     default:
@@ -245,8 +245,8 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
 `-------------------------------------------------------------------------*/
 
 static boolean
-collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
-                   struct obstack *arguments)
+collect_arguments (char *symbol_name, read_type expansion,
+                   struct obstack *argptr, struct obstack *arguments)
 {
   int ch;
   token_data td;
@@ -256,7 +256,7 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
   char last_char = ' ';
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-  TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
+  TOKEN_DATA_TEXT (&td) = symbol_name;
   tdp = (token_data *) obstack_copy (arguments, (voidstar) &td, sizeof (td));
   obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
 
@@ -275,7 +275,7 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
             {
               MP4HERROR ((EXIT_FAILURE, 0,
                 _("ERROR:%s:%d: EOF when reading argument of the `%s' tag"),
-                     CURRENT_FILE_LINE, SYMBOL_NAME(sym)));
+                     CURRENT_FILE_LINE, symbol_name));
             }
           tdp = (token_data *)
             obstack_copy (arguments, (voidstar) &td, sizeof (td));
@@ -293,7 +293,7 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
     {
       MP4HERROR ((warning_status, 0,
         _("INTERNAL ERROR: Bad tag expression in `%s'"),
-             CURRENT_FILE_LINE, SYMBOL_NAME (sym)));
+             CURRENT_FILE_LINE, symbol_name));
     }
   return (last_char == '/');
 }
@@ -387,7 +387,7 @@ collect_body (symbol *sym, struct obstack *argptr, struct obstack *bodyptr)
             {
               newsym = lookup_symbol (text, SYMBOL_LOOKUP);
               if (newsym == NULL || SYMBOL_TYPE (newsym) == TOKEN_VOID)
-                shipout_text (bodyptr, TOKEN_DATA_TEXT (&td), strlen (TOKEN_DATA_TEXT (&td)));
+                expand_unknown_tag (text, READ_ATTR_ASIS);
               else
                 expand_macro (newsym, READ_ATTR_ASIS);
             }
@@ -488,7 +488,8 @@ expand_macro (symbol *sym, read_type expansion)
   else
     attr_expansion = READ_ATTRIBUTE;
 
-  slash = collect_arguments (sym, attr_expansion, &argptr, &arguments);
+  slash = collect_arguments (SYMBOL_NAME (sym), attr_expansion, &argptr,
+                             &arguments);
   argc = obstack_object_size (&argptr) / sizeof (token_data *);
 
   if (SYMBOL_CONTAINER (sym))
@@ -570,4 +571,56 @@ expand_macro (symbol *sym, read_type expansion)
 
   if (expansion_level == 0)
     clear_tag_attr ();
+}
+
+/*-------------------------------------------------------------------------.
+| This macro reads attributes without expanding macro.  It is useful to    |
+| print unknown tags.                                                      |
+`-------------------------------------------------------------------------*/
+
+static void
+expand_unknown_tag (char *name, read_type expansion)
+{
+  struct obstack arguments, argptr;
+  token_data **argv;
+  int argc, i;
+  struct obstack *obs_expansion;
+  const char *expanded;
+  read_type attr_expansion;
+  char *symbol_name;
+
+  symbol_name = xstrdup (name);
+
+  obstack_init (&arguments);
+  obstack_init (&argptr);
+
+  if (expansion == READ_ATTR_ASIS || expansion == READ_BODY
+          || expansion == READ_ATTR_VERB)
+    attr_expansion = READ_ATTR_ASIS;
+  else
+    attr_expansion = READ_ATTRIBUTE;
+
+  (void) collect_arguments (symbol_name, attr_expansion, &argptr,
+                             &arguments);
+  argc = obstack_object_size (&argptr) / sizeof (token_data *);
+  argv = (token_data **) obstack_finish (&argptr);
+
+  obs_expansion = push_string_init ();
+  obstack_1grow (obs_expansion, '<');
+  shipout_string (obs_expansion, symbol_name, 0);
+
+  for (i = 1; i < argc; i++)
+    {
+      obstack_1grow (obs_expansion, ' ');
+      shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+    }
+  obstack_1grow (obs_expansion, '>');
+
+  /*  Input must not be rescanned, so expansion is set to READ_BODY.  */
+  expanded = push_string_finish (READ_BODY);
+
+  obstack_free (&arguments, NULL);
+  obstack_free (&argptr, NULL);
+
+  xfree (symbol_name);
 }

@@ -152,13 +152,9 @@
 <define-tag three-colon>;;;</define-tag>
 <define-tag example endtag=required attributes=verbatim whitespace=delete>
 <set-var-verbatim verb-body=%ubody>
-<subst-in-var verb-body "<" "_LT_">
-<subst-in-var verb-body ">" "_GT_">
 <subst-in-var verb-body "^\n+" "" singleline=true>
 <subst-in-var verb-body "^(.)" "   \\1">
 <set-var body=%body>
-<subst-in-var body "<" "_LT_">
-<subst-in-var body ">" "_GT_">
 <subst-in-var body "<three-colon>[^\n]*\n[ \t]*" "" singleline=true>
 <subst-in-var body "<three-colon>$" "">
 <subst-in-var body "^\n+" "" singleline=true>
@@ -186,8 +182,6 @@
 ;;;
 <define-tag code endtag=required attributes=verbatim whitespace=delete>
 <set-var-verbatim verb-body=%ubody>
-<subst-in-var verb-body "<" "_LT_">
-<subst-in-var verb-body ">" "_GT_">
 <subst-in-var verb-body "^(.)" "   \\1">
 <get-var-once verb-body>
 </define-tag>

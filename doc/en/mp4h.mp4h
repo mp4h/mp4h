@@ -5,7 +5,7 @@
 
 <mp4h-l10n LC_ALL=C>
 <set-var package=mp4h>
-<set-var version=0.9.4>
+<set-var version=0.9.5>
 <set-var title="mp4h - A Macro Processeur for HTML Documents">
 
 <include <get-var format>.out
@@ -40,7 +40,7 @@ written by Brian J. Fox,  Even if both syntaxes look similar, source
 code is completely different.  Indeed, a subset of <Meta-HTML> was used
 as a part of a more complex program, <WML>
 (<URL src="http://www.engelschall.com/sw/wml/" name="Website Meta Language">)
-written by Ralf S. Engelschall and which i maintain since january 1999.
+written by Ralf S. Engelschall and which i maintain since January 1999.
 For licensing reasons, it was hard to hack <Meta-HTML> and so i decided
 to write my own macro-processor.
 </para>
@@ -1246,8 +1246,8 @@ Cancels the <command noexpand> tag.
 </tag:description>
 
 <para>
-If string is non empty, second argument is evalled otherwise third
-argument is evalled.
+If string is non empty, second argument is evaluated otherwise third
+argument is evaluated.
 </para>
 
 <pseudo-func test>
@@ -1267,8 +1267,8 @@ argument is evalled.
 </tag:description>
 
 <para>
-If first two arguments are identical strings, third argument is evalled
-otherwise fourth argument is evalled.
+If first two arguments are identical strings, third argument is evaluated
+otherwise fourth argument is evaluated.
 </para>
 
 <tag:description ifneq verbatim>
@@ -1280,7 +1280,7 @@ otherwise fourth argument is evalled.
 
 <para>
 If first two arguments are not identical strings, third argument is
-evalled otherwise fourth argument is evalled.
+evaluated otherwise fourth argument is evaluated.
 </para>
 
 <tag:description when complex>
@@ -1288,7 +1288,7 @@ evalled otherwise fourth argument is evalled.
 </tag:description>
 
 <para>
-When argument is not empty, its body fuction is evalled.
+When argument is not empty, its body fuction is evaluated.
 </para>
 
 <tag:description while verbatim complex>
@@ -1296,7 +1296,7 @@ When argument is not empty, its body fuction is evalled.
 </tag:description>
 
 <para>
-While condition is true, body function is evalled.
+While condition is true, body function is evaluated.
 </para>
 
 <example>
@@ -1316,7 +1316,7 @@ While condition is true, body function is evalled.
 
 <para>
 This macro is similar to the <command foreach> Perl's macro:
-a variable loops over array values and function body is evalled for each
+a variable loops over array values and function body is evaluated for each
 value.
 
 first argument is a generic variable name, and second is the name of an
@@ -1902,7 +1902,7 @@ input stack in order to be rescanned.
 </para>
 
 <note>
-By default attributes are evalled before any replacement.
+By default attributes are evaluated before any replacement.
 </note>
 
 <define-tag text-tt endtag=required whitespace=delete>
