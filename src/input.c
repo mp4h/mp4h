@@ -488,7 +488,7 @@ push_string_finish (read_type expansion)
       obstack_1grow (current_input, '\0');
       next->u.u_s.start = obstack_finish (current_input);
       if (expansion == READ_ATTR_VERB || expansion == READ_ATTR_ASIS
-          || expansion == READ_BODY || expansion == READ_ATTR_BODY)
+          || expansion == READ_BODY)
         {
           TOKEN_DATA_TYPE (&token_read) = TOKEN_TEXT;
           TOKEN_DATA_TEXT (&token_read) = xstrdup (next->u.u_s.start);
@@ -1024,15 +1024,18 @@ next_token (token_data *td, read_type expansion)
                   ch = CHAR_EOF;
                   break;
                 }
+              /*
               if (ch == '"')
                 obstack_1grow (&token_stack, CHAR_QUOTE);
               else
+                  */
                 obstack_1grow (&token_stack, ch);
             }
           unget_input(ch);
 
           type = TOKEN_STRING;
         }
+      /*  Below we know that expansion != READ_BODY  */
       else if (IS_ALPHA(ch))
         {
           obstack_1grow (&token_stack, ch);
@@ -1084,7 +1087,6 @@ next_token (token_data *td, read_type expansion)
           switch (expansion)
           {
             case READ_NORMAL:
-            case READ_BODY:
               obstack_1grow (&token_stack, CHAR_QUOTE);
               type = TOKEN_SIMPLE;
               break;
@@ -1095,7 +1097,6 @@ next_token (token_data *td, read_type expansion)
               break;
 
             case READ_ATTR_ASIS:
-            case READ_ATTR_BODY:
               obstack_1grow (&token_stack, '"');
               type = TOKEN_QUOTE;
               break;
@@ -1111,21 +1112,12 @@ next_token (token_data *td, read_type expansion)
           switch (expansion)
           {
             case READ_NORMAL:
-            case READ_BODY:
               obstack_1grow (&token_stack, ch);
               type = TOKEN_SIMPLE;
               break;
 
-            case READ_ATTR_BODY:
-              obstack_1grow (&token_stack, ch);
-              ch = next_char();
-              obstack_1grow (&token_stack, ch);
-              type = TOKEN_STRING;
-              break;
-
             case READ_ATTRIBUTE:
             case READ_ATTR_VERB:
-            case READ_ATTR_ASIS:
               ch = next_char();
               if (ch == 'n')
                 obstack_1grow (&token_stack, '\n');
@@ -1138,6 +1130,13 @@ next_token (token_data *td, read_type expansion)
               else
                 obstack_1grow (&token_stack, ch);
 
+              type = TOKEN_STRING;
+              break;
+
+            case READ_ATTR_ASIS:
+              obstack_1grow (&token_stack, ch);
+              ch = next_char();
+              obstack_1grow (&token_stack, ch);
               type = TOKEN_STRING;
               break;
 

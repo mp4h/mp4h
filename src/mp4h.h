@@ -339,8 +339,6 @@ struct token_data
            modification, main difference with READ_ATTR_VERB is that quotes
            are not removed and are part of this attribute  */
 #define READ_BODY      (1 << 4)  /* when reading body function */
-#define READ_ATTR_BODY (1 << 5)  /* when reading attributes of tags
-                                    within another body function  */
 
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;

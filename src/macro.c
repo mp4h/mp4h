@@ -372,7 +372,7 @@ collect_body (symbol *sym, struct obstack *argptr, struct obstack *bodyptr)
               if (newsym == NULL || SYMBOL_TYPE (newsym) == TOKEN_VOID)
                 shipout_text (bodyptr, TOKEN_DATA_TEXT (&td), strlen (TOKEN_DATA_TEXT (&td)));
               else
-                expand_macro (newsym, READ_ATTR_BODY);
+                expand_macro (newsym, READ_ATTR_ASIS);
             }
           break;
 
@@ -463,12 +463,11 @@ expand_macro (symbol *sym, read_type expansion)
   if (traced && (debug_level & DEBUG_TRACE_CALL))
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
 
-  if (expansion == READ_ATTR_BODY || expansion == READ_BODY)
-    attr_expansion = READ_ATTR_BODY;
-  else if (expansion == READ_ATTR_VERB || ! SYMBOL_EXPAND_ARGS (sym))
-    attr_expansion = READ_ATTR_VERB;
-  else if (expansion == READ_ATTR_ASIS)
+  if (expansion == READ_ATTR_ASIS || expansion == READ_BODY
+          || expansion == READ_ATTR_VERB)
     attr_expansion = READ_ATTR_ASIS;
+  else if (! SYMBOL_EXPAND_ARGS (sym))
+    attr_expansion = READ_ATTR_VERB;
   else
     attr_expansion = READ_ATTRIBUTE;
 

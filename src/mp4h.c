@@ -424,7 +424,7 @@ main (int argc, char *const *argv, char *const *envp)
             if (fp == NULL)
               {
                 error (0, errno, argv[optind]);
-                continue;
+                abort ();
               }
             else
               {
