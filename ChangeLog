@@ -8,6 +8,13 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.9.4 and SNAP:
+
+    *) Fix trailing slash (06-May-2000):
+       When there was no attribute and no space before the slash sign,
+       as in <br/>, this tag was not expanded.
+       [Denis Barbier]
+
   Changes between 0.9.3 and 0.9.4:
 
     *) Changes in l10n (03-May-2000):
