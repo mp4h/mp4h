@@ -37,8 +37,8 @@
 
 #include "ltdl.h"
 
-#define DEBUG_MODULES
 #undef DEBUG_MODULES
+#define DEBUG_MODULES
 
 /* 
  * This file implements dynamic modules in GNU m4.  A module is a
@@ -140,10 +140,7 @@ module_init (void)
 }
 
 /* 
- * Load a module.  MODNAME can be a absolute file name or, if relative,
- * it is searched for in the module path.  The module is unloaded in
- * case of error.  The builtins from the module are installed in the
- * symbol table.
+ * Load a dynamic library.
  */
 
 void
