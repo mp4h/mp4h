@@ -1090,6 +1090,11 @@ next_token (token_data *td, read_type expansion)
 
           type = TOKEN_STRING;
         }
+      else if (IS_RQUOTE(ch))
+        {
+          MP4HERROR ((EXIT_FAILURE, 0,
+             _("INTERNAL ERROR: CHAR_QUOTE found.")));
+        }
       else if (IS_LQUOTE(ch))             /* QUOTED STRING */
         {
           quote_level = 1;
