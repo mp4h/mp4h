@@ -2,7 +2,8 @@
 # Copyright (C) 1991-1998 Free Software Foundation, Inc.
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(src/mp4h.c)
+AC_INIT
+AC_CONFIG_SRCDIR([src/mp4h.c])
 AC_CONFIG_HEADER(config.h)
 
 shtool=./shtool
@@ -11,10 +12,10 @@ VERSION="`$shtool version -l c -d short src/version.c`"
 LONG_VERSION="`$shtool version -l c -d long src/version.c`"
 $shtool echo -e "Configuring for %B$PACKAGE $LONG_VERSION %b"
 
-AC_SUBST(PACKAGE)
-AC_SUBST(VERSION)
-AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE")
-AC_DEFINE_UNQUOTED(VERSION, "$VERSION")
+AC_SUBST([PACKAGE])
+AC_SUBST([VERSION])
+AC_DEFINE_UNQUOTED([PACKAGE], "$PACKAGE")
+AC_DEFINE_UNQUOTED([VERSION], "$VERSION")
 
 MAINTAINER_MODE_TRUE='#'
 AC_SUBST(MAINTAINER_MODE_TRUE)
@@ -28,7 +29,7 @@ if test x$datadir = 'x${prefix}/share'; then
 else
     PKGDATADIR="$datadir/mp4h"
 fi
-AC_DEFINE_UNQUOTED(PKGDATADIR, "$PKGDATADIR")
+AC_DEFINE_UNQUOTED([PKGDATADIR], "$PKGDATADIR")
 pkgdatadir="$datadir/mp4h"
 AC_SUBST(pkgdatadir)
 
@@ -41,9 +42,9 @@ if test x$libdir = 'x${exec_prefix}/lib'; then
 else
     PKGLIBDIR="$libdir/mp4h"
 fi
-AC_DEFINE_UNQUOTED(PKGLIBDIR, "$PKGLIBDIR") 
+AC_DEFINE_UNQUOTED([PKGLIBDIR], "$PKGLIBDIR") 
 pkglibdir="$libdir/mp4h"
-AC_SUBST(pkglibdir)
+AC_SUBST([pkglibdir])
 
 AC_ARG_PROGRAM
 
@@ -128,7 +129,7 @@ AC_SUBST(do_module_mozjs)
 dnl  This line is needed for Debian builds
 AC_SUBST(CFLAGS)
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
    Makefile
    pcre/Makefile
    lib/Makefile
@@ -137,11 +138,13 @@ AC_OUTPUT([
    packages/WML/Makefile
    modules/Makefile
    modules/example/Makefile
+   modules/exec/Makefile
    modules/mozjs/Makefile
    modules/njs/Makefile
    doc/Makefile
    tests/Makefile
 ])
+AC_OUTPUT
 
 echo ''
 $shtool echo -e "Now please type %Bmake%b to compile mp4h"
