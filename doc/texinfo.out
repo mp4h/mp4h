@@ -6,10 +6,10 @@
 <preserve alt />
 <set-var %attributes />
 <increment info:chap />
-<ifeq <get-var info:gentoc /> 1 "@remove@%body
+<if <get-var info:gentoc />
+    "@remove@=LT=set-var ext:chap[<get-var info:chap />]=\"%body\" />
+@remove@=LT=set-var ext:alt[<get-var info:chap />]=\"<get-var alt />\"/>
 " />
-<ifeq <get-var info:gentoc /> 2
-  "@remove@\"/>=LT=set-var ext:alt[<get-var info:chap />]=\"<get-var alt />\"/>=LT=set-var ext:chap<get-var info:chap />=\"" />
 
 @node %body, ;;;
       <or <get-var ext:chap[<add <get-var info:chap /> 1 />] /> " " />, ;;;
@@ -37,13 +37,14 @@
 <preserve alt />
 <set-var %attributes />
 <increment info:sect />
-<ifeq <get-var info:gentoc /> 2
-  "@remove@%body
+<if <get-var info:gentoc />
+  "@remove@=LT=set-var ext:chap<get-var info:chap />[<get-var info:sect />]=\"%body\" />
+@remove@=LT=set-var ext:alt<get-var info:chap />[<get-var info:sect />]=\"<get-var alt />\" />
 " />
 
 @node %body, ;;;
-      <or <get-var ext:chap<get-var info:chap />[<add <get-var info:sect /> 2 />] /> " " />, ;;;
-      <or <get-var ext:chap<get-var info:chap />[<add <get-var info:sect /> 0 />] /> <get-var ext:chap[<get-var info:chap />] /> />, ;;;
+      <or <get-var ext:chap<get-var info:chap />[<add <get-var info:sect /> 1 />] /> " " />, ;;;
+      <or <get-var ext:chap<get-var info:chap />[<add <get-var info:sect /> -1 />] /> <get-var ext:chap[<get-var info:chap />] /> />, ;;;
       <get-var ext:chap[<get-var info:chap />] />
 @section %body
 
