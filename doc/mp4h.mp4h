@@ -1837,18 +1837,18 @@ size, type, ctime, mtime, atime, owner and group.
 </example>
 
 <tag:description include>
-[<var filename />]
 file=<var filename /> | command=<var command-line />
 [alt=<var action />]
 [verbatim=true]
 </tag:description>
 
 <para>
-Insert the contents of a file in the file system - if the file attribute is given -,
-or the output from executing a system command - if the command attribute is given -
-into the input stream. 
-For backwards compatbility, if neither the file nor the command attributes are given,
-the first argument is taken as a file to include.
+Insert the contents of a file in the file system - if the <attribute file />
+attribute is given -, or the output from executing a system command - if the
+<attribute command /> attribute is given - into the input stream. 
+For backwards compatibility, if neither the <attribute file /> nor the
+<attribute command /> attributes are given, the first argument is taken
+as a file to include.
 </para>
 
 <attributes:description>
