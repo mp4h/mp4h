@@ -603,9 +603,11 @@ dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
       if (i > 1)
         obstack_grow (obs, sep, len);
 
-      obstack_1grow (obs, CHAR_BGROUP);
+      if (expansion_level > 1)
+        obstack_1grow (obs, CHAR_BGROUP);
       shipout_string (obs, TOKEN_DATA_TEXT (argv[i]), 0);
-      obstack_1grow (obs, CHAR_EGROUP);
+      if (expansion_level > 1)
+        obstack_1grow (obs, CHAR_EGROUP);
     }
 }
 
@@ -862,9 +864,11 @@ mp4h_function_def (MP4H_BUILTIN_ARGS)
   switch (SYMBOL_TYPE (s))
     {
     case TOKEN_TEXT:
-      obstack_1grow (obs, CHAR_LQUOTE);
+      if (expansion_level > 1)
+        obstack_1grow (obs, CHAR_LQUOTE);
       shipout_string (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
-      obstack_1grow (obs, CHAR_RQUOTE);
+      if (expansion_level > 1)
+        obstack_1grow (obs, CHAR_RQUOTE);
       break;
 
     case TOKEN_FUNC:
@@ -1058,9 +1062,11 @@ mp4h_date (MP4H_BUILTIN_ARGS)
 static void
 mp4h_group (MP4H_BUILTIN_ARGS)
 {
-  obstack_1grow (obs, CHAR_BGROUP);
+  if (expansion_level > 1)
+    obstack_1grow (obs, CHAR_BGROUP);
   dump_args (obs, argc, argv, "");
-  obstack_1grow (obs, CHAR_EGROUP);
+  if (expansion_level > 1)
+    obstack_1grow (obs, CHAR_EGROUP);
 }
 
 /*--------------------------------------------------------------.
@@ -2152,7 +2158,8 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   victim = TOKEN_DATA_TEXT (argv[1]);
   length = strlen (victim);
 
-  obstack_1grow (obs, CHAR_BGROUP);
+  if (expansion_level > 1)
+    obstack_1grow (obs, CHAR_BGROUP);
   offset = 0;
   matchpos = 0;
   while (offset < length)
@@ -2193,7 +2200,8 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
         obstack_1grow (obs, victim[offset++]);
     }
 
-  obstack_1grow (obs, CHAR_EGROUP);
+  if (expansion_level > 1)
+    obstack_1grow (obs, CHAR_EGROUP);
 
   xfree (buf.buffer);
   return;
@@ -3383,13 +3391,13 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                || strncmp (text, "xbody", 5) == 0
                || strncmp (text, "qbody", 5) == 0)
         {
-          if (unexpanded)
+          if (unexpanded && obs)
             obstack_1grow (obs, CHAR_LQUOTE);
           if (SYMBOL_CONTAINER (sym))
             dump_args (obs, 2, (argv+argc-1), sep);
           else
             dump_args (obs, argc, argv, sep);
-          if (unexpanded)
+          if (unexpanded && obs)
             obstack_1grow (obs, CHAR_RQUOTE);
 
           if (*text == 'b')
@@ -3401,10 +3409,10 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                || strncmp (text, "xattributes", 11) == 0
                || strncmp (text, "qattributes", 11) == 0)
         {
-          if (unexpanded)
+          if (unexpanded && obs)
             obstack_1grow (obs, CHAR_LQUOTE);
           dump_args (obs, argc, argv, sep);
-          if (unexpanded)
+          if (unexpanded && obs)
             obstack_1grow (obs, CHAR_RQUOTE);
 
           if (*text == 'a')

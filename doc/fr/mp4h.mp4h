@@ -48,7 +48,7 @@ s'appuye sur la version 1.4n de GNU <m4>, qui est une version de
 développement.
 </para>
 
-<section "Commandes">
+<section "Description">
 
 <para>
 Le programme <mp4h> est un macro-processeur, ce qui signifie que les

@@ -22,6 +22,7 @@
 <define-tag left-angle>_LT_</define-tag>
 <define-tag right-angle>_GT_</define-tag>
 <define-tag true>C_LT_true_GT_</define-tag>
+<define-tag option>C_LT_-%attributes_GT_</define-tag>
 
 ;;;
 ;;;    Alias for writing URLs

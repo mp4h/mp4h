@@ -506,6 +506,8 @@ void expand_input __P ((void));
 void call_macro __P ((symbol *, struct obstack *, int, token_data **, read_type));
 boolean get_attribute (struct obstack *obs, token_data *argp);
 
+extern int expansion_level;
+
 
 /* File: builtin.c  --- builtins.  */
 
