@@ -194,7 +194,8 @@ add_suffix_searchdir (const char *oldpath, const char *dir)
       offset += len + lendir + 2;
       sp = next;
     }
-  *(new_search_path+strlen (new_search_path)) = '\0';
+  /*   Remove trailing colon  */
+  *(new_search_path+strlen (new_search_path) - 1) = '\0';
   xfree ((voidstar) path);
   return new_search_path;
 }
@@ -221,7 +222,7 @@ library_load (const char *libname, struct obstack *obs)
       dir = xmalloc (cp - libname + 1);
       strncpy (dir, libname, cp - libname);
       dir[cp - libname] = '\0';
-      save_path = lt_dlgetsearchpath ();
+      save_path = xstrdup(lt_dlgetsearchpath ());
       new_search_path = add_suffix_searchdir (save_path, dir);
       lt_dlsetsearchpath (new_search_path);
       xfree ((voidstar) new_search_path);
@@ -273,7 +274,7 @@ module_load (const char *modname, struct obstack *obs)
       dir = xmalloc (cp - modname + 1);
       strncpy (dir, modname, cp - modname);
       dir[cp - modname] = '\0';
-      save_path = lt_dlgetsearchpath ();
+      save_path = xstrdup(lt_dlgetsearchpath ());
       new_search_path = add_suffix_searchdir (save_path, dir);
       lt_dlsetsearchpath (new_search_path);
       xfree ((voidstar) new_search_path);
