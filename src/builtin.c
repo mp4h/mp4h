@@ -3510,7 +3510,9 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
             remove_special_chars (value, FALSE);
 
             ptr_index = strchr (ARG (i), ']');
-            if (ptr_index != NULL && *(ptr_index-1) != '[')
+            if (ptr_index != NULL && *(ptr_index-1) == '[')
+              *(ptr_index-1) = '\0';
+            else if (ptr_index != NULL && *(ptr_index-1) != '[')
               {
                 *ptr_index = '\0';
                 ptr_index = strchr (ARG (i), '[');
@@ -3615,7 +3617,9 @@ Warning:%s:%d: wrong index declaration in <%s>"),
           {
             array_index = -1;
             ptr_index = strchr (ARG (i), ']');
-            if (ptr_index != NULL && *(ptr_index-1) != '[')
+            if (ptr_index != NULL && *(ptr_index-1) == '[')
+              *(ptr_index-1) = '\0';
+            else if (ptr_index != NULL && *(ptr_index-1) != '[')
               {
                 *ptr_index = '\0';
                 ptr_index = strchr (ARG (i), '[');

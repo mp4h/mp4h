@@ -8,6 +8,15 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.0.4 and 1.0.5:
+
+    *) Minor fix to restore compatibility with old syntax (09-Jul-2000):
+       It is possible (but not desirable) to put square brackets after
+       a variable name to show that this variable is an array of
+       newline separated lists.
+       This fix restores this capability which is broken in 1.0.4
+       [Denis Barbier]
+
   Changes between 1.0.3 and 1.0.4:
 
     *) Internal change in hash tables (08-Jul-2000):
