@@ -29,6 +29,7 @@ SUBDIRS = \
    string-length \
    downcase \
    upcase \
+   capitalize \
    char-offsets \
    match \
    array-shift \

@@ -240,9 +240,10 @@ INTERNAL ERROR: Bad token type in expand_argument ()")));
 | Collect all the arguments to a call of the macro SYM.  The arguments are |
 | stored on the obstack ARGUMENTS and a table of pointers to the arguments |
 | on the obstack ARGPTR.                                                   |
+| Returns FALSE when arguments are not valid                               |
 `-------------------------------------------------------------------------*/
 
-static void
+static boolean
 collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
                    struct obstack *arguments)
 {
@@ -286,6 +287,11 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
           && strlen (TOKEN_DATA_TEXT (tdp)) == 0)
         argptr->next_free = last_addr;
     }
+  else
+    {
+      return FALSE;
+    }
+  return TRUE;
 }
 
 /*-----------------------------------------------------------------.
@@ -439,7 +445,7 @@ expand_macro (symbol *sym, read_type expansion)
   int argc, i;
   struct obstack *obs_expansion;
   const char *expanded;
-  boolean traced;
+  boolean traced, valid;
   int my_call_id;
   read_type attr_expansion;
 
@@ -467,16 +473,24 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
   else
       attr_expansion = expansion | READ_VERB_ATTR;
 
-  collect_arguments (sym, attr_expansion, &argptr, &arguments);
-
-  save_argptr = argptr;
-  argc = obstack_object_size (&argptr) / sizeof (token_data *);
-  argv = (token_data **) obstack_finish (&argptr);
-
-  if (SYMBOL_CONTAINER (sym))
+  valid = collect_arguments (sym, attr_expansion, &argptr, &arguments);
+  if (valid)
     {
-      collect_body (sym, &save_argptr);
-      argv = (token_data **) obstack_finish (&save_argptr);
+      save_argptr = argptr;
+      argc = obstack_object_size (&argptr) / sizeof (token_data *);
+      argv = (token_data **) obstack_finish (&argptr);
+
+      if (SYMBOL_CONTAINER (sym))
+        {
+          collect_body (sym, &save_argptr);
+          argv = (token_data **) obstack_finish (&save_argptr);
+        }
+    }
+  else
+    {
+      argc = 0;
+      argv = NULL;
+      expansion = READ_VERBATIM;
     }
 
   if (traced)
@@ -502,15 +516,18 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
           obstack_1grow (obs_expansion, ' ');
           shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
         }
-      obstack_1grow (obs_expansion, '>');
-      if (SYMBOL_CONTAINER (sym))
+      if (valid)
         {
-          obstack_grow(obs_expansion, TOKEN_DATA_TEXT (argv[argc]),
-              strlen(TOKEN_DATA_TEXT (argv[argc])));
-          obstack_grow (obs_expansion, "</", 2);
-          obstack_grow (obs_expansion, SYMBOL_NAME (sym),
-              strlen (SYMBOL_NAME (sym)));
           obstack_1grow (obs_expansion, '>');
+          if (SYMBOL_CONTAINER (sym))
+            {
+              obstack_grow(obs_expansion, TOKEN_DATA_TEXT (argv[argc]),
+                  strlen(TOKEN_DATA_TEXT (argv[argc])));
+              obstack_grow (obs_expansion, "</", 2);
+              obstack_grow (obs_expansion, SYMBOL_NAME (sym),
+                  strlen (SYMBOL_NAME (sym)));
+              obstack_1grow (obs_expansion, '>');
+            }
         }
     }
   expanded = push_string_finish (expansion);
@@ -535,7 +552,7 @@ expand_unknown_macro (char *name, read_type expansion)
   struct obstack *obs_expansion;
   char *symbol_name;
   const char *expanded;
-  boolean traced;
+  boolean traced, valid;
   int my_call_id;
 
   /* The ``name'' pointer points to a region which is modified
@@ -568,12 +585,19 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
   if (expansion & READ_VERBATIM || expansion & READ_VERB_ATTR)
     expansion = READ_VERBATIM;
   else
-    expansion = READ_NORMAL;
+    expansion = READ_ATTRIBUTE;
 
-  collect_arguments (&unknown, expansion, &argptr, &arguments);
-
-  argc = obstack_object_size (&argptr) / sizeof (token_data *);
-  argv = (token_data **) obstack_finish (&argptr);
+  valid = collect_arguments (&unknown, expansion, &argptr, &arguments);
+  if (valid)
+    {
+      argc = obstack_object_size (&argptr) / sizeof (token_data *);
+      argv = (token_data **) obstack_finish (&argptr);
+    }
+  else
+    {
+      argc = 0;
+      argv = NULL;
+    }
 
   if (traced)
     trace_pre (SYMBOL_NAME (&unknown), my_call_id, argc, argv);
@@ -587,7 +611,8 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
       obstack_1grow (obs_expansion, ' ');
       shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
     }
-  obstack_1grow (obs_expansion, '>');
+  if (valid)
+    obstack_1grow (obs_expansion, '>');
   expanded = push_string_finish (READ_VERBATIM);
 
   if (traced)

@@ -192,11 +192,20 @@ static struct obstack token_stack;
 /* Normal input stack.  */
 static struct obstack input_stack;
 
+/* Wrapup input stack.  */
+static struct obstack wrapup_stack;
+
+/* Input or wrapup.  */
+static struct obstack *current_input;
+
 /* Bottom of token_stack, for obstack_free.  */
 static char *token_bottom;
 
-/* Pointer to top of input stack.  */
+/* Pointer to top of current_input.  */
 static input_block *isp;
+
+/* Pointer to top of wrapup stack.  */
+static input_block *wsp;
 
 /* Aux. for handling split push_string ().  */
 static input_block *next;
@@ -299,14 +308,14 @@ push_file (FILE *fp, const char *title)
 
   if (next != NULL)
     {
-      obstack_free (&input_stack, next);
+      obstack_free (current_input, next);
       next = NULL;
     }
 
   if (debug_level & DEBUG_TRACE_INPUT)
     DEBUG_MESSAGE1 (_("Input read from %s"), title);
 
-  i = (input_block *) obstack_alloc (&input_stack,
+  i = (input_block *) obstack_alloc (current_input,
                                      sizeof (struct input_block));
   i->funcs = &file_funcs;
 
@@ -316,7 +325,7 @@ push_file (FILE *fp, const char *title)
   i->u.u_f.out_lineno = output_current_line;
   i->u.u_f.advance_line = start_of_input_line;
 
-  current_file = obstack_copy0 (&input_stack, title, strlen (title));
+  current_file = obstack_copy0 (current_input, title, strlen (title));
   current_line = 1;
   output_current_line = -1;
 
@@ -360,11 +369,11 @@ push_macro (builtin_func *func, boolean traced)
 
   if (next != NULL)
     {
-      obstack_free (&input_stack, next);
+      obstack_free (current_input, next);
       next = NULL;
     }
 
-  i = (input_block *) obstack_alloc (&input_stack,
+  i = (input_block *) obstack_alloc (current_input,
                                      sizeof (struct input_block));
   i->funcs = &macro_funcs;
 
@@ -408,11 +417,11 @@ push_single (int ch)
 
   if (next != NULL)
     {
-      obstack_free (&input_stack, next);
+      obstack_free (current_input, next);
       next = NULL;
     }
 
-  i = (input_block *) obstack_alloc (&input_stack,
+  i = (input_block *) obstack_alloc (current_input,
                                      sizeof (struct input_block));
 
   i->funcs = &single_funcs;
@@ -467,11 +476,11 @@ push_string_init (void)
       abort ();
     }
 
-  next = (input_block *) obstack_alloc (&input_stack,
+  next = (input_block *) obstack_alloc (current_input,
                                         sizeof (struct input_block));
   next->funcs = &string_funcs;
 
-  return &input_stack;
+  return current_input;
 }
 
 /*------------------------------------------------------------------------.
@@ -492,10 +501,10 @@ push_string_finish (read_type expansion)
   if (next == NULL)
     return NULL;
 
-  if (obstack_object_size (&input_stack) > 0)
+  if (obstack_object_size (current_input) > 0)
     {
-      obstack_1grow (&input_stack, '\0');
-      next->u.u_s.start = obstack_finish (&input_stack);
+      obstack_1grow (current_input, '\0');
+      next->u.u_s.start = obstack_finish (current_input);
       if (expansion & READ_VERBATIM)
         {
           TOKEN_DATA_TYPE (&token_read) = TOKEN_TEXT;
@@ -510,10 +519,34 @@ push_string_finish (read_type expansion)
       ret = isp->u.u_s.start;   /* for immediate use only */
     }
   else
-    obstack_free (&input_stack, next); /* people might leave garbage on it. */
+    obstack_free (current_input, next); /* people might leave garbage on it. */
   next = NULL;
   return ret;
 }
+
+
+/*--------------------------------------------------------------------------.
+| The function push_wrapup () pushes a string on the wrapup stack.  When    |
+| he normal input stack gets empty, the wrapup stack will become the input  |
+| stack, and push_string () and push_file () will operate on wrapup_stack.  |
+| Push_wrapup should be done as push_string (), but this will suffice, as   |
+| long as arguments to m4_m4wrap () are moderate in size.                   |
+`--------------------------------------------------------------------------*/
+void
+push_wrapup (const char *s)
+{
+  input_block *i = (input_block *) obstack_alloc (&wrapup_stack,
+                                                  sizeof (struct input_block));
+  i->prev = wsp;
+
+  i->funcs = &string_funcs;
+
+  i->u.u_s.start = obstack_copy0 (&wrapup_stack, s, strlen (s));
+  i->u.u_s.current = i->u.u_s.start;
+
+  wsp = i;
+}
+
 
 
 /*-------------------------------------------------------------------------.
@@ -530,10 +563,29 @@ pop_input (void)
   if (isp->funcs->clean_func != NULL)
     (*isp->funcs->clean_func)();
 
-  obstack_free (&input_stack, isp);
+  obstack_free (current_input, isp);
   next = NULL;                  /* might be set in push_string_init () */
 
   isp = tmp;
+}
+
+/*------------------------------------------------------------------------.
+| To switch input over to the wrapup stack, main () calls pop_wrapup ().  |
+| Since wrapup text can install new wrapup text, pop_wrapup () returns    |
+| FALSE when there is no wrapup text on the stack, and TRUE otherwise.    |
+`------------------------------------------------------------------------*/
+
+boolean
+pop_wrapup (void)
+{
+  if (wsp == NULL)
+    return FALSE;
+
+  current_input = &wrapup_stack;
+  isp = wsp;
+  wsp = NULL;
+
+  return TRUE;
 }
 
 /*-------------------------------------------------------------------.
@@ -736,11 +788,15 @@ input_init (void)
 
   obstack_init (&token_stack);
   obstack_init (&input_stack);
+  obstack_init (&wrapup_stack);
+
+  current_input = &input_stack;
 
   obstack_1grow (&token_stack, '\0');
   token_bottom = obstack_finish (&token_stack);
 
   isp = NULL;
+  wsp = NULL;
   next = NULL;
 
   start_of_input_line = FALSE;

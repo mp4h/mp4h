@@ -47,6 +47,7 @@ src/mp4h.c
 src/mp4h.h
 src/output.c
 src/path.c
+src/qqq.wml
 src/symtab.c
 src/version.c
 tests/Makefile

@@ -10,6 +10,18 @@
 
   Changes between 0.7.1 and 0.7.0:
 
+    *) Fix escaped quotes in attributes (13-Feb-2000):
+       [Denis Barbier]
+
+    *) Fix expansion of malformed tags (13-Feb-2000):
+       When an opening angle is followed by a valid name, which is
+       neither followed by a space nor a closing angle, this rag must
+       be written verbatim. For instance, <a+1> was expanded into <a>+1>.
+       [Denis Barbier]
+
+    *) Add tags: <capitalize> <at-end-of-file> <eval> (13-Feb-2000):
+       [Denis Barbier]
+
     *) Allow spaces in variable assignments (13-Feb-2000):
        Constructs like <set-var i = 0> are now parsed like <set-var i=0>.
        [Denis Barbier]

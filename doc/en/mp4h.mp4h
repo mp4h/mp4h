@@ -417,7 +417,7 @@ Retourne <true> si la variable existe, et rien sinon.
 
 <tag:description increment>
 <var nom>
-[amount=<var valeur>]
+[by=<var valeur>]
 </tag:description>
 
 <para>
@@ -426,7 +426,7 @@ défaut est 1.
 </para>
 
 <attributes:description>
-<attributes:item "amount=<var valeur>">
+<attributes:item "by=<var valeur>">
 Spécifie la valeur de l'incrément.
 </attributes:description>
 
@@ -434,12 +434,12 @@ Spécifie la valeur de l'incrément.
 <set-var i=10>
 <get-var i>
 <increment i><get-var i>
-<increment i amount="-3"><get-var i>
+<increment i by="-3"><get-var i>
 </example>
 
 <tag:description decrement>
 <var nom>
-[amount=<var valeur>]
+[by=<var valeur>]
 </tag:description>
 
 <para>
@@ -448,7 +448,7 @@ défaut de 1.
 </para>
 
 <attributes:description>
-<attributes:item "amount=<var valeur>">
+<attributes:item "by=<var valeur>">
 Spécifie la valeur qui est soustraite à la variable
 </attributes:description>
 
@@ -456,7 +456,7 @@ Spécifie la valeur qui est soustraite à la variable
 <set-var i=10>
 <get-var i>
 <decrement i><get-var i>
-<decrement i amount="3"><get-var i>
+<decrement i by="3"><get-var i>
 </example>
 
 <tag:description copy-var>

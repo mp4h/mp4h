@@ -350,7 +350,8 @@ void push_file __P ((FILE *, const char *));
 void push_macro __P ((builtin_func *, boolean));
 struct obstack *push_string_init __P ((void));
 const char *push_string_finish __P ((read_type));
-void reallocate_current_obs __P ((const char *));
+void push_wrapup __P ((const char *));
+boolean pop_wrapup __P ((void));
 
 /* read a file verbatim */
 void read_file_verbatim __P ((struct obstack *));

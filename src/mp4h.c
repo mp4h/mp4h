@@ -253,7 +253,7 @@ main (int argc, char *const *argv, char *const *envp)
   program_name = argv[0];
   error_print_progname = print_program_name;
 
-  /* setlocale (LC_ALL, ""); */
+  setlocale (LC_ALL, "");
   setlocale (LC_NUMERIC, "C");
 
   debug_init ();
@@ -485,6 +485,11 @@ main (int argc, char *const *argv, char *const *envp)
         expand_input ();
       }
 #undef NEXTARG
+
+  /* Now handle wrapup text.  */
+  
+  while (pop_wrapup ())
+    expand_input ();
 
   if (frozen_file_to_write)
     produce_frozen_state (frozen_file_to_write);

@@ -108,6 +108,7 @@ DECLARE (mp4h_or);
   /*  string functions  */
 DECLARE (mp4h_downcase);
 DECLARE (mp4h_upcase);
+DECLARE (mp4h_capitalize);
 DECLARE (mp4h_string_length);
 DECLARE (mp4h_substring);
 DECLARE (mp4h_subst_in_string);
@@ -119,6 +120,7 @@ DECLARE (mp4h_string_neq);
 DECLARE (mp4h_char_offsets);
 DECLARE (mp4h_set_regexp_syntax);
 DECLARE (mp4h_get_regexp_syntax);
+DECLARE (mp4h_eval);
 
   /*  variable functions  */
 DECLARE (mp4h_get_var);
@@ -232,6 +234,7 @@ builtin_tab[] =
   { "string-length",    FALSE,    TRUE,   mp4h_string_length },
   { "downcase",         FALSE,    TRUE,   mp4h_downcase },
   { "upcase",           FALSE,    TRUE,   mp4h_upcase },
+  { "capitalize",       FALSE,    TRUE,   mp4h_capitalize },
   { "substring",        FALSE,    TRUE,   mp4h_substring },
   { "subst-in-string",  FALSE,    TRUE,   mp4h_subst_in_string },
   { "subst-in-var",     FALSE,    TRUE,   mp4h_subst_in_var },
@@ -242,6 +245,7 @@ builtin_tab[] =
   { "char-offsets",     FALSE,    TRUE,   mp4h_char_offsets },
   { "set-regexp-syntax",FALSE,    TRUE,   mp4h_set_regexp_syntax },
   { "get-regexp-syntax",FALSE,    TRUE,   mp4h_get_regexp_syntax },
+  { "eval"             ,FALSE,    TRUE,   mp4h_eval },
   
       /*  variable functions  */
   { "get-var",          FALSE,    TRUE,   mp4h_get_var },
@@ -1996,6 +2000,7 @@ updowncase (struct obstack *obs, int argc, token_data **argv, boolean upcase)
             *cp = tolower (*cp);
         }
       obstack_grow (obs, text, strlen (text));
+      xfree (text);
     }
 }
 
@@ -2010,6 +2015,39 @@ mp4h_upcase (MP4H_BUILTIN_ARGS)
 {
   updowncase (obs, argc, argv, TRUE);
 }
+
+static void
+mp4h_capitalize (MP4H_BUILTIN_ARGS)
+{
+  char *text;
+  register char *cp;
+  register int i;
+  boolean next;
+
+  if (argc == 1)
+    return;
+
+  for (i=1; i<argc; i++)
+    {
+      if (i > 1)
+        obstack_1grow (obs, ' ');
+
+      next = TRUE;
+      text = xstrdup (ARG (i));
+      for (cp = text; *cp != '\0'; cp++)
+        {
+          if (next)
+            *cp = toupper (*cp);
+          if (isspace (*cp))
+            next = TRUE;
+          else
+            next = FALSE;
+        }
+      obstack_grow (obs, text, strlen (text));
+      xfree (text);
+    }
+}
+
 
 /*---------------------------------------------------------------.
 | Extracts some portion of a string.  Optional attributes are    |
@@ -2542,6 +2580,29 @@ mp4h_get_regexp_syntax (MP4H_BUILTIN_ARGS)
     }
 }
 
+/*----------------------------------------.
+| Remove quotes and evaluate attributes.  |
+`----------------------------------------*/
+static void
+mp4h_eval (MP4H_BUILTIN_ARGS)
+{
+  char *cp;
+
+  if (bad_argc (argv[0], argc, 2, 0))
+    return;
+
+  while (*ARG (1) == CHAR_LQUOTE || *ARG (1) == CHAR_BGROUP)
+    (TOKEN_DATA_TEXT (argv[1]))++;
+  
+  for (cp = ARG (argc-1) + strlen (ARG (argc-1)); ; cp--)
+    {
+      if (*cp != CHAR_RQUOTE)
+        break;
+      *cp = '\0';
+    }
+  dump_args (obs, argc, argv, "");
+}
+
 
 /* Operation on variables: define, undefine, search, insert,...
    Variables are either strings or array of strings.  */
@@ -2603,17 +2664,6 @@ generic_variable (struct obstack *obs, int argc, token_data **argv,
             ptr_index = strchr (ARG (i), ']');
             if (ptr_index != NULL && *(ptr_index-1) != '[')
               {
-                if (verbatim)
-                  {
-                    obstack_grow (obs, "<set-var ", 9);
-                    obstack_grow (obs, ARG (i), strlen (ARG (i)));
-                    obstack_1grow (obs, '=');
-                    obstack_1grow (obs, CHAR_LQUOTE);
-                    obstack_grow (obs, value, strlen (value));
-                    obstack_1grow (obs, CHAR_RQUOTE);
-                    obstack_1grow (obs, '>');
-                    continue;
-                  }
                 *ptr_index = '\0';
                 ptr_index = strchr (ARG (i), '[');
                 if (!ptr_index)
@@ -2839,14 +2889,14 @@ mp4h_increment (MP4H_BUILTIN_ARGS)
   int value, incr;
   symbol *var;
   char buf[128];
-  const char *amount;
+  const char *by;
 
-  amount = predefined_attribute ("amount", &argc, argv, TRUE);
+  by = predefined_attribute ("by", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!amount)
-    amount = "1";
+  if (!by)
+    by = "1";
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -2856,7 +2906,7 @@ mp4h_increment (MP4H_BUILTIN_ARGS)
     return;
   if (!numeric_arg (argv[0], SYMBOL_TEXT (var), TRUE, &value))
     return;
-  if (!numeric_arg (argv[0], amount, TRUE, &incr))
+  if (!numeric_arg (argv[0], by, TRUE, &incr))
     return;
 
   if (SYMBOL_TYPE (var) == TOKEN_TEXT)
@@ -2872,14 +2922,14 @@ mp4h_decrement (MP4H_BUILTIN_ARGS)
   int value, incr;
   symbol *var;
   char buf[128];
-  const char *amount;
+  const char *by;
 
-  amount = predefined_attribute ("amount", &argc, argv, TRUE);
+  by = predefined_attribute ("by", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!amount)
-    amount = "1";
+  if (!by)
+    by = "1";
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -2889,7 +2939,7 @@ mp4h_decrement (MP4H_BUILTIN_ARGS)
     return;
   if (!numeric_arg (argv[0], SYMBOL_TEXT (var), TRUE, &value))
     return;
-  if (!numeric_arg (argv[0], amount, TRUE, &incr))
+  if (!numeric_arg (argv[0], by, TRUE, &incr))
     return;
 
   if (SYMBOL_TYPE (var) == TOKEN_TEXT)
