@@ -1,3 +1,9 @@
+mp4h (1.1.2-3) unstable; urgency=low
+
+  * Fix broken original tarball, it differed from 1.1.2-1
+
+ -- Denis Barbier <barbier@debian.org>  Thu, 15 Feb 2001 22:57:22 +0100
+
 mp4h (1.1.2-2) unstable; urgency=low
 
   * Fix another bug with some conditionals: <ifeq>, <ifneq>

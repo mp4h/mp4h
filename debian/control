@@ -1,8 +1,8 @@
 Source: mp4h
 Section: web
 Priority: optional
-Maintainer: Denis Barbier <barbier@imacs.polytechnique.fr>
-Standards-Version: 3.2.1
+Maintainer: Denis Barbier <barbier@debian.org>
+Standards-Version: 3.5.0
 Build-Depends: debhelper, tidy
 
 Package: mp4h
