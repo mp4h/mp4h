@@ -68,23 +68,23 @@ typedef struct {
 
 __BEGIN_DECLS
 extern int lt_dlinit LTDL_PARAMS((void));
-extern int lt_dlpreload LTDL_PARAMS((const lt_dlsymlist *preloaded));
-extern int lt_dlpreload_default LTDL_PARAMS((const lt_dlsymlist *preloaded));
+extern int lt_dlpreload LTDL_PARAMS((const lt_dlsymlist *));
+extern int lt_dlpreload_default LTDL_PARAMS((const lt_dlsymlist *));
 extern int lt_dlexit LTDL_PARAMS((void));
-extern lt_dlhandle lt_dlopen LTDL_PARAMS((const char *filename));
-extern lt_dlhandle lt_dlopenext LTDL_PARAMS((const char *filename));
-extern int lt_dlclose LTDL_PARAMS((lt_dlhandle handle));
-extern lt_ptr_t lt_dlsym LTDL_PARAMS((lt_dlhandle handle, const char *name));
+extern lt_dlhandle lt_dlopen LTDL_PARAMS((const char *));
+extern lt_dlhandle lt_dlopenext LTDL_PARAMS((const char *));
+extern int lt_dlclose LTDL_PARAMS((lt_dlhandle));
+extern lt_ptr_t lt_dlsym LTDL_PARAMS((lt_dlhandle, const char *));
 extern const char *lt_dlerror LTDL_PARAMS((void));
-extern int lt_dladdsearchdir LTDL_PARAMS((const char *search_dir));
-extern int lt_dlsetsearchpath LTDL_PARAMS((const char *search_path));
+extern int lt_dladdsearchdir LTDL_PARAMS((const char *));
+extern int lt_dlsetsearchpath LTDL_PARAMS((const char *));
 extern const char *lt_dlgetsearchpath LTDL_PARAMS((void));
 
 extern const lt_dlsymlist lt_preloaded_symbols[];
 #define LTDL_SET_PRELOADED_SYMBOLS() lt_dlpreload_default(lt_preloaded_symbols)
 
-extern lt_ptr_t (*lt_dlmalloc)LTDL_PARAMS((size_t size));
-extern void (*lt_dlfree)LTDL_PARAMS((lt_ptr_t ptr));
+extern lt_ptr_t (*lt_dlmalloc)LTDL_PARAMS((size_t));
+extern void (*lt_dlfree)LTDL_PARAMS((lt_ptr_t));
 
 __END_DECLS
 
