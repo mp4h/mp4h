@@ -27,8 +27,8 @@
 <section "Introduction">
 
 <para>
-The <mp4h> software is a macro-processor specially designed to deal with
-HTML documents.  It allows powerful programming constructs, with a
+The <mp4h> software is a macro-processor specifically designed to deal
+with HTML documents.  It allows powerful programming constructs, with a
 syntax familiar to HTML authors.
 </para>
 

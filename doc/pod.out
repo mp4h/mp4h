@@ -88,8 +88,7 @@
    <if <get-var verbatim> "" "<tag:V>">
 
 <foreach attr list-attributes>;;;
-<if <get-var attr> <group C_LT_<get-var attr>_GT_>>;;;
- ;;;
+<if <get-var attr> <group C_LT_<get-var attr>_GT_>> ;;;
 </foreach>
 
 =back
@@ -176,6 +175,12 @@
 </define-tag>
 <set-eol-comment ";;;">
 
+<define-tag pseudo-func>;;;
+<set-var liste-funcs="%Aattributes">;;;
+<foreach func liste-funcs>;;;
+  <subst-in-string "=LT=define-tag <get-var func>>=LT=/define-tag>" "=LT=" "<">;;;
+</foreach>;;;
+</define-tag>
 ;;;
 ;;;    Verbatim code
 ;;;
