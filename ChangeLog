@@ -8,7 +8,7 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 1.2.3 and ???:
+  Changes between 1.2.3 and 1.2.4:
 
     *) Run autoconf in libltdl/ subdirectory (02-Mar-2002):
        The toplevel configure script could fail due to autoconf

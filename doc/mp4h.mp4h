@@ -1,10 +1,10 @@
 ;;;
 ;;;  mp4h.mp4h -- Documentation for mp4h
-;;;  Copyright 2000-2001, Denis Barbier   <barbier@imacs.polytechnique.fr>
+;;;  Copyright 2000-2002, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
 <set-var package=mp4h />
-<set-var version=1.2.3 />
+<set-var version=1.2.4 />
 <set-var title="mp4h - Macro Processor for HTML Documents" />
 
 <defvar srcdir "." />
