@@ -10,6 +10,9 @@
 
   Changes between 0.9.5 and SNAP:
 
+    *) Add -X flag to test parser (03-Jun-2000):
+       [Denis Barbier]
+
     *) Fix compilation bug in src/builtin.c (01-Jun-2000):
        [<gaa@ulticom.com>]
 
