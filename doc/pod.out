@@ -1,7 +1,4 @@
 
-<set-var package=mp4g>
-<set-var version="@LONG_VERSION@">
-
 ;;;
 ;;;    Sectioning
 ;;;
@@ -33,6 +30,10 @@
 =head1 NAME
 
 <get-var title>
+
+=head1 VERSION
+
+<get-var version>
 
 </define-tag>
 

@@ -331,20 +331,11 @@ struct token_data
 #define TOKEN_DATA_FUNC_TRACED(Td)      ((Td)->u.u_f.traced)
 
 /* The status of processing. */
-#if 0
-enum read_type
-{
-  READ_NORMAL,                  /* normal expansion of macros */
-  READ_ATTRIBUTE,               /* when reading macro arguments */
-  READ_VERB_ATTR,               /* attributes are not expanded */
-  READ_VERBATIM,                /* macros are not expanded */
-};
-#endif
-
 #define READ_NORMAL    1                     /* normal expansion of macros */
 #define READ_ATTRIBUTE (READ_NORMAL << 1)    /* when reading macro arguments */
 #define READ_VERB_ATTR (READ_ATTRIBUTE << 1) /* attributes are not expanded */
 #define READ_VERBATIM  (READ_VERB_ATTR << 1) /* macros are not expanded */
+#define READ_BODY      (READ_VERBATIM << 1)  /* when reading body function */
 
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
@@ -536,8 +527,8 @@ void define_builtin __P ((const char *, const builtin *, symbol_lookup,
                           boolean));
 void set_regexp_extended __P ((boolean));
 void init_break __P ((void));
-void define_user_macro __P ((const char *, const char *, symbol_lookup,
-                             boolean, boolean));
+void define_user_macro __P ((const char *, char *, symbol_lookup,
+                             boolean, boolean, boolean));
 void undivert_all __P ((void));
 void expand_user_macro __P ((struct obstack *, symbol *, int, token_data **,
                              read_type));

@@ -978,7 +978,7 @@ next_token (token_data *td, read_type expansion)
                 {
                   ch = next_char ();
                   obstack_1grow (&token_stack, ch);
-                  while ((ch = next_char ()) != CHAR_EOF && (ch == '-'))
+                  while ((ch = next_char ()) != CHAR_EOF && (!IS_SPACE(ch)))
                     {
                       obstack_1grow (&token_stack, ch);
                     }
@@ -1011,6 +1011,18 @@ next_token (token_data *td, read_type expansion)
             }
           else
             type = TOKEN_SIMPLE;        /* escape before eof */
+        }
+      else if (expansion & READ_BODY)
+        {
+          obstack_1grow (&token_stack, ch);
+          while ((ch = next_char ()) != CHAR_EOF && ! (IS_ESCAPE(ch)))
+            {
+              obstack_1grow (&token_stack, ch);
+            }
+          if (ch != CHAR_EOF)
+            unget_input(ch);
+
+          type = TOKEN_STRING;
         }
       else if (IS_ALPHA(ch))
         {

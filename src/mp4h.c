@@ -229,8 +229,8 @@ static const struct option long_options[] =
   {"silent", no_argument, NULL, 'Q'},
   {"synclines", no_argument, NULL, 's'},
 
-  {"help", no_argument, &show_help, 1},
-  {"version", no_argument, &show_version, 1},
+  {"help", no_argument, NULL, 'h'},
+  {"version", no_argument, NULL, 'V'},
 
   /* These are somewhat troublesome.  */
   { "define", required_argument, NULL, 'D' },
@@ -240,7 +240,7 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
-#define OPTSTRING "B:D:EF:H:I:L:N:QR:S:U:cd::el:o:st:"
+#define OPTSTRING "B:D:EF:H:I:L:N:QR:S:U:cd::ehl:o:st:V"
 
 int
 main (int argc, char *const *argv, char *const *envp)
@@ -364,6 +364,15 @@ main (int argc, char *const *argv, char *const *envp)
       case 's':
         sync_output = 1;
         break;
+
+      case 'V':
+        show_version = 1;
+        break;
+
+      case 'h':
+        show_help = 1;
+        break;
+
       }
 
   if (show_version)

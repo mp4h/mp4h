@@ -8,6 +8,11 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.5.4 and 0.5.5:
+
+    *) Fix ``whitespace=delete'' attribute (30-Jan-2000):
+       [Denis Barbier]
+
   Changes between 0.5.3 and 0.5.4:
 
     *) Documentation available in POD format (06-Dec-1999):

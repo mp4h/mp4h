@@ -48,7 +48,8 @@ SUBDIRS = \
    var-case \
    get-file-properties \
    directory-contents \
-   file-exists
+   file-exists \
+   misc
 
 #   common tools
 RM      = rm -f

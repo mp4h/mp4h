@@ -379,17 +379,71 @@ init_break (void) {
 `-------------------------------------------------------------------------*/
 
 void
-define_user_macro (const char *name, const char *text, symbol_lookup mode,
-    boolean container, boolean expand_args)
+define_user_macro (const char *name, char *text, symbol_lookup mode,
+    boolean container, boolean expand_args, boolean space_delete)
 {
   symbol *s;
+  char *begin, *cp;
+  int offset, bracket_level = 0;
 
   s = lookup_symbol (name, mode);
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
     xfree (SYMBOL_TEXT (s));
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
-  SYMBOL_TEXT (s) = xstrdup (text);
+  if (space_delete)
+    {
+      for (begin=text; *begin != '\0' && IS_SPACE(*begin); begin++) ;
+      SYMBOL_TEXT (s) = xstrdup (begin);
+      offset = 0;
+      for (cp=SYMBOL_TEXT (s); *cp != '\0'; cp++)
+        {
+          switch (*cp)
+            {
+              case '<':
+                bracket_level++;
+                *(cp-offset) = *cp;
+                break;
+
+              case '>':
+                bracket_level--;
+                *(cp-offset) = *cp;
+                break;
+
+              case '\\':
+                if (offset>0)
+                  *(cp-offset) = *cp;
+                cp++;
+                if (*cp == '\0')
+                  cp--;
+                else
+                  *(cp-offset) = *cp;
+                break;
+
+              case '\n':
+                if (bracket_level>0)
+                  *(cp-offset) = *cp;
+                else
+                  {
+                  offset++;
+                  while (*(cp+1) == ' ' || *(cp+1) == '\t')
+                    {
+                      cp++;
+                      offset++;
+                    }
+                  }
+                break;
+
+              default:
+                *(cp-offset) = *cp;
+                break;
+            }
+        }
+      *(cp-offset) = '\0';
+    }
+  else
+    SYMBOL_TEXT (s) = xstrdup (text);
+
   SYMBOL_TRACED (s)      = FALSE;
   SYMBOL_SHADOWED (s)    = FALSE;
   SYMBOL_CONTAINER (s)   = container;
@@ -1196,9 +1250,10 @@ static void
 mp4h_define_tag (MP4H_BUILTIN_ARGS)
 {
   const builtin *bp;
-  const char *attributes, *endtag;
+  const char *attributes, *endtag, *whitespace;
   boolean expand_args = TRUE;
   boolean container = FALSE;
+  boolean space_delete = FALSE;
 
   attributes = predefined_attribute ("attributes", &argc, argv, TRUE, TRUE);
   if (attributes && strcmp (attributes, "verbatim") == 0)
@@ -1206,6 +1261,9 @@ mp4h_define_tag (MP4H_BUILTIN_ARGS)
   endtag = predefined_attribute ("endtag", &argc, argv, TRUE, TRUE);
   if (endtag && strcmp (endtag, "required") == 0)
     container = TRUE;
+  whitespace = predefined_attribute ("whitespace", &argc, argv, TRUE, TRUE);
+  if (whitespace && strcmp (whitespace, "delete") == 0)
+    space_delete = TRUE;
 
   if (bad_argc (argv[0], argc, 2, 3))
     return;
@@ -1215,14 +1273,16 @@ mp4h_define_tag (MP4H_BUILTIN_ARGS)
 
   if (argc == 1)
     {
-      define_user_macro (ARG (1), "", SYMBOL_INSERT, container, expand_args);
+      define_user_macro (ARG (1), "", SYMBOL_INSERT, container,
+              expand_args, space_delete);
       return;
     }
 
   switch (TOKEN_DATA_TYPE (argv[argc]))
     {
     case TOKEN_TEXT:
-      define_user_macro (ARG (1), ARGBODY, SYMBOL_INSERT, container, expand_args);
+      define_user_macro (ARG (1), ARGBODY, SYMBOL_INSERT, container,
+              expand_args, space_delete);
       break;
 
     case TOKEN_FUNC:
@@ -1323,7 +1383,7 @@ mp4h_let (MP4H_BUILTIN_ARGS)
       break;
     case TOKEN_TEXT:
       define_user_macro (ARG (1), SYMBOL_TEXT (s), SYMBOL_INSERT,
-                         SYMBOL_CONTAINER (s), SYMBOL_EXPAND_ARGS (s));
+            SYMBOL_CONTAINER (s), SYMBOL_EXPAND_ARGS (s), FALSE);
       break;
 
     default:

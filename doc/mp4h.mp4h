@@ -50,6 +50,9 @@ is derived from GNU <m4> 1.4n, which is a development version.
 [endtag=required]
 [whitespace=delete]
 </tag:description>
+Avec whitespace=delete
+  * les espaces au debut et a la fin sont supprimes
+  * les sauts de ligne sont supprimes
 
 <para>
 This function defines a new tag.

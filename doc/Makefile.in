@@ -9,9 +9,11 @@ top_srcdir      = @top_srcdir@
 srcdir          = @srcdir@
 tmpdir          = @tmpdir@
 VPATH           = @srcdir@
-LONG_VERSION    = @LONG_VERSION@
 
 RM              = rm -f
+
+SHTOOL          = $(top_srcdir)/shtool
+VERSION_TOOL    = $(SHTOOL) version
 
 # ------------------------------------------------
 #   THE DEFAULT TARGETS
@@ -24,11 +26,13 @@ all: mp4h.html mp4h.1
 # ------------------------------------------------
 
 mp4h.html: mp4h.mp4h html.out ../src/mp4h
-	sed -e 's|\@LONG_VERSION\@|$(LONG_VERSION)|g' < mp4h.mp4h \
+	V=`$(VERSION_TOOL) -l c -d long ../src/version.c`;\
+	sed -e "s|@LONG_VERSION\@|$$V|g" < mp4h.mp4h \
 	| ../src/mp4h -D format=html > $@
 
 mp4h.pod: mp4h.mp4h pod.out ../src/mp4h
-	sed -e 's|\@LONG_VERSION\@|$(LONG_VERSION)|g' < mp4h.mp4h \
+	V=`$(VERSION_TOOL) -l c -d long ../src/version.c`;\
+	sed -e "s|@LONG_VERSION\@|$$V|g" < mp4h.mp4h \
 	| ../src/mp4h -D format=pod \
 	| sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
 

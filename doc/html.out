@@ -1,7 +1,4 @@
 
-<set-var package=mp4g>
-<set-var version="@LONG_VERSION@">
-
 ;;;
 ;;;    Sectioning
 ;;;
@@ -38,6 +35,7 @@
 <body>
 
 <h1><get-var title></h1>
+<p>This documentation describes MP4H version <get-var version></p>
 </define-tag>
 
 ;;;

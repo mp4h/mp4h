@@ -36,13 +36,16 @@
 static void expand_macro __P ((symbol *, read_type));
 static void expand_unknown_macro __P ((char *, read_type));
 static void expand_token __P ((struct obstack *, read_type, token_type, token_data *));
-static void collect_body __P ((symbol *, boolean, struct obstack *));
+static void collect_body __P ((symbol *, struct obstack *));
 
 /* Current recursion level in expand_macro ().  */
 int expansion_level = 0;
 
 /* The number of the current call of expand_macro ().  */
 static int macro_call_id = 0;
+
+/* global variable to abort expansion */
+static boolean internal_abort = FALSE;
 
 /*----------------------------------------------------------------------.
 | This function read all input, and expands each token, one at a time.  |
@@ -185,8 +188,8 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
           break;
 
         case TOKEN_EOF:
-          MP4HERROR ((EXIT_FAILURE, 0,
-                    _("ERROR: EOF in argument list")));
+          internal_abort = TRUE;
+          return FALSE;
           break;
 
         case TOKEN_BGROUP:
@@ -265,6 +268,12 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
               argument if it is empty.  */
           last_addr = argptr->next_free;
           more_args = expand_argument (arguments, expansion, &td);
+          if (internal_abort)
+            {
+              MP4HERROR ((EXIT_FAILURE, 0,
+                    _("ERROR: EOF when reading argument of the `%s' tag"),
+                        SYMBOL_NAME(sym)));
+            }
           tdp = (token_data *)
             obstack_copy (arguments, (voidstar) &td, sizeof (td));
           obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
@@ -283,7 +292,7 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
 | Collect the body of a container tag. No expansion is performed.  |
 `-----------------------------------------------------------------*/
 static void
-collect_body (symbol *sym, boolean whitespace, struct obstack *argptr)
+collect_body (symbol *sym, struct obstack *argptr)
 {
   token_type t;
   token_data td;
@@ -295,7 +304,7 @@ collect_body (symbol *sym, boolean whitespace, struct obstack *argptr)
   obstack_init (&body);
   while (1)
     {
-      t = next_token (&td, READ_VERBATIM);
+      t = next_token (&td, READ_BODY);
       text = TOKEN_DATA_TEXT (&td);
       switch (t)
         {                                /* TOKSW */
@@ -311,13 +320,9 @@ collect_body (symbol *sym, boolean whitespace, struct obstack *argptr)
           break;
 
         case TOKEN_SIMPLE:
+        case TOKEN_SPACE:
         case TOKEN_STRING:
           shipout_text (&body, text, strlen (text));
-          break;
-
-        case TOKEN_SPACE:
-          if (!whitespace)
-              shipout_text (&body, text, strlen (text));
           break;
 
         case TOKEN_WORD:
@@ -436,7 +441,6 @@ expand_macro (symbol *sym, read_type expansion)
   const char *expanded;
   boolean traced;
   int my_call_id;
-  const char *space_delete;
   read_type attr_expansion;
 
   expansion_level++;
@@ -471,13 +475,7 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
 
   if (SYMBOL_CONTAINER (sym))
     {
-      space_delete = predefined_attribute ("whitespace", &argc, argv,
-                                           TRUE, FALSE);
-      if (space_delete && strcmp (space_delete, "delete") == 0)
-          collect_body (sym, TRUE, &save_argptr);
-      else
-          collect_body (sym, FALSE, &save_argptr);
-      
+      collect_body (sym, &save_argptr);
       argv = (token_data **) obstack_finish (&save_argptr);
     }
 
