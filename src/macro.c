@@ -164,6 +164,8 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
         case TOKEN_SPACE:
         case TOKEN_SIMPLE:
           text = TOKEN_DATA_TEXT (&td);
+          if (*text == '"' && group_level == 0)
+              in_string = !in_string;
           if ((IS_SPACE(*text) || IS_CLOSE(*text))
                && !in_string && (group_level == 0))
             {

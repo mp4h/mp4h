@@ -1,5 +1,5 @@
 ;;;
-;;;  mp4h.pod -- Documentation for mp4h
+;;;  mp4h.mp4h -- Documentation for mp4h
 ;;;
 
 <set-var package=mp4h>
@@ -15,7 +15,8 @@
 
 <para>
 The <mp4h> program is a macro processor specifically designed for HTML
-documents.  One can define and use its own tags very easily.
+documents.  It has some powerful programming features, with a syntax
+familiar to HTML writers.
 </para>
 
 <para>
@@ -47,6 +48,7 @@ is derived from GNU <m4> 1.4n, which is a development version.
 <var name>
 [attributes=verbatim]
 [endtag=required]
+[whitespace=delete]
 </tag:description>
 
 <para>
@@ -165,12 +167,14 @@ This function defines a new tag.
 <var string>
 <var regexp>
 [<var replacement>]
+[singleline=true]
 </tag:description>
 
 <tag:description subst-in-var>
 <var name>
 <var regexp>
 [<var replacement>]
+[singleline=true]
 </tag:description>
 
 <tag:description string-eq>
@@ -469,11 +473,11 @@ This function defines a new tag.
 When a tag name is not followed by a space or a closing bracket,
 expansion is wrong.  For instance, this comment
 <pre>
-    &lt;!--this is a comment --&gt;
+    <html:comment>this is a comment</html:comment>
 </pre>
 will cause trouble whereas this one
 <pre>
-    &lt;!-- this is a comment --&gt;
+    <html:comment> this is a comment</html:comment>
 </pre>
 is correctly parsed.
 </para>

@@ -1,0 +1,110 @@
+
+<set-var package=mp4g>
+<set-var version="@LONG_VERSION@">
+
+;;;
+;;;    Sectioning
+;;;
+<define-tag section>=head1 <upcase %attributes>
+</define-tag>
+<define-tag subsection>=head2 %attributes
+</define-tag>
+
+;;;
+;;;    Common names
+;;;
+<define-tag program>B_LT_%attributes_GT_</define-tag>
+<define-tag mp4h><program mp4h></define-tag>
+<define-tag WML><program WML></define-tag>
+<define-tag m4><program m4></define-tag>
+<define-tag Meta-HTML><program Meta-HTML></define-tag>
+
+;;;
+;;;    Alias for writing URLs
+;;;
+<define-tag URL>C_LT_E_LT_lt_GT_URL:%attributesE_LT_gt_GT__GT_</define-tag>
+
+;;;
+;;;    Header of the POD document
+;;;
+<define-tag header>
+=pod
+
+=head1 NAME
+
+<get-var title>
+
+</define-tag>
+
+;;;
+;;;    Footer of the POD document
+;;;
+<define-tag footer>
+=cut
+</define-tag>
+
+;;;
+;;;    Description of MP4H tags
+;;;
+<define-tag tag:description endtag=required>;;;
+<preserve complex>;;;
+<preserve verbatim>;;;
+<set-var complex=*>;;;
+<set-var verbatim=*>;;;
+<set-var %attributes>;;;
+<set-var list-attributes[]="%body">;;;
+
+=over 2
+
+=item * %0 ;;;
+<set-var _i="%0"><subst-in-var _i . " ">;;;
+<match "                              " <get-var _i> action=delete>;;;
+<if <get-var complex> - "End Tag"> <if <get-var verbatim> - "Verbatim Attributes">
+
+<foreach attr list-attributes>;;;
+<if <get-var attr> <group C_LT_<get-var attr>_GT_ " ">>;;;
+</foreach>
+
+=back
+<restore verbatim>;;;
+<restore complex>;;;
+</define-tag>
+
+<define-tag var>I_LT_%attributes_GT_</define-tag>
+;;;
+;;;    Paragraphs
+;;;
+<define-tag para endtag=required>
+
+%body
+
+</define-tag>
+
+;;;
+;;;    Example of MP4H code
+;;;
+<define-tag example endtag=required attributes=verbatim>
+<set-var-verbatim verb-body=%ubody>;;;
+<subst-in-var verb-body "<" "_LT_">;;;
+<subst-in-var verb-body ">" "_GT_">;;;
+Example:
+
+    <get-var verb-body>
+    
+Output:
+
+    %body
+
+</define-tag>
+
+;;;
+;;;    HTML Comments
+;;;
+<define-tag html:comment endtag=required>
+_LT_!--%body--_GT_
+</define-tag>
+
+<define-tag pre endtag=required>
+%body
+</define-tag>
+

@@ -1,0 +1,8 @@
+<set-var a="abc">
+<set-regexp-syntax type=basic>
+<subst-in-var a "\\([a-z]\\)" "\\1 ">
+<get-var a>
+<set-var a="abc">
+<set-regexp-syntax>
+<subst-in-var a "([a-z])" "\\1 ">
+<get-var a>

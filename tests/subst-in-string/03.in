@@ -1,0 +1,3 @@
+<set-var a="abc\ndef\nghi">
+<subst-in-string <get-var a> ".$" "">
+<subst-in-string <get-var a> ".$" "" singleline=true>

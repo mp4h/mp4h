@@ -17,7 +17,7 @@ RM              = rm -f
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
 
-all: mp4h.html
+all: mp4h.html mp4h.1
 
 # ------------------------------------------------
 #   DOCUMENTATION
@@ -26,6 +26,18 @@ all: mp4h.html
 mp4h.html: mp4h.mp4h html.out ../src/mp4h
 	sed -e 's|\@LONG_VERSION\@|$(LONG_VERSION)|g' < mp4h.mp4h \
 	| ../src/mp4h -D format=html > $@
+
+mp4h.pod: mp4h.mp4h pod.out ../src/mp4h
+	sed -e 's|\@LONG_VERSION\@|$(LONG_VERSION)|g' < mp4h.mp4h \
+	| ../src/mp4h -D format=pod \
+	| sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
+
+mp4h.1: mp4h.pod
+	pod2man --section=1 \
+            --center="HTML Tools" \
+            --release="HTML Tools" \
+        mp4h.pod > $@
+
 
 # ------------------------------------------------
 #   PROGRAM
@@ -39,7 +51,7 @@ mp4h.html: mp4h.mp4h html.out ../src/mp4h
 # ------------------------------------------------
 
 clean:
-	$(RM) *.html
+	$(RM) *.html *.pod *.1
 
 distclean: clean
 	$(RM) Makefile

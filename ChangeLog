@@ -8,5 +8,18 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.5.3 and 0.5.4:
+
+    *) Documentation available in POD format (06-Dec-1999):
+       [Denis Barbier]
+
+    *) Add ``singleline'' attribute (06-Dec-1999):
+       This attribute changes the behavior of <subst-in-string> and
+       <subst-in-var>.  By default, ^ matches an empty string after a
+       newline and $ an empty string before a newline.  When this
+       attribute is set, ^ only matches the beginning of the string 
+       and $ the end.
+       [Denis Barbier]
+
   mp4h 0.5.3 (30-Nov-1999):
     First public release.

@@ -1,2 +1,2 @@
 Makefile
-*.html
+*.html *.pod *.1

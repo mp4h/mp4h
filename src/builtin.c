@@ -1940,7 +1940,8 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
 | A string is returned.                         |
 `----------------------------------------------*/
 static void
-subst_in_string (struct obstack *obs, int argc, token_data **argv)
+subst_in_string (struct obstack *obs, int argc, token_data **argv,
+        boolean singleline)
 {
   const char *victim;           /* first argument */
   const char *regexp;           /* regular expression */
@@ -1963,7 +1964,10 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv)
   buf.allocated = 0;
   buf.fastmap = NULL;
   buf.translate = NULL;
-  msg = re_compile_pattern (regexp, strlen (regexp), &buf);
+  if (singleline)
+    msg = re_compile_pattern_nl (regexp, strlen (regexp), &buf);
+  else
+    msg = re_compile_pattern (regexp, strlen (regexp), &buf);
 
   if (msg != NULL)
     {
@@ -2026,7 +2030,13 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv)
 static void
 mp4h_subst_in_string (MP4H_BUILTIN_ARGS)
 {
-  subst_in_string (obs, argc, argv);
+  const char *singleline;
+  boolean s;
+
+  singleline = predefined_attribute ("singleline", &argc, argv, FALSE, TRUE);
+  s = (singleline
+       && (*singleline == '\0' || strcmp (singleline, "true") == 0));
+  subst_in_string (obs, argc, argv, s);
 }
 
 /*------------------------------------------------.
@@ -2037,6 +2047,12 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   token_data td;
+  const char *singleline;
+  boolean s;
+
+  singleline = predefined_attribute ("singleline", &argc, argv, FALSE, TRUE);
+  s = (singleline
+       && (*singleline == '\0' || strcmp (singleline, "true") == 0));
 
   if (bad_argc (argv[0], argc, 3, 4))
     return;
@@ -2055,7 +2071,7 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
   obstack_1grow (obs, '=');
   obstack_1grow (obs, CHAR_BGROUP);
   argv[1] = &td;
-  subst_in_string (obs, argc, argv);
+  subst_in_string (obs, argc, argv, s);
   obstack_1grow (obs, CHAR_EGROUP);
   obstack_1grow (obs, '>');
 }
@@ -3269,13 +3285,9 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
         {
           if (unexpanded)
             obstack_1grow (obs, CHAR_LQUOTE);
-          else
-            obstack_1grow (obs, CHAR_BGROUP);
           dump_args (obs, argc, argv, sep);
           if (unexpanded)
             obstack_1grow (obs, CHAR_RQUOTE);
-          else
-            obstack_1grow (obs, CHAR_EGROUP);
 
           if (*text == 'a')
             text += 10;

@@ -92,7 +92,7 @@
 ;;;
 ;;;    Example of MP4H code
 ;;;
-<define-tag example andtag=required attributes=verbatim>
+<define-tag example endtag=required attributes=verbatim>
 <set-var-verbatim verb-body=%ubody>;;;
 <subst-in-var verb-body "&" "&amp;">;;;
 <subst-in-var verb-body "<" "&lt;">;;;
@@ -107,4 +107,9 @@
 </table>
 </define-tag>
 
-
+;;;
+;;;    HTML Comments
+;;;
+<define-tag html:comment endtag=required>
+&lt;!--%body--&gt;
+</define-tag>

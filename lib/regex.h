@@ -1,3 +1,7 @@
+/*
+   This version implements a new routine re_compile_pattern_nl
+   Denis Barbier
+*/
 /* Definitions for data structures and routines for the regular
    expression library, version 0.12.
    Copyright (C) 1985,89,90,91,92,93,95,96,97,98 Free Software Foundation, Inc.
@@ -447,6 +451,9 @@ extern reg_syntax_t re_set_syntax _RE_ARGS ((reg_syntax_t syntax));
    and syntax given by the global `re_syntax_options', into the buffer
    BUFFER.  Return NULL if successful, and an error string if not.  */
 extern const char *re_compile_pattern
+  _RE_ARGS ((const char *pattern, size_t length,
+             struct re_pattern_buffer *buffer));
+extern const char *re_compile_pattern_nl
   _RE_ARGS ((const char *pattern, size_t length,
              struct re_pattern_buffer *buffer));
 

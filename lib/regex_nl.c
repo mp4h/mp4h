@@ -1,3 +1,7 @@
+/*
+   This version implements a new routine re_compile_pattern_nl
+   Denis Barbier
+*/
 /* Extended regular expression matching and search library,
    version 0.12.
    (Implements POSIX draft P1003.2/D11.2, except for some of the
@@ -5536,6 +5540,36 @@ re_compile_pattern (pattern, length, bufp)
 }
 #ifdef _LIBC
 weak_alias (__re_compile_pattern, re_compile_pattern)
+#endif
+
+const char *
+re_compile_pattern_nl (pattern, length, bufp)
+     const char *pattern;
+     size_t length;
+     struct re_pattern_buffer *bufp;
+{
+  reg_errcode_t ret;
+
+  /* GNU code is written to assume at least RE_NREGS registers will be set
+     (and at least one extra will be -1).  */
+  bufp->regs_allocated = REGS_UNALLOCATED;
+
+  /* And GNU code determines whether or not to get register information
+     by passing null for the REGS argument to re_match, etc., not by
+     setting no_sub.  */
+  bufp->no_sub = 0;
+
+  /* Match anchors at newline.  */
+  bufp->newline_anchor = 0;
+
+  ret = regex_compile (pattern, length, re_syntax_options, bufp);
+
+  if (!ret)
+    return NULL;
+  return gettext (re_error_msgid + re_error_msgid_idx[(int) ret]);
+}
+#ifdef _LIBC
+weak_alias (__re_compile_pattern_nl, re_compile_pattern_nl)
 #endif
 
 /* Entry points compatible with 4.2 BSD regex library.  We don't define
