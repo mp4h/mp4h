@@ -9,6 +9,9 @@ top_srcdir      = @top_srcdir@
 srcdir          = @srcdir@
 VPATH           = @srcdir@
 
+prefix          = @prefix@
+datadir         = @datadir@
+
 # ------------------------------------------------
 #   DEFINITIONS
 # ------------------------------------------------
@@ -57,6 +60,9 @@ mp4h: $(OBJECTS) $(LDADD)
 
 ../lib/libmp4h.a:
 	cd ../lib && $(MAKE) libmp4h.a
+
+install:
+	@:
 
 # ------------------------------------------------
 #   CLEANUP

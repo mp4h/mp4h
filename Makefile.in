@@ -13,7 +13,7 @@ VPATH           = @srcdir@
 #   DEFINITIONS
 # ------------------------------------------------
 
-SUBDIRS         = lib src doc tests
+SUBDIRS         = lib src packages doc tests
 SDP             =
 
 #   installation tools
@@ -52,7 +52,7 @@ check: test
 #   INSTALLATION
 # ------------------------------------------------
 
-install: all
+install: all install-recursive
 	$(MKDIR) $(bindir) $(mandir)/man1
 	$(INSTALL_PROGRAM) src/mp4h $(bindir)/mp4h
 	$(INSTALL_DATA) doc/mp4h.1 $(mandir)/man1/mp4h.1

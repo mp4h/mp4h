@@ -64,7 +64,7 @@ RM      = rm -f
 #   THE DEFAULT TARGET
 # ------------------------------------------------
 
-all:
+all install:
 	@:
 
 check: ../src/$(PROGRAM)
