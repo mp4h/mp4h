@@ -11,14 +11,9 @@ config.h.in
 configure
 configure.in
 doc/Makefile.in
-doc/en/Makefile.in
-doc/en/mp4h.mp4h
-doc/fr/Makefile.in
-doc/fr/mp4h.mp4h
 doc/html.out
-doc/lang.en
-doc/lang.fr
 doc/list-tags
+doc/mp4h.mp4h
 doc/pod.out
 doc/texinfo.out
 lib/COPYING.LIB

@@ -8,7 +8,6 @@
 <set-var version=0.9a603 />
 <set-var title="mp4h - A Macro Processeur for HTML Documents" />
 
-<include lang.en />
 <include <get-var format />.out
     alt=<exit status=1
         message="This file has to be compiled with one of the following lines
@@ -56,7 +55,7 @@ development version.
 </para>
 
 <para>
-The <mp4h/> software is not an HTML editor ; its unique goal is to
+The <mp4h/> software is not an HTML editor; its unique goal is to
 provide an easy way to define its own macros inside HTML documents.
 There is no plan to add functionalities to automagically produce valid
 HTML documents, if you want to clean up your code or validate it,
@@ -101,6 +100,27 @@ enter NAME has having VALUE, or empty</option>
 delete builtin COMMAND</option>
 </option-list>
 
+<subsection "Parser features" />
+
+<option-list>
+<option -X --expansion=<optmand NUMBER />>###
+set parser behaviour according to the bits of <optmand NUMBER /></option>
+</option-list>
+
+<para>
+NUMBER is a combination of
+<option-list>
+<option 1>do not parse unknown tags</option>
+<option 2>unknown tags are assumed being simple</option>
+<option 4>trailing star in tag name do not make this tag simple</option>
+<option 8>leave the trailing star in tag name</option>
+<option 16>leave the trailing slash in tag attributes</option>
+<option 1024>suppress warnings about bad nested tags</option>
+<option 2048>suppress warnings about missing trailing slash</option>
+</option-list>
+</para>
+and default value is 0.
+
 <subsection "Limits control" />
 
 <option-list>
@@ -144,6 +164,7 @@ Flags are any of:
 <para>
 The <mp4h/> software is a macro-processor, which means that keywords are
 replaced by other text.  This chapter describes all primitives.
+and default value is 0.
 As <mp4h/> has been specially designed for HTML documents, its syntax is
 very similar to HTML, with tags and attributes.  An important feature
 has no equivalent in HTML: comments until end of line.  All text
@@ -1534,6 +1555,24 @@ This tag does nothing, its body is simply discarded.
 <para>
 Change comment characters.
 </para>
+
+<tag:description set-quotes>
+[<var string /> <var string />]
+[display=visible]
+</tag:description>
+
+<para>
+By default, all characters between "<@[" and "]@>" pairs are read without 
+parsing.  When called without argument, this macro inhibates this
+feature.  When called with two arguments, it redefines begin and end
+delimiters.  Begin delimiter must begin with a left-angle bracket, and
+end delimiter must end with a right-angle bracket.
+</para>
+
+<attributes:description>
+<attributes:item "display=visible" />
+Delimiters are also written into output.
+</attributes:description>
 
 ###
 ###    Debugging

@@ -2,7 +2,7 @@
 1
 2
 3
-4">
+4" />
 <foreach i a>
-<get-var i>
+<get-var i />
 </foreach>

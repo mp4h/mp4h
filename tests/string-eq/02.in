@@ -1,4 +1,4 @@
-<string-eq "foo" "foo" caseless=true>
-<string-eq "foo" "FOO" caseless=true>
-<string-eq "foo" "bar" caseless=true>
-<string-eq "foo" "BAR" caseless=true>
+<string-eq "foo" "foo" caseless=true />
+<string-eq "foo" "FOO" caseless=true />
+<string-eq "foo" "bar" caseless=true />
+<string-eq "foo" "BAR" caseless=true />

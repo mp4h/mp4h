@@ -1,5 +1,5 @@
-<set-var foo=bar>
-<string-eq <get-var foo> "foo">
-<string-eq <get-var foo> "FOO">
-<string-eq <get-var foo> "bar">
-<string-eq <get-var foo> "BAR">
+<set-var foo=bar />
+<string-eq <get-var foo> "foo" />
+<string-eq <get-var foo> "FOO" />
+<string-eq <get-var foo> "bar" />
+<string-eq <get-var foo> "BAR" />

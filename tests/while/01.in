@@ -1,4 +1,4 @@
-<set-var i=5>
-<while <gt <get-var i> 0>>
-<get-var i><decrement i>
+<set-var i=5 />
+<while <gt <get-var i /> 0 />>
+<get-var i /><decrement i />
 </while>

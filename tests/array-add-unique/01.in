@@ -1,6 +1,6 @@
 <set-var a="zero
 one
-two">
-<array-add-unique a three>
-<array-add-unique a one>
-<get-var a>
+two" />
+<array-add-unique a three />
+<array-add-unique a one />
+<get-var a />

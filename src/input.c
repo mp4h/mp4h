@@ -1163,7 +1163,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
               break;
 
             case READ_ATTRIBUTE:
-            case READ_ATTR_VERB:
+            case READ_ATTR_QUOT:
               ch = next_char();
               if (ch == 'n')
                 obstack_1grow (&token_stack, '\n');
@@ -1184,19 +1184,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
               type = TOKEN_STRING;
               break;
 
-            case READ_ATTR_QUOT:
-              ch = next_char();
-              if (ch == '"' && in_string)
-                obstack_1grow (&token_stack, CHAR_QUOTE);
-              else
-                {
-                  obstack_1grow (&token_stack, '\\');
-                  obstack_1grow (&token_stack, ch);
-                }
-
-              type = TOKEN_STRING;
-              break;
-
+            case READ_ATTR_VERB:
             case READ_ATTR_ASIS:
               obstack_1grow (&token_stack, ch);
               ch = next_char();

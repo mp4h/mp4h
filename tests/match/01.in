@@ -1,4 +1,4 @@
-<match "abcdefghij" "def" action=startpos>
-<match "abcdefghij" "d.f" action=startpos>
-<match "abcdefghij" "[fed]+" action=startpos>
-<match "abcdefghij" "[xyz]" action=startpos>
+<match "abcdefghij" "def" action=startpos />
+<match "abcdefghij" "d.f" action=startpos />
+<match "abcdefghij" "[fed]+" action=startpos />
+<match "abcdefghij" "[xyz]" action=startpos />

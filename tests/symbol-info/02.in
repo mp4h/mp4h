@@ -1,4 +1,4 @@
 <define-tag foo></define-tag>
 <define-tag bar endtag=required></define-tag>
-<symbol-info foo>
-<symbol-info bar>
+<symbol-info foo />
+<symbol-info bar />

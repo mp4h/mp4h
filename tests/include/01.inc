@@ -1,1 +1,1 @@
-<set-var a="bar">
+<set-var a="bar" />

@@ -1,2 +1,2 @@
-<set-var x="This Is A Test">
-<upcase <get-var x>>
+<set-var x="This Is A Test" />
+<upcase <get-var x /> />

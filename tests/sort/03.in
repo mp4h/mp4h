@@ -1,5 +1,5 @@
-<set-var foo="1\n2\n3\n10\n11\n12">
-<sort foo>
-<get-var foo>
-<sort foo numeric=true>
-<get-var foo>
+<set-var foo="1\n2\n3\n10\n11\n12" />
+<sort foo />
+<get-var foo />
+<sort foo numeric=true />
+<get-var foo />

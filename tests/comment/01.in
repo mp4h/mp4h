@@ -1,5 +1,5 @@
-<set-var a="foo">
+<set-var a="foo" />
 <comment>
   bar
 </comment>
-<get-var a>
+<get-var a />

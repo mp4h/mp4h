@@ -147,13 +147,13 @@ Preprocessor features:\n\
 \n\
 Parser features:\n\
   -X, --expansion=NUMBER       set parser behaviour according to the bits\n\
-                               of NUMBER, with (starred values are default)\n\
+                               of NUMBER, with (default is 0)\n\
 "), stdout);
       HELP_EXP_FLAGS(    1, "do not parse unknown tags");
-      HELP_EXP_FLAGS(    2, "unknown tags are assumed being complex");
-      HELP_EXP_FLAGS(    4, "an unknown tag whose name ends with a star is assumed simple");
-      HELP_EXP_FLAGS(    8, "remove the trailing star in tag name");
-      HELP_EXP_FLAGS(   16, "remove the trailing slash in tag attributes");
+      HELP_EXP_FLAGS(    2, "unknown tags are assumed being simple");
+      HELP_EXP_FLAGS(    4, "trailing star in tag name do not make this tag simple");
+      HELP_EXP_FLAGS(    8, "leave the trailing star in tag name");
+      HELP_EXP_FLAGS(   16, "leave the trailing slash in tag attributes");
       HELP_EXP_FLAGS( 1024, "suppress warnings about bad nested tags");
       HELP_EXP_FLAGS( 2048, "suppress warnings about missing trailing slash");
 

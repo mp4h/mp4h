@@ -1,2 +1,2 @@
-<set-var string="This is a test">
-<string-length <get-var string>>
+<set-var string="This is a test" />
+<string-length <get-var string /> />

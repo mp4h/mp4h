@@ -10,6 +10,10 @@
 
   Changes between 0.9.5 and SNAP:
 
+    *) Change default behaviour (08-Jun-2000):
+       Expansion flags are renamed to reflect current policy.
+       [Denis Barbier]
+
     *) Remove French documentation (07-Jun-2000):
        English version is now the only one maintained.
        [Denis Barbier]

@@ -1,5 +1,5 @@
 <set-var a="zero
 one
-two">
-<array-member a THREE caseless=true>
-<array-member a ONE caseless=true>
+two" />
+<array-member a THREE caseless=true />
+<array-member a ONE caseless=true />

@@ -1,3 +1,3 @@
-<set-var a="0\n1\n2\n3\n4">
-<array-shift a 2 start=2>
-<get-var a>
+<set-var a="0\n1\n2\n3\n4" />
+<array-shift a 2 start=2 />
+<get-var a />

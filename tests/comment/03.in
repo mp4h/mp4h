@@ -1,8 +1,8 @@
-<set-var a="foo">
+<set-var a="foo" />
 <comment>
   <comment>
-    <set-var a="bar">
+    <set-var a="bar" />
   </comment>
-  <set-var a="baz">
+  <set-var a="baz" />
 </comment>
-<get-var a>
+<get-var a />

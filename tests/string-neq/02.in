@@ -1,4 +1,4 @@
-<string-neq "foo" "foo" caseless=true>
-<string-neq "foo" "FOO" caseless=true>
-<string-neq "foo" "bar" caseless=true>
-<string-neq "foo" "BAR" caseless=true>
+<string-neq "foo" "foo" caseless=true />
+<string-neq "foo" "FOO" caseless=true />
+<string-neq "foo" "bar" caseless=true />
+<string-neq "foo" "BAR" caseless=true />

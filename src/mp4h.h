@@ -340,18 +340,17 @@ struct token_data
 #define READ_BODY      (1 << 5)  /* when reading body function */
 
 /* Flags which determine how expansion is done  */
-#define EXP_NO_HTMLTAG  (1 << 0)  /* do not parse unknown tags */
-#define EXP_COMPLEX     (1 << 1)  /* HTML tags are assumed being complex */
-#define EXP_INV_COMPLEX (1 << 2)  /* HTML tags whose last char is an asterisk
-                                     are complex HTML tags which are parsed
-                                     like single ones  */
-#define EXP_REMOVE_TRAILING_STAR \
-                        (1 << 3)  /* Remove trailing star in tag name */
-#define EXP_REMOVE_TRAILING_SLASH \
-                        (1 << 4)  /* Remove trailing slash in simple tag attributes */
-#define EXP_NOWARN_NEST (1 << 10) /* Suppress warning about bad nested tags */
-#define EXP_NOWARN_SLASH \
-                        (1 << 11) /* Suppress warning about missing trailing slash */
+#define EXP_NO_HTMLTAG   (1 << 0)  /* do not parse unknown tags */
+#define EXP_DFT_SIMPLE   (1 << 1)  /* HTML tags are simple */
+#define EXP_STAR_COMPLEX (1 << 2)  /* HTML tags whose last char is an asterisk
+                                      are by default simple tags, they become
+                                      complex when this flag is set.  */
+#define EXP_LEAVE_TRAILING_STAR \
+                         (1 << 3)  /* Do not remove trailing star in tag name */
+#define EXP_LEAVE_TRAILING_SLASH \
+                         (1 << 4)  /* Do not remove trailing slash in simple tag attributes */
+#define EXP_NOWARN_NEST  (1 << 10) /* Suppress warning about bad nested tags */
+#define EXP_NOWARN_SLASH (1 << 11) /* Suppress warning about missing trailing slash */
 
 extern int exp_flags;
 

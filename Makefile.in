@@ -178,6 +178,9 @@ new-revision:
 new-patchlevel:
 	OPT=-iP; $(NEWVERS)
 
+new-alphalevel:
+	OPT=-ia; $(NEWVERS)
+
 new-release:
 	OPT=-s$(R); $(NEWVERS)
 

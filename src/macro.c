@@ -201,8 +201,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
           break;
 
         case TOKEN_QUOTE:
-          if (group_level == 0)
-            in_string = !in_string;
+          in_string = !in_string;
           obstack_grow (obs, TOKEN_DATA_TEXT (&td),
                   strlen (TOKEN_DATA_TEXT (&td)));
           break;
@@ -648,21 +647,21 @@ expand_unknown_tag (char *name, read_type expansion)
   if (*(symbol_name) == '/')
     slash = TRUE;
 
-  if ((!slash) && (exp_flags & EXP_INV_COMPLEX))
+  if (!slash && !(exp_flags & EXP_STAR_COMPLEX))
     slash = (LAST_CHAR (symbol_name) == '*');
 
-  if ((!slash) && (exp_flags & EXP_COMPLEX))
+  if (!slash && !(exp_flags & EXP_DFT_SIMPLE))
     collect_body (symbol_name, expansion, &argptr, &body);
 
   argv = (token_data **) obstack_finish (&argptr);
 
   /*  When this tag is no more processed, remove the trailing star.  */
-  if ((exp_flags & EXP_REMOVE_TRAILING_STAR) &&
+  if (!(exp_flags & EXP_LEAVE_TRAILING_STAR) &&
       expansion == READ_NORMAL && LAST_CHAR (symbol_name) == '*')
     LAST_CHAR (symbol_name) = '\0';
 
   /*  When this tag is no more processed, remove the trailing slash.  */
-  if ((exp_flags & EXP_REMOVE_TRAILING_SLASH) &&
+  if (!(exp_flags & EXP_LEAVE_TRAILING_SLASH) &&
       expansion == READ_NORMAL && slash)
     {
       cp = TOKEN_DATA_TEXT (argv[argc-1]);
@@ -691,7 +690,7 @@ expand_unknown_tag (char *name, read_type expansion)
   obstack_1grow (obs_expansion, '>');
   if (expansion != READ_BODY)
     obstack_1grow (obs_expansion, CHAR_RQUOTE);
-  if ((!slash) && (exp_flags & EXP_COMPLEX))
+  if (!slash && !(exp_flags & EXP_DFT_SIMPLE))
     {
       shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[argc]), 0);
       if (expansion != READ_BODY)

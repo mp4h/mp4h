@@ -1,4 +1,4 @@
-<match "abcdefghij" "def" action=length>
-<match "abcdefghij" "d.f" action=length>
-<match "abcdefghij" "[fed]+" action=length>
-<match "abcdefghij" "[xyz]" action=length>
+<match "abcdefghij" "def" action=length />
+<match "abcdefghij" "d.f" action=length />
+<match "abcdefghij" "[fed]+" action=length />
+<match "abcdefghij" "[xyz]" action=length />

@@ -1,6 +1,6 @@
 <set-var foo="This
 is
 a
-list">
-<sort foo>
-<get-var foo>
+list" />
+<sort foo />
+<get-var foo />

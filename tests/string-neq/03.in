@@ -1,5 +1,5 @@
-<set-var foo=bar>
-<string-neq <get-var foo> "foo">
-<string-neq <get-var foo> "FOO">
-<string-neq <get-var foo> "bar">
-<string-neq <get-var foo> "BAR">
+<set-var foo=bar />
+<string-neq <get-var foo> "foo" />
+<string-neq <get-var foo> "FOO" />
+<string-neq <get-var foo> "bar" />
+<string-neq <get-var foo> "BAR" />

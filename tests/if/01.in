@@ -1,2 +1,2 @@
-<if true a b>
-<if "" a b>
+<if true a b />
+<if "" a b />

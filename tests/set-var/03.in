@@ -1,4 +1,4 @@
 <define-tag foo>bar %attributes baz</define-tag>
-<set-var a="<foo 1 2 3>" b="4 5 6">
-<get-var-once a>
-<get-var a>
+<set-var a="<foo 1 2 3 />" b="4 5 6" />
+<get-var-once a />
+<get-var a />

@@ -1,6 +1,6 @@
 <set-var a="zero
 one
-two">
-<array-add-unique a THREE caseless=true>
-<array-add-unique a ONE caseless=true>
-<get-var a>
+two" />
+<array-add-unique a THREE caseless=true />
+<array-add-unique a ONE caseless=true />
+<get-var a />

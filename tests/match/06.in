@@ -1,4 +1,4 @@
-<match "abcdefghij" "def" action=report>
-<match "abcdefghij" "d.f" action=report>
-<match "abcdefghij" "[fed]+" action=report>
-<match "abcdefghij" "[xyz]" action=report>
+<match "abcdefghij" "def" action=report />
+<match "abcdefghij" "d.f" action=report />
+<match "abcdefghij" "[fed]+" action=report />
+<match "abcdefghij" "[xyz]" action=report />
