@@ -154,11 +154,6 @@ DECLARE (mp4h_sort);
 
 #undef DECLARE
 
-static int array_size __P ((symbol *));
-static int array_member __P ((const char *, symbol *, boolean));
-static char *array_value __P ((symbol *, int, int *));
-static int sort_function __P ((const void *, const void *));
-
 static builtin
 builtin_tab[] =
 {
@@ -285,6 +280,26 @@ builtin_tab[] =
 
   { 0,                  FALSE,    FALSE,  0 },
 };
+
+/*   Local functions  */
+static void push_builtin_table __P ((builtin *));
+static void install_builtin_table __P ((builtin *));
+static boolean bad_argc __P ((token_data *, int, int, int));
+static void dump_args __P ((struct obstack *, int, token_data **, const char *));
+static const char *predefined_attribute __P ((const char *, int *, token_data **, boolean));
+static void set_trace __P ((symbol *, const char *));
+static void generic_set_hook __P ((MP4H_BUILTIN_PROTO, boolean, int));
+static void math_relation __P ((MP4H_BUILTIN_PROTO, mathrel_type));
+static void mathop_functions __P ((MP4H_BUILTIN_PROTO, mathop_type));
+static void updowncase __P ((struct obstack *, int, token_data **, boolean));
+static void substitute __P ((struct obstack *, const char *, const char *, struct re_registers *));
+static void string_regexp __P ((struct obstack *, int, token_data **, const char *));
+static void subst_in_string __P ((struct obstack *, int, token_data **, boolean));
+static void generic_variable __P ((MP4H_BUILTIN_PROTO, symbol_lookup, boolean));
+static int array_size __P ((symbol *));
+static char *array_value __P ((symbol *, int, int *));
+static int array_member __P ((const char *, symbol *, boolean));
+static int sort_function __P ((const void *, const void *));
 
 /*  This symbol controls breakings of flow statements.  */
 symbol varbreak;
@@ -1824,7 +1839,7 @@ mp4h_get_hook (MP4H_BUILTIN_ARGS)
 | are either numbers or variable names.             |
 `--------------------------------------------------*/
 static void
-math_relation (mathrel_type mathrel, MP4H_BUILTIN_ARGS)
+math_relation (MP4H_BUILTIN_ARGS, mathrel_type mathrel)
 {
   boolean result;
   symbol *var;
@@ -1886,25 +1901,25 @@ math_relation (mathrel_type mathrel, MP4H_BUILTIN_ARGS)
 static void
 mp4h_gt (MP4H_BUILTIN_ARGS)
 {
-  math_relation (MATHREL_GT, obs, argc, argv, expansion);
+  math_relation (MP4H_BUILTIN_RECUR, MATHREL_GT);
 }
 
 static void
 mp4h_lt (MP4H_BUILTIN_ARGS)
 {
-  math_relation (MATHREL_LT, obs, argc, argv, expansion);
+  math_relation (MP4H_BUILTIN_RECUR, MATHREL_LT);
 }
 
 static void
 mp4h_eq (MP4H_BUILTIN_ARGS)
 {
-  math_relation (MATHREL_EQ, obs, argc, argv, expansion);
+  math_relation (MP4H_BUILTIN_RECUR, MATHREL_EQ);
 }
 
 static void
 mp4h_neq (MP4H_BUILTIN_ARGS)
 {
-  math_relation (MATHREL_NEQ, obs, argc, argv, expansion);
+  math_relation (MP4H_BUILTIN_RECUR, MATHREL_NEQ);
 }
 
 /*------------------------------------------------------.
@@ -1919,12 +1934,13 @@ mp4h_neq (MP4H_BUILTIN_ARGS)
      if (result_int) result = floor (result);}
 
 static void
-mathop_functions (mathop_type mathop, MP4H_BUILTIN_ARGS)
+mathop_functions (MP4H_BUILTIN_ARGS, mathop_type mathop)
 {
   double val, result;
   int i;
   char svalue[128];
   char *pos_decimal_point;
+#define decimal_point "."
   boolean result_int = TRUE;
 
   if (bad_argc (argv[0], argc, 3, 0))
@@ -1932,7 +1948,7 @@ mathop_functions (mathop_type mathop, MP4H_BUILTIN_ARGS)
   
   /*  If all operands are integers, an integer must be returned.  */
   for (i=1; i<argc; i++)
-    if (strchr (ARG (i), '.') != NULL)
+    if (strstr (ARG (i), decimal_point) != NULL)
       result_int = FALSE;
 
   if (mathop == MATHOP_MOD)
@@ -1992,7 +2008,7 @@ mathop_functions (mathop_type mathop, MP4H_BUILTIN_ARGS)
   sprintf (svalue, "%f", result);
   if (result_int)
     {
-      pos_decimal_point = strchr (svalue, '.');
+      pos_decimal_point = strstr (svalue, decimal_point);
       if (pos_decimal_point)
         *pos_decimal_point = '\0';
     }
@@ -2004,43 +2020,43 @@ mathop_functions (mathop_type mathop, MP4H_BUILTIN_ARGS)
 static void
 mp4h_add (MP4H_BUILTIN_ARGS)
 {
-  mathop_functions (MATHOP_ADD, obs, argc, argv, expansion);
+  mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_ADD);
 }
 
 static void
 mp4h_substract (MP4H_BUILTIN_ARGS)
 {
-  mathop_functions (MATHOP_SUB, obs, argc, argv, expansion);
+  mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_SUB);
 }
 
 static void
 mp4h_multiply (MP4H_BUILTIN_ARGS)
 {
-  mathop_functions (MATHOP_MUL, obs, argc, argv, expansion);
+  mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_MUL);
 }
 
 static void
 mp4h_divide (MP4H_BUILTIN_ARGS)
 {
-  mathop_functions (MATHOP_DIV, obs, argc, argv, expansion);
+  mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_DIV);
 }
 
 static void
 mp4h_modulo (MP4H_BUILTIN_ARGS)
 {
-  mathop_functions (MATHOP_MOD, obs, argc, argv, expansion);
+  mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_MOD);
 }
 
 static void
 mp4h_min (MP4H_BUILTIN_ARGS)
 {
-  mathop_functions (MATHOP_MIN, obs, argc, argv, expansion);
+  mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_MIN);
 }
 
 static void
 mp4h_max (MP4H_BUILTIN_ARGS)
 {
-  mathop_functions (MATHOP_MAX, obs, argc, argv, expansion);
+  mathop_functions (MP4H_BUILTIN_RECUR, MATHOP_MAX);
 }
 
 
@@ -2858,8 +2874,7 @@ mp4h_get_regexp_syntax (MP4H_BUILTIN_ARGS)
 `---------------------------------------------------------------*/
 
 static void
-generic_variable (struct obstack *obs, int argc, token_data **argv,
-                  read_type expansion, symbol_lookup mode, boolean verbatim)
+generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
 {
   char *value, *cp, *ptr_index, *old_value;
   symbol *var, *index_var;
