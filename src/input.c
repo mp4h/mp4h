@@ -1012,10 +1012,7 @@ next_token (token_data *td, read_type expansion)
         skip_line ();
       else if (expansion == READ_BODY)
         {
-          if (ch == '"')
-            obstack_1grow (&token_stack, CHAR_QUOTE);
-          else
-            obstack_1grow (&token_stack, ch);
+          obstack_1grow (&token_stack, ch);
           while ((ch = next_char ()) != CHAR_EOF && ! IS_ESCAPE(ch))
             {
               if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
@@ -1024,11 +1021,6 @@ next_token (token_data *td, read_type expansion)
                   ch = CHAR_EOF;
                   break;
                 }
-              /*
-              if (ch == '"')
-                obstack_1grow (&token_stack, CHAR_QUOTE);
-              else
-                  */
                 obstack_1grow (&token_stack, ch);
             }
           unget_input(ch);
