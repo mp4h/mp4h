@@ -2340,7 +2340,6 @@ mp4h_bp_attributes_extract (MP4H_BUILTIN_ARGS)
 static void
 mp4h_bp_define_entity (MP4H_BUILTIN_ARGS)
 {
-  const builtin *bp;
   symbol *sym;
 
   if (bad_argc (argv[0], argc, 2, 2))
