@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.5.7>
+<set-var version=0.7.0>
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -15,6 +15,7 @@
 ">
 >
 
+<include lang.fr>
 <include list-tags>
 
 ;;;
@@ -33,11 +34,11 @@ programmation, avec une syntaxe familière aux auteurs de documents HTML.
 
 <para>
 Ce programme est un clone de
-<URL src="http://www.metahtml.org/" name="<Meta-HTML>">, écrit par Brian
-J. Fox,  Il en reprend
-une partie de l'interface utilisateur, mais pas le code source.
-En effet, <Meta-HTML> était utilisé à l'intérieur du programme
-<WML> (<URL src="http://www.engelschall.com/sw/wml/" name="Website Meta Language">)
+<URL src="http://www.metahtml.org/" name="<Meta-HTML>">,
+écrit par Brian J. Fox,  Il en reprend une partie de l'interface
+utilisateur, mais pas le code source.
+En effet, <Meta-HTML> était utilisé à l'intérieur du programme <WML>
+(<URL src="http://www.engelschall.com/sw/wml/" name="Website Meta Language">)
 écrit par Ralf S. Engelschall et que je maintiens depuis février 1998.
 Pour des raisons de licences, il était difficile de faire des
 modifications dans <Meta-HTML>, et j'ai décidé d'écrire mon propre
@@ -46,26 +47,37 @@ macro-processeur.
 
 <para>
 Plutôt que de tout réécrire depuis le début, j'ai utilisé en grande
-partie le code source de <URL src="http://www.gnu.org/software/m4/" name="GNU <m4>">,
-écrit par René Seindal, à cause de ses nombreux avantages : ce logiciel
+partie le code source de
+<URL src="http://www.gnu.org/software/m4/" name="GNU <m4>">,
+écrit par René Seindal, en raison de ses nombreux avantages : ce logiciel
 est stable, robuste et très bien documenté. Cette version de <mp4h>
 s'appuye sur la version 1.4n de GNU <m4>, qui est une version de
 développement.
+</para>
+
+<para>
+Le programme <mp4h> a été conçu dans le seul but de pouvoir définir ses
+propres balises dans un document HTML, et n'est en aucune façon un 
+éditeur HTML. Ce n'est donc pas la peine de demander d'ajouter des
+fonctionnalités pour modifier la mise en page du document final, il y a
+peu de chances que je le fasse. Pour avoir un résultat correct, il
+suffit d'utiliser un post-processur du type de
+<URL src="http://www.w3.org/People/Raggett/tidy/" name="tidy">.
 </para>
 
 <section "Options de la ligne de commande">
 
 <para>
 Les arguments optionnels sont placés entre crochets. Tous les synonymes
-d'une option ont la même syntaxe, donc lorsqu'une option accepte un
-argument, l'option courte doit l'accepter aussi.
+d'une option ont la même syntaxe, donc lorsqu'une option longue accepte
+un argument, l'option courte doit l'accepter aussi.
 </para>
 
 <para>
 La syntaxe générale d'appel de <mp4h> est
 <code>mp4h [options] [fichier]</code>
 Les options sont décrites ci-dessous. Si aucun fichier n'est spécifié
-sur la ligne de commande, ou s'il a pour nom <comman ->, alors les
+sur la ligne de commande, ou s'il a pour nom <file ->, alors les
 caractères sont lus sur l'entrée standard.
 </para>
 
@@ -118,8 +130,7 @@ Redirige dans un fichier les messages de déboguage</option>
 </option-list>
 
 <para>
-Les drapeuax pour l'option <optmand -d> sont les suivantes:
-</para>
+Les drapeaux pour l'option <optmand -d> sont les suivantes:
 <option-list>
 <option t>###
 trace tous les appels de macros, pas seulement
@@ -137,6 +148,7 @@ l'arborescence</option>
 <option i>affiche les changements dans le fichier d'entrée</option>
 <option V>raccourci pour tous ces drapeaux</option>
 </option-list>
+</para>
 
 <section "Description">
 
@@ -153,14 +165,16 @@ point-virgules, par exemple:
 </para>
 
 ###
-###    Definition of new macros
+###    Defining new macros
 ###
 
 <subsection "Fonctions pour les définitions">
 
 <para>
 La définition de nouvelles commandes est la tâche la plus courante
-réalisée par <mp4h>.
+réalisée par <mp4h>. Comme en HTML, le nom des commandes peut être écrit
+indifféremment en monuscules ou majuscules. Dans cette documentation,
+seules les minuscules seront utilisées.
 Les commandes (aussi appelées balises), sont de deux types : simples ou
 complexes. Une balise simple a la forme suivante :
 <code><nom [attributs]></code>
@@ -225,7 +239,8 @@ Définit une balise complexe
 
 <undef foo>
 <example>
-<define-tag foo endtag=required>body is: %body</define-tag>
+<define-tag foo endtag=required>;;;
+body is: %body</define-tag>
 <foo>Here it is</foo>
 </example>
 
@@ -492,7 +507,8 @@ primitive, un message indique de quel type de symbole il s'agit :
 <example>
 <set-var x="0\n1\n2\n3\n4">
 <define-tag foo>bar</define-tag>
-<define-tag bar endtag=required>quux</define-tag>
+<define-tag bar endtag=required>;;;
+quux</define-tag>
 <symbol-info x>
 <symbol-info symbol-info>
 <symbol-info define-tag>
@@ -888,7 +904,6 @@ en premier.
 <para>
 Si la valeur est contenue dans le tableau, retourne l'indice de cette
 valeur, sinon retourne <value -1>.
-dans ce tableau.
 </para>
 
 <example>
@@ -1580,11 +1595,16 @@ attribut.
 <para>
 Dans certains cas, il est nécessaire de regrouper ensemble plusieurs
 chaînes de caractères pour en faire un seul attribut. Cela peut être
-fait soit avec des guillements, soit avec la commande <command group>.
-Par exemple,
+fait soit avec des guillements anglo-saxons (double quotes), soit avec
+la commande <command group>.  Par exemple,
 <code><foo "Ceci est le 1er attribut"
            <group et le second>></code>
 </para>
+
+<note>
+Contrairement au HTML, l'apostrophe ne peut pas servir à la place des
+guillements.
+</note>
 
 <undef href mail1 mail2 show-attributes show1 show2 bar>
 <para>
@@ -1601,6 +1621,26 @@ argument, et pas par le 3e argument suivi d'un 0.
 <a href="%0">%1</a>;;;
 </define-tag>;;;
 <href http://www.gimp.org "The Gimp">
+</example>
+
+<item>La séquence <value %#> affiche le nombre d'attributs passés
+à la commande.
+
+<item>La séquence <value %%> est remplacée par un <value %>, ce qui est
+utile pour des définitions imbriquées.
+<example>
+<define-tag externe>;;;
+Externe, nombre d'attributs: %#
+<define-tag interne1>;;;
+Interne1, nombre d'attributs: %#;;;
+</define-tag>;;;
+<define-tag interne2>;;;
+Interne2, nombre d'attributs: %%#;;;
+</define-tag>;;;
+<interne1 %attributes et quelques autres>
+<interne2 %attributes et quelques autres>
+</define-tag>
+<externe liste attributs>
 </example>
 
 <item>Les caractères <value %attributes> sont remplacés par la liste 
@@ -1666,33 +1706,49 @@ Après développement: %attributes
 </list>
 </para>
 
+<note>
+Le mécanisme de lecture des instructions est complètement différent dans
+<Meta-HTML> et dans <mp4h>. Avec <Meta-HTML>, il est parfois nécessaire
+d'avoir recours à d'autres constructions, comme <value %xbody> et <value
+%qbody>. Celles-ci n'ont pas lieu d'être avec <mp4h>, mais pour être au
+plus compatible avec <Meta-HTML>, <mp4h> les reconnait aussi et elles
+ont exactement le même rôle que <value %body>. Une autre particularité
+non mentionnée ci-dessus, qui existe aussi pour des raisons de
+compatibilité avec <Meta-HTML>, est le fait que pour des balises
+simples, <value %body> est un synonyme de <value %attributes>. Ces
+fonctionnalités sont actuellement comprises dans <mp4h>, mais peuvent
+très bien être supprimées dans les versions futures.
+</note>
+
 <subsection "Mécanisme d'expansion des commandes">
 
-<section "Problèmes connus">
+<step-by-step>
+<step start>
+Les caractères sont lus un par un, jusqu'à trouver un «<left-angle>».
+Si le caractère suivant est une lettre, un underscore
+(<command _>) ou un signe de pourcentage (<command %>), alors cela
+signifie que ce qui suit est le nom d'une commande et le processus
+continue en <step-ref parse-name>. Dans le cas contraire, le signe
+<left-angle> est traité comme un caractère ordinaire, et est simplement
+affiché. Retour en <step-ref start>.
 
-<para>
-Quand une balise n'est pas suivie par un espace ou un signe supérieur,
-la lecture et l'affichage des symboles peuvent être erronés ou même
-entrainer l'arrêt du programme. Par exemple, ce commentaire
-<code>
-    <html:comment>this is a comment</html:comment>
-</code>
-peut entrainer des problèmes tandis que celui-ci
-<code>
-    <html:comment> this is a comment</html:comment>
-</code>
-est correct.
-</para>
+<step parse-name>
+Une fois la première lettre d'un mot trouvée, les caractères sont 
+lus tant qu'ils sont susceptibles de former le nom d'une commande.
+D'un point de vue formel, voici comment est défini le nom d'une
+commande:
+<code>nom ::= [A-Za-z%_][A-Za-z0-9%_:*-]</code>
 
-<para>
-Dans la même veine, il est fréquent d'avoir des problèmes quand du code
-perl est à l'intérieur des pages HTML pour être exécuté par le serveur.
-Les lignes suivantes sont des exemples des problèmes rencontrés avec
-<mp4h>:
-<code>
-    $x = 1 if $x<=0;
-    @articles = sort {$a <=> $b} @files;
-</code>
-</para>
+<step command>
+Ce nom est ensuite comparé à la liste des noms de commandes connus.
+Si la commande existe, aller en <step-ref parse-attribute>.
+Sinon. Les attributs sont lus comme s'il s'agissait d'une commande
+normale, le résultat est affiché et le programme retourne en <step-ref
+start>.
+
+<step parse-attribute>
+blah blah blah à finir.
+
+</step-by-step>
 
 <footer>

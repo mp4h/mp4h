@@ -18,7 +18,7 @@ RM              = rm -f
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
 
-all: mp4h.html mp4h.1 mp4h.info
+all: mp4h.html mp4h.1
 
 # ------------------------------------------------
 #   DOCUMENTATION

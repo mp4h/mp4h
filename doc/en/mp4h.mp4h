@@ -3,190 +3,586 @@
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
-<include "version">
+<set-var package=mp4h>
+<set-var version=0.7.0>
+<set-var title="MP4H - A macro processeur for HTML">
 
-<if <not <get-var format>>
-  <exit status=1
+<include <get-var format>.out
+    alt=<exit status=1
         message="This file has to be compiled with one of the following lines
-   ../../src/mp4h -D format=html mp4h.mp4h > mp4h.html
-   ../../src/mp4h -D format=pod mp4h.mp4h > mp4h.pod
-">>
+   ../../src/mp4h -D format=html mp4h.mp4h -I .. > mp4h.html
+   ../../src/mp4h -D format=pod mp4h.mp4h -I .. > mp4h.pod
+">
+>
 
-<include <get-var format>.out>
+<include lang.en>
+<include list-tags>
+
+;;;
+;;;   Les caractères pour commentaires sont modifiés
+;;;
+<eol-comment "###">
 
 <header>
+<section "Introduction">
+
+<para>
+Le programme <mp4h> est un macro-processeur spécialement conçu pour
+traiter les documents HTML. Il possède des capacités puissantes de
+programmation, avec une syntaxe familière aux auteurs de documents HTML.
+</para>
+
+<para>
+Ce programme est un clone de
+<URL src="http://www.metahtml.org/" name="<Meta-HTML>">,
+écrit par Brian J. Fox,  Il en reprend une partie de l'interface
+utilisateur, mais pas le code source.
+En effet, <Meta-HTML> était utilisé à l'intérieur du programme <WML>
+(<URL src="http://www.engelschall.com/sw/wml/" name="Website Meta Language">)
+écrit par Ralf S. Engelschall et que je maintiens depuis février 1998.
+Pour des raisons de licences, il était difficile de faire des
+modifications dans <Meta-HTML>, et j'ai décidé d'écrire mon propre
+macro-processeur.
+</para>
+
+<para>
+Plutôt que de tout réécrire depuis le début, j'ai utilisé en grande
+partie le code source de
+<URL src="http://www.gnu.org/software/m4/" name="GNU <m4>">,
+écrit par René Seindal, en raison de ses nombreux avantages : ce logiciel
+est stable, robuste et très bien documenté. Cette version de <mp4h>
+s'appuye sur la version 1.4n de GNU <m4>, qui est une version de
+développement.
+</para>
+
+<para>
+Le programme <mp4h> a été conçu dans le seul but de pouvoir définir ses
+propres balises dans un document HTML, et n'est en aucune façon un 
+éditeur HTML. Ce n'est donc pas la peine de demander d'ajouter des
+fonctionnalités pour modifier la mise en page du document final, il y a
+peu de chances que je le fasse. Pour avoir un résultat correct, il
+suffit d'utiliser un post-processur du type de
+<URL src="http://www.w3.org/People/Raggett/tidy/" name="tidy">.
+</para>
+
+<section "Options de la ligne de commande">
+
+<para>
+Les arguments optionnels sont placés entre crochets. Tous les synonymes
+d'une option ont la même syntaxe, donc lorsqu'une option longue accepte
+un argument, l'option courte doit l'accepter aussi.
+</para>
+
+<para>
+La syntaxe générale d'appel de <mp4h> est
+<code>mp4h [options] [fichier]</code>
+Les options sont décrites ci-dessous. Si aucun fichier n'est spécifié
+sur la ligne de commande, ou s'il a pour nom <file ->, alors les
+caractères sont lus sur l'entrée standard.
+</para>
+
+<subsection "Mode opératoire">
+
+<option-list>
+<option --help>Affiche un message d'aide et quitte le programme</option>
+<option --version>Affiche le numéro de version de <mp4h> et quitte le
+programme</option>
+<option -E --fatal-warnings>Arrête l'exécution du programme dès qu'un
+message d'avertissement est affiché</option>
+<option -Q --quiet --silent>Supprime certains messages
+d'avertissement</option>
+</option-list>
+
+<subsection "Pré-processeur">
+
+<option-list>
+<option -I --include=<optmand REPERTOIRE>>###
+Ajoute ce répertoire à la liste des répertoires où les fichiers à
+inclure sont cherchés</option>
+<option -D --define=<optmand NOM<optopt =VALEUR>>>###
+Affecte une valeur à la variable de nom <var NOM></option>
+<option -U --undefine=<optmand COMMANDE>>###
+Supprime la primitive de nom <command COMMANDE></option>
+</option-list>
+
+<subsection "Limites des ressources">
+
+<option-list>
+<option -H --hashsize=<optmand PREMIER>>###
+Utilise le nombre premier <optmand PREMIER> pour remplir la table de
+hachage (défaut: 509)</option>
+<option -L -nesting-limit=<optmand NOMBRE>>###
+Fixe la limite arbitraire du nombre d'appels récursifs (défaut: 250)</option>
+</option-list>
+
+<subsection "Déboguage">
+
+<option-list>
+<option -d --debug=<optmand FLAGS>>###
+Détermine quelles sont les informations affichées (voir ci-dessous)</option>
+<option -t --trace=<optmand NOM>>###
+La commande <command NOM> sera tracée dès qu'elle est définie</option>
+<option -l --arglength=<optmand NOMBRE>>###
+Limite le nombre de caractères affichés dans les messages de
+déboguage</option>
+<option -o --error-output=<optmand FICHIER>>###
+Redirige dans un fichier les messages de déboguage</option>
+</option-list>
+
+<para>
+Les drapeaux pour l'option <optmand -d> sont les suivantes:
+<option-list>
+<option t>###
+trace tous les appels de macros, pas seulement
+ceux déclarés avec <command traceon></option>
+<option a>affiche les arguments</option>
+<option e>affiche le texte de remplacement</option>
+<option c>affiche la commande avant la collecte des arguments, après et
+après l'appel de la fonction</option>
+<option x>ajoute un identifiant à la sortie, ce qui est utile en cas
+d'appel récursif</option>
+<option f>affiche le nom du fichier d'entrée</option>
+<option l>affiche le numéro de la ligne dans le fichier d'entrée</option>
+<option p>affiche le résultat de a recherche de fichiers dans
+l'arborescence</option>
+<option i>affiche les changements dans le fichier d'entrée</option>
+<option V>raccourci pour tous ces drapeaux</option>
+</option-list>
+</para>
+
 <section "Description">
 
 <para>
-The <mp4h> program is a macro processor specifically designed for HTML
-documents.  It has some powerful programming features, with a syntax
-familiar to HTML writers.
+Le programme <mp4h> est un macro-processeur, ce qui signifie que les
+mots-clés définis sont remplacés par un autre texte. Ce chapitre
+est un exposé des primitives définies par <mp4h>. Comme <mp4h> a été
+spécialement conçu pour les documents HTML, la syntaxe est très proche
+de celle du HTML, avec des balises et des attributs. La seule notion
+inconnue en HTML est la possibilité de commenter une partie du texte
+jusqu'à la fin de la ligne. Les commentaires commencent par trois
+point-virgules, par exemple:
+<code>;;;  Ceci est un commentaire</code>
+</para>
+
+###
+###    Defining new macros
+###
+
+<subsection "Fonctions pour les définitions">
+
+<para>
+La définition de nouvelles commandes est la tâche la plus courante
+réalisée par <mp4h>. Comme en HTML, le nom des commandes peut être écrit
+indifféremment en monuscules ou majuscules. Dans cette documentation,
+seules les minuscules seront utilisées.
+Les commandes (aussi appelées balises), sont de deux types : simples ou
+complexes. Une balise simple a la forme suivante :
+<code><nom [attributs]></code>
+tandis qu'une balise complexe est de la forme :
+<code><nom [attributs]>
+texte
+</nom></code>
 </para>
 
 <para>
-This software was originally written as a piece of a more complex
-program, Website Meta Language (<WML>)
-<URL http://www.engelschall.com/sw/wml/>.
-<WML> used <Meta-HTML> (<URL http://www.metahtml.org/> written
-by Brian J. Fox) to perform macro substitutions.  For license reasons,
-it was difficult to hack <Meta-HTML> into <WML>, so a replacement for
-this program was needed. 
-</para>
-
-<para>
-Then I pick up GNU <m4> <URL http://www.gnu.org/software/m4/>,
-written by René Seindal, because of its numerous advantages : this software is
-stable, robust, well documented and runs fast.  This version of <mp4h>
-is derived from GNU <m4> 1.4n, which is a development version.
-</para>
-
-<section "Language Reference">
-
-<para>
-The program <mp4h> is a macro processor, this means that internal macros are
-expanded and replaced by some other text.  In this chapter the full list of
-internal macros is described.
-</para>
-
-;;;
-;;;    Definition of new macros
-;;;
-
-<subsection "Macro functions">
-
-<para>
-Defining new macros is the most common task performed by
-macro-processors.  As <mp4h> is designed for HTML documents, its syntax
-has been defined to be easy to learn by HTML authors.  An 
-composed of 
+<anchor name="noteattr">
+Dans les descriptions de commandes, une barre oblique <slash> indique
+que la balise est complexe, et la lettre <command V> que les attributs
+de la balise sont lus sans être développés (voir le chapitre sur le
+mécanisme de développement des macros pour plus de détails).
 </para>
 
 <tag:description define-tag complex>
-<var name>
+<var nom>
 [attributes=verbatim]
 [endtag=required]
 [whitespace=delete]
 </tag:description>
-Avec whitespace=delete
-  * les espaces au debut et a la fin sont supprimes
-  * les sauts de ligne sont supprimes
 
 <para>
-This function lets you define new tags.  First argument is the macro
-name.
-</para>
+Cette fonction permet de définir ses propres commandes. Le premier
+argument est le nom de la nouvelle commande. Le texte de remplacement
+est le corps de la fonction.
 
+<undef foo>
 <example>
 <define-tag foo>bar</define-tag>
 <foo>
 </example>
 
+Même si en HTML les espaces ont en général peu d'importance, il est
+utile de comprendre certains points. En particulier,
+<code><define-tag foo>bar</define-tag></code>
+et
+<code><define-tag foo>
+bar
+</define-tag></code>
+ne sont pas équivalents, la deuxième forme comprenant deux sauts de
+lignes non présents dans la première.
+</para>
+
+<attributes:description>
+<attributes:item "whitespace=delete">
+Certains espaces sont supprimés dans le texte de remplacement. Il s'agit
+des espaces au début ou à la fin de la définition, et des sauts de ligne
+qui ne sont pas compris à l'intérieur de commandes délimitées par
+<left-angle> et <right-angle>.
+
+<attributes:item "endtag=required">
+Définit une balise complexe
+
+<undef foo>
 <example>
-<define-tag foo endtag=required>body is: %body</define-tag>
+<define-tag foo>bar</define-tag>
+<foo>
+</example>
+
+<undef foo>
+<example>
+<define-tag foo endtag=required>;;;
+body is: %body</define-tag>
 <foo>Here it is</foo>
 </example>
 
-<tag:description preserve>
-<var name>
+<attributes:item "attributes=verbatim">
+Par défaut, les attributs sont évalués lors de l'appel de la fonction.
+Lorsque cet attribut est utilisé, les arguments ne sont pas évalués.
+
+<undef foo bar>
+<example>
+<define-tag bar>quux</define-tag>
+<define-tag foo attributes=verbatim endtag=required>
+Corps: %ubody
+Attributs: %uattributes
+</define-tag>
+<foo txt="<bar>">Et voila</foo>
+</example>
+</attributes:description>
+
+<tag:description provide-tag complex>
+<var nom>
+[attributes=verbatim]
+[endtag=required]
+[whitespace=delete]
 </tag:description>
 
-<tag:description restore>
-<var name>
-</tag:description>
+<para>
+Cette commande est identique à la précédente, sauf qu'aucune opération
+n'est effectuée si la commande est déjà définie.
+</para>
 
 <tag:description let>
 <var new> <var old>
 </tag:description>
 
+<para>
+Copie une fonction dans une autre. Cette fonction permet notamment de
+sauvegarder une fonction avant de la redéfinir.
+</para>
+
+<undef foo bar>
+<example>
+<define-tag foo>un</define-tag>
+<let bar foo>
+<define-tag foo>deux</define-tag>
+<foo><bar>
+</example>
+
 <tag:description undef>
-<var name>
+<var nom>
 </tag:description>
 
-;;;
-;;;    Variable functions
-;;;
+<para>
+Supprime la définition d'une commande.
+</para>
 
-<subsection "Variable functions">
+<undef foo>
+<example>
+<define-tag foo>un</define-tag>
+<undef foo>
+<foo>
+</example>
+
+###
+###    Variable functions
+###
+
+<subsection "Variables">
 
 <para>
-qqq
+Les variables peuvent être vues comme un cas particulier de fonctions,
+qui ne possèdent pas d'arguments. En fait, leur usage est différent,
+notamment grâce à la notion de tableaux. En effet, une variable
+peut être considérée comme un tableau de caractères séparés par des
+sauts de lignes. Comme nous le verrons ci-dessous, cette notion permet
+des manipulations qui sont difficilement accessibles avec des fonctions.
 </para>
 
 <tag:description set-var>
-<var name>=<var value>
-[<var name>=<var value>] ...
+<var nom>=<var valeur>
+[<var nom>=<var valeur>] ...
 </tag:description>
+
+<para>
+Cette commande permet de définir des variables.
+</para>
 
 <tag:description set-var-verbatim verbatim>
-<var name>=<var value>
-[<var name>=<var value>] ...
+<var nom>=<var valeur>
+[<var nom>=<var valeur>] ...
 </tag:description>
+
+<para>
+Comme la commande précédente, mais les arguments sont lus tels quels,
+sans développement.
+</para>
 
 <tag:description get-var>
-<var name>
-[<var name>] ...
+<var nom>
+[<var nom>] ...
 </tag:description>
+
+<para>
+Affiche le contenu de la variable. Lorsqu'une valeur numérique est
+indiquée entre crochets, elle représente un indice (par convention, la
+première valeur d'un tableau correspond à un indice 0).
+</para>
+
+<example>
+<set-var version="0.10.1">
+Ceci est la version <get-var version>
+</example>
+
+<example>
+<set-var foo="0
+1
+2
+3">
+<get-var foo[2] foo[0] foo>
+</example>
 
 <tag:description get-var-once verbatim>
-<var name>
-[<var name>] ...
+<var nom>
+[<var nom>] ...
 </tag:description>
+
+<para>
+Comme la commande précédente, mais les arguments ne sont pas développés.
+</para>
+
+<undef foo>
+<example>
+<define-tag foo>0.10.1</define-tag>
+<set-var version="<foo>">Ici version <get-var version>
+<set-var-verbatim version="<foo>">Ici version <get-var version>
+<set-var-verbatim version="<foo>">Ici version <get-var-once version>
+</example>
+
+<tag:description preserve>
+<var nom>
+</tag:description>
+
+<para>
+Une pile est utilisée pour sauvegarder le contenu de variables. Cette
+commande permet de placer le contenu de la variable dont le nom est
+passé en argument dans le sommet de la pile.
+</para>
+
+<tag:description restore>
+<var nom>
+</tag:description>
+
+<para>
+Cette commande effectue l'opération inverse de la commande précédente ;
+la variable dont le nom est passé en argument prend la valeur qui se
+trouve au sommet de la pile, et cette valeur est supprimée de la pile.
+</para>
 
 <tag:description unset-var>
-<var name>
-[<var name>] ...
+<var nom>
+[<var nom>] ...
 </tag:description>
+
+<para>
+Déclare la variable passée en argument comme n'étant pas définie.
+</para>
 
 <tag:description var-exists>
-<var name>
+<var nom>
 </tag:description>
+
+<para>
+Retourne <true> si la variable existe, et rien sinon.
+</para>
 
 <tag:description increment>
-<var name>
-[amount=<var value>]
+<var nom>
+[amount=<var valeur>]
 </tag:description>
 
+<para>
+Incrémente le contenu de la variable passée en argument. L'incrément par
+défaut est 1.
+</para>
+
+<attributes:description>
+<attributes:item "amount=<var valeur>">
+Spécifie la valeur de l'incrément.
+</attributes:description>
+
+<example>
+<set-var i=10>
+<get-var i>
+<increment i><get-var i>
+<increment i amount="-3"><get-var i>
+</example>
+
 <tag:description decrement>
-<var name>
-[amount=<var value>]
+<var nom>
+[amount=<var valeur>]
 </tag:description>
+
+<para>
+Decrémente le contenu de la variable passée en argument, par
+défaut de 1.
+</para>
+
+<attributes:description>
+<attributes:item "amount=<var valeur>">
+Spécifie la valeur qui est soustraite à la variable
+</attributes:description>
+
+<example>
+<set-var i=10>
+<get-var i>
+<decrement i><get-var i>
+<decrement i amount="3"><get-var i>
+</example>
 
 <tag:description copy-var>
 <var src>
 <var dest>
 </tag:description>
 
+<para>
+Copie le contenu d'une variable dans une autre.
+</para>
+
+<example>
+<set-var i=10>
+<copy-var i j>
+<get-var j>
+</example>
+
 <tag:description defvar>
-<var name>
-<var value>
+<var nom>
+<var valeur>
 </tag:description>
+
+<para>
+Si la variable n'est pas définie ou est définie comme une chaîne de
+caractères vide, affecte la valeur passée en argument. Dans le cas
+contraire, aucune opération n'est effectuée.
+</para>
+
+<example>
+<unset-var title>
+<defvar title "Titre"><get-var title>
+<defvar title "Nouveau titre"><get-var title>
+</example>
 
 <tag:description symbol-info>
-<var name>
+<var nom>
 </tag:description>
 
-;;;
-;;;    String functions
-;;;
+<para>
+Affiche des informations sur le symbole passé en argument. S'il s'agit
+d'une variable, le mot <command STRING> est affiché, ainsi que le
+nombre de lignes de cette variable. S'il s'agit d'une commande ou
+primitive, un message indique de quel type de symbole il s'agit :
+<command PRIM COMPLEX>, <command PRIM TAG>,
+<command USER COMPLEX> et <command USER TAG>
+</para>
 
-<subsection "String functions">
+<example>
+<set-var x="0\n1\n2\n3\n4">
+<define-tag foo>bar</define-tag>
+<define-tag bar endtag=required>;;;
+quux</define-tag>
+<symbol-info x>
+<symbol-info symbol-info>
+<symbol-info define-tag>
+<symbol-info foo>
+<symbol-info bar>
+</example>
+
+###
+###    String functions
+###
+
+<subsection "Manipulation de chaînes de caractères">
 
 <tag:description string-length>
 <var string>
 </tag:description>
 
+<para>
+Retourne le nombre de caractères présents dans la chaîne. Les sauts de
+ligne comptent pour un caractère.
+</para>
+
+<example>
+<set-var foo="0
+1
+2
+3">
+<string-length <get-var foo>>
+<set-var foo="0 1 2 3">
+<set-var l=<string-length <get-var foo>>>
+<get-var l>
+</example>
+
 <tag:description downcase>
 <var string>
 </tag:description>
+
+<para>
+Convertit les caractères en minuscules.
+</para>
+
+<example>
+<downcase "Qu'en est-il des caractères accentués ?">
+</example>
 
 <tag:description upcase>
 <var string>
 </tag:description>
 
+<para>
+Convertit les caractères en majuscules.
+</para>
+
+<example>
+<upcase "Qu'en est-il des caractères accentués ?">
+</example>
+
 <tag:description substring>
 <var string>
 [<var start> [<var end>]]
 </tag:description>
+
+<para>
+Extrait une partie de la chaîne de caractères. Le premier argument est
+la chaîne à traiter, les deuxième et troisième sont les indices
+respectivement du début et de la fin. Par convention, le premier
+caractère est représenté par l'indice 0.
+</para>
+
+<example>
+<set-var foo="abcdefghijk">
+<substring <get-var foo> 4>
+<substring <get-var foo> 4 6>
+</example>
 
 <tag:description subst-in-string>
 <var string>
@@ -195,12 +591,32 @@ qqq
 [singleline=true]
 </tag:description>
 
+<para>
+Effectue une substitution dans la chaîne de caractères.
+</para>
+
+<example>
+<set-var foo="abcdefghijk">
+<subst-in-string <get-var foo> "[c-e]">
+<subst-in-string <get-var foo> "([c-e])" "\\1 ">
+</example>
+
+<example>
+<set-var foo="abcdefghijk\nabcdefghijk\nabcdefghijk">
+<subst-in-string <get-var foo> ".$" "">
+<subst-in-string <get-var foo> ".$" "" singleline=true>
+</example>
+
 <tag:description subst-in-var>
-<var name>
+<var nom>
 <var regexp>
 [<var replacement>]
 [singleline=true]
 </tag:description>
+
+<para>
+Effectue une substitution dans une variable.
+</para>
 
 <tag:description string-eq>
 <var string1>
@@ -208,17 +624,80 @@ qqq
 [caseless=true]
 </tag:description>
 
+<para>
+Si les arguments 1 et 2  sont identiques, retourne <true>, sinon aucune
+valeur n'est affichée.
+</para>
+
+<example>
+1:<string-eq "aAbBcC" "aabbcc">
+2:<string-eq "aAbBcC" "aAbBcC">
+</example>
+
+<attributes:description>
+<attributes:item "caseless=true">
+Avec cet attribut, la comparaison est faite indépendamment de la casse
+des caractères.
+</attributes:description>
+
+<example>
+1:<string-eq "aAbBcC" "aabbcc" caseless=true>
+2:<string-eq "aAbBcC" "aAbBcC" caseless=true>
+</example>
+
 <tag:description string-neq>
 <var string1>
 <var string2>
 [caseless=true]
 </tag:description>
 
+<para>
+Si les arguments 1 et 2  sont identiques,
+aucune valeur n'est affichée, sinon retourne <true>.
+</para>
+
+<example>
+1:<string-neq "aAbBcC" "aabbcc">
+2:<string-neq "aAbBcC" "aAbBcC">
+</example>
+
+<attributes:description>
+<attributes:item "caseless=true">
+Avec cet attribut, la comparaison est faite indépendamment de la casse
+des caractères.
+</attributes:description>
+
+<example>
+1:<string-neq "aAbBcC" "aabbcc" caseless=true>
+2:<string-neq "aAbBcC" "aAbBcC" caseless=true>
+</example>
+
 <tag:description string-compare>
 <var string1>
 <var string2>
 [caseless=true]
 </tag:description>
+
+<para>
+Compare deux chaînes de caractères et retourne une des valeurs less,
+greater ou equal suivant que le premier argument est inférieur,
+supérieur, ou égal au second.
+</para>
+
+<example>
+1:<string-compare "aAbBcC" "aabbcc">
+2:<string-compare "aAbBcC" "aAbBcC">
+</example>
+
+<attributes:description>
+<attributes:item "caseless=true">
+Avec cet attribut, la comparaison est faite indépendamment de la casse
+des caractères.
+</attributes:description>
+
+<example>
+1:<string-compare "aAbBcC" "aabbcc" caseless=true>
+</example>
 
 <tag:description match>
 <var string>
@@ -227,119 +706,479 @@ qqq
 [action=report|extract|delete|startpos|endpos|length]
 </tag:description>
 
+<para>
+Compare deux chaînes de caractères et retourne une des valeurs <value
+less>, <value greater> ou <value equal> suivant que le premier argument
+est inférieur, supérieur, ou égal au second.
+</para>
+
+<attributes:description>
+<attributes:item "caseless=true">
+Avec cet attribut, la comparaison est faite indépendamment de la casse
+des caractères.
+<attributes:item "action=report">
+Affiche <true> si la chaîne de caractères contient l'expression
+régulière, et rien sinon.
+<attributes:item "action=extract">
+Affiche la partie de la chaîne de caractères qui correspond à l'expression
+régulière.
+<attributes:item "action=delete">
+Affiche la chaîne de caractères en supprimant la portion qui correspond
+à l'expression régulière.
+<attributes:item "action=startpos">
+Si la chaîne de caractères contient l'expression régulière, 
+affiche l'indice du premier caractère de la chaîne qui correspond à
+l'expression régulière, sinon affiche <value -1>.
+<attributes:item "action=endpos">
+Si la chaîne de caractères contient l'expression régulière, 
+affiche l'indice du dernier caractère de la chaîne qui correspond à
+l'expression régulière, sinon affiche <value -1>.
+<attributes:item "action=length">
+Affiche la longueur de la portion de la chaîne de caractères qui
+correspond à l'expression régulière.
+</attributes:description>
+
+<example>
+1:<match "abcdefghijk" "[c-e]+">
+2:<match "abcdefghijk" "[c-e]+" action=extract>
+3:<match "abcdefghijk" "[c-e]+" action=delete>
+4:<match "abcdefghijk" "[c-e]+" action=startpos>
+5:<match "abcdefghijk" "[c-e]+" action=endpos>
+6:<match "abcdefghijk" "[c-e]+" action=length>
+</example>
+
 <tag:description char-offsets>
 <var string>
 <var character>
 [caseless=true]
 </tag:description>
 
+<para>
+Affiche un tableau contenant les indices où le caractère passé en second
+argument apparait dans la chaîne de caractères passée en premier
+argument.
+</para>
+
+<attributes:description>
+<attributes:item "caseless=true">
+Avec cet attribut, la comparaison est faite indépendamment de la casse
+des caractères.
+</attributes:description>
+
+<example>
+1:<char-offsets "abcdAbCdaBcD" a>
+2:<char-offsets "abcdAbCdaBcD" a caseless=true>
+</example>
+
 <tag:description set-regexp-syntax>
 [type=basic|extended]
 </tag:description>
 
+<para>
+Cette commande permet de contrôler quel type d'expression régulière est
+utilisé dans les différentes commandes ci-dessus. Actuellement, deux
+types sont définis: basic et extended. Le premier correspond aux
+expressions régulières de la norme POSIX, le second aux expressions
+régulières étendues. Par défaut, les expressions régulières sont de type
+extended.
+</para>
+
+<example>
+<set-var foo="abcdefghijk">
+<set-regexp-syntax type=basic>
+<subst-in-string <get-var foo> "([c-e]+)" ":\\1:">
+<subst-in-string <get-var foo> "\\([c-e]\\{1,\\}\\)" ":\\1:">
+<set-regexp-syntax type=extended>
+<subst-in-string <get-var foo> "([c-e]+)" ":\\1:">
+<subst-in-string <get-var foo> "\\([c-e]\\{1,\\}\\)" ":\\1:">
+</example>
+
 <tag:description get-regexp-syntax>
 </tag:description>
 
-;;;
-;;;    Array functions
-;;;
+<para>
+Affiche quel est le type d'expressions régulières actuellement utilisé.
+</para>
 
-<subsection "Array functions">
+<example>
+<get-regexp-syntax>
+</example>
+
+###
+###    Array functions
+###
+
+<subsection "Tableaux">
+
+<para>
+Le programme <mp4h> permet de faire des manipulations simples sur les
+tableaux. Le texte contenu à l'intérieur d'une variable peut être vu
+indifféremment comme une seule chaîne de caractères, ou comme un tableau
+de lignes séparées par des sauts de ligne. Ainsi, après
+<code>
+<set-var chiffres="0
+1
+2
+3">
+</code>
+nous pouvons afficher soit le contenu de cette variable, soit une des
+lignes.
+<set-var chiffres="0\n1\n2\n3">
+<example>
+<get-var chiffres[2]>
+<get-var chiffres>
+</example>
+</para>
 
 <tag:description array-size>
-<var name>
+<var nom>
 </tag:description>
+
+<para>
+Affiche la taille du tableau dont le nom est passé en argument. Cette
+taille est le nombre de lignes présentes dans la variable.
+</para>
+
+<example>
+<array-size chiffres>
+</example>
 
 <tag:description array-append>
-<var name>
-<var value>
+<var valeur>
+<var nom>
 </tag:description>
 
-<tag:description array-member>
-<var name>
-<var value>
-[caseless=true]
-</tag:description>
+<para>
+Ajoute une ou plusieurs lignes à la fin du tableau.
+</para>
+
+<example>
+<array-append "10\n11\n12" chiffres>
+<get-var chiffres>
+</example>
 
 <tag:description array-add-unique>
-<var name>
-<var value>
+<var valeur>
+<var nom>
 [caseless=true]
 </tag:description>
+
+<para>
+Ajoute une valeur à la fin du tableau si elle n'est pas déjà présente
+dans ce tableau.
+</para>
+
+<example>
+<array-add-unique 2 chiffres>
+<get-var chiffres>
+</example>
+
+<attributes:description>
+<attributes:item "caseless=true">
+Avec cet attribut, la comparaison est faite indépendamment de la casse
+des caractères.
+</attributes:description>
+
+<tag:description array-concat>
+<var nom1>
+[<var nom2>] ...
+</tag:description>
+
+<para>
+Concatène le contenu des tableaux dans la variable dont le nom est passé
+en premier.
+</para>
+
+<example>
+<set-var foo="foo">
+<set-var bar="bar">
+<array-concat foo bar><get-var foo>
+</example>
+
+<tag:description array-member>
+<var valeur>
+<var nom>
+[caseless=true]
+</tag:description>
+
+<para>
+Si la valeur est contenue dans le tableau, retourne l'indice de cette
+valeur, sinon retourne <value -1>.
+</para>
+
+<example>
+<array-member 11 chiffres>
+</example>
+
+<attributes:description>
+<attributes:item "caseless=true">
+Avec cet attribut, la comparaison est faite indépendamment de la casse
+des caractères.
+</attributes:description>
 
 <tag:description array-shift>
 <var offset>
-<var name>
-[start=<var start>]
+<var nom>
+[start=<var début>]
 </tag:description>
 
-<tag:description array-concat>
-<var name>
-[<var name>] ...
-</tag:description>
+<para>
+Cette commande permet de décaler les éléments du tableau. Le premier
+argument est la valeur du décalage, et le second argument le nom de la
+variable à manipuler. Si le décalage est négatif, les indices qui
+tombent en dessous de 0 sont éliminés, et s'il est positif, les
+premières valeurs sont remplies par des lignes vides.
+</para>
 
-<tag:description foreach complex>
-<var variable>
-<var array>
-[start=<var start>]
-[end=<var end>]
-[step=<var step>]
-[iter=<var iter>]
-</tag:description>
+<example>
+<array-shift 2 chiffres>
+Maintenant: <get-var chiffres>
+<array-shift -4 chiffres>
+Et là: <get-var chiffres>
+</example>
+
+<attributes:description>
+<attributes:item "start=<var début>">
+Indique le point de départ à partir duquel le décalage s'opère.
+<example>
+<array-shift 2 chiffres start=2><get-var chiffres>
+</example>
+</attributes:description>
 
 <tag:description sort>
-<var name>
+<var nom>
 [caseless=true]
 [numeric=true]
 [sortorder=reverse]
 </tag:description>
 
-;;;
-;;;    Relational operators
-;;;
+<para>
+Trie les lignes d'un tableau par ordre alphabétique.
+</para>
 
-<subsection "Relational operators">
+<example>
+<sort chiffres><get-var chiffres>
+</example>
+
+<attributes:description>
+<attributes:item "caseless=true">
+Avec cet attribut, le tri est fait indépendamment de la casse
+des caractères.
+
+<attributes:item "numeric=true">
+Effectue un tri en comparant les valeurs numériquement, et non
+alphabétiquement.
+<example>
+<sort chiffres numeric=true><get-var chiffres>
+</example>
+
+<attributes:item "sortorder=reverse">
+Effectue le tri en ordre inverse
+<example>
+<sort chiffres numeric=true sortorder=reverse><get-var chiffres>
+</example>
+</attributes:description>
+
+###
+###    Numerical operators
+###
+
+<subsection "Opérateurs arithmétiques">
+
+<para>
+Les opérateurs suivants permettent de manipuler des nombres. Lorsque
+tous les nombres sont des entiers, le résultat est un entier. Dans le
+cas contraire, le résultat est un réel.
+</para>
+
+<tag:description add>
+<var nombre1>
+<var nombre2>
+[<var nombre3>] ...
+</tag:description>
+
+<tag:description substract>
+<var nombre1>
+<var nombre2>
+[<var nombre3>] ...
+</tag:description>
+
+<tag:description multiply>
+<var nombre1>
+<var nombre2>
+[<var nombre3>] ...
+</tag:description>
+
+<tag:description divide>
+<var nombre1>
+<var nombre2>
+[<var nombre3>] ...
+</tag:description>
+
+<tag:description min>
+<var nombre1>
+<var nombre2>
+[<var nombre3>] ...
+</tag:description>
+
+<tag:description max>
+<var nombre1>
+<var nombre2>
+[<var nombre3>] ...
+</tag:description>
+
+<example>
+<add 1 2 3 4 5 6>
+<add 1 2 3 4 5 6.>
+</example>
+
+<example>
+<define-tag factorielle whitespace=delete>
+<ifeq %0 1 1 <multiply %0 <factorielle <substract %0 1>>>>
+</define-tag>
+<factorielle 6>
+</example>
+
+<tag:description modulo>
+<var nombre1>
+<var nombre2>
+</tag:description>
+
+<para>
+Contrairement aux fonctions ci-dessus, la fonction modulo ne peut
+prendre que deux arguments, qui sont obligatoirement des entiers.
+</para>
+
+<example>
+<modulo 345 7>
+<factorielle 6>
+</example>
+
+<para>
+Les fonctions suivantes permettent de comparer des nombres, et
+retournent <true> lorsque la comparaison est vraie et rien sinon. Si un
+des arguments n'est pas un nombre, la comparaison est fausse.
+</para>
+
+<tag:description gt>
+<var nombre1>
+<var nombre2>
+</tag:description>
+
+<para>
+Retourne <true> si le premier argument est strictement supérieur au
+second.
+</para>
+
+<tag:description lt>
+<var nombre1>
+<var nombre2>
+</tag:description>
+
+<para>
+Retourne <true> si le premier argument est strictement inférieur au
+second.
+</para>
+
+<tag:description eq>
+<var nombre1>
+<var nombre2>
+</tag:description>
+
+<para>
+Retourne <true> si les deux arguments sont égaux.
+</para>
+
+<tag:description neq>
+<var nombre1>
+<var nombre2>
+</tag:description>
+
+<para>
+Retourne <true> si les deux arguments sont différents.
+</para>
+
+###
+###    Relational operators
+###
+
+<subsection "Operateurs relationnels">
 
 <tag:description not>
 <var string>
-[<var string>] ...
 </tag:description>
+
+<para>
+Retourne <true> si la chaîne de caractères est vide, et rien sinon.
+</para>
 
 <tag:description and>
 <var string>
 [<var string>] ...
 </tag:description>
 
+<para>
+Retourne le dernier argument si tous les arguments sont non vides, sinon
+ne retourne rien.
+</para>
+
 <tag:description or>
 <var string>
 [<var string>] ...
 </tag:description>
 
-<tag:description gt>
-<var number1>
-<var number2>
+<para>
+Affiche le premier argument non nul.
+</para>
+
+###
+###    Flow functions
+###
+
+<subsection "Fonctions de contrôle">
+
+<tag:description group verbatim>
+<var statement>
+[<var statement>] ...
 </tag:description>
 
-<tag:description lt>
-<var number1>
-<var number2>
-</tag:description>
+<para>
+Cette fonction a pour objectif de grouper une succession de commandes en une
+seule. Des applications seront vues dans les exemples des commandes
+suivantes.
+</para>
 
-<tag:description eq>
-<var number1>
-<var number2>
-</tag:description>
+<para>
+Une autre utilisation de cette commande, moins intuitive mais tout aussi
+importante, est de pouvoir mettre des sauts de ligne même si l'attribut
+<attribute whitespace=delete> a été spécifié.
+</para>
 
-<tag:description neq>
-<var number1>
-<var number2>
-</tag:description>
+<example>
+<define-tag texte1>
+Ce texte est sur
+3 lignes sans
+whitespace=delete
+</define-tag >
+<define-tag texte2 whitespace=delete>
+Ce texte est sur
+3 lignes avec
+whitespace=delete
+</define-tag >
+<define-tag texte3 whitespace=delete>
+<group "Ce texte est sur
+3 lignes avec
+whitespace=delete">
+</define-tag >
+<texte1>
+<texte2>
+<texte3>
+</example>
 
-;;;
-;;;    Flow functions
-;;;
-
-<subsection "Flow functions">
+<para>
+Notez dans l'exemple 2 que les sauts de ligne ont été supprimés, ce qui
+a pour conséquence de coller des lettres qui ne doivent pas l'être.
+</para>
 
 <tag:description if verbatim>
 <var string>
@@ -347,13 +1186,18 @@ qqq
 [<var else-clause>]
 </tag:description>
 
-<tag:description when complex>
-<var string>
-</tag:description>
+<para>
+Si la chaîne de caractères passée en premier argument n'est pas vide, le
+deuxième argument est exécuté, sinon c'est le troisième.
+</para>
 
-<tag:description while verbatim complex>
-<var cond>
-</tag:description>
+<example>
+<define-tag test whitespace=delete>
+<if %0 "oui" "non">
+</define-tag>
+<test "chaine">
+<test "">
+</example>
 
 <tag:description ifeq verbatim>
 <var string1>
@@ -362,6 +1206,12 @@ qqq
 [<var else-clause>]
 </tag:description>
 
+<para>
+Si les deux chaînes de caractères passées en premier et deuxième
+arguments sont identiques, le troisième argument est exécuté, sinon
+c'est le quatrième.
+</para>
+
 <tag:description ifneq verbatim>
 <var string1>
 <var string2>
@@ -369,142 +1219,536 @@ qqq
 [<var else-clause>]
 </tag:description>
 
-<tag:description group verbatim>
-<var statement>
-[<var statement>] ...
+<para>
+Si les deux chaînes de caractères passées en premier et deuxième
+arguments ne sont pas identiques, le troisième argument est exécuté,
+sinon c'est le quatrième.
+</para>
+
+<tag:description when complex>
+<var string>
 </tag:description>
 
-<tag:description var-case verbatim>
-<var string1>=<var value1> <var statement1>
-[<var string2>=<var value2> <var statement2> ...
+<para>
+Quand la chaîne de caractères passée en premier argument n'est pas vide,
+le corps de cette fonction est exécuté.
+</para>
+
+<tag:description while verbatim complex>
+<var cond>
 </tag:description>
+
+<para>
+Tant que la condition passée en premier argument est vérifiée, le corps
+de cette fonction est exécuté.
+</para>
+
+<example>
+<set-var i=10>
+<while <gt <get-var i> 0>>;;;
+  <get-var i> <decrement i>;;;
+</while>
+</example>
+
+<tag:description foreach complex>
+<var variable>
+<var array>
+[start=<var start>]
+[end=<var end>]
+[step=<var pas>]
+</tag:description>
+
+<para>
+Cette commande est similaire à la commande <command foreach> de Perl ; 
+une variable prend successivement toutes les valeurs stockées dans un
+tableau, et le corps de la fonction est exécuté pour chacune de ces
+valeurs.
+
+Le premier argument est le nom de la variable qui va prendre les
+différentes valeurs, et le deuxième argument est le nom de la variable
+qui contient le tableau de valeurs.
+</para>
+
+<example>
+<set-var x="1\n2\n3\n4\n5\n6">
+<foreach i x><get-var i> </foreach>
+</example>
+
+<attributes:description>
+<attributes:item "start=<var start>">
+La boucle commence à l'indice indiqué par cet attribut.
+<example>
+<set-var x="1\n2\n3\n4\n5\n6">
+<foreach i x start=3><get-var i> </foreach>
+</example>
+
+<attributes:item "end=<var end>">
+La boucle termine à l'indice indiqué par cet attribut.
+<example>
+<set-var x="1\n2\n3\n4\n5\n6">
+<foreach i x end=3><get-var i> </foreach>
+</example>
+
+<attributes:item "step=<var pas>">
+Lorsqu'un pas est spécifié, 
+Au lieu de prendre toutes les valeurs du tableau, 
+Si le pas est négatif, la boucle est inversée.
+<example>
+<set-var x="1\n2\n3\n4\n5\n6">
+<foreach i x step=2><get-var i> </foreach>
+<foreach i x step=-2><get-var i> </foreach>
+</example>
+</attributes:description>
+
+<tag:description var-case verbatim>
+<var var1>=<var valeur1> <var action1>
+[<var var2>=<var valeur2> <var action2> ...
+</tag:description>
+
+<para>
+Cette commande permet de faire plusieurs tests en une seule instruction.
+
+<example>
+<set-var i=0>
+<define-tag test whitespace=delete>
+<var-case
+  x=1   <group <increment i> x<get-var i>>
+  x=2   <group <decrement i> x<get-var i>>
+  y=1   <group <increment i> y<get-var i>>
+  y=2   <group <decrement i> y<get-var i>>
+>
+</define-tag>
+<set-var x=1 y=2><test>
+<set-var x=0 y=2><test>
+</example>
+</para>
 
 <tag:description break>
 </tag:description>
 
-;;;
-;;;    Numerical operators
-;;;
+<para>
+Cette commande fait sortir de la boucle <command while>
+la plus interne.
+</para>
 
-<subsection "Numerical operators">
+<example>
+<set-var i=10>
+<while <gt <get-var i> 0>>;;;
+  <get-var i> <decrement i>;;;
+  <ifeq <get-var i> 5 <break>>;;;
+</while>
+</example>
 
-<tag:description add>
-<var number1>
-<var number2>
-</tag:description>
+###
+###    File functions
+###
 
-<tag:description substract>
-<var number1>
-<var number2>
-</tag:description>
-
-<tag:description multiply>
-<var number1>
-<var number2>
-</tag:description>
-
-<tag:description divide>
-<var number1>
-<var number2>
-</tag:description>
-
-<tag:description modulo>
-<var number1>
-<var number2>
-</tag:description>
-
-<tag:description min>
-<var number1>
-<var number2>
-</tag:description>
-
-<tag:description max>
-<var number1>
-<var number2>
-</tag:description>
-
-;;;
-;;;    File functions
-;;;
-
-<subsection "File functions">
-
-<tag:description get-file-properties>
-<var filename>
-</tag:description>
+<subsection "Fonctions sur les fichiers">
 
 <tag:description directory-contents>
 <var dirname>
+[matching=regexp]
 </tag:description>
+
+<para>
+Le nom d'un répertoire est passé en argument. Cette commande 
+affiche la liste des noms de fichiers présents dans ce répertoire,
+séparés par des sauts de ligne.
+</para>
+
+<example>
+<directory-contents . matching=".*\\.mp4h$">
+</example>
 
 <tag:description file-exists>
 <var filename>
 </tag:description>
 
-<tag:description include>
+<para>
+Affiche <true> si le fichier dont le nom est passé en argument est
+trouvé, et rien sinon.
+</para>
+
+<tag:description get-file-properties>
 <var filename>
 </tag:description>
 
-;;;
-;;;    Debugging
-;;;
+<para>
+Affiche un tableau d'informations sur le fichier dont le nom est donné
+en argument. Les informations sont dans l'ordre : la taille du fichier,
+son type, la date du dernier changement de l'inode (en secondes depuis
+le 1er janvier 1970), la date de la dernière modification du fichier, la
+date du dernier accès au fichier, le nom du propriétaire du fichier, et
+le nom du groupe.
+</para>
 
-<subsection "Debugging">
+<example>
+<get-file-properties mp4h.mp4h>
+</example>
+
+<tag:description include>
+<var filename>
+[alt=<var action>]
+[verbatim=true]
+</tag:description>
+
+<para>
+Lit les données contenues dans le fichier passé en argument.
+</para>
+
+<attributes:description>
+<attributes:item "alt=<var texte>">
+Si le fichier n'est pas trouvé, le texte alternatif est affiché. Si cet
+attribut est absent et que le fichier n'est pas trouvé, le programme
+s'arrête.
+
+<attributes:item "verbatim=true">
+Avec cet attribut, le contenu du fichier est inclus sans être modifié
+par <mp4h>.
+</attributes:description>
+
+###
+###    Debugging
+###
+
+<subsection "Aide au déboguage">
+
+<para>
+Lorsque les constructions deviennent complexes, il peut être ardu de comprendre
+ce qui cloche dans ce qu'on a écrit. Les fonctions ci-dessous permettent
+d'afficher certaines informations. Le déboguage reste cependant délicat, et est
+une partie de <mp4h> à améliorer.
+</para>
+
+<tag:description function-def>
+<var nom>
+</tag:description>
+
+<para>
+Affiche le texte de remplacement de la fonction. Par exemple, la commande qui
+affiche les exemples à été définie ainsi:
+<example>
+<function-def example>
+</example>
+
+</para>
 
 <tag:description debugmode>
 <var string>
 </tag:description>
 
-<tag:description function-def>
-<var name>
+<para>
+Cette commande prend le même argument que l'option <optflag d>.
+</para>
+
+<tag:description debugfile>
+<var fichier>
 </tag:description>
+
+<para>
+Indique dans quel fichier les instructions de déboguage doivent être
+écrites. Si le nom de fichier est vide, l'affichage de ces instructions
+se fait de nouveau dans la sortie erreur standard. Si le nom du fichier
+est <fle ->, l'affichage est supprimé.
+</para>
+
+<para>
+Il n'existe aucun moyen pour insérer ces instructions à l'intérieur du
+document post-traité.
+</para>
 
 <tag:description debugging-on>
-<var name>
+<var nom>
+[<var nom>] ...
 </tag:description>
+
+<para>
+Les commandes dont les noms sont passés en argument sont «tracées»,
+c'est-à-diree que les informations demandées au travers de l'option <optflag d>
+et de la commande <command debugmode> sont affichées lors de chaque appel de
+la fonction.
+</para>
 
 <tag:description debugging-off>
-<var name>
+<var nom>
+[<var nom>] ...
 </tag:description>
 
-;;;
-;;;    Misc
-;;;
+<para>
+Fonction inverse de la précédente.
+</para>
 
-<subsection "Miscellaneous">
+###
+###    Misc
+###
+
+<subsection "Divers">
+
+<tag:description __file__>
+</tag:description>
+
+<para>
+Fonction qui retourne le nom du fichier en train d'être traité.
+</para>
+
+<tag:description __line__>
+</tag:description>
+<para>
+Fonction qui retourne le numéro de la ligne dans le fichier en train
+d'être traité.
+</para>
+
+<example>
+Ceci est le fichier <__file__>, ligne <__line__>.
+</example>
+
+<para>
+En fait, si vous regardez le fichier source, vous vous apercevrez que le
+numéro de la ligne n'est pas correct.
+d'être traité.
+</para>
+
+<tag:description version>
+</tag:description>
+
+<para>
+Affiche le numéro de version de <mp4h>.
+</para>
 
 <tag:description date>
 [epoch]
 </tag:description>
 
+<para>
+Affiche l'heure locale correspondant au temps epoch donné en argument.
+Lorsqu'il n'y a pas d'argument, l'heure actuelle est affichée.
+</para>
+
+<example>
+<date>
+<set-var info=<get-file-properties <__file__>>>
+<date <get-var info[2]>>
+</example>
+
 <tag:description timer>
 </tag:description>
 
-<tag:description __file__>
-</tag:description>
+<para>
+Affiche le temps écoulé depuis le précédent appel à cette fonction.
+Le temps affiché est le nombre de cycles d'horloge, et est donc
+dépendant de la vitesse du processeur.
+</para>
 
-<tag:description __line__>
-</tag:description>
-
-<tag:description version>
-</tag:description>
+<example>
+Le temps écoulé est mesuré en cycles d'horloge. Depuis le début de la
+compilation de cette documentation par <mp4h>, voici le nombre de cycles
+écoulés:
+<timer>
+</example>
 
 <tag:description comment complex>
 </tag:description>
 
-<section Bugs>
+<para>
+Le corps de cette balise est supprimé.
+</para>
+
+<section "Schéma d'expansion des macros">
 
 <para>
-When a tag name is not followed by a space or a closing bracket,
-expansion is wrong.  For instance, this comment
-<pre>
-    <html:comment>this is a comment</html:comment>
-</pre>
-will cause trouble whereas this one
-<pre>
-    <html:comment> this is a comment</html:comment>
-</pre>
-is correctly parsed.
+Cette partie décrit les mécanismes utilisés pour le remplacement des
+macros. Elle se veut aussi précise que possible, aussi n'hésitez pas à me
+signaler toute erreur ou omission.
 </para>
+
+<subsection "Généralités">
+
+<undef foo bar>
+Commençons par donner des exemples de définition de balises:
+<example>
+<define-tag foo>;;;
+Ceci est un exemple de balise simple;;;
+</define-tag>;;;
+<define-tag bar endtag=required>;;;
+Ceci est un exemple de balise complexe;;;
+</define-tag>;;;
+<foo>
+<bar>Corps de la fonction</bar>
+</example>
+
+<para>
+Les commandes ainsi définies peuvent avoir des attributs, comme toute
+balise HTML. Ces attributs sont séparés par un ou plusieurs espaces,
+tabulations ou sauts de lignes, et chaque attribut doit être une entité
+complète de <mp4h>. Par exemple, avec les définitionsa ci-dessus,
+<full-command bar> ne peut pas être un attribut,
+parce que la commande <full-command bar> est complexe.
+En revanche, il est possible d'écrire
+<code><foo <foo>></code>
+ou même
+<code><foo <foo name=src url=ici>></code>
+Dans les deux exemples ci-dessus, la commande <command foo> a un seul
+attribut.
+</para>
+
+<undef foo bar>
+<para>
+Dans certains cas, il est nécessaire de regrouper ensemble plusieurs
+chaînes de caractères pour en faire un seul attribut. Cela peut être
+fait soit avec des guillements anglo-saxons (double quotes), soit avec
+la commande <command group>.  Par exemple,
+<code><foo "Ceci est le 1er attribut"
+           <group et le second>></code>
+</para>
+
+<note>
+Contrairement au HTML, l'apostrophe ne peut pas servir à la place des
+guillements.
+</note>
+
+<undef href mail1 mail2 show-attributes show1 show2 bar>
+<para>
+Pour que ces attributs se retrouvent dans le texte de
+remplacement, les conventions suivantes ont été adoptées:
+<list>
+<item>Les attributs sont numérotés à partir de 0. Dans le texte de
+remplacement, <value %0> sera remplacé par le 1er attribut, <value %1>
+par le 2e attribut, etc. Comme le nombre d'attribut n'est pas limité,
+les lettres <value %20> seront remplacés par le vingt-et-unième
+argument, et pas par le 3e argument suivi d'un 0.
+<example>
+<define-tag href>;;;
+<a href="%0">%1</a>;;;
+</define-tag>;;;
+<href http://www.gimp.org "The Gimp">
+</example>
+
+<item>La séquence <value %#> affiche le nombre d'attributs passés
+à la commande.
+
+<item>La séquence <value %%> est remplacée par un <value %>, ce qui est
+utile pour des définitions imbriquées.
+<example>
+<define-tag externe>;;;
+Externe, nombre d'attributs: %#
+<define-tag interne1>;;;
+Interne1, nombre d'attributs: %#;;;
+</define-tag>;;;
+<define-tag interne2>;;;
+Interne2, nombre d'attributs: %%#;;;
+</define-tag>;;;
+<interne1 %attributes et quelques autres>
+<interne2 %attributes et quelques autres>
+</define-tag>
+<externe liste attributs>
+</example>
+
+<item>Les caractères <value %attributes> sont remplacés par la liste 
+des arguments, séparés par un espace.
+<example>
+<define-tag mail1>;;;
+<set-var %attributes>;;;
+<get-var name>
+<get-var mail>
+</define-tag>;;;
+<set-var name="" mail="">
+<mail1 name="Dr. Foo" mail="hello@foo.com">
+</example>
+
+<item>Les caractères <value %body> sont remplacés par le corps de la
+commande, dans le cas d'une balise complexe.
+<example>
+<define-tag mail2 endtag=required>;;;
+<set-var %attributes>;;;
+<a href="mailto:<get-var mail>">%body</a>
+</define-tag>;;;
+<mail2 mail="hello@foo.com">;;;
+<img src="photo.png" alt="Dr. Foo" border=0>;;;
+</mail2>
+</example>
+
+<item>Les deux formes ci-dessus possèdent une forme alternative, où la
+liste est séparée par des sauts de lignes au lieu d'espaces. Il s'agit
+des formes <value %Aattributes> et <value %Abody>, le <value A> voulant
+dire array (tableau en français).
+<example>
+<define-tag show-attributes>;;;
+<set-var list="%Aattributes" i=0>;;;
+<foreach attr list>;;;
+%<get-var i>: <get-var attr>
+<increment i>;;;
+</foreach>;;;
+</define-tag>;;;
+<show-attributes name="Dr. Foo" mail="hello@foo.com">
+</example>
+
+<item>Une autre forme alternative est obtenue en remoplaçant le <value
+A> par <value U>, auquel cas le texte est remplacé mais n'est lui-même
+pas évalué. Cela n'a de sens que si la commande a été déclarée avec
+l'attribut <attribute attributes=verbatim>, parce que dans le cas
+contraire les arguments sont développés avant que ces substitutions
+n'aient lieu.
+<example>
+<define-tag show1>;;;
+Avant développement: %Uattributes
+Après développement: %attributes
+</define-tag>;;;
+<define-tag show2 attributes=verbatim>;;;
+Avant développement: %Uattributes
+Après développement: %attributes
+</define-tag>;;;
+<define-tag bar>et hop %attributes</define-tag>;;;
+<show1 <bar la boum>>
+<show2 <bar la boum>>
+</example>
+
+<item>Les modificateurs <value A> et <value U> peuvent être combinés.
+</list>
+</para>
+
+<note>
+Le mécanisme de lecture des instructions est complètement différent dans
+<Meta-HTML> et dans <mp4h>. Avec <Meta-HTML>, il est parfois nécessaire
+d'avoir recours à d'autres constructions, comme <value %xbody> et <value
+%qbody>. Celles-ci n'ont pas lieu d'être avec <mp4h>, mais pour être au
+plus compatible avec <Meta-HTML>, <mp4h> les reconnait aussi et elles
+ont exactement le même rôle que <value %body>. Une autre particularité
+non mentionnée ci-dessus, qui existe aussi pour des raisons de
+compatibilité avec <Meta-HTML>, est le fait que pour des balises
+simples, <value %body> est un synonyme de <value %attributes>. Ces
+fonctionnalités sont actuellement comprises dans <mp4h>, mais peuvent
+très bien être supprimées dans les versions futures.
+</note>
+
+<subsection "Mécanisme d'expansion des commandes">
+
+<step-by-step>
+<step start>
+Les caractères sont lus un par un, jusqu'à trouver un «<left-angle>».
+Si le caractère suivant est une lettre, un underscore
+(<command _>) ou un signe de pourcentage (<command %>), alors cela
+signifie que ce qui suit est le nom d'une commande et le processus
+continue en <step-ref parse-name>. Dans le cas contraire, le signe
+<left-angle> est traité comme un caractère ordinaire, et est simplement
+affiché. Retour en <step-ref start>.
+
+<step parse-name>
+Une fois la première lettre d'un mot trouvée, les caractères sont 
+lus tant qu'ils sont susceptibles de former le nom d'une commande.
+D'un point de vue formel, voici comment est défini le nom d'une
+commande:
+<code>nom ::= [A-Za-z%_][A-Za-z0-9%_:*-]</code>
+
+<step command>
+Ce nom est ensuite comparé à la liste des noms de commandes connus.
+Si la commande existe, aller en <step-ref parse-attribute>.
+Sinon. Les attributs sont lus comme s'il s'agissait d'une commande
+normale, le résultat est affiché et le programme retourne en <step-ref
+start>.
+
+<step parse-attribute>
+blah blah blah à finir.
+
+</step-by-step>
 
 <footer>

@@ -119,8 +119,11 @@ $(SHTOOL):
 #   THE RELEASE STUFF
 # ------------------------------------------------
 
+FIND = find      # name of a GNU find
 GZIP = gzip      # where to find GNU Zip
 NAME = barbier   # name of maintainer who rolls the tarball
+
+EXCLUDE_FILES = CVS .cvsignore core mp4h-*.tar.gz
 
 NEWVERS = \
     $(VERSION_TOOL) -l c -p MP4H $$OPT src/version.c; \
@@ -147,7 +150,13 @@ _BUILDDIST = \
     echo "Done"; \
     cd $$_cwd && ls -l $${_tarball}
 
-release: distclean fixperm
+manifest: distclean
+	x=`echo $(EXCLUDE_FILES) |\
+	   sed -e 's;/;\\\\/;g' -e 's#[ 	]\{1,\}#/d -e /#g'`; \
+	$(FIND) * -type f -depth -print |\
+	sed -e /$$x/d | sort >MANIFEST
+
+release: distclean manifest fixperm
 	@$(_GETDISTINFO) \
     _distname="mp4h-$${_version}"; \
     _tarball="$${_distname}.tar.gz"; \

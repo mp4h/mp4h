@@ -153,6 +153,12 @@ by the Foundation.
 </define-tag>
 
 ;;;
+;;;    Notes
+;;;
+<define-tag note endtag=required>;;;
+<para>@b{<lang:note>}: %body</para></define-tag>
+
+;;;
 ;;;    Example of MP4H code
 ;;;
 <define-tag example endtag=required attributes=verbatim>

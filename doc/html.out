@@ -26,6 +26,9 @@
 <define-tag file><tt>%attributes</tt></define-tag>
 <define-tag anchor><a %attributes>&nbsp;</a></define-tag>
 
+<define-tag tag:slash><slash></define-tag>
+<define-tag tag:V><tt>V</tt></define-tag>
+
 ;;;
 ;;;    Alias for writing URLs
 ;;;
@@ -46,7 +49,7 @@
 <head>
 <meta name="Author"    content="Denis Barbier">
 <meta name="Generator" content="mp4h <version>">
-<meta name="Created"   content="29-Nov-1999">
+<meta name="Created"   content="10-Feb-2000">
 <set-var fileinfo[]="<get-file-properties mp4h.mp4h>">;;;
 <meta name="Modified"  content="<date <get-var fileinfo[3]>>">
 <title><get-var title></title>
@@ -78,8 +81,8 @@
 <p><a name="tag-%0">&nbsp;</a></p>
 <table border=2>
 <tr valign=top>
-<td align=center><if <get-var complex> "" "<a href=\"#noteattr\">/</a>"></td>
-<td align=center><if <get-var verbatim> "" "<a href=\"#noteattr\">V</a>"></td>
+<td align=center><if <get-var complex> "" "<a href=\"#noteattr\"><tag:slash></a>"></td>
+<td align=center><if <get-var verbatim> "" "<a href=\"#noteattr\"><tag:V></a>"></td>
 <td align=center>%0</td>
 <td>
   <table>
@@ -110,6 +113,12 @@
 <define-tag para endtag=required><p>%body</p></define-tag>
 
 ;;;
+;;;    Notes
+;;;
+<define-tag note endtag=required>;;;
+<para><b><lang:note>:</b> %body</para></define-tag>
+
+;;;
 ;;;    Lists
 ;;;
 <define-tag list endtag=required>;;;
@@ -122,7 +131,8 @@
 ;;;
 <eol-comment "###">
 <define-tag three-colon>;;;</define-tag>
-<define-tag example endtag=required attributes=verbatim whitespace=delete>
+<define-tag example endtag=required
+            attributes=verbatim whitespace=delete>
 <set-var-verbatim verb-body=%ubody>
 <subst-in-var verb-body "&" "&amp;">
 <subst-in-var verb-body "<" "&lt;">
@@ -134,11 +144,11 @@
 <subst-in-var body "<three-colon>[^\n]*\n[ \t]*" "" singleline=true>
 <subst-in-var body "<three-colon>$" "">
 <subst-in-var body "^\n*" "" singleline=true>
-<table border=2 cellpadding=0 cellspacing=0>
-    <tr><th bgcolor="#ccccff">Source</th></tr>
-    <tr><td bgcolor="#ccff99"><pre><get-var-once verb-body></pre></td></tr>
-    <tr><th bgcolor="#ccccff">Output</th></tr>
-    <tr><td bgcolor="#ff99cc"><pre><get-var-once body></pre></td></tr>
+<table border=2 cellpadding=0 cellspacing=0 width="80%">
+    <tr><th bgcolor="#ccccff"><lang:example-source></th></tr>
+    <tr><td bgcolor="#ccff99" width="80%"><pre><get-var-once verb-body></pre></td></tr>
+    <tr><th bgcolor="#ccccff"><lang:example-output></th></tr>
+    <tr><td bgcolor="#ff99cc" width="80%"><pre><get-var-once body></pre></td></tr>
 </table>
 </define-tag>
 <eol-comment ";;;">
@@ -180,3 +190,21 @@
 
 <define-tag optopt><tt>[%attributes]</tt></define-tag>
 
+;;;
+;;;   Macros to draw a numbered list, with refs.
+;;;
+<define-tag step-by-step endtag=required whitespace=delete>
+  <set-var __step=>
+  <define-tag step-ref></define-tag>
+  <define-tag step>
+    <array-append %%0 __step>
+  </define-tag>
+  <set-var dummy="%body">
+  <define-tag step><li></define-tag>
+  <define-tag step-ref>
+  <add 1 <array-member %%0 __step>>
+  </define-tag>
+  <ol>
+  %body
+  </ol>
+</define-tag>

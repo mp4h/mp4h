@@ -18,11 +18,18 @@
 
 <define-tag var>I_LT_%attributes_GT_</define-tag>
 <define-tag value>C_LT_%attributes_GT_</define-tag>
-<define-tag commande>C_LT_%attributes_GT_</define-tag>
+<define-tag command>C_LT_%attributes_GT_</define-tag>
+<define-tag full-command>C_LT_E_LT_lt_GT_%attributesE_LT_gt_GT__GT_</define-tag>
 <define-tag left-angle>_LT_</define-tag>
 <define-tag right-angle>_GT_</define-tag>
+<define-tag slash>C_LT_/_GT_</define-tag>
 <define-tag true>C_LT_true_GT_</define-tag>
-<define-tag option>C_LT_-%attributes_GT_</define-tag>
+<define-tag optflag>C_LT_-%attributes_GT_</define-tag>
+<define-tag file>C_LT_%attributes_GT_</define-tag>
+<define-tag anchor></define-tag>
+
+<define-tag tag:slash><slash></define-tag>
+<define-tag tag:V>C_LT_V_GT_</define-tag>
 
 ;;;
 ;;;    Alias for writing URLs
@@ -48,7 +55,7 @@
 
 =head1 VERSION
 
-<get-var version>
+<document-version>
 
 </define-tag>
 
@@ -56,7 +63,9 @@
 ;;;    Footer of the POD document
 ;;;
 <define-tag footer>
+
 =cut
+
 </define-tag>
 
 ;;;
@@ -68,20 +77,20 @@
 <set-var complex=*>;;;
 <set-var verbatim=*>;;;
 <set-var %attributes>;;;
-<set-var list-attributes[]="%body">;;;
+<set-var list-attributes="%body">;;;
 
 =over 2
 
 =item * %0 ;;;
-<set-var _i="%0"><subst-in-var _i . " ">;;;
-<match "                              " <get-var _i> action=delete>;;;
-<if <get-var complex> - "End Tag"> <if <get-var verbatim> - "Verbatim Attributes">
+   <if <get-var complex> "" "<tag:slash>">;;;
+   <if <get-var verbatim> "" "<tag:V>">
 
 <foreach attr list-attributes>;;;
 <if <get-var attr> <group C_LT_<get-var attr>_GT_ " ">>;;;
 </foreach>
 
 =back
+
 <restore verbatim>;;;
 <restore complex>;;;
 </define-tag>
@@ -111,34 +120,46 @@
 </define-tag>
 
 ;;;
+;;;    Notes
+;;;
+<define-tag note endtag=required>;;;
+<para>B_LT_<lang:note>:_GT_ %body</para></define-tag>
+
+;;;
 ;;;    Example of MP4H code
 ;;;
-<define-tag example endtag=required attributes=verbatim>
-<set-var-verbatim verb-body=%ubody>;;;
-<subst-in-var verb-body "<" "_LT_">;;;
-<subst-in-var verb-body ">" "_GT_">;;;
-<subst-in-var verb-body "^[ \t\n]+" "" singleline=true>;;;
-<subst-in-var verb-body "[ \t\n]+$" "" singleline=true>;;;
-<subst-in-var verb-body "^(.)" "   \\1">;;;
-<set-var body=%body>;;;
-<subst-in-var body "^[ \t\n]+" "" singleline=true>;;;
-<subst-in-var body "[ \t\n]+$" "" singleline=true>;;;
-<subst-in-var body "^(.)" "   \\1">;;;
-Example:
+<eol-comment "###">
+<define-tag three-colon>;;;</define-tag>
+<define-tag example endtag=required attributes=verbatim whitespace=delete>
+<set-var-verbatim verb-body=%ubody>
+<subst-in-var verb-body "<" "_LT_">
+<subst-in-var verb-body ">" "_GT_">
+<subst-in-var verb-body "^\n*" "" singleline=true>
+<subst-in-var verb-body "^(.)" "   \\1">
+<set-var body=%body>
+<subst-in-var body "<" "_LT_">
+<subst-in-var body ">" "_GT_">
+<subst-in-var body "<three-colon>[^\n]*\n[ \t]*" "" singleline=true>
+<subst-in-var body "<three-colon>$" "">
+<subst-in-var body "^\n*" "" singleline=true>
+<subst-in-var body "^(.)" "   \\1">
+<group "<lang:example-source>:
 
 <get-var-once verb-body>
-    
-Output:
+
+<lang:example-output>:
 
 <get-var-once body>
 
+">
 </define-tag>
+<eol-comment ";;;">
 
 ;;;
 ;;;    Verbatim code
 ;;;
 <define-tag code endtag=required attributes=verbatim>
-%ubody
+<subst-in-string "%ubody" "^(.)" "   \\1">
 </define-tag>
 
 ;;;
@@ -157,3 +178,45 @@ _LT_!--%body--_GT_
 %body
 </define-tag>
 
+<define-tag option-list endtag=required>
+
+=over 2
+
+%body
+
+=back
+
+</define-tag>
+
+<define-tag option endtag=required>
+
+=item %attributes
+
+%body
+
+</define-tag>
+
+<define-tag optmand>C_LT_%attributesC_GT_</define-tag>
+
+<define-tag optopt>C_LT_[%attributes]C_GT_</define-tag>
+
+;;;
+;;;   Macros to draw a numbered list, with refs.
+;;;
+<define-tag step-by-step endtag=required>
+<set-var __step=>;;;
+<set-var __istep=0>;;;
+<define-tag step-ref></define-tag>;;;
+<define-tag step><array-append %%0 __step></define-tag>;;;
+<set-var dummy="%body">;;;
+<define-tag step>
+=item <increment __istep><get-var __istep>. </define-tag>
+<define-tag step-ref><add 1 <array-member %%0 __step>></define-tag>;;;
+
+=over 2
+
+%body
+
+=back
+
+</define-tag>
