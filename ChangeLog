@@ -10,6 +10,10 @@
 
   Changes between 1.2.3 and ???:
 
+    *) Do not abort with missing input files (05-Jan-2002):
+       Just print a warning and skip this file.
+       [Anders Dinsen]
+
     *) Fix line numbers in error messages (10-Dec-2001):
        [Denis Barbier]
 

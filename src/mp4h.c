@@ -473,7 +473,9 @@ main (int argc, char *const *argv)
             if (fp == NULL)
               {
                 error (0, errno, argv[optind]);
-                abort ();
+                MP4HERROR ((warning_status, 0,
+                   _("%s: file skipped"), argv[optind]));
+                continue;
               }
             else
               {
