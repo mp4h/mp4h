@@ -343,7 +343,7 @@ remove_stars_and_slash (char *s)
           if (exp_flags & EXP_REMOVE_TRAILING_SLASH)
             {
               offset++;
-              if (cp > s && *(cp-1) == ' ')
+              if (cp > s && IS_SPACE(*(cp-1)))
                 offset++;
             }
           else

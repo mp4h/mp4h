@@ -252,7 +252,7 @@ This documentation describes <get-var package /> version <get-var version />.
 ;;;    Verbatim code
 ;;;
 <define-tag code endtag=required attributes=verbatim whitespace=delete>
-<set-var-verbatim verb-body=%ubody />;;;
+<set-var-verbatim verb-body=%Ubody />;;;
 <subst-in-var verb-body "&" "&amp;" />;;;
 <subst-in-var verb-body "<" "&lt;" />;;;
 <subst-in-var verb-body ">" "&gt;" />;;;

@@ -10,6 +10,24 @@
 
   Changes between 1.0.3 and SNAP:
 
+    *) Better control with <return> tag (04-Jul-2000):
+       With `up=0', closes all current macro expansion.
+       With `up=-1', closes all current macro expansion and stops
+       processing current file.
+       [Denis Barbier]
+
+    *) Preserve whitespaces in attributes (04-Jul-2000):
+       Meta-HTML did preserve whitespaces in attributes.  Even if it is
+       not very useful, some people may need this feature to format
+       thier output files as wanted.
+       This change fixes also the `whitespace=delete' attribute, which
+       did remove newlines in attributes.
+       [Denis Barbier]
+
+    *) Fix <return> (04-Jul-2000):
+       This tag could cause segmentation fault.
+       [Denis Barbier]
+
     *) New <compound> tag for grouping (02-Jul-2000):
        It does exactly the same job as <group>, but this tag is
        complex.

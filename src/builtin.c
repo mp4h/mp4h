@@ -322,7 +322,7 @@ static boolean safe_strtod __P ((const char *, const char *, double *));
 static boolean safe_strtol __P ((const char *, const char *, long int *));
 static const char *predefined_attribute __P ((const char *, int *, token_data **, boolean));
 static void quote_name_value __P ((struct obstack *, char *));
-static void matching_attributes __P ((struct obstack *, int, token_data **, char *, boolean, boolean));
+static void matching_attributes __P ((struct obstack *, int, token_data **, char *));
 static void set_trace __P ((symbol *, const char *));
 static void generic_set_hook __P ((MP4H_BUILTIN_PROTO, boolean, int));
 static void math_relation __P ((MP4H_BUILTIN_PROTO, mathrel_type));
@@ -921,8 +921,7 @@ quote_name_value (struct obstack *obs, char *pair)
 }
 
 static void
-matching_attributes (struct obstack *obs, int argc, token_data **argv,
-        char *list, boolean quote, boolean unexpanded)
+matching_attributes (struct obstack *obs, int argc, token_data **argv, char *list)
 {
   char *cp, *next, *sp;
   int i, special_chars;
@@ -952,15 +951,9 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
               if (!first)
                 obstack_1grow (obs, ' ');
               first = FALSE;
-              if (unexpanded)
-                obstack_1grow (obs, CHAR_LQUOTE);
-              else
-                obstack_1grow (obs, CHAR_BGROUP);
+              obstack_1grow (obs, CHAR_BGROUP);
               obstack_grow (obs, ARG (i), strlen (ARG (i)));
-              if (unexpanded)
-                obstack_1grow (obs, CHAR_RQUOTE);
-              else
-                obstack_1grow (obs, CHAR_EGROUP);
+              obstack_1grow (obs, CHAR_EGROUP);
             }
           else if (sp != NULL
                    && strncasecmp (ARG (i)+special_chars, cp, strlen (cp)) == 0
@@ -969,18 +962,9 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
               if (!first)
                 obstack_1grow (obs, ' ');
               first = FALSE;
-              if (unexpanded)
-                obstack_1grow (obs, CHAR_LQUOTE);
-              else
-                obstack_1grow (obs, CHAR_BGROUP);
-              if (quote)
-                quote_name_value (obs, ARG (i));
-              else
-                obstack_grow (obs, ARG (i), strlen (ARG (i)));
-              if (unexpanded)
-                obstack_1grow (obs, CHAR_RQUOTE);
-              else
-                obstack_1grow (obs, CHAR_EGROUP);
+              obstack_1grow (obs, CHAR_BGROUP);
+              obstack_grow (obs, ARG (i), strlen (ARG (i)));
+              obstack_1grow (obs, CHAR_EGROUP);
             }
         }
       cp = next;
@@ -1874,6 +1858,10 @@ mp4h_return (MP4H_BUILTIN_ARGS)
     numeric_arg (argv[0], up, TRUE, &levels);
 
   if (levels < 0)
+    levels = expansion_level + 1;
+  else if (levels == 0)
+    levels = expansion_level;
+  else if (levels > expansion_level)
     levels = expansion_level;
 
   for (i=0; i<levels; i++)
@@ -2299,7 +2287,7 @@ mp4h_attributes_extract (MP4H_BUILTIN_ARGS)
         || expansion == READ_ATTR_QUOT))
       obstack_1grow (obs, CHAR_EGROUP);
 
-  matching_attributes (obs, argc-1, argv+1, ARG (1), FALSE, FALSE);
+  matching_attributes (obs, argc-1, argv+1, ARG (1));
 
   if (expansion_level > 1 && (
         expansion == READ_NORMAL || expansion == READ_ATTRIBUTE

@@ -151,11 +151,18 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
   TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
 
   /* Skip leading white space.  */
-  do
+  t = next_token (&td, expansion, FALSE);
+  if (t == TOKEN_SPACE)
     {
+      if (expansion == READ_ATTR_ASIS || expansion == READ_ATTR_QUOT)
+        {
+          /*  We are parsing attributes of a command which will be
+              rescanned, so whitepsaces are preserved.  */
+          obstack_grow (obs, TOKEN_DATA_TEXT (&td),
+                  strlen (TOKEN_DATA_TEXT (&td)));
+        }
       t = next_token (&td, expansion, FALSE);
     }
-  while (t == TOKEN_SPACE);
 
   while (1)
     {
@@ -168,6 +175,13 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
           if ((IS_SPACE(*text) || IS_CLOSE(*text))
                && !in_string && (group_level == 0))
             {
+
+              if (t == TOKEN_SPACE &&
+                  (expansion == READ_ATTR_ASIS || expansion == READ_ATTR_QUOT))
+                {
+                  obstack_grow (obs, TOKEN_DATA_TEXT (&td),
+                          strlen (TOKEN_DATA_TEXT (&td)));
+                }
 
               /* The argument MUST be finished, whether we want it or not.  */
               obstack_1grow (obs, '\0');
@@ -254,7 +268,7 @@ collect_arguments (char *symbol_name, read_type expansion,
   int ch;
   token_data td;
   token_data *tdp;
-  char *last_addr;
+  char *last_addr, *cp;
   boolean more_args;
   char last_char = ' ';
 
@@ -280,12 +294,13 @@ collect_arguments (char *symbol_name, read_type expansion,
                 _("ERROR:%s:%d: EOF when reading argument of the `%s' tag"),
                      CURRENT_FILE_LINE, symbol_name));
             }
+
           tdp = (token_data *)
             obstack_copy (arguments, (voidstar) &td, sizeof (td));
           obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
         }
       while (more_args);
-      
+
       /*  If the last argument is empty, it is removed.  We need it to
           remove white spaces before closing brackets.  */
       if (TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT
@@ -575,12 +590,10 @@ expand_macro (symbol *sym, read_type expansion)
 
       for (i = 1; i < argc; i++)
         {
-          obstack_1grow (obs_expansion, ' ');
           shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
         }
       if (!SYMBOL_CONTAINER (sym) && slash)
         {
-          obstack_1grow (obs_expansion, ' ');
           obstack_1grow (obs_expansion, CHAR_SLASH);
         }
 
@@ -686,14 +699,14 @@ expand_unknown_tag (char *name, read_type expansion)
   obstack_1grow (obs_expansion, '<');
   shipout_string (obs_expansion, symbol_name, 0);
 
+  /*  Whitespaces between attributes have been put into
+      attributes text, so there is no need to insert a space
+      between them.  */
   for (i = 1; i < argc; i++)
-    {
-      obstack_1grow (obs_expansion, ' ');
-      shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-    }
+    shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+
   if (slash)
     {
-      obstack_1grow (obs_expansion, ' ');
       obstack_1grow (obs_expansion, CHAR_SLASH);
     }
   obstack_1grow (obs_expansion, '>');

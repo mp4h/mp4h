@@ -738,6 +738,9 @@ skip_line (void)
 void
 skip_buffer (void)
 {
+  if (isp == NULL)
+    return;
+
   pop_input ();
 }
 
@@ -1232,10 +1235,8 @@ next_token (token_data *td, read_type expansion, boolean in_string)
             type = TOKEN_STRING;
           else if (IS_SPACE(ch))
             {
-              while ((ch = next_char ()) != CHAR_EOF && (IS_SPACE(ch)))
-                {
-                  obstack_1grow (&token_stack, ch);
-                }
+              while ((ch = next_char ()) != CHAR_EOF && IS_SPACE(ch))
+                obstack_1grow (&token_stack, ch);
               unget_input(ch);
               type = TOKEN_SPACE;
             }
