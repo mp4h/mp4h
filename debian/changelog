@@ -88,5 +88,4 @@ mp4h (0.8.0-1) unstable; urgency=low
 
 Local variables:
 mode: debian-changelog
-add-log-mailing-address: "barbier@debian.org"
 End:
