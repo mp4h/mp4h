@@ -40,6 +40,8 @@
 
 DECLARE (mp4h___file__);
 DECLARE (mp4h___line__);
+DECLARE (mp4h_synclines_push);
+DECLARE (mp4h_synclines_pop);
 DECLARE (mp4h_timer);
 DECLARE (mp4h_unsupported);
 DECLARE (mp4h_version);
@@ -76,8 +78,6 @@ DECLARE (mp4h_at_end_of_file);
   /*  macro functions  */
 DECLARE (mp4h_define_tag);
 DECLARE (mp4h_provide_tag);
-DECLARE (mp4h_preserve);
-DECLARE (mp4h_restore);
 DECLARE (mp4h_let);
 DECLARE (mp4h_undef);
 
@@ -120,7 +120,6 @@ DECLARE (mp4h_string_neq);
 DECLARE (mp4h_char_offsets);
 DECLARE (mp4h_set_regexp_syntax);
 DECLARE (mp4h_get_regexp_syntax);
-DECLARE (mp4h_eval);
 
   /*  variable functions  */
 DECLARE (mp4h_get_var);
@@ -128,6 +127,8 @@ DECLARE (mp4h_get_var_once);
 DECLARE (mp4h_set_var);
 DECLARE (mp4h_set_var_verbatim);
 DECLARE (mp4h_unset_var);
+DECLARE (mp4h_preserve);
+DECLARE (mp4h_restore);
 DECLARE (mp4h_var_exists);
 DECLARE (mp4h_increment);
 DECLARE (mp4h_decrement);
@@ -160,6 +161,8 @@ builtin_tab[] =
 
   { "__file__",         FALSE,    TRUE,   mp4h___file__ },
   { "__line__",         FALSE,    TRUE,   mp4h___line__ },
+  { "synclines-push",   FALSE,    TRUE,   mp4h_synclines_push },
+  { "synclines-pop",    FALSE,    TRUE,   mp4h_synclines_pop },
   { "timer",            FALSE,    TRUE,   mp4h_timer },
   { "date",             FALSE,    TRUE,   mp4h_date },
   { "version",          FALSE,    TRUE,   mp4h_version },
@@ -183,7 +186,7 @@ builtin_tab[] =
 #endif /* HAVE_FILE_FUNCS */
 
       /*  flow functions  */
-  { "group",            FALSE,    FALSE,  mp4h_group },
+  { "group",            FALSE,    TRUE,   mp4h_group },
   { "if",               FALSE,    FALSE,  mp4h_if },
   { "ifeq",             FALSE,    FALSE,  mp4h_ifeq },
   { "ifneq",            FALSE,    FALSE,  mp4h_ifneq },
@@ -199,8 +202,6 @@ builtin_tab[] =
       /*  macro functions  */
   { "define-tag",       TRUE,     TRUE,   mp4h_define_tag },
   { "provide-tag",      TRUE,     TRUE,   mp4h_provide_tag },
-  { "preserve",         FALSE,    TRUE,   mp4h_preserve },
-  { "restore",          FALSE,    TRUE,   mp4h_restore },
   { "let",              FALSE,    TRUE,   mp4h_let },
   { "undef",            FALSE,    TRUE,   mp4h_undef },
 
@@ -245,7 +246,6 @@ builtin_tab[] =
   { "char-offsets",     FALSE,    TRUE,   mp4h_char_offsets },
   { "set-regexp-syntax",FALSE,    TRUE,   mp4h_set_regexp_syntax },
   { "get-regexp-syntax",FALSE,    TRUE,   mp4h_get_regexp_syntax },
-  { "eval"             ,FALSE,    TRUE,   mp4h_eval },
   
       /*  variable functions  */
   { "get-var",          FALSE,    TRUE,   mp4h_get_var },
@@ -253,6 +253,8 @@ builtin_tab[] =
   { "set-var",          FALSE,    TRUE,   mp4h_set_var },
   { "set-var-verbatim", FALSE,    FALSE,  mp4h_set_var_verbatim },
   { "unset-var",        FALSE,    TRUE,   mp4h_unset_var },
+  { "preserve",         FALSE,    TRUE,   mp4h_preserve },
+  { "restore",          FALSE,    TRUE,   mp4h_restore },
   { "var-exists",       FALSE,    TRUE,   mp4h_var_exists },
   { "increment",        FALSE,    TRUE,   mp4h_increment },
   { "decrement",        FALSE,    TRUE,   mp4h_decrement },
@@ -719,6 +721,38 @@ mp4h___line__ (MP4H_BUILTIN_ARGS)
 }
 
 static void
+mp4h_synclines_push (MP4H_BUILTIN_ARGS)
+{
+  synclines *next;
+
+  next = xmalloc (sizeof (synclines));
+  next->filename = xstrdup (current_file);
+  next->lineno = current_line;
+  next->prev = sl;
+  sl = next;
+
+  if (argc > 1)
+    current_file = xstrdup (ARG (1));
+  if (argc > 2)
+    numeric_arg (argv[0], ARG (2), FALSE, &current_line);
+}
+
+static void
+mp4h_synclines_pop (MP4H_BUILTIN_ARGS)
+{
+  synclines *prev;
+
+  current_line = sl->lineno;
+  current_file = xstrdup(sl->filename);
+
+  prev = sl->prev;
+
+  xfree (sl->filename);
+  xfree (sl);
+  sl = prev;
+}
+
+static void
 mp4h_timer (MP4H_BUILTIN_ARGS)
 {
   char buf[128];
@@ -893,10 +927,10 @@ mp4h_function_def (MP4H_BUILTIN_ARGS)
   switch (SYMBOL_TYPE (s))
     {
     case TOKEN_TEXT:
-      if (expansion_level > 0)
+      if (expansion_level > 1)
         obstack_1grow (obs, CHAR_LQUOTE);
       shipout_string (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
-      if (expansion_level > 0)
+      if (expansion_level > 1)
         obstack_1grow (obs, CHAR_RQUOTE);
       break;
 
@@ -1091,11 +1125,25 @@ mp4h_date (MP4H_BUILTIN_ARGS)
 static void
 mp4h_group (MP4H_BUILTIN_ARGS)
 {
-  if (expansion_level > 0)
-    obstack_1grow (obs, CHAR_BGROUP);
+  const char *quoted;
+
+  quoted = predefined_attribute ("quoted", &argc, argv, TRUE);
+
+  if (expansion_level > 1)
+    {
+      if (quoted)
+        obstack_1grow (obs, CHAR_LQUOTE);
+      else
+        obstack_1grow (obs, CHAR_BGROUP);
+    }
   dump_args (obs, argc, argv, "");
-  if (expansion_level > 0)
-    obstack_1grow (obs, CHAR_EGROUP);
+  if (expansion_level > 1)
+    {
+      if (quoted)
+        obstack_1grow (obs, CHAR_RQUOTE);
+      else
+        obstack_1grow (obs, CHAR_EGROUP);
+    }
 }
 
 /*--------------------------------------------------------------.
@@ -1375,7 +1423,7 @@ static void
 mp4h_exit (MP4H_BUILTIN_ARGS)
 {
   const char *status, *message;
-  int rc = 0;
+  int rc = -1;
 
   status = predefined_attribute ("status", &argc, argv, TRUE);
   if (status)
@@ -1476,58 +1524,6 @@ mp4h_provide_tag (MP4H_BUILTIN_ARGS)
   sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
   if (sym == NULL)
     mp4h_define_tag (MP4H_BUILTIN_RECUR);
-}
-
-/*-----------------------------------------------------.
-| Push a variable to a stack and reset this variable.  |
-`-----------------------------------------------------*/
-static void
-mp4h_preserve (MP4H_BUILTIN_ARGS)
-{
-  symbol *var;
-  var_stack *next;
-
-  if (bad_argc (argv[0], argc, 2, 0))
-    return;
-
-  next = xmalloc (sizeof (var_stack));
-  var  = lookup_variable (ARG (1), SYMBOL_INSERT);
-  if (SYMBOL_TYPE (var) != TOKEN_TEXT)
-    {
-      SYMBOL_TEXT (var) = xmalloc (1);
-      *(SYMBOL_TEXT (var)) = '\0';
-    }
-
-  next->text = xstrdup (SYMBOL_TEXT (var));
-  SYMBOL_TYPE (var) = TOKEN_TEXT;
-  *(SYMBOL_TEXT (var)) = '\0';
-
-  next->prev = vs;
-  vs = next;
-}
-
-/*-----------------------------------------.
-| Pop a variable from the variable stack.  |
-`-----------------------------------------*/
-static void
-mp4h_restore (MP4H_BUILTIN_ARGS)
-{
-  symbol *var;
-  var_stack *prev;
-
-  if (bad_argc (argv[0], argc, 2, 0))
-    return;
-
-  prev = vs->prev;
-  var = lookup_variable (ARG (1), SYMBOL_INSERT);
-  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (var));
-  SYMBOL_TEXT (var) = xstrdup (vs->text);
-  SYMBOL_TYPE (var) = TOKEN_TEXT;
-
-  xfree (vs->text);
-  xfree (vs);
-  vs = prev;
 }
 
 /*-------------------.
@@ -2271,8 +2267,8 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   victim = TOKEN_DATA_TEXT (argv[1]);
   length = strlen (victim);
 
-  if (expansion_level > 0)
-    obstack_1grow (obs, CHAR_LQUOTE);
+  obstack_1grow (obs, CHAR_BGROUP);
+
   offset = 0;
   matchpos = 0;
   while (offset < length)
@@ -2312,9 +2308,7 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
       if (regs.start[0] == regs.end[0])
         obstack_1grow (obs, victim[offset++]);
     }
-
-  if (expansion_level > 0)
-    obstack_1grow (obs, CHAR_RQUOTE);
+  obstack_1grow (obs, CHAR_EGROUP);
 
   xfree (buf.buffer);
   return;
@@ -2580,29 +2574,6 @@ mp4h_get_regexp_syntax (MP4H_BUILTIN_ARGS)
     }
 }
 
-/*----------------------------------------.
-| Remove quotes and evaluate attributes.  |
-`----------------------------------------*/
-static void
-mp4h_eval (MP4H_BUILTIN_ARGS)
-{
-  char *cp;
-
-  if (bad_argc (argv[0], argc, 2, 0))
-    return;
-
-  while (*ARG (1) == CHAR_LQUOTE || *ARG (1) == CHAR_BGROUP)
-    (TOKEN_DATA_TEXT (argv[1]))++;
-  
-  for (cp = ARG (argc-1) + strlen (ARG (argc-1)); ; cp--)
-    {
-      if (*cp != CHAR_RQUOTE)
-        break;
-      *cp = '\0';
-    }
-  dump_args (obs, argc, argv, "");
-}
-
 
 /* Operation on variables: define, undefine, search, insert,...
    Variables are either strings or array of strings.  */
@@ -2806,10 +2777,10 @@ generic_variable (struct obstack *obs, int argc, token_data **argv,
                 xfree (old_value);
               }
 
-            if (verbatim && expansion_level > 0)
+            if (verbatim && expansion_level > 1)
               obstack_1grow (obs, CHAR_LQUOTE);
             obstack_grow (obs, value, strlen (value));
-            if (verbatim && expansion_level > 0)
+            if (verbatim && expansion_level > 1)
               obstack_1grow (obs, CHAR_RQUOTE);
             xfree (value);
           }
@@ -2865,6 +2836,58 @@ static void
 mp4h_unset_var (MP4H_BUILTIN_ARGS)
 {
   lookup_variable (ARG (1), SYMBOL_DELETE);
+}
+
+/*-----------------------------------------------------.
+| Push a variable to a stack and reset this variable.  |
+`-----------------------------------------------------*/
+static void
+mp4h_preserve (MP4H_BUILTIN_ARGS)
+{
+  symbol *var;
+  var_stack *next;
+
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  next = xmalloc (sizeof (var_stack));
+  var  = lookup_variable (ARG (1), SYMBOL_INSERT);
+  if (SYMBOL_TYPE (var) != TOKEN_TEXT)
+    {
+      SYMBOL_TEXT (var) = xmalloc (1);
+      *(SYMBOL_TEXT (var)) = '\0';
+    }
+
+  next->text = xstrdup (SYMBOL_TEXT (var));
+  SYMBOL_TYPE (var) = TOKEN_TEXT;
+  *(SYMBOL_TEXT (var)) = '\0';
+
+  next->prev = vs;
+  vs = next;
+}
+
+/*-----------------------------------------.
+| Pop a variable from the variable stack.  |
+`-----------------------------------------*/
+static void
+mp4h_restore (MP4H_BUILTIN_ARGS)
+{
+  symbol *var;
+  var_stack *prev;
+
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  prev = vs->prev;
+  var = lookup_variable (ARG (1), SYMBOL_INSERT);
+  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+    xfree (SYMBOL_TEXT (var));
+  SYMBOL_TEXT (var) = xstrdup (vs->text);
+  SYMBOL_TYPE (var) = TOKEN_TEXT;
+
+  xfree (vs->text);
+  xfree (vs);
+  vs = prev;
 }
 
 /*----------------------------.
@@ -3534,7 +3557,11 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
           i = (int)strtol (text, &endp, 10);
           text = endp;
           if (i+1 < argc)
+            {
+              obstack_1grow (obs, CHAR_BGROUP);
               shipout_string (obs, ARG (i+1), 0);
+              obstack_1grow (obs, CHAR_EGROUP);
+            }
         }
       else if (strncmp (text, "body", 4) == 0
                || strncmp (text, "xbody", 5) == 0

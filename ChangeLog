@@ -8,6 +8,17 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.7.2 and 0.7.1:
+
+    *) Add <synclines-push> and <synclines-pop> tag (16-Feb-2000):
+       These macros will help debugging within WML.
+       [Denis Barbier]
+
+    *) Remove <eval> and <quote> tags (16-Feb-2000):
+       A change in how macros are quoted and evalled make these macros
+       useless.
+       [Denis Barbier]
+
   Changes between 0.7.1 and 0.7.0:
 
     *) Fix escaped quotes in attributes (13-Feb-2000):

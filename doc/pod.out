@@ -78,6 +78,8 @@
 <set-var verbatim=*>;;;
 <set-var %attributes>;;;
 <set-var list-attributes="%body">;;;
+<subst-in-var list-attributes "^\n+" singleline=true>
+<subst-in-var list-attributes "\n+$" singleline=true>
 
 =over 2
 
@@ -196,9 +198,8 @@ _LT_!--%body--_GT_
 
 </define-tag>
 
-<define-tag optmand>C_LT_%attributesC_GT_</define-tag>
-
-<define-tag optopt>C_LT_[%attributes]C_GT_</define-tag>
+<define-tag optmand>C_LT_%attributes_GT_</define-tag>
+<define-tag optopt>C_LT_[%attributes]_GT_</define-tag>
 
 ;;;
 ;;;   Macros to draw a numbered list, with refs.

@@ -285,7 +285,8 @@ enum token_type
 {
   TOKEN_EOF,                    /* end of file */
   TOKEN_NONE,                   /* discardable token */
-  TOKEN_STRING,                 /* a quoted string */
+  TOKEN_STRING,                 /* a string */
+  TOKEN_QUOTED,                 /* a quoted string */
   TOKEN_QUOTE,                  /* begin delimiter of a quoted string
                                    to expand */
   TOKEN_BGROUP,                 /* begin group */

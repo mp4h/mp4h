@@ -77,15 +77,16 @@
 <set-var verbatim=*>
 <set-var %attributes>
 <set-var list-attributes[]="%body">
-<subst-in-var list-attributes "^\n" "">
+<subst-in-var list-attributes "^\n+" singleline=true>
+<subst-in-var list-attributes "\n+$" singleline=true>
 <p><a name="tag-%0">&nbsp;</a></p>
 <table border=2>
 <tr valign=top>
-<td align=center><if <get-var complex> "" "<a href=\"#noteattr\"><tag:slash></a>"></td>
-<td align=center><if <get-var verbatim> "" "<a href=\"#noteattr\"><tag:V></a>"></td>
+<td align=center><if <get-var complex> "&nbsp;" "<a href=\"#noteattr\"><tag:slash></a>"></td>
+<td align=center><if <get-var verbatim> "&nbsp;" "<a href=\"#noteattr\"><tag:V></a>"></td>
 <td align=center>%0</td>
 <td>
-  <table>
+  <table border=0 cellpadding=0 cellspacing=0>
     <foreach attr list-attributes>
       <tr><td><tt><get-var attr></tt></td></tr>
     </foreach>
@@ -104,7 +105,7 @@
 </define-tag>
 
 <define-tag attributes:item>
-<LI><attribute %0><br>
+<li><attribute %0><br>
 </define-tag>
 
 ;;;
@@ -187,7 +188,6 @@
 </define-tag>
 
 <define-tag optmand><tt>%attributes</tt></define-tag>
-
 <define-tag optopt><tt>[%attributes]</tt></define-tag>
 
 ;;;

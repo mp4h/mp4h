@@ -83,9 +83,14 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
       break;
 
     case TOKEN_SIMPLE:
+    case TOKEN_QUOTED:
     case TOKEN_STRING:
     case TOKEN_SPACE:
+      if (expansion_level > 0 && t == TOKEN_QUOTED)
+        obstack_1grow (obs, CHAR_LQUOTE);
       shipout_text (obs, text, strlen (text));
+      if (expansion_level > 0 && t == TOKEN_QUOTED)
+        obstack_1grow (obs, CHAR_RQUOTE);
       break;
 
     case TOKEN_BGROUP:
@@ -205,9 +210,14 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
               in_string = !in_string;
           break;
 
+        case TOKEN_QUOTED:
         case TOKEN_STRING:
+          if (expansion_level > 0 && t == TOKEN_QUOTED)
+            obstack_1grow (obs, CHAR_LQUOTE);
           obstack_grow (obs, TOKEN_DATA_TEXT (&td),
                   strlen (TOKEN_DATA_TEXT (&td)));
+          if (expansion_level > 0 && t == TOKEN_QUOTED)
+            obstack_1grow (obs, CHAR_RQUOTE);
           break;
 
         case TOKEN_WORD:
@@ -327,8 +337,13 @@ collect_body (symbol *sym, struct obstack *argptr)
 
         case TOKEN_SIMPLE:
         case TOKEN_SPACE:
+        case TOKEN_QUOTED:
         case TOKEN_STRING:
+          if (expansion_level > 0 && t == TOKEN_QUOTED)
+            obstack_1grow (&body, CHAR_LQUOTE);
           shipout_text (&body, text, strlen (text));
+          if (expansion_level > 0 && t == TOKEN_QUOTED)
+            obstack_1grow (&body, CHAR_RQUOTE);
           break;
 
         case TOKEN_WORD:

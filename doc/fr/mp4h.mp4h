@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.7.0>
+<set-var version=0.7.2>
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -75,7 +75,7 @@ un argument, l'option courte doit l'accepter aussi.
 
 <para>
 La syntaxe générale d'appel de <mp4h> est
-<code>mp4h [options] [fichier]</code>
+<code>mp4h [options] [fichier [fichier] ...]</code>
 Les options sont décrites ci-dessous. Si aucun fichier n'est spécifié
 sur la ligne de commande, ou s'il a pour nom <file ->, alors les
 caractères sont lus sur l'entrée standard.
@@ -385,7 +385,9 @@ Comme la commande précédente, mais les arguments ne sont pas développés.
 <para>
 Une pile est utilisée pour sauvegarder le contenu de variables. Cette
 commande permet de placer le contenu de la variable dont le nom est
-passé en argument dans le sommet de la pile.
+passé en argument dans le sommet de la pile. Après appel de cette
+commande, la variable est réinitialisée, c'est-à-dire que son contenu
+est vide.
 </para>
 
 <tag:description restore>
@@ -1153,6 +1155,7 @@ Affiche le premier argument non nul.
 <tag:description group verbatim>
 <var statement>
 [<var statement>] ...
+[quoted=true]
 </tag:description>
 
 <para>
@@ -1172,17 +1175,17 @@ importante, est de pouvoir mettre des sauts de ligne même si l'attribut
 Ce texte est sur
 3 lignes sans
 whitespace=delete
-</define-tag >
+</define-tag>
 <define-tag texte2 whitespace=delete>
 Ce texte est sur
 3 lignes avec
 whitespace=delete
-</define-tag >
+</define-tag>
 <define-tag texte3 whitespace=delete>
 <group "Ce texte est sur
 3 lignes avec
 whitespace=delete">
-</define-tag >
+</define-tag>
 <texte1>
 <texte2>
 <texte3>
@@ -1192,6 +1195,20 @@ whitespace=delete">
 Notez dans l'exemple 2 que les sauts de ligne ont été supprimés, ce qui
 a pour conséquence de coller des lettres qui ne doivent pas l'être.
 </para>
+
+<attributes:description>
+<attributes:item "quoted=true">
+Avec cet attribut, le résultat de l'évaluation est entouré de caractères
+de contrôle, pour qu'il ne soit plus développé ensuite.
+</attributes:description>
+
+<undef foo>
+<example>
+<subst-in-string "=LT=define-tag foo>bar</define-tag>" "=LT=" "<">
+<foo>
+<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT=" "<quote \"<\">">
+<foo>
+</example>
 
 <tag:description if verbatim>
 <var string>
@@ -1352,6 +1369,34 @@ la plus interne.
 </while>
 </example>
 
+<tag:description warning>
+</tag:description>
+
+<para>
+Affiche le message donné en arguments sur l'erreur standard.
+</para>
+
+<tag:description exit>
+[status=<var rc>]
+[message=<var chaine>]
+</tag:description>
+
+<para>
+Interrompt immédiatement le programme. L'attribut <attribute message>
+permet d'afficher une information sur l'erreur standard, pour indiquer
+la cause de l'arrêt du programme. Si l'attribut <attribute status> est
+utilisé, il indique quel code le programme retourne (-1 par défaut).
+</para>
+
+<tag:description at-end-of-file>
+</tag:description>
+
+<para>
+Cette commande est spéciale, puisqu'elle stocke ses arguments
+temporairement. Ils seront traités lorsque le fichier d'entrée est
+entièrement lu.
+</para>
+
 ###
 ###    File functions
 ###
@@ -1419,6 +1464,20 @@ s'arrête.
 Avec cet attribut, le contenu du fichier est inclus sans être modifié
 par <mp4h>.
 </attributes:description>
+
+<tag:description comment complex>
+</tag:description>
+
+<para>
+Le corps de cette balise est supprimé.
+</para>
+
+<tag:description eol-comment>
+</tag:description>
+
+<para>
+Permet de modifier les caractères servant de commentaires.
+</para>
 
 ###
 ###    Debugging
@@ -1558,13 +1617,6 @@ compilation de cette documentation par <mp4h>, voici le nombre de cycles
 écoulés:
 <timer>
 </example>
-
-<tag:description comment complex>
-</tag:description>
-
-<para>
-Le corps de cette balise est supprimé.
-</para>
 
 <section "Schéma d'expansion des macros">
 
@@ -1732,6 +1784,29 @@ simples, <value %body> est un synonyme de <value %attributes>. Ces
 fonctionnalités sont actuellement comprises dans <mp4h>, mais peuvent
 très bien être supprimées dans les versions futures.
 </note>
+
+<subsection "Schéma sumplifié">
+
+<para>
+Les commandes ont les caractéristiques suivantes:
+<list>
+<item>le nom de la commande ;
+<item>s'il s'agit d'une balise simple ou complexe ;
+<item>si les attributs sont développés ou non ;
+<item>le type de fonction (primitive ou commande de l'utilisateur) ;
+<item>pour les primitives, l'adresse de la routine correspondante dans
+le code exécutable, et pour les commandes définies par l'utilisateur, le
+texte de remplacement de la commande.
+</list>
+</para>
+
+<para>
+Les caractères sont lus un par un, jusqu'à trouver un <left-angle>.
+Les caractères suivants sont lus pour déterminer le nom de la commande.
+Avec ce nom, les caractéristiques ci-dessus sont déterminées. Les
+attributs de la commande sont lus, soient tels quels, soient en les
+développant, jusqu'au <right-angle> final. 
+</para>
 
 <subsection "Mécanisme d'expansion des commandes">
 

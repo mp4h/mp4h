@@ -1049,7 +1049,7 @@ next_token (token_data *td, read_type expansion)
                   obstack_1grow (&token_stack, ch);
                 }
             }
-          type = TOKEN_STRING;
+          type = TOKEN_QUOTED;
         }
       else if (IS_BGROUP(ch))             /* BEGIN GROUP */
         {
@@ -1171,6 +1171,10 @@ print_token (const char *s, token_type t, token_data *td)
 
     case TOKEN_STRING:
       fprintf (stderr, "string\t\"%s\"\n", TOKEN_DATA_TEXT (td));
+      break;
+
+    case TOKEN_QUOTED:
+      fprintf (stderr, "quoted\t\"%s\"\n", TOKEN_DATA_TEXT (td));
       break;
 
     case TOKEN_BGROUP:
