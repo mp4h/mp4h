@@ -513,25 +513,45 @@ Here is version <get-var-once version />
 
 <tag:description preserve>
 <var name />
+[<var name />] ...
 </tag:description>
 
 <para>
 All variables are global, there is no variable or macro scope.
-For this reason a stack is used to preserve variables.
-When this command is invoked, the first argument is the name of a
-variable. The value of this variable is put at the top of the stack and
-this variable is reset to an empty string.
+For this reason a stack is used to preserve variables.  When this
+command is invoked, arguments are names of variables, whose values
+are put at the top of the stack and variables are reset to an
+empty string.
 </para>
 
 <tag:description restore>
 <var name />
+[<var name />] ...
 </tag:description>
 
 <para>
-This is the opposite: first argument is a variable name, this variable
-is set to the value found at the top of the stack, and this value is
-popped.
+This is the opposite: arguments are names of variables, which are set to
+the value found at the top of the stack, and stack is popped down.
 </para>
+
+<note>
+The <command preserve /> tag pushes its last argument first, whereas
+<command restore /> first pops its first argument.
+</note>
+
+<pseudo-func foo />
+<example>
+<define-tag foo whitespace=delete>
+<preserve src name text />
+<set-var %attributes />
+Inside: src=<get-var src /> name=<get-var name /> text=<get-var text />
+<restore  src name text />
+</define-tag>
+<set-var src=foo.png text="Hello, World!" />
+Before: src=<get-var src /> name=<get-var name /> text=<get-var text />
+<foo src=bar name=quux />
+After: src=<get-var src /> name=<get-var name /> text=<get-var text />
+</example>
 
 <tag:description unset-var>
 <var name />

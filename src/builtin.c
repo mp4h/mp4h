@@ -3739,22 +3739,26 @@ mp4h_preserve (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   var_stack *next;
+  int i;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (argv[0], argc, 2, 0))
     return;
 
-  next = (var_stack *) xmalloc (sizeof (var_stack));
-  var  = lookup_variable (ARG (1), SYMBOL_LOOKUP);
-  if (var)
+  for (i=argc-1; i>0; i--)
     {
-      next->text = xstrdup (SYMBOL_TEXT (var));
-      *(SYMBOL_TEXT (var)) = '\0';
-    }
-  else
-    next->text = xstrdup ("");
+      next = (var_stack *) xmalloc (sizeof (var_stack));
+      var  = lookup_variable (ARG (i), SYMBOL_LOOKUP);
+      if (var)
+        {
+          next->text = xstrdup (SYMBOL_TEXT (var));
+          *(SYMBOL_TEXT (var)) = '\0';
+        }
+      else
+        next->text = xstrdup ("");
 
-  next->prev = vs;
-  vs = next;
+      next->prev = vs;
+      vs = next;
+    }
 }
 
 /*-----------------------------------------.
@@ -3765,20 +3769,24 @@ mp4h_restore (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   var_stack *prev;
+  int i;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (argv[0], argc, 2, 0))
     return;
 
-  var = lookup_variable (ARG (1), SYMBOL_INSERT);
+  for (i=1; i<argc; i++)
+    {
+      var = lookup_variable (ARG (i), SYMBOL_INSERT);
 
-  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (var));
-  SYMBOL_TEXT (var) = xstrdup (vs->text);
+      if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+        xfree (SYMBOL_TEXT (var));
+      SYMBOL_TEXT (var) = xstrdup (vs->text);
 
-  prev = vs->prev;
-  xfree (vs->text);
-  xfree (vs);
-  vs = prev;
+      prev = vs->prev;
+      xfree (vs->text);
+      xfree (vs);
+      vs = prev;
+    }
 }
 
 /*----------------------------.

@@ -10,6 +10,18 @@
 
   Changes between 1.0.3 and SNAP:
 
+    *) Improve <preserve>/<restore> stuff (05-Jul-2000):
+       These tags accept now any number of arguments, so it is possible
+       to write
+           <define-tag foo>
+           <preserve name src text>
+           <set-var %attributes>
+           ... code using `name', `src' and `text' variables.
+           <restore  name src text>
+           </define-tag>
+       All module files have been updated in consequence.
+       [Denis Barbier]
+
     *) Better control with <return> tag (04-Jul-2000):
        With `up=0', closes all current macro expansion.
        With `up=-1', closes all current macro expansion and stops
