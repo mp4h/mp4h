@@ -48,12 +48,8 @@ libltdl/ltdl.h
 libltdl/stamp-h.in
 ltmain.sh
 modules/Makefile.in
-modules/example/.libs/test.lai
-modules/example/.libs/test.so
-modules/example/Makefile
 modules/example/Makefile.in
 modules/example/test.c
-modules/example/test.la
 modules/example/test.mp4h
 modules/example/test.ok
 modules/exec.c
