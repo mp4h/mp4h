@@ -1,0 +1,87 @@
+##
+##  Makefile -- mp4h Makefile for modules
+##
+
+@SET_MAKE@
+SHELL = /bin/sh
+
+top_srcdir      = @top_srcdir@
+top_builddir    = @top_srcdir@
+srcdir          = @srcdir@
+prefix          = @prefix@
+exec_prefix     = @exec_prefix@
+pkglibdir       = @pkglibdir@
+
+VPATH           = @srcdir@
+
+# ------------------------------------------------
+#   DEFINITIONS
+# ------------------------------------------------
+
+SHELL           = /bin/sh
+SHTOOL          = $(top_srcdir)/shtool
+CC              = @CC@
+CFLAGS          = @CFLAGS@
+CPPFLAGS        = @CPPFLAGS@
+DEFS            = @DEFS@ -I. -I$(srcdir)
+INCLUDES        = -I$(top_srcdir) -I$(top_srcdir)/lib  -I$(top_srcdir)/src
+LDFLAGS         = @LDFLAGS@
+LIBS            = @LIBS@
+LIBTOOL         = @LIBTOOL@
+mp4h_config     = $(top_srcdir)/mp4h-config
+
+#   installation tools
+SHTOOL          = $(top_srcdir)/shtool
+#   libtool does not like this definition
+#INSTALL         = $(SHTOOL) install -c -m 644
+INSTALL         = @INSTALL@
+RM              = rm -f
+
+SOURCES     = javascript.c mp4h-js.c
+MODULE      = javascript
+LOBJ        = $(SOURCES:.c=.lo)
+
+.SUFFIXES: .c .o .lo
+
+.c.o:
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -c $<
+
+.c.lo:
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -c $<
+
+# ------------------------------------------------
+#   THE DEFAULT TARGETS
+# ------------------------------------------------
+
+all: $(MODULE).la
+
+$(MODULE).la: $(LOBJ)
+	$(LIBTOOL) --quiet --mode=link `$(mp4h_config) --cc` -o $@ $(LOBJ) \
+	    -module -rpath `$(mp4h_config) --pkglibdir` -avoid-version
+
+test check install:
+
+INSTALL_LA_FILES = \
+   d=`$(mp4h_config) --pkglibdir`; \
+   echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
+   $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
+
+install-mod:
+	@list='$(MODULES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    $(INSTALL_LA_FILES); \
+	  else :; fi; \
+	done
+
+# ------------------------------------------------
+#   CLEANUP
+# ------------------------------------------------
+
+clean:
+	-rm -f *.o *.lo *.la core
+	-rm -rf .libs
+
+distclean: clean
+	-rm -f Makefile
+
+##EOF##

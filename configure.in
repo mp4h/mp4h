@@ -98,6 +98,8 @@ AC_SUBST(WITH_MODULES_FALSE)
 
 mp4h_libs="$LIBS"
 
+do_module_njs=0
+do_module_mozjs=0
 if test ".$with_modules" = .yes; then
     echo ''
     $shtool echo -e "Checking for %Bloadable modules%b support"
@@ -110,12 +112,16 @@ if test ".$with_modules" = .yes; then
     AC_SUBST(INCLTDL)
     AC_SUBST(LIBLTDL)
     AC_CONFIG_SUBDIRS(libltdl)
+    AC_CHECK_HEADER(njs/jig.h, do_module_njs=1)
+    AC_CHECK_HEADER(mozilla/jsapi.h, do_module_mozjs=1)
 else
     #   Remove recursive call to configure in libltdl
     no_recursion=yes
     #   Restore libraries
     LIBS="$mp4h_libs"
 fi
+AC_SUBST(do_module_njs)
+AC_SUBST(do_module_mozjs)
 
 dnl  This line is needed for Debian builds
 AC_SUBST(CFLAGS)
@@ -128,6 +134,9 @@ AC_OUTPUT([
    packages/Makefile
    packages/WML/Makefile
    modules/Makefile
+   modules/example/Makefile
+   modules/mozjs/Makefile
+   modules/njs/Makefile
    doc/Makefile
    tests/Makefile
 ])
