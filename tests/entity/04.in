@@ -1,0 +1,3 @@
+<define-tag foo>%attributes</define-tag>
+<define-entity bar>quux</define-entity>
+<foo name="x &bar; y">
