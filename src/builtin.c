@@ -218,7 +218,7 @@ builtin_tab[] =
 #endif /* HAVE_FILE_FUNCS */
 
       /*  flow functions  */
-  { "group",            FALSE,    FALSE,  mp4h_group },
+  { "group",            FALSE,    TRUE,   mp4h_group },
   { "compound",          TRUE,    TRUE,   mp4h_compound },
   { "noexpand",         FALSE,    FALSE,  mp4h_noexpand },
   { "expand",           FALSE,    TRUE,   mp4h_expand },
@@ -1030,7 +1030,7 @@ mp4h_rb (MP4H_BUILTIN_ARGS)
 static void
 mp4h_dq (MP4H_BUILTIN_ARGS)
 {
-  add_1char_protected (obs, '"');
+  obstack_1grow (obs, CHAR_QUOTE);
 }
 
 static void

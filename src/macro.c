@@ -146,9 +146,13 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
 | whether the argument read are the last for the active macro call.  The   |
 | argument read are the last for the active macro call.  The argument are  |
 | on the obstack OBS, indirectly through expand_token ().                  |
+| On exit, this function returns                                           |
+|      0: close bracket found                                              |
+|      1: last argument                                                    |
+|      2: other arguments follow                                           |
 `-------------------------------------------------------------------------*/
 
-static boolean
+static int
 expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
                  char *last_char_ptr)
 {
@@ -156,6 +160,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
   token_type t;
   token_data td;
   int group_level = 0;
+  int rc;
   boolean in_string = FALSE;
 
   *last_char_ptr = ' ';
@@ -175,9 +180,9 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
       t = next_token (&td, expansion, FALSE);
     }
 
+  rc = 0;
   while (1)
     {
-
       switch (t)
         {                       /* TOKSW */
         case TOKEN_SPACE:
@@ -202,7 +207,9 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
                   TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
                   TOKEN_DATA_TEXT (argp) = obstack_finish (obs);
                 }
-              return (boolean) (IS_SPACE(*TOKEN_DATA_TEXT (&td)));
+              if (IS_SPACE(*TOKEN_DATA_TEXT (&td)))
+                rc = 2;
+              return rc;
             }
           expand_token (obs, expansion, t, &td);
           break;
@@ -261,6 +268,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
 
       *last_char_ptr = LAST_CHAR (TOKEN_DATA_TEXT (&td));
       t = next_token (&td, expansion, in_string);
+      rc = 1;
     }
 }
 
@@ -280,7 +288,7 @@ collect_arguments (char *symbol_name, read_type expansion,
   token_data td;
   token_data *tdp;
   char *last_addr;
-  boolean more_args;
+  int more_args;
   char last_char = ' ';
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
@@ -310,12 +318,11 @@ collect_arguments (char *symbol_name, read_type expansion,
             obstack_copy (arguments, (voidstar) &td, sizeof (td));
           obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
         }
-      while (more_args);
+      while (more_args == 2);
 
       /*  If the last argument is empty, it is removed.  We need it to
           remove white spaces before closing brackets.  */
-      if (TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT
-          && strlen (TOKEN_DATA_TEXT (tdp)) == 0)
+      if (more_args == 0)
         argptr->next_free = last_addr;
     }
   else

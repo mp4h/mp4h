@@ -1075,7 +1075,10 @@ next_token (token_data *td, read_type expansion, boolean in_string)
         skip_line ();
       else if (expansion == READ_BODY)
         {
-          obstack_1grow (&token_stack, ch);
+          if (ch == '"')
+            obstack_1grow (&token_stack, CHAR_QUOTE);
+          else
+            obstack_1grow (&token_stack, ch);
           while ((ch = next_char ()) != CHAR_EOF
                   && ! IS_ESCAPE(ch) && ! IS_CLOSE (ch))
             {
@@ -1085,7 +1088,10 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                   ch = CHAR_EOF;
                   break;
                 }
-              obstack_1grow (&token_stack, ch);
+              if (ch == '"')
+                obstack_1grow (&token_stack, CHAR_QUOTE);
+              else
+                obstack_1grow (&token_stack, ch);
             }
           unget_input(ch);
 

@@ -10,12 +10,16 @@
 
   Changes between 1.0.5 and SNAP:
 
-    *) Fix <group> tag (17-Jul-2000):
-       This tag may contain any sequence of tags in attributes.  In
-       order to prevent extra removal of quotes in their expansion,
-       attributes must be read verbatim and expanded after <group>
-       is parsed.
-       [Denis Barbier]
+    *) Fix some bugs with quotes (19-Jul-2000):
+       Quotes have two functions: group multiple words into a single
+       token in attributes, and its normal meaning (i.e. output quotes).
+       The former must be removed, whereas the latter are preserved.
+       This is quite tricky, and previous implementations failed under
+       certain circumstances.  Now when quotes are seen outside of tag
+       attributes, they are marked as being special and cannot be
+       removed.
+       The <dq> tag is also fixed.
+       [Fritz Zaucker]
 
     *) Add support for loadable modules (12-Jul-2000):
        This stage was easy because GNU m4 1.4n already has such
