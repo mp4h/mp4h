@@ -1,0 +1,37 @@
+;;;
+;;;  exec:sh - Executing Shell commands
+;;; 
+;;;  Copyright (c) 2001 Denis Barbier, All Rights Reserved. 
+;;;
+
+<load module="exec">
+<load module="exec-sh">
+
+##EOF##
+__END__
+
+=head1 NAME
+
+exec:sh - Executing Shell commands
+
+=head1 SYNOPSIS
+
+ <use name="exec:sh" />
+
+ <exec type=sh>... some shell commands ...</exec>
+
+=head1 DESCRIPTION
+
+This is an interface to the standard HTML anchor tag (C<E<lt>a
+href="..."E<gt>...E<lt>/aE<gt>>).  The intended use of C<E<lt>hrefE<gt>> is to
+simplify the creation of hyperlinks. The following
+
+  <exec type=sh>uname -a</exec>
+
+=head1 AUTHOR
+
+ Denis Barbier
+ barbier@engelschall.com
+
+=cut
+

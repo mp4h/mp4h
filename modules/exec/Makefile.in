@@ -1,0 +1,126 @@
+##
+##  packages/exec/Makefile
+##
+
+# ------------------------------------------------
+#   DEFINITIONS
+# ------------------------------------------------
+
+@SET_MAKE@
+SHELL = /bin/sh
+
+top_srcdir      = @top_srcdir@
+top_builddir    = @top_srcdir@
+srcdir          = @srcdir@
+prefix          = @prefix@
+VPATH           = @srcdir@
+
+SHTOOL          = $(top_srcdir)/shtool
+INSTALL_DATA    = $(SHTOOL) install -c -m 644
+#   libtool does not like this definition
+#INSTALL         = $(SHTOOL) install -c -m 644
+INSTALL         = @INSTALL@
+MKDIR           = $(SHTOOL) mkdir -f -p -m 755
+INSTPREFIX      =
+
+INITVARS = \
+   pkgdatadir=`$(top_srcdir)/mp4h-config --pkgdatadir` \
+   mandir=`$(top_srcdir)/mp4h-config --mandir`
+
+CC              = @CC@
+CFLAGS          = @CFLAGS@
+CPPFLAGS        = @CPPFLAGS@
+DEFS            = @DEFS@ -I. -I$(srcdir)
+INCLUDES        = -I$(top_srcdir) -I$(top_srcdir)/lib  -I$(top_srcdir)/src
+LDFLAGS         = @LDFLAGS@
+LIBS            = @LIBS@
+LIBTOOL         = @LIBTOOL@
+mp4h_config     = $(top_srcdir)/mp4h-config
+
+man3ext         = 3
+thisdir         = exec
+SOURCES         = sh.src
+PKGFILES        = $(SOURCES:.src=.mp4hp)
+
+MODSOURCES      = exec-sh.c
+LOBJ            = $(MODSOURCES:.c=.lo)
+LARCHIVE        = $(MODSOURCES:.c=.la)
+
+.SUFFIXES:
+.SUFFIXES: .src .mp4hp .c .o .lo .la
+
+.src.mp4hp:
+	sed -e '/^=head1/,/^=cut/d' -e '/^##EOF##/,$$d' $< > $@
+	cat $< > $(thisdir):$*.pod && pod2man --section=$(man3ext) \
+   --center="mp4h packages" \
+   --release="mp4h packages" \
+   $(thisdir):$*.pod > $*.$(man3ext) && rm -f $(thisdir):$*.pod
+
+.c.o:
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -c $<
+
+.c.lo:
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -c $<
+
+.lo.la:
+	$(LIBTOOL) --quiet --mode=link `$(mp4h_config) --cc` -o $@ $< \
+	    -module -rpath `$(mp4h_config) --pkglibdir` -avoid-version
+
+# ------------------------------------------------
+#   TARGETS
+# ------------------------------------------------
+
+all: $(PKGFILES) $(LARCHIVE)
+
+exec-sh.c: sh.c
+	cp -f $? $@
+
+INSTALL_LA_FILES = \
+   d=`$(mp4h_config) --pkglibdir`; \
+   echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
+   $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
+
+install: all install-dirs
+	@list='$(LARCHIVE)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    $(INSTALL_LA_FILES); \
+	  else :; fi; \
+	done
+	@set -e; $(INITVARS); \
+	files='$(PKGFILES)'; \
+	for file in $$files; do \
+	    base=`echo $$file | sed -e 's/\.mp4hp$$//g'`; \
+	    dir=`echo $$file | sed -e 's/[a-zA-Z0-9_]*.mp4hp$$//g'`; \
+	    name="$(thisdir):$$base"; \
+	    if [ ! -d "$(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir" ]; then \
+	        echo "$(MKDIR) $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir"; \
+	        $(MKDIR) $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir; \
+	    else :; \
+	    fi; \
+            echo "$(INSTALL_DATA) $$file $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$file"; \
+            $(INSTALL_DATA) $$file $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$file; \
+            echo "$(INSTALL_DATA) $$base.$(man3ext) $(INSTPREFIX)$$mandir/man$(man3ext)/$$name.$(man3ext)"; \
+            $(INSTALL_DATA) $$base.$(man3ext) $(INSTPREFIX)$$mandir/man$(man3ext)/$$name.$(man3ext); \
+	done
+
+install-dirs:
+	@set -e; $(INITVARS); \
+	if [ ! -d "$(INSTPREFIX)$$mandir/man$(man3ext)" ]; then \
+	        echo "$(MKDIR) $(INSTPREFIX)$$mandir/man$(man3ext)"; \
+	        $(MKDIR) $(INSTPREFIX)$$mandir/man$(man3ext); \
+	else :; \
+	fi
+
+clean:
+	-rm -f *.o *.lo *.la core
+	-rm -rf .libs
+	-rm -f *.mp4hp
+	-rm -f exec-*
+	-rm -f *.pod *.$(man3ext)
+
+distclean: clean
+	-rm -f Makefile
+
+realclean: distclean
+
+##EOF##
