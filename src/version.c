@@ -28,7 +28,7 @@ extern mp4h_version_t mp4h_version;
 #else /* _SRC_VERSION_C_AS_HEADER_ */
 
 #define _SRC_VERSION_C_AS_HEADER_
-#include "src/version.c"
+#include "version.c"
 #undef  _SRC_VERSION_C_AS_HEADER_
 
 mp4h_version_t mp4h_version = {
