@@ -459,6 +459,7 @@ void make_diversion __P ((int));
 void insert_diversion __P ((int));
 void insert_file __P ((FILE *));
 void freeze_diversions __P ((FILE *));
+void remove_special_chars __P ((char *));
 
 
 /* File symtab.c  --- symbol table definitions.  */

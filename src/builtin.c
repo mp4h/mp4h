@@ -313,7 +313,6 @@ static void dump_args __P ((struct obstack *, int, token_data **, const char *))
 static boolean safe_strtod __P ((const char *, const char *, double *));
 static boolean safe_strtol __P ((const char *, const char *, long int *));
 static const char *predefined_attribute __P ((const char *, int *, token_data **, boolean));
-static void remove_special_chars __P ((char *));
 static void set_trace __P ((symbol *, const char *));
 static void generic_set_hook __P ((MP4H_BUILTIN_PROTO, boolean, int));
 static void math_relation __P ((MP4H_BUILTIN_PROTO, mathrel_type));
@@ -839,24 +838,6 @@ clear_tag_attr (void)
       xfree (tag_attr);
       tag_attr = pa;
     }
-}
-
-void
-remove_special_chars (char *s)
-{
-  int offset;
-  register char *cp;
-
-  offset = 0;
-  for (cp=s; *cp != '\0'; cp++)
-    {
-      if (*cp == CHAR_LQUOTE || *cp == CHAR_RQUOTE
-       || *cp == CHAR_BGROUP || *cp == CHAR_EGROUP)
-        offset++;
-      else
-        *(cp-offset) = *cp;
-    }
-  *(cp-offset) = '\0';
 }
 
 

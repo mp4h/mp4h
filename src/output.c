@@ -267,6 +267,36 @@ make_room_for (int length)
     }
 }
 
+/*---------------------------------------------.
+| Remove special characters added in strings.  |
+| Replacement is made in place.                |
+`---------------------------------------------*/
+
+void
+remove_special_chars (char *s)
+{
+  int offset;
+  register char *cp;
+
+  /*  For efficiency reason, this loop is divided into 2 parts.  */
+  for (cp=s; *cp != '\0' && *cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE
+             && *cp != CHAR_BGROUP && *cp != CHAR_EGROUP; cp++)
+    ;
+  if (*cp == '\0')
+    return;
+
+  offset = 0;
+  for ( ; *cp != '\0'; cp++)
+    {
+      if (*cp == CHAR_LQUOTE || *cp == CHAR_RQUOTE
+       || *cp == CHAR_BGROUP || *cp == CHAR_EGROUP)
+        offset++;
+      else
+        *(cp-offset) = *cp;
+    }
+  *(cp-offset) = '\0';
+}
+
 /*------------------------------------------------------------------------.
 | Output one character CHAR, when it is known that it goes to a diversion |
 | file or an in-memory diversion buffer.                                  |
@@ -356,6 +386,7 @@ shipout_text (struct obstack *obs, char *text, int length)
     return;
 
   /* Restitute some special characters */
+  remove_special_chars (text);
   for (cp=text, i=0; i<length; cp++, i++)
     if (*cp == CHAR_QUOTE)
       *cp = '"';

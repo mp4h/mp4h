@@ -363,6 +363,7 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
 {
   int i;
   const builtin *bp;
+  char *text;
 
   trace_header (id);
   trace_format ("<%s", name);
@@ -379,7 +380,10 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
           switch (TOKEN_DATA_TYPE (argv[i]))
             {
             case TOKEN_TEXT:
+              text = xstrdup (TOKEN_DATA_TEXT (argv[i]));
+              remove_special_chars (text);
               trace_format ("%S", TOKEN_DATA_TEXT (argv[i]));
+              xfree (text);
               break;
 
             case TOKEN_FUNC:
@@ -419,6 +423,8 @@ void
 trace_post (const char *name, int id, int argc, token_data **argv,
             const char *expanded)
 {
+  char *text;
+
   if (debug_level & DEBUG_TRACE_CALL)
     {
       trace_header (id);
@@ -426,6 +432,11 @@ trace_post (const char *name, int id, int argc, token_data **argv,
     }
 
   if (expanded && (debug_level & DEBUG_TRACE_EXPANSION))
-    trace_format (" -> %S", expanded);
+    {
+      text = xstrdup (expanded);
+      remove_special_chars (text);
+      trace_format (" -> %S", text);
+      xfree (text);
+    }
   trace_flush ();
 }

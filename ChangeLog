@@ -10,6 +10,11 @@
 
   Changes between 0.9.5 and 0.9.6:
 
+    *) Remove control characters from debug output (16-Jun-2000):
+       There were some garbage in debug output caused by control
+       characters, which are now filtered.
+       [Denis Barbier]
+
     *) Fix string substitution (14-Jun-2000):
        With some complex expressions, string substitution did not
        work properly.
