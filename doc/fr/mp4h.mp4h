@@ -1,5 +1,5 @@
 ;;;
-;;;  mp4h.mp4h -- Documentation for mp4h
+;;;  mp4h.mp4h -- Documentation pour mp4h
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
@@ -136,7 +136,7 @@ Les drapeaux pour l'option <optmand -d> sont les suivantes:
 <option-list>
 <option t>###
 trace tous les appels de macros, pas seulement
-ceux déclarés avec <command traceon></option>
+ceux déclarés avec <command debugging-on></option>
 <option a>affiche les arguments</option>
 <option e>affiche le texte de remplacement</option>
 <option c>affiche la commande avant la collecte des arguments, après et
@@ -145,7 +145,7 @@ après l'appel de la fonction</option>
 d'appel récursif</option>
 <option f>affiche le nom du fichier d'entrée</option>
 <option l>affiche le numéro de la ligne dans le fichier d'entrée</option>
-<option p>affiche le résultat de a recherche de fichiers dans
+<option p>affiche le résultat de la recherche de fichiers dans
 l'arborescence</option>
 <option i>affiche les changements de fichiers d'entrée</option>
 <option V>raccourci pour tous ces drapeaux</option>
@@ -167,7 +167,7 @@ point-virgules, par exemple:
 </para>
 
 ###
-###    Defining new macros
+###    Définition de nouvelles commandes
 ###
 
 <subsection "Fonctions pour les définitions">
@@ -280,7 +280,7 @@ n'est effectuée si la commande est déjà définie.
 
 <para>
 Copie une fonction dans une autre. Cette fonction permet notamment de
-sauvegarder une fonction avant de la redéfinir.
+sauvegarder une commande avant de la redéfinir.
 </para>
 
 <undef foo bar>
@@ -307,7 +307,7 @@ Supprime la définition d'une commande.
 </example>
 
 ###
-###    Variable functions
+###    Opérations sur les variables
 ###
 
 <subsection "Variables">
@@ -509,6 +509,7 @@ primitive, un message indique de quel type de symbole il s'agit :
 <command USER COMPLEX> et <command USER TAG>
 </para>
 
+<unset-var x foo bar symbol-info define-tag>
 <example>
 <set-var x="0\n1\n2\n3\n4">
 <define-tag foo>bar</define-tag>
@@ -522,7 +523,7 @@ quux</define-tag>
 </example>
 
 ###
-###    String functions
+###    Manipulation de chaînes de caractères
 ###
 
 <subsection "Manipulation de chaînes de caractères">
@@ -540,10 +541,10 @@ ligne comptent pour un caractère.
 <set-var foo="0
 1
 2
-3">
+3">;;;
 <string-length <get-var foo>>
-<set-var foo="0 1 2 3">
-<set-var l=<string-length <get-var foo>>>
+<set-var foo="0 1 2 3">;;;
+<set-var l=<string-length <get-var foo>>>;;;
 <get-var l>
 </example>
 
@@ -824,13 +825,13 @@ Affiche quel est le type d'expressions régulières actuellement utilisé.
 </example>
 
 ###
-###    Array functions
+###    Manipulation de tableaux
 ###
 
 <subsection "Tableaux">
 
 <para>
-Le programme <mp4h> permet de faire des manipulations simples sur les
+Le programme <mp4h> permet de faire simplement des manipulations sur les
 tableaux. Le texte contenu à l'intérieur d'une variable peut être vu
 indifféremment comme une seule chaîne de caractères, ou comme un tableau
 de lignes séparées par des sauts de ligne. Ainsi, après
@@ -844,8 +845,8 @@ nous pouvons afficher soit le contenu de cette variable, soit une des
 lignes.
 <set-var chiffres="0\n1\n2\n3">
 <example>
-<get-var chiffres[2]>
 <get-var chiffres>
+<get-var chiffres[2]>
 </example>
 </para>
 
@@ -999,7 +1000,7 @@ Effectue le tri en ordre inverse
 </attributes:description>
 
 ###
-###    Numerical operators
+###    Opérateurs arithmétiques
 ###
 
 <subsection "Opérateurs arithmétiques">
@@ -1070,7 +1071,6 @@ prendre que deux arguments, qui sont obligatoirement des entiers.
 
 <example>
 <modulo 345 7>
-<factorielle 6>
 </example>
 
 <para>
@@ -1118,13 +1118,13 @@ Retourne <true> si les deux arguments sont différents.
 </para>
 
 ###
-###    Relational operators
+###    Opérateurs relationnels
 ###
 
-<subsection "Operateurs relationnels">
+<subsection "Opérateurs relationnels">
 
 <tag:description not>
-<var string>
+<var chaîne>
 </tag:description>
 
 <para>
@@ -1132,8 +1132,8 @@ Retourne <true> si la chaîne de caractères est vide, et rien sinon.
 </para>
 
 <tag:description and>
-<var string>
-[<var string>] ...
+<var chaîne>
+[<var chaîne>] ...
 </tag:description>
 
 <para>
@@ -1142,8 +1142,8 @@ ne retourne rien.
 </para>
 
 <tag:description or>
-<var string>
-[<var string>] ...
+<var chaîne>
+[<var chaîne>] ...
 </tag:description>
 
 <para>
@@ -1151,14 +1151,14 @@ Affiche le premier argument non nul.
 </para>
 
 ###
-###    Flow functions
+###    Fonctions de contrôle
 ###
 
 <subsection "Fonctions de contrôle">
 
 <tag:description group verbatim>
-<var statement>
-[<var statement>] ...
+<var commande>
+[<var commande>] ...
 [quoted=true]
 </tag:description>
 
@@ -1174,6 +1174,7 @@ importante, est de pouvoir mettre des sauts de ligne même si l'attribut
 <attribute whitespace=delete> a été spécifié.
 </para>
 
+<undef texte1 texte2 texte3>
 <example>
 <define-tag texte1>
 Ce texte est sur
@@ -1210,12 +1211,12 @@ de contrôle, pour qu'il ne soit plus développé ensuite.
 <example>
 <subst-in-string "=LT=define-tag foo>bar</define-tag>" "=LT=" "<">
 <foo>
-<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT=" "<quote \"<\">">
+<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT=" "<group "<" quoted=true>">
 <foo>
 </example>
 
 <tag:description if verbatim>
-<var string>
+<var chaîne>
 <var then-clause>
 [<var else-clause>]
 </tag:description>
@@ -1229,13 +1230,13 @@ deuxième argument est exécuté, sinon c'est le troisième.
 <define-tag test whitespace=delete>
 <if %0 "oui" "non">
 </define-tag>
-<test "chaine">
+<test "chaîne">
 <test "">
 </example>
 
 <tag:description ifeq verbatim>
-<var string1>
-<var string2>
+<var chaîne1>
+<var chaîne2>
 <var then-clause>
 [<var else-clause>]
 </tag:description>
@@ -1247,8 +1248,8 @@ c'est le quatrième.
 </para>
 
 <tag:description ifneq verbatim>
-<var string1>
-<var string2>
+<var chaîne1>
+<var chaîne2>
 <var then-clause>
 [<var else-clause>]
 </tag:description>
@@ -1260,7 +1261,7 @@ sinon c'est le quatrième.
 </para>
 
 <tag:description when complex>
-<var string>
+<var chaîne>
 </tag:description>
 
 <para>
@@ -1269,7 +1270,7 @@ le corps de cette fonction est exécuté.
 </para>
 
 <tag:description while verbatim complex>
-<var cond>
+<var condition>
 </tag:description>
 
 <para>
@@ -1287,8 +1288,8 @@ de cette fonction est exécuté.
 <tag:description foreach complex>
 <var variable>
 <var array>
-[start=<var start>]
-[end=<var end>]
+[start=<var début>]
+[end=<var fin>]
 [step=<var pas>]
 </tag:description>
 
@@ -1309,14 +1310,14 @@ qui contient le tableau de valeurs.
 </example>
 
 <attributes:description>
-<attributes:item "start=<var start>">
+<attributes:item "start=<var début>">
 La boucle commence à l'indice indiqué par cet attribut.
 <example>
 <set-var x="1\n2\n3\n4\n5\n6">
 <foreach i x start=3><get-var i> </foreach>
 </example>
 
-<attributes:item "end=<var end>">
+<attributes:item "end=<var fin>">
 La boucle termine à l'indice indiqué par cet attribut.
 <example>
 <set-var x="1\n2\n3\n4\n5\n6">
@@ -1324,8 +1325,8 @@ La boucle termine à l'indice indiqué par cet attribut.
 </example>
 
 <attributes:item "step=<var pas>">
-Lorsqu'un pas est spécifié, 
-Au lieu de prendre toutes les valeurs du tableau, 
+Lorsqu'un pas est spécifié, il représente l'incrément de l'index dans la
+boucle (1 par défaut).
 Si le pas est négatif, la boucle est inversée.
 <example>
 <set-var x="1\n2\n3\n4\n5\n6">
@@ -1381,16 +1382,22 @@ Affiche le message donné en arguments sur l'erreur standard.
 </para>
 
 <tag:description exit>
+[message=<var chaîne>]
 [status=<var rc>]
-[message=<var chaine>]
 </tag:description>
 
 <para>
-Interrompt immédiatement le programme. L'attribut <attribute message>
-permet d'afficher une information sur l'erreur standard, pour indiquer
-la cause de l'arrêt du programme. Si l'attribut <attribute status> est
-utilisé, il indique quel code le programme retourne (-1 par défaut).
+Interrompt immédiatement le programme.
 </para>
+
+<attributes:description>
+<attributes:item "message=<var chaîne>">
+Afficher une information sur l'erreur standard, pour indiquer
+la cause de l'arrêt du programme.
+
+<attributes:item "status=<var rc>">
+Change le code retourné par le programme (-1 par défaut).
+</attributes:description>
 
 <tag:description at-end-of-file>
 </tag:description>
@@ -1402,13 +1409,13 @@ entièrement lu.
 </para>
 
 ###
-###    File functions
+###    Fonctions sur les fichiers
 ###
 
 <subsection "Fonctions sur les fichiers">
 
 <tag:description directory-contents>
-<var dirname>
+<var répertoire>
 [matching=regexp]
 </tag:description>
 
@@ -1423,7 +1430,7 @@ séparés par des sauts de ligne.
 </example>
 
 <tag:description file-exists>
-<var filename>
+<var fichier>
 </tag:description>
 
 <para>
@@ -1432,7 +1439,7 @@ trouvé, et rien sinon.
 </para>
 
 <tag:description get-file-properties>
-<var filename>
+<var fichier>
 </tag:description>
 
 <para>
@@ -1449,7 +1456,7 @@ le nom du groupe.
 </example>
 
 <tag:description include>
-<var filename>
+<var fichier>
 [alt=<var action>]
 [verbatim=true]
 </tag:description>
@@ -1459,7 +1466,7 @@ Lit les données contenues dans le fichier passé en argument.
 </para>
 
 <attributes:description>
-<attributes:item "alt=<var texte>">
+<attributes:item "alt=<var action>">
 Si le fichier n'est pas trouvé, le texte alternatif est affiché. Si cet
 attribut est absent et que le fichier n'est pas trouvé, le programme
 s'arrête.
@@ -1476,7 +1483,8 @@ par <mp4h>.
 Le corps de cette balise est supprimé.
 </para>
 
-<tag:description eol-comment>
+<tag:description set-eol-comment>
+[<var chaîne>]
 </tag:description>
 
 <para>
@@ -1484,7 +1492,7 @@ Permet de modifier les caractères servant de commentaires.
 </para>
 
 ###
-###    Debugging
+###    Aide au déboguage
 ###
 
 <subsection "Aide au déboguage">
@@ -1506,11 +1514,10 @@ affiche les exemples à été définie ainsi:
 <example>
 <function-def example>
 </example>
-
 </para>
 
 <tag:description debugmode>
-<var string>
+<var chaîne>
 </tag:description>
 
 <para>
@@ -1528,10 +1535,10 @@ se fait de nouveau dans la sortie erreur standard. Si le nom du fichier
 est <file ->, l'affichage est supprimé.
 </para>
 
-<para>
+<note>
 Il n'existe aucun moyen pour insérer ces instructions à l'intérieur du
 document post-traité.
-</para>
+</note>
 
 <tag:description debugging-on>
 <var nom>
@@ -1540,8 +1547,8 @@ document post-traité.
 
 <para>
 Les commandes dont les noms sont passés en argument sont «tracées»,
-c'est-à-diree que les informations demandées au travers de l'option <optflag d>
-et de la commande <command debugmode> sont affichées lors de chaque appel de
+c'est-à-dire que les informations demandées au travers de l'option <optflag d>
+ou de la commande <command debugmode> sont affichées lors de chaque appel de
 la fonction.
 </para>
 
@@ -1555,13 +1562,13 @@ Fonction inverse de la précédente.
 </para>
 
 ###
-###    Misc
+###    Divers
 ###
 
 <subsection "Divers">
 
 <tag:description __file__>
-[<var nom>]
+[<var fichier>]
 </tag:description>
 
 <para>
@@ -1585,8 +1592,9 @@ Ceci est le fichier <__file__>, ligne <__line__>.
 
 <para>
 En fait, si vous regardez le fichier source, vous vous apercevrez que le
-numéro de la ligne n'est pas correct.
-d'être traité.
+numéro de la ligne n'est pas correct. En effet, les commandes sont lues
+avant d'être développées. Le numéro retourné est le numéro de la
+dernière ligne du bloc qui contient cette instrction.
 </para>
 
 <tag:description __version__>
@@ -1621,9 +1629,8 @@ dépendant de la vitesse du processeur.
 </para>
 
 <example>
-Le temps écoulé est mesuré en cycles d'horloge. Depuis le début de la
-compilation de cette documentation par <mp4h>, voici le nombre de cycles
-écoulés:
+Depuis le début de la compilation de cette documentation par <mp4h>,
+voici le nombre de cycles d'horloge écoulés:
 <timer>
 </example>
 
@@ -1902,6 +1909,21 @@ attributs soient développés en premier. Il convient donc d'écrire:
 <define-tag opt attributes=verbatim><text-tt>%attributes</text-tt></define-tag>
 <opt "Ceci est un <opt essai>">
 </example>
+</para>
+
+<section "Auteur">
+<para>
+Denis Barbier
+<URL src="mailto:barbier@imacs.polytechnique.fr"
+     name="<left-angle>barbier@imacs.polytechnique.fr<right-angle>">
+</para>
+
+
+<section "Remerciement">
+<para>
+Je tiens à remercier très sincèrement Brian J. Fox pour avoir écrit
+<Meta-HTML> et René Seindal pour son travail sur ce merveilleux
+macro-processeur qu'est GNU <m4>.
 </para>
 
 <footer>

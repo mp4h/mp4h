@@ -80,8 +80,16 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
     {                           /* TOKSW */
     case TOKEN_EOF:
     case TOKEN_MACDEF:
+      break;
+
     case TOKEN_BGROUP:
+      if (expansion == READ_ATTR_BODY)
+        obstack_1grow (obs, CHAR_BGROUP);
+      break;
+
     case TOKEN_EGROUP:
+      if (expansion == READ_ATTR_BODY)
+        obstack_1grow (obs, CHAR_EGROUP);
       break;
 
     case TOKEN_QUOTED:
@@ -187,9 +195,13 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
 
         case TOKEN_BGROUP:
           group_level++;
+          if (expansion == READ_ATTR_BODY)
+            obstack_1grow (obs, CHAR_BGROUP);
           break;
 
         case TOKEN_EGROUP:
+          if (expansion == READ_ATTR_BODY)
+            obstack_1grow (obs, CHAR_EGROUP);
           group_level--;
           break;
 
@@ -547,7 +559,7 @@ expand_unknown_macro (char *name, read_type expansion)
   SYMBOL_NAME (&unknown)        = symbol_name;
   SYMBOL_TRACED (&unknown)      = FALSE;
   SYMBOL_CONTAINER (&unknown)   = FALSE;
-  SYMBOL_EXPAND_ARGS (&unknown) = FALSE;
+  SYMBOL_EXPAND_ARGS (&unknown) = TRUE;
 
   traced = (boolean) ((debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (&unknown));
 
@@ -576,34 +588,21 @@ expand_unknown_macro (char *name, read_type expansion)
   obstack_grow (obs_expansion, symbol_name, strlen (symbol_name));
 
   /*  Replace `name=val' attributes by name="val" */
-#if 0
-  if (expansion_level > 1)
+  for (i = 1; i < argc; i++)
     {
-      for (i = 1; i < argc; i++)
+      obstack_1grow (obs_expansion, ' ');
+      cp = strchr (TOKEN_DATA_TEXT (argv[i]), '=');
+      if (cp != NULL && *(cp+1) != '"' && *(cp+1) != CHAR_QUOTE)
         {
-          obstack_1grow (obs_expansion, ' ');
+          *cp = '\0';
           shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+          obstack_1grow (obs_expansion, '=');
+          obstack_1grow (obs_expansion, CHAR_QUOTE);
+          shipout_string (obs_expansion, cp + 1, 0);
+          obstack_1grow (obs_expansion, CHAR_QUOTE);
         }
-    }
-  else
-#endif
-    {
-      for (i = 1; i < argc; i++)
-        {
-          obstack_1grow (obs_expansion, ' ');
-          cp = strchr (TOKEN_DATA_TEXT (argv[i]), '=');
-          if (cp != NULL && *(cp+1) != '"' && *(cp+1) != CHAR_QUOTE)
-            {
-              *cp = '\0';
-              shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-              obstack_1grow (obs_expansion, '=');
-              obstack_1grow (obs_expansion, CHAR_QUOTE);
-              shipout_string (obs_expansion, cp + 1, 0);
-              obstack_1grow (obs_expansion, CHAR_QUOTE);
-            }
-          else
-            shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-        }
+      else
+        shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
     }
   obstack_1grow (obs_expansion, '>');
   expanded = push_string_finish (READ_BODY);

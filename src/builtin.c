@@ -220,7 +220,7 @@ builtin_tab[] =
 
       /*  page functions  */
   { "include",          FALSE,   FALSE,   mp4h_include },
-  { "%%include",        FALSE,    TRUE,   mp4h___include },
+  { "%%include",        TRUE,     TRUE,   mp4h___include },
   { "comment",          TRUE,     TRUE,   mp4h_comment },
   { "set-eol-comment",  FALSE,    TRUE,   mp4h_set_eol_comment },
   { "dnl",              FALSE,    TRUE,   mp4h_dnl },
@@ -620,7 +620,7 @@ dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
       if (expansion_level > 0)
         obstack_1grow (obs, CHAR_BGROUP);
       if (*ARG (i) == '"' && *(ARG (i) + strlen (ARG (i))) == '"')
-        obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 1));
+        obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 2));
       else
         obstack_grow (obs, ARG (i), strlen (ARG (i)));
       if (expansion_level > 0)
@@ -1809,37 +1809,30 @@ mp4h_include (MP4H_BUILTIN_ARGS)
 
   obstack_grow (obs, "<%%include ", 11);
   obstack_grow (obs, ARG (1), strlen (ARG (1)));
-  if (alt)
-    {
-      obstack_grow (obs, " alt=", 5);
-      obstack_1grow (obs, CHAR_LQUOTE);
-      obstack_grow (obs, alt, strlen (alt));
-      obstack_1grow (obs, CHAR_RQUOTE);
-     }
   if (verbatim)
-      obstack_grow (obs, " verbatim=true", 14);
+    obstack_grow (obs, " verbatim=true", 14);
   obstack_1grow (obs, '>');
+  if (alt)
+    obstack_grow (obs, alt, strlen (alt));
+  obstack_grow (obs, "</%%include>", 12);
 }
 
 static void
 mp4h___include (MP4H_BUILTIN_ARGS)
 {
-  const char *alt, *verbatim;
+  const char *verbatim;
   FILE *fp;
   char *filename = NULL;
 
-  alt = predefined_attribute ("alt", &argc, argv, TRUE);
   verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
-
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
   fp = path_search (ARG (1), &filename);
   if (fp == NULL)
     {
-      if (alt)
-        /*  Remove CHAR_LQUOTE and CHAR_RQUOTE */
-        obstack_grow (obs, alt + 1, strlen(alt) - 1);
+      if (strlen (TOKEN_DATA_TEXT (argv[argc])) > 0)
+        shipout_string (obs, TOKEN_DATA_TEXT (argv[argc]), 0);
       else
         {
           MP4HERROR ((warning_status, errno,
@@ -1879,7 +1872,7 @@ mp4h_set_eol_comment (MP4H_BUILTIN_ARGS)
 
 /*------------------------------------------------------------------------.
 | Delete all subsequent whitespace from input.  The function skip_line () |
-| lives in input.c.							  |
+| lives in input.c.                                                       |
 `------------------------------------------------------------------------*/
 
 static void
@@ -1893,7 +1886,7 @@ mp4h_dnl (MP4H_BUILTIN_ARGS)
 
 /*------------------------------------------------------------------------.
 | Delete all subsequent whitespace from input.  The function skip_line () |
-| lives in input.c.							  |
+| lives in input.c.                                                       |
 `------------------------------------------------------------------------*/
 
 static void
@@ -2856,7 +2849,10 @@ mp4h_get_var_once (MP4H_BUILTIN_ARGS)
 static void
 mp4h_unset_var (MP4H_BUILTIN_ARGS)
 {
-  lookup_variable (ARG (1), SYMBOL_DELETE);
+  int i;
+
+  for (i=1; i<argc; i++)
+    lookup_variable (ARG (i), SYMBOL_DELETE);
 }
 
 /*-----------------------------------------------------.

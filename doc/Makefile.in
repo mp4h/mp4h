@@ -6,7 +6,7 @@
 SHELL   = /bin/sh
 RM      = rm -f
 
-SUBDIRS = fr en
+SUBDIRS = en fr
 
 # ------------------------------------------------
 #   THE DEFAULT TARGETS
@@ -14,7 +14,7 @@ SUBDIRS = fr en
 
 default: all
 
-all-recursive clean-recursive distclean-recursive:
+all-recursive clean-recursive distclean-recursive realclean-recursive:
 	-@set -e; \
 	set dummy $(MAKEFLAGS); amf=$$2; \
 	for dir in $(SUBDIRS); do \
@@ -28,6 +28,8 @@ all-recursive clean-recursive distclean-recursive:
 all: all-recursive
 
 clean: clean-recursive
+
+realclean: realclean-recursive
 
 distclean: distclean-recursive
 	$(RM) Makefile

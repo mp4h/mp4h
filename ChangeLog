@@ -3,14 +3,23 @@
   =================
 
   This file summarizes *all* types of changes to the MP4H sources,
-  i.e. changes between each patchlevel (1.x.y->1.x.(y+1) and
-  1.x.y->1.(x+1).0). Take this logfile for concrete and detailed
+  i.e. changes between each patchlevel (0.x.y->0.x.(y+1) and
+  0.x.y->0.(x+1).0). Take this logfile for concrete and detailed
   information about every single change.
   ___________________________________________________________________________
 
   Changes between 0.8.0 and 0.7.2:
 
     *) English documentation (28-Feb-2000):
+       [Denis Barbier]
+
+    *) Fix <unset-var> tag (28-Feb-2000):
+       [Denis Barbier]
+
+    *) Internal change in <include> tag (28-Feb-2000):
+       [Denis Barbier]
+
+    *) Expand attributes in unknown macros (28-Feb-2000):
        [Denis Barbier]
 
     *) Internal changes in macro parser (26-Feb-2000):

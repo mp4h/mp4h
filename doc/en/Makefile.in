@@ -11,6 +11,7 @@ PROGDIR         = $(top_srcdir)/src
 PROGRAM         = $(PROGDIR)/mp4h
 INCDIR          = ..
 DEPS            = ../list-tags
+TIDYOPT         =
 
 RM              = rm -f
 
@@ -24,9 +25,10 @@ all: mp4h.html mp4h.1
 #   DOCUMENTATION
 # ------------------------------------------------
 
-mp4h.html: mp4h.mp4h $(INCDIR)/html.out $(PROGRAM) $(DEPS)
-	PATH=$(PROGDIR):$(PATH) mp4h -D format=html -I $(INCDIR) mp4h.mp4h > $@
-	tidy $@ >/dev/null
+#   Do not rebuild HTML documentation
+mp4h.html: mp4h.mp4h $(INCDIR)/html.out
+	PATH=$(PROGDIR):$(PATH) mp4h -D format=html -I $(INCDIR) mp4h.mp4h > tmp-$@
+	tidy $(TIDYOPT) tmp-$@ > $@ && $(RM) tmp-$@
 
 mp4h.pod: mp4h.mp4h $(INCDIR)/pod.out $(PROGRAM) $(DEPS)
 	PATH=$(PROGDIR):$(PATH) mp4h -D format=pod -I $(INCDIR) mp4h.mp4h \

@@ -72,7 +72,7 @@
 <html>
 <head>
 <meta name="Author"    content="Denis Barbier">
-<meta name="Generator" content="mp4h <version>">
+<meta name="Generator" content="mp4h <__version__>">
 <meta name="Created"   content="10-Feb-2000">
 <set-var fileinfo="<get-file-properties mp4h.mp4h>">;;;
 <meta name="Modified"  content="<date <get-var fileinfo[3]>>">
@@ -110,7 +110,7 @@
 <td align=center><if <get-var verbatim> "&nbsp;" "<a href=\"#noteattr\"><tag:V></a>"></td>
 <td align=center>%0</td>
 <td>
-  <when <eq <array-size list-attributes> -1>>
+  <when <gt <array-size list-attributes> 0>>
     <table border=0 cellpadding=0 cellspacing=0 summary="">
       <foreach attr list-attributes>
         <tr><td><texttt><get-var attr></texttt></td></tr>

@@ -19,7 +19,7 @@
 <include list-tags>
 
 ;;;
-;;;   Les caractères pour commentaires sont modifiés
+;;;   We need to change comment characters to view original source code
 ;;;
 <set-eol-comment "###">
 
@@ -36,10 +36,10 @@ syntax familiar to HTML authors.
 This software is based on
 <URL src="http://www.metahtml.org/" name="<Meta-HTML>">,
 written by Brian J. Fox,  Even if both syntaxes look similar, source
-code is completely different.  Indeed, <Meta-HTML> was used as a part of
-a more complex program, <WML>
+code is completely different.  Indeed, a subset of <Meta-HTML> was used
+as a part of a more complex program, <WML>
 (<URL src="http://www.engelschall.com/sw/wml/" name="Website Meta Language">)
-written by Ralf S. Engelschall, and which i maintain since january 1999.
+written by Ralf S. Engelschall and which i maintain since january 1999.
 For licensing reasons, it was hard to hack <Meta-HTML> and so i decided
 to write my own macro-processor.
 </para>
@@ -125,7 +125,7 @@ redirect debug and trace output</option>
 <para>
 Flags are any of:
 <option-list>
-<option t>trace for all macro calls, not only traceon'ed</option>
+<option t>trace for all macro calls, not only debugging-on'ed</option>
 <option a>show actual arguments</option>
 <option e>show expansion</option>
 <option c>show before collect, after collect and after call</option>
@@ -243,7 +243,7 @@ Attributes: %uattributes
 </attributes:description>
 
 <tag:description provide-tag complex>
-<var nom>
+<var name>
 [attributes=verbatim]
 [endtag=required]
 [whitespace=delete]
@@ -311,8 +311,8 @@ This command sets variables.
 </para>
 
 <tag:description set-var-verbatim verbatim>
-<var nom>[=<var valeur>]
-[<var nom>[=<var valeur>]] ...
+<var name>[=<var value>]
+[<var name>[=<var value>]] ...
 </tag:description>
 
 <para>
@@ -361,7 +361,7 @@ As above but attributes are not expanded.
 </example>
 
 <tag:description preserve>
-<var nom>
+<var name>
 </tag:description>
 
 <para>
@@ -373,13 +373,13 @@ this variable is reset to an empty string.
 </para>
 
 <tag:description restore>
-<var nom>
+<var name>
 </tag:description>
 
 <para>
 This is the opposite: first argument is a variable name, this variable
 is set to the value found at the top of the stack, and this value is
-pooped.
+popped.
 </para>
 
 <tag:description unset-var>
@@ -392,7 +392,7 @@ Undefine variables.
 </para>
 
 <tag:description var-exists>
-<var nom>
+<var name>
 </tag:description>
 
 <para>
@@ -488,6 +488,7 @@ If it is a macro name, one of the following messages is printed:
 <command USER COMPLEX> or <command USER TAG>
 </para>
 
+<unset-var x foo bar symbol-info define-tag>
 <example>
 <set-var x="0\n1\n2\n3\n4">
 <define-tag foo>bar</define-tag>
@@ -518,10 +519,10 @@ Prints the length of the string.
 <set-var foo="0
 1
 2
-3">
+3">;;;
 <string-length <get-var foo>>
-<set-var foo="0 1 2 3">
-<set-var l=<string-length <get-var foo>>>
+<set-var foo="0 1 2 3">;;;
+<set-var l=<string-length <get-var foo>>>;;;
 <get-var l>
 </example>
 
@@ -707,7 +708,6 @@ Comparison is case insensitive.
 Comparison is case insensitive.
 <attributes:item "action=report">
 Prints <true> if string contains regexp.
-régulière, et rien sinon.
 <attributes:item "action=extract">
 Prints the expression matching regexp in string.
 <attributes:item "action=delete">
@@ -789,85 +789,82 @@ Prints actual regexp type.
 ###    Array functions
 ###
 
-<subsection "Tableaux">
+<subsection "Arrays">
 
 <para>
-Le programme <mp4h> permet de faire des manipulations simples sur les
-tableaux. Le texte contenu à l'intérieur d'une variable peut être vu
-indifféremment comme une seule chaîne de caractères, ou comme un tableau
-de lignes séparées par des sauts de ligne. Ainsi, après
+With <mp4h> one can easily deal with string arrays. Variables can be
+treated as a single value or as a newline separated list of strings.
+Thus after defining
 <code>
-<set-var chiffres="0
+<set-var digits="0
 1
 2
 3">
 </code>
-nous pouvons afficher soit le contenu de cette variable, soit une des
-lignes.
-<set-var chiffres="0\n1\n2\n3">
+one can view its content or one of these values:
+<set-var digits="0\n1\n2\n3">
 <example>
-<get-var chiffres[2]>
-<get-var chiffres>
+<get-var digits>
+<get-var digits[2]>
 </example>
 </para>
 
 <tag:description array-size>
-<var nom>
+<var name>
 </tag:description>
 
 <para>
-Affiche la taille du tableau dont le nom est passé en argument. Cette
-taille est le nombre de lignes présentes dans la variable.
+Returns an array size which is the number of lines present in the
+variable.
 </para>
 
 <example>
-<array-size chiffres>
+<array-size digits>
 </example>
 
 <tag:description array-append>
-<var valeur>
-<var nom>
+<var value>
+<var name>
 </tag:description>
 
 <para>
-Ajoute une ou plusieurs lignes à la fin du tableau.
+Add a value (or more if this value contains newlines) at the end of an
+array.
 </para>
 
 <example>
-<array-append "10\n11\n12" chiffres>
-<get-var chiffres>
+<array-append "10\n11\n12" digits>
+<get-var digits>
 </example>
 
 <tag:description array-add-unique>
-<var valeur>
-<var nom>
+<var value>
+<var name>
 [caseless=true]
 </tag:description>
 
 <para>
-Ajoute une valeur à la fin du tableau si elle n'est pas déjà présente
-dans ce tableau.
+Add a value at the end of an array if this value is not already present
+in this variable.
 </para>
 
 <example>
-<array-add-unique 2 chiffres>
-<get-var chiffres>
+<array-add-unique 2 digits>
+<get-var digits>
 </example>
 
 <attributes:description>
 <attributes:item "caseless=true">
-Avec cet attribut, la comparaison est faite indépendamment de la casse
-des caractères.
+Comparison is case insensitive.
 </attributes:description>
 
 <tag:description array-concat>
-<var nom1>
-[<var nom2>] ...
+<var name1>
+[<var name2>] ...
 </tag:description>
 
 <para>
-Concatène le contenu des tableaux dans la variable dont le nom est passé
-en premier.
+Concatenates all arrays into the first one.
 </para>
 
 <example>
@@ -877,86 +874,80 @@ en premier.
 </example>
 
 <tag:description array-member>
-<var valeur>
-<var nom>
+<var value>
+<var name>
 [caseless=true]
 </tag:description>
 
 <para>
-Si la valeur est contenue dans le tableau, retourne l'indice de cette
-valeur, sinon retourne <value -1>.
+If value is contained in array, returns its index otherwise returns -1.
 </para>
 
 <example>
-<array-member 11 chiffres>
+<array-member 11 digits>
 </example>
 
 <attributes:description>
 <attributes:item "caseless=true">
-Avec cet attribut, la comparaison est faite indépendamment de la casse
-des caractères.
+Comparison is case insensitive.
 </attributes:description>
 
 <tag:description array-shift>
 <var offset>
-<var nom>
-[start=<var début>]
+<var name>
+[start=<var start>]
 </tag:description>
 
 <para>
-Cette commande permet de décaler les éléments du tableau. Le premier
-argument est la valeur du décalage, et le second argument le nom de la
-variable à manipuler. Si le décalage est négatif, les indices qui
-tombent en dessous de 0 sont éliminés, et s'il est positif, les
-premières valeurs sont remplies par des lignes vides.
+Shifts an array.  If offset is negative, indexes below 0 are lost.
+If offset is positive, first indexes are filled with empty strings.
 </para>
 
 <example>
-<array-shift 2 chiffres>
-Maintenant: <get-var chiffres>
-<array-shift -4 chiffres>
-Et là: <get-var chiffres>
+<array-shift 2 digits>
+Now: <get-var digits>
+<array-shift -4 digits>
+And: <get-var digits>
 </example>
 
 <attributes:description>
-<attributes:item "start=<var début>">
-Indique le point de départ à partir duquel le décalage s'opère.
+<attributes:item "start=<var start>">
+Change origin of shifts (default is 0).
 <example>
-<array-shift -2 chiffres start=2><get-var chiffres>
+<array-shift -2 digits start=2><get-var digits>
 </example>
 </attributes:description>
 
 <tag:description sort>
-<var nom>
+<var name>
 [caseless=true]
 [numeric=true]
 [sortorder=reverse]
 </tag:description>
 
 <para>
-Trie les lignes d'un tableau par ordre alphabétique.
+Sort lines of an array in place. Default is to sort lines
+alphabetically.
 </para>
 
 <example>
-<sort chiffres><get-var chiffres>
+<sort digits><get-var digits>
 </example>
 
 <attributes:description>
 <attributes:item "caseless=true">
-Avec cet attribut, le tri est fait indépendamment de la casse
-des caractères.
+Comparison is case insensitive.
 
 <attributes:item "numeric=true">
-Effectue un tri en comparant les valeurs numériquement, et non
-alphabétiquement.
+Sort lines numerically
 <example>
-<sort chiffres numeric=true><get-var chiffres>
+<sort digits numeric=true><get-var digits>
 </example>
 
 <attributes:item "sortorder=reverse">
-Effectue le tri en ordre inverse
+Reverse sort order
 <example>
-<sort chiffres numeric=true sortorder=reverse><get-var chiffres>
+<sort digits numeric=true sortorder=reverse><get-var digits>
 </example>
 </attributes:description>
 
@@ -964,48 +955,48 @@ Effectue le tri en ordre inverse
 ###    Numerical operators
 ###
 
-<subsection "Opérateurs arithmétiques">
+<subsection "Numerical operators">
 
 <para>
-Les opérateurs suivants permettent de manipuler des nombres. Lorsque
-tous les nombres sont des entiers, le résultat est un entier. Dans le
-cas contraire, le résultat est un réel.
+These operators perform basic arithmetic operations.  When all operands
+are integers result is an integer too, otherwise it is a float.  These
+operators are self-explanatory.
 </para>
 
 <tag:description add>
-<var nombre1>
-<var nombre2>
-[<var nombre3>] ...
+<var number1>
+<var number2>
+[<var number3>] ...
 </tag:description>
 
 <tag:description substract>
-<var nombre1>
-<var nombre2>
-[<var nombre3>] ...
+<var number1>
+<var number2>
+[<var number3>] ...
 </tag:description>
 
 <tag:description multiply>
-<var nombre1>
-<var nombre2>
-[<var nombre3>] ...
+<var number1>
+<var number2>
+[<var number3>] ...
 </tag:description>
 
 <tag:description divide>
-<var nombre1>
-<var nombre2>
-[<var nombre3>] ...
+<var number1>
+<var number2>
+[<var number3>] ...
 </tag:description>
 
 <tag:description min>
-<var nombre1>
-<var nombre2>
-[<var nombre3>] ...
+<var number1>
+<var number2>
+[<var number3>] ...
 </tag:description>
 
 <tag:description max>
-<var nombre1>
-<var nombre2>
-[<var nombre3>] ...
+<var number1>
+<var number2>
+[<var number3>] ...
 </tag:description>
 
 <example>
@@ -1014,83 +1005,80 @@ cas contraire, le résultat est un réel.
 </example>
 
 <example>
-<define-tag factorielle whitespace=delete>
-<ifeq %0 1 1 <multiply %0 <factorielle <substract %0 1>>>>
+<define-tag factorial whitespace=delete>
+<ifeq %0 1 1 <multiply %0 <factorial <substract %0 1>>>>
 </define-tag>
-<factorielle 6>
+<factorial 6>
 </example>
 
 <tag:description modulo>
-<var nombre1>
-<var nombre2>
+<var number1>
+<var number2>
 </tag:description>
 
 <para>
-Contrairement aux fonctions ci-dessus, la fonction modulo ne peut
-prendre que deux arguments, qui sont obligatoirement des entiers.
+Unlike functions listed above the modulo function cannot handle more
+than 2 arguments, and these arguments must be integers.
 </para>
 
 <example>
 <modulo 345 7>
-<factorielle 6>
 </example>
 
 <para>
-Les fonctions suivantes permettent de comparer des nombres, et
-retournent <true> lorsque la comparaison est vraie et rien sinon. Si un
-des arguments n'est pas un nombre, la comparaison est fausse.
+Those functions compare two numbers and returns <true> when this
+comparison is true.  If one argument is not a number, comparison
+is false.
 </para>
 
 <tag:description gt>
-<var nombre1>
-<var nombre2>
+<var number1>
+<var number2>
 </tag:description>
 
 <para>
-Retourne <true> si le premier argument est strictement supérieur au
-second.
+Returns <true> if first argument is greater than second.
 </para>
 
 <tag:description lt>
-<var nombre1>
-<var nombre2>
+<var number1>
+<var number2>
 </tag:description>
 
 <para>
-Retourne <true> si le premier argument est strictement inférieur au
-second.
+Returns <true> if first argument is lower than second.
 </para>
 
 <tag:description eq>
-<var nombre1>
-<var nombre2>
+<var number1>
+<var number2>
 </tag:description>
 
 <para>
-Retourne <true> si les deux arguments sont égaux.
+Returns <true> if arguments are equal.
 </para>
 
 <tag:description neq>
-<var nombre1>
-<var nombre2>
+<var number1>
+<var number2>
 </tag:description>
 
 <para>
-Retourne <true> si les deux arguments sont différents.
+Returns <true> if arguments are not equal.
 </para>
 
 ###
 ###    Relational operators
 ###
 
-<subsection "Operateurs relationnels">
+<subsection "Relational operators">
 
 <tag:description not>
 <var string>
 </tag:description>
 
 <para>
-Retourne <true> si la chaîne de caractères est vide, et rien sinon.
+Returns <true> if string is empty, otherwise returns an empty string.
 </para>
 
 <tag:description and>
@@ -1099,8 +1087,7 @@ Retourne <true> si la chaîne de caractères est vide, et rien sinon.
 </tag:description>
 
 <para>
-Retourne le dernier argument si tous les arguments sont non vides, sinon
-ne retourne rien.
+Returns the last argument if all arguments are non empty.
 </para>
 
 <tag:description or>
@@ -1109,14 +1096,14 @@ ne retourne rien.
 </tag:description>
 
 <para>
-Affiche le premier argument non nul.
+Returns the first non empty argument.
 </para>
 
 ###
 ###    Flow functions
 ###
 
-<subsection "Fonctions de contrôle">
+<subsection "Flow functions">
 
 <tag:description group verbatim>
 <var statement>
@@ -1125,54 +1112,52 @@ Affiche le premier argument non nul.
 </tag:description>
 
 <para>
-Cette fonction a pour objectif de grouper une succession de commandes en une
-seule. Des applications seront vues dans les exemples des commandes
-suivantes.
+This function groups multiple statements into a single one.  Some
+examples will be seen below with conditional operations.
 </para>
 
 <para>
-Une autre utilisation de cette commande, moins intuitive mais tout aussi
-importante, est de pouvoir mettre des sauts de ligne même si l'attribut
-<attribute whitespace=delete> a été spécifié.
+A less intuitive but very helpful use of this macro is to preserve newlines
+when <attribute whitespace=delete> is specified.
 </para>
 
+<undef text1 text2 text3>
 <example>
-<define-tag texte1>
-Ce texte est sur
-3 lignes sans
+<define-tag text1>
+Text on
+3 lines without
 whitespace=delete
 </define-tag>
-<define-tag texte2 whitespace=delete>
-Ce texte est sur
-3 lignes avec
+<define-tag text2 whitespace=delete>
+Text on
+3 lines with
 whitespace=delete
 </define-tag>
-<define-tag texte3 whitespace=delete>
-<group "Ce texte est sur
-3 lignes avec
+<define-tag text3 whitespace=delete>
+<group "Text on
+3 lines with
 whitespace=delete">
 </define-tag>
-<texte1>
-<texte2>
-<texte3>
+<text1>
+<text2>
+<text3>
 </example>
 
 <para>
-Notez dans l'exemple 2 que les sauts de ligne ont été supprimés, ce qui
-a pour conséquence de coller des lettres qui ne doivent pas l'être.
+Note that newlines are suppressed in <value text2> and result is
+certainly unwanted.
 </para>
 
 <attributes:description>
 <attributes:item "quoted=true">
-Avec cet attribut, le résultat de l'évaluation est entouré de caractères
-de contrôle, pour qu'il ne soit plus développé ensuite.
+Statements grouped will no longer be expanded.
 </attributes:description>
 
 <undef foo>
 <example>
 <subst-in-string "=LT=define-tag foo>bar</define-tag>" "=LT=" "<">
 <foo>
-<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT=" "<quote \"<\">">
+<subst-in-string "=LT=define-tag foo>quux</define-tag>" "=LT=" "<group "<" quoted=true>">
 <foo>
 </example>
 
@@ -1183,15 +1168,15 @@ de contrôle, pour qu'il ne soit plus développé ensuite.
 </tag:description>
 
 <para>
-Si la chaîne de caractères passée en premier argument n'est pas vide, le
-deuxième argument est exécuté, sinon c'est le troisième.
+If string is non empty, second argument is evalled otherwise third
+argument is evalled.
 </para>
 
 <example>
 <define-tag test whitespace=delete>
-<if %0 "oui" "non">
+<if %0 "yes" "no">
 </define-tag>
-<test "chaine">
+<test "string">
 <test "">
 </example>
 
@@ -1203,9 +1188,8 @@ deuxième argument est exécuté, sinon c'est le troisième.
 </tag:description>
 
 <para>
-Si les deux chaînes de caractères passées en premier et deuxième
-arguments sont identiques, le troisième argument est exécuté, sinon
-c'est le quatrième.
+If first two arguments are identical strings, third argument is evalled
+otherwise fourth argument is evalled.
 </para>
 
 <tag:description ifneq verbatim>
@@ -1216,9 +1200,8 @@ c'est le quatrième.
 </tag:description>
 
 <para>
-Si les deux chaînes de caractères passées en premier et deuxième
-arguments ne sont pas identiques, le troisième argument est exécuté,
-sinon c'est le quatrième.
+If first two arguments are not identical strings, third argument is
+evalled otherwise fourth argument is evalled.
 </para>
 
 <tag:description when complex>
@@ -1226,8 +1209,7 @@ sinon c'est le quatrième.
 </tag:description>
 
 <para>
-Quand la chaîne de caractères passée en premier argument n'est pas vide,
-le corps de cette fonction est exécuté.
+When argument is not empty, its body fuction is evalled.
 </para>
 
 <tag:description while verbatim complex>
@@ -1235,8 +1217,7 @@ le corps de cette fonction est exécuté.
 </tag:description>
 
 <para>
-Tant que la condition passée en premier argument est vérifiée, le corps
-de cette fonction est exécuté.
+While condition is true, body function is evalled.
 </para>
 
 <example>
@@ -1255,14 +1236,12 @@ de cette fonction est exécuté.
 </tag:description>
 
 <para>
-Cette commande est similaire à la commande <command foreach> de Perl ; 
-une variable prend successivement toutes les valeurs stockées dans un
-tableau, et le corps de la fonction est exécuté pour chacune de ces
-valeurs.
+This macro is similar to the <command foreach> Perl's macro:
+a variable loops over array values and function body is evalled for each
+value.
 
-Le premier argument est le nom de la variable qui va prendre les
-différentes valeurs, et le deuxième argument est le nom de la variable
-qui contient le tableau de valeurs.
+first argument is a generic variable name, and second is the name of an
+array.
 </para>
 
 <example>
@@ -1272,23 +1251,22 @@ qui contient le tableau de valeurs.
 
 <attributes:description>
 <attributes:item "start=<var start>">
-La boucle commence à l'indice indiqué par cet attribut.
+Skips first indexes.
 <example>
 <set-var x="1\n2\n3\n4\n5\n6">
 <foreach i x start=3><get-var i> </foreach>
 </example>
 
 <attributes:item "end=<var end>">
-La boucle termine à l'indice indiqué par cet attribut.
+Stops after index has reached that value.
 <example>
 <set-var x="1\n2\n3\n4\n5\n6">
 <foreach i x end=3><get-var i> </foreach>
 </example>
 
-<attributes:item "step=<var pas>">
-Lorsqu'un pas est spécifié, 
-Au lieu de prendre toutes les valeurs du tableau, 
-Si le pas est négatif, la boucle est inversée.
+<attributes:item "step=<var step>">
+Change index increment (default is 1).
+If step is negative, array is treated in reverse order.
 <example>
 <set-var x="1\n2\n3\n4\n5\n6">
 <foreach i x step=2><get-var i> </foreach>
@@ -1297,12 +1275,12 @@ Si le pas est négatif, la boucle est inversée.
 </attributes:description>
 
 <tag:description var-case verbatim>
-<var var1>=<var valeur1> <var action1>
-[<var var2>=<var valeur2> <var action2> ...
+<var var1>=<var value1> <var action1>
+[<var var2>=<var value2> <var action2> ...
 </tag:description>
 
 <para>
-Cette commande permet de faire plusieurs tests en une seule instruction.
+This command performs multiple conditions with a single instruction.
 
 <example>
 <set-var i=0>
@@ -1323,8 +1301,7 @@ Cette commande permet de faire plusieurs tests en une seule instruction.
 </tag:description>
 
 <para>
-Cette commande fait sortir de la boucle <command while>
-la plus interne.
+Breaks the innermost <command while> loop.
 </para>
 
 <example>
@@ -1339,35 +1316,39 @@ la plus interne.
 </tag:description>
 
 <para>
-Affiche le message donné en arguments sur l'erreur standard.
+Prints a warning on standard error.
 </para>
 
 <tag:description exit>
 [status=<var rc>]
-[message=<var chaine>]
+[message=<var string>]
 </tag:description>
 
 <para>
-Interrompt immédiatement le programme. L'attribut <attribute message>
-permet d'afficher une information sur l'erreur standard, pour indiquer
-la cause de l'arrêt du programme. Si l'attribut <attribute status> est
-utilisé, il indique quel code le programme retourne (-1 par défaut).
+Immediately exits program.
 </para>
+
+<attributes:description>
+<attributes:item "message=<var string>">
+Prints a message to the standard error.
+
+<attributes:item "status=<var rc>">
+Selects the code returned by the program (-1 by default).
+</attributes:description>
 
 <tag:description at-end-of-file>
 </tag:description>
 
 <para>
-Cette commande est spéciale, puisqu'elle stocke ses arguments
-temporairement. Ils seront traités lorsque le fichier d'entrée est
-entièrement lu.
+This is a special command: all attributes are stored and will be
+expanded after end of input.
 </para>
 
 ###
 ###    File functions
 ###
 
-<subsection "Fonctions sur les fichiers">
+<subsection "File functions">
 
 <tag:description directory-contents>
 <var dirname>
@@ -1375,9 +1356,7 @@ entièrement lu.
 </tag:description>
 
 <para>
-Le nom d'un répertoire est passé en argument. Cette commande 
-affiche la liste des noms de fichiers présents dans ce répertoire,
-séparés par des sauts de ligne.
+Returns a newline separated list of files contained in a given directory.
 </para>
 
 <example>
@@ -1389,8 +1368,7 @@ séparés par des sauts de ligne.
 </tag:description>
 
 <para>
-Affiche <true> si le fichier dont le nom est passé en argument est
-trouvé, et rien sinon.
+Returns <true> if file exists.
 </para>
 
 <tag:description get-file-properties>
@@ -1398,12 +1376,8 @@ trouvé, et rien sinon.
 </tag:description>
 
 <para>
-Affiche un tableau d'informations sur le fichier dont le nom est donné
-en argument. Les informations sont dans l'ordre : la taille du fichier,
-son type, la date du dernier changement de l'inode (en secondes depuis
-le 1er janvier 1970), la date de la dernière modification du fichier, la
-date du dernier accès au fichier, le nom du propriétaire du fichier, et
-le nom du groupe.
+Returns an array of informations on this file.  These informations are:
+size, type, ctime, mtime, atime, owner and group.
 </para>
 
 <example>
@@ -1417,58 +1391,56 @@ le nom du groupe.
 </tag:description>
 
 <para>
-Lit les données contenues dans le fichier passé en argument.
+Read input from another file.
 </para>
 
 <attributes:description>
-<attributes:item "alt=<var texte>">
-Si le fichier n'est pas trouvé, le texte alternatif est affiché. Si cet
-attribut est absent et que le fichier n'est pas trouvé, le programme
-s'arrête.
+<attributes:item "alt=<var action>">
+If file is not found, this alternate action is handled. If this atribute
+is not set and file is not found, then an error is raised.
 
 <attributes:item "verbatim=true">
-Avec cet attribut, le contenu du fichier est inclus sans être modifié
-par <mp4h>.
+File content is included without expansion.
 </attributes:description>
 
 <tag:description comment complex>
 </tag:description>
 
 <para>
-Le corps de cette balise est supprimé.
+This tag does nothing, its body is simply discarded.
 </para>
 
-<tag:description eol-comment>
+<tag:description set-eol-comment>
+[<var string>]
 </tag:description>
 
 <para>
-Permet de modifier les caractères servant de commentaires.
+Change comment characters.
 </para>
 
 ###
 ###    Debugging
 ###
 
-<subsection "Aide au déboguage">
+<subsection "Debugging">
 
 <para>
-Lorsque les constructions deviennent complexes, il peut être ardu de comprendre
-ce qui cloche dans ce qu'on a écrit. Les fonctions ci-dessous permettent
-d'afficher certaines informations. Le déboguage reste cependant délicat, et est
-une partie de <mp4h> à améliorer.
+When constructs become complex it could be hard to debug them.
+Functions listed below are very useful when you could not figure what is
+wrong.  These functions are not perfect yet and must be improved in
+future releases.
 </para>
 
 <tag:description function-def>
-<var nom>
+<var name>
 </tag:description>
 
 <para>
-Affiche le texte de remplacement de la fonction. Par exemple, la commande qui
-affiche les exemples à été définie ainsi:
+Prints the replacement text of a user defined macro. For instance, the
+macro used to generate all examples of this documentation is
 <example>
 <function-def example>
 </example>
-
 </para>
 
 <tag:description debugmode>
@@ -1476,86 +1448,84 @@ affiche les exemples à été définie ainsi:
 </tag:description>
 
 <para>
-Cette commande prend le même argument que l'option <optflag d>.
+This comand acts like the <optflag d> flag but can be ynamically
+changed.
 </para>
 
 <tag:description debugfile>
-<var fichier>
+<var filename>
 </tag:description>
 
 <para>
-Indique dans quel fichier les instructions de déboguage doivent être
-écrites. Si le nom de fichier est vide, l'affichage de ces instructions
-se fait de nouveau dans la sortie erreur standard. Si le nom du fichier
-est <file ->, l'affichage est supprimé.
+Selects a file where debugging messages are diverted.
+If this filename is empty, debugging messages are sent back to standard
+error, and if it is set to <file -> these messages are discarded.
 </para>
 
-<para>
-Il n'existe aucun moyen pour insérer ces instructions à l'intérieur du
-document post-traité.
-</para>
+<note>
+There is no way to print these debugging messages into the document
+being processed.
+</note>
 
 <tag:description debugging-on>
-<var nom>
-[<var nom>] ...
+<var name>
+[<var name>] ...
 </tag:description>
 
 <para>
-Les commandes dont les noms sont passés en argument sont «tracées»,
-c'est-à-diree que les informations demandées au travers de l'option <optflag d>
-et de la commande <command debugmode> sont affichées lors de chaque appel de
-la fonction.
+Declare these macros traced, i.e. informations about these macros will
+be printed if <optflag d> flag or <command debugmode> macro are used.
 </para>
 
 <tag:description debugging-off>
-<var nom>
-[<var nom>] ...
+<var name>
+[<var name>] ...
 </tag:description>
 
 <para>
-Fonction inverse de la précédente.
+These macros are no more traced.
 </para>
 
 ###
-###    Misc
+###    Miscellaneous
 ###
 
-<subsection "Divers">
+<subsection "Miscellaneous">
 
 <tag:description __file__>
-[<var nom>]
+[<var name>]
 </tag:description>
 
 <para>
-Sans argument, la fonction retourne le nom du fichier en train d'être
-traité. S'il y a un argument, il est le nom du fichier retourné par les
-prochains appels à cette fonxction.
+Without argument this macro prints current input filename.
+With an argument, this macro sets the string returned by future
+invocation of this macro.
 </para>
 
 <tag:description __line__>
-[<var numéro>]
+[<var number>]
 </tag:description>
 <para>
-Sans argument, la fonction retourne le numéro de la ligne dans le
-fichier en train d'être traité. S'il y a un argument, il est le numéro
-de la ligne retourné par les prochains appels à cette fonxction.
+Without argument this macro prints current number line in input file.
+With an argument, this macro sets the number returned by future
+invocation of this macro.
 </para>
 
 <example>
-Ceci est le fichier <__file__>, ligne <__line__>.
+This is <__file__>, line <__line__>.
 </example>
 
 <para>
-En fait, si vous regardez le fichier source, vous vous apercevrez que le
-numéro de la ligne n'est pas correct.
-d'être traité.
+If you closely look at source code you will see that this number is
+wrong. Indeed the number line is the end of the entire block containing
+this instruction.
 </para>
 
 <tag:description __version__>
 </tag:description>
 
 <para>
-Affiche le numéro de version de <mp4h>.
+Prints the version of <mp4h>.
 </para>
 
 <tag:description date>
@@ -1563,8 +1533,8 @@ Affiche le numéro de version de <mp4h>.
 </tag:description>
 
 <para>
-Affiche l'heure locale correspondant au temps epoch donné en argument.
-Lorsqu'il n'y a pas d'argument, l'heure actuelle est affichée.
+Prints local time according to the epoch passed on argument.  If there
+is no argument, current local time is printed.
 </para>
 
 <example>
@@ -1577,53 +1547,52 @@ Lorsqu'il n'y a pas d'argument, l'heure actuelle est affichée.
 </tag:description>
 
 <para>
-Affiche le temps écoulé depuis le précédent appel à cette fonction.
-Le temps affiché est le nombre de cycles d'horloge, et est donc
-dépendant de la vitesse du processeur.
+Prints the time spent since last call to this macro.  The printed value
+is the number of clock ticks, and so is dependant of your CPU.
 </para>
 
 <example>
-Le temps écoulé est mesuré en cycles d'horloge. Depuis le début de la
-compilation de cette documentation par <mp4h>, voici le nombre de cycles
-écoulés:
+The number of clock ticks since the beginning of generation of
+this documentation by <mp4h> is:
 <timer>
 </example>
 
-<section "Schéma d'expansion des macros">
+<section "Macro expansion">
 
 <para>
-Cette partie décrit les mécanismes utilisés pour le remplacement des
-macros. Elle se veut aussi précise que possible, aussi n'hésitez pas à
-<URL src="mailto:barbier@imacs.polytechnique.fr" name="me signaler">
-toute erreur ou omission.
+This part describes internal mechanism of macro expansion.
+It must be as precise and exhaustive as possible so
+<URL src="mailto:barbier@imacs.polytechnique.fr" name="contact me">
+if you have any suggestion.
 </para>
 
-<subsection "Généralités">
+<subsection "Basics">
 
 <undef foo bar>
-Commençons par donner des exemples de définition de balises:
+Let us begin with some examples:
 <example>
 <define-tag foo>;;;
-Ceci est un exemple de balise simple;;;
+This is a simple tag;;;
 </define-tag>;;;
 <define-tag bar endtag=required>;;;
-Ceci est un exemple de balise complexe;;;
+This is a complex tag;;;
 </define-tag>;;;
 <foo>
-<bar>Corps de la fonction</bar>
+<bar>Body function</bar>
 </example>
 
 <undef href mail1 mail2 show-attributes show1 show2 bar>
 <para>
-Les commandes ainsi définies peuvent avoir des attributs, comme toute
-balise HTML. Pour que ces attributs se retrouvent dans le texte de
-remplacement, les conventions suivantes ont été adoptées:
+User defined macros may have attributes like HTML tags. To handle these
+attributes in replacement text, following conventions have been adopted
+(mostly derived from <Meta-HTML>):
 <list>
-<item>Les attributs sont numérotés à partir de 0. Dans le texte de
-remplacement, <value %0> sera remplacé par le 1er attribut, <value %1>
-par le 2e attribut, etc. Comme le nombre d'attribut n'est pas limité,
-les lettres <value %20> seront remplacés par le vingt-et-unième
-argument, et pas par le 3e argument suivi d'un 0.
+<item>Attributes are numbered from 0. In replacement text,
+<value %0> is replaced by first argument, <value %1>
+by the 2nd, etc.
+As there is no limitation on the number of arguments,
+<value %20> is the 21st argument and not the third followed by the 0
+letter.
 <example>
 <define-tag href>;;;
 <a href="%0">%1</a>;;;
@@ -1631,28 +1600,27 @@ argument, et pas par le 3e argument suivi d'un 0.
 <href http://www.gimp.org "The Gimp">
 </example>
 
-<item>La séquence <value %#> affiche le nombre d'attributs passés
-à la commande.
+<item>Sequence <value %#> prints number of attributes.
 
-<item>La séquence <value %%> est remplacée par un <value %>, ce qui est
-utile pour des définitions imbriquées.
+<item>Sequence <value %%> is replaced by <value %>, which is useful in
+nested efinitions.
 <example>
-<define-tag externe>;;;
-Externe, nombre d'attributs: %#
-<define-tag interne1>;;;
-Interne1, nombre d'attributs: %#;;;
+<define-tag outer>;;;
+outer, # attributes: %#
+<define-tag inner1>;;;
+inner1, # attributes: %#;;;
 </define-tag>;;;
-<define-tag interne2>;;;
-Interne2, nombre d'attributs: %%#;;;
+<define-tag inner2>;;;
+inner2, # attributes: %%#;;;
 </define-tag>;;;
-<interne1 %attributes et quelques autres>
-<interne2 %attributes et quelques autres>
+<inner1 %attributes and some others>
+<inner2 %attributes and some others>
 </define-tag>
-<externe liste attributs>
+<outer list attributes>
 </example>
 
-<item>Les caractères <value %attributes> sont remplacés par la liste 
-des arguments, séparés par un espace.
+<item>Sequence <value %attributes> is replaced by the space separated
+list of attributes.
 <example>
 <define-tag mail1>;;;
 <set-var %attributes>;;;
@@ -1663,8 +1631,7 @@ des arguments, séparés par un espace.
 <mail1 name="Dr. Foo" mail="hello@foo.com">
 </example>
 
-<item>Les caractères <value %body> sont remplacés par le corps de la
-commande, dans le cas d'une balise complexe.
+<item>Sequence <value %body> is replaced by the body of a complex macro.
 <example>
 <define-tag mail2 endtag=required>;;;
 <set-var %attributes>;;;
@@ -1675,10 +1642,9 @@ commande, dans le cas d'une balise complexe.
 </mail2>
 </example>
 
-<item>Les deux formes ci-dessus possèdent une forme alternative, où la
-liste est séparée par des sauts de lignes au lieu d'espaces. Il s'agit
-des formes <value %Aattributes> et <value %Abody>, le <value A> voulant
-dire array (tableau en français).
+<item>The two forms above accept modifiers. When <value %Aattributes>
+or <value %Abody> is used, a newline separated list of attributes is
+printed.
 <example>
 <define-tag show-attributes>;;;
 <set-var list="%Aattributes" i=0>;;;
@@ -1690,120 +1656,111 @@ dire array (tableau en français).
 <show-attributes name="Dr. Foo" mail="hello@foo.com">
 </example>
 
-<item>Une autre forme alternative est obtenue en remoplaçant le <value
-A> par <value U>, auquel cas le texte est remplacé mais n'est lui-même
-pas évalué. Cela n'a de sens que si la commande a été déclarée avec
-l'attribut <attribute attributes=verbatim>, parce que dans le cas
-contraire les arguments sont développés avant que ces substitutions
-n'aient lieu.
+<item>Another alternate form is obtained by replacing <value
+A> by <value U>, in which case text is replaced but will not be
+expanded.
+This does make sense only when macro has been defined with
+<attribute attributes=verbatim>, otherwise attributes are expanded
+before replacement.
 <example>
 <define-tag show1>;;;
-Avant développement: %Uattributes
-Après développement: %attributes
+Before expansion: %Uattributes
+After expansion: %attributes
 </define-tag>;;;
 <define-tag show2 attributes=verbatim>;;;
-Avant développement: %Uattributes
-Après développement: %attributes
+Before expansion: %Uattributes
+After expansion: %attributes
 </define-tag>;;;
-<define-tag bar>et hop %attributes</define-tag>;;;
-<show1 <bar la boum>>
-<show2 <bar la boum>>
+<define-tag bar>and here %attributes</define-tag>;;;
+<show1 <bar we go>>
+<show2 <bar we go>>
 </example>
 
-<item>Les modificateurs <value A> et <value U> peuvent être combinés.
+<item>Modifiers <value A> and <value U> can be combined.
 </list>
 </para>
 
 <note>
-Le mécanisme de lecture des instructions est complètement différent dans
-<Meta-HTML> et dans <mp4h>. Avec <Meta-HTML>, il est parfois nécessaire
-d'avoir recours à d'autres constructions, comme <value %xbody> et <value
-%qbody>. Celles-ci n'ont pas lieu d'être avec <mp4h>, mais pour être au
-plus compatible avec <Meta-HTML>, <mp4h> les reconnait aussi et elles
-ont exactement le même rôle que <value %body>. Une autre particularité
-non mentionnée ci-dessus, qui existe aussi pour des raisons de
-compatibilité avec <Meta-HTML>, est le fait que pour des balises
-simples, <value %body> est un synonyme de <value %attributes>. Ces
-fonctionnalités sont actuellement comprises dans <mp4h>, mais peuvent
-très bien être supprimées dans les versions futures.
+Input expansion is completely different in <Meta-HTML> and in <mp4h>.
+With <Meta-HTML> it is sometimes necessary to use other constructs like
+<value %xbody> and <value %qbody>.
+In order to improve compatibity with <Meta-HTML>, these constructs are
+recognized and are interpreted like <value %body>.
+Another feature provided for compatibility reason is the fact that for
+simple tags <value %body> and <value %attributes> are equivalent.
+These features are in the current <mp4h> version but may disappear in
+future releases.
 </note>
 
-<subsection "Attributs">
+<subsection "Attributes">
 
 <para>
-Les attributs sont séparés par un ou plusieurs espaces, tabulations ou
-sauts de lignes, et chaque attribut doit être une entité complète de
-<mp4h>. Par exemple, avec les définitionsa ci-dessus,
-<full-command bar> ne peut pas être un attribut,
-parce que la commande <full-command bar> est complexe.
-En revanche, il est possible d'écrire
+Attributes are separated by spaces, tabulations or newlines, and each
+attribute must be a valid <mp4h> entity. For instance with the
+definitions above, <full-command bar> can not be an attribute since it
+must be finished by <full-command /bar>.
+But this is valid:
 <code><foo <foo>></code>
-ou même
+or even
 <code><foo <foo name=src url=ici>></code>
-Dans les deux exemples ci-dessus, la commande <command foo> a un seul
-attribut.
+In these examples, the <command foo> has only one argument.
 </para>
 
 <undef foo bar>
 <para>
-Dans certains cas, il est nécessaire de regrouper ensemble plusieurs
-chaînes de caractères pour en faire un seul attribut. Cela peut être
-fait soit avec des guillements anglo-saxons (double quotes), soit avec
-la commande <command group>.  Par exemple,
-<code><foo "Ceci est le 1er attribut"
-           <group et le second>></code>
+Under certain circumstances it is necessary to group multiple statements
+into a single one. This can be done with double quotes or with the
+<command group> primitive, e.g.
+<code><foo "This is the 1st attribute"
+           <group and the second>></code>
 </para>
 
 <note>
-Contrairement au HTML, l'apostrophe ne peut pas servir à la place des
-guillements.
+Unlike HTML single quotes can not replace doube quotes for this purpose.
 </note>
 
 <para>
-Si des guillements apparaissent dans un argument, ils doivent être
-précédés d'une barre oblique inverse (backslash) <value "\\"> afin de ne
-pas être interprétés comme le caractère de fin de chaîne de caractères.
+If double quotes appear in an argument, they must be escaped by a
+backslash <value "\\">.
 <example>
-  <set-var texte="Texte avec un guillemet \" dedans">;;;
-  <get-var texte>
+  <set-var text="Text with double quotes \" inside">;;;
+  <get-var text>
 </example>
 </para>
 
-<subsection "Évaluation des commandes">
+<subsection "Macro evaluation">
 
 <para>
-Les commandes ont les caractéristiques suivantes:
+Macros are characterized by
 <list>
-<item>le nom de la commande ;
-<item>s'il s'agit d'une balise simple ou complexe ;
-<item>si les attributs sont développés ou non ;
-<item>le type de fonction (primitive ou commande de l'utilisateur) ;
-<item>pour les primitives, l'adresse de la routine correspondante dans
-le code exécutable, et pour les commandes définies par l'utilisateur, le
-texte de remplacement de la commande.
+<item>name
+<item>container status (simple or complex)
+<item>if attributes are expanded or not
+<item>function type (primitive or user defined macro)
+<item>for primitives, adress of corresponding code in memory and for
+user defined macros the replacement text
 </list>
 </para>
 
 <para>
-Les caractères sont lus un par un, jusqu'à trouver un <left-angle>.
-Le nom de la commande est ensuite lu. Les attributs sont lus, avec ou
-sans expansion, selon la caractéristique de la commande. Enfin, si
-la commande est complexe, le corps de la balise est lu.
-Le texte de remplacement est mis sur la pile, en remplaçaant les mots
-commençant par un <value %>, comme <value %body>, <value %attributes>
-ainsi que <value %0>, <value %1>, etc.
+Characters are read on input until a <left-angle> is found.
+Then macro name is read. After that attributes are read, verbatim or not
+depending on how this macro as been defined. And if this macro is
+complex, its body is read verbatim. When this is finished, some special
+sequences in replacement text are replaced (like <value %body>, <value
+%attributes>, <value %0>, <value %1>, etc.) and resulting text is put on
+input stack in order to be rescanned.
 </para>
 
 <note>
-Par défaut, les attributs sont évalués avant la commande elle-même.
+By default attributes are evalled before any replacement.
 </note>
 
 <define-tag text-tt endtag=required whitespace=delete>
 <tt>%body</tt>
 </define-tag>
 <para>
-Considérons l'exemple suivant, qui permet de mettre du texte en police
-bâton:
+Consider the following example, to change text in typewriter font:
 <code>
 <define-tag text-tt endtag=required whitespace=delete>
 <tt>%body</tt>
@@ -1812,11 +1769,11 @@ bâton:
 </para>
 
 <para>
-Cet exemple a un inconvénient, comme le montre l'exemple ci-dessous:
+This definition has a major drawback:
 <example>
-<text-tt>Ceci est un <text-tt>essai</text-tt></text-tt>
+<text-tt>This is an <text-tt>example</text-tt></text-tt>
 </example>
-Nous souhaiterions que les balises intérieures soient supprimées.
+We would like that inner tags are removed.
 </para>
 
 <set-var _text:tt=0>
@@ -1828,8 +1785,8 @@ Nous souhaiterions que les balises intérieures soient supprimées.
 <decrement _text:tt>
 </define-tag>
 <para>
-L'idée qui vient de suite est d'utiliser une variable pour savoir si
-on est déjà à l'intérieur d'une de ces balises:
+First idea is to use an auxiliary variable to know whether we still
+are inside such an environment:
 <code>
 <set-var _text:tt=0>
 <define-tag text-tt endtag=required whitespace=delete>
@@ -1841,29 +1798,43 @@ on est déjà à l'intérieur d'une de ces balises:
 </define-tag>
 </code>
 <example>
-<text-tt>Ceci est un <text-tt>essai</text-tt></text-tt>
+<text-tt>This is an <text-tt>example</text-tt></text-tt>
 </example>
 </para>
 
 <undef opt>
 <para>
-Mais si nous utilisons des balises simples, comme dans l'exemple
-ci-dessous, notre définition ne marche plus parce que les attributs sont
-développés avant la commande elle-même:
+But if we use simple tags, as in the example below, our definition does
+not seem to work. It is because attributes are expanded before they are
+put into replacement text.
 <example>
 <define-tag opt><text-tt>%attributes</text-tt></define-tag>
-<opt "Ceci est un <opt essai>">
+<opt "This is an <opt example>">
 </example>
 </para>
 
 <undef opt>
 <para>
-Pour remédier à ce problème, il convient donc d'empêcher que les
-attributs soient développés en premier. Il convient donc d'écrire:
+If we want to prevent this problem we have to forbid attributes
+expansion with
 <example>
 <define-tag opt attributes=verbatim><text-tt>%attributes</text-tt></define-tag>
-<opt "Ceci est un <opt essai>">
+<opt "This is an <opt example>">
 </example>
+</para>
+
+<section "Author">
+<para>
+Denis Barbier
+<URL src="mailto:barbier@imacs.polytechnique.fr"
+     name="<left-angle>barbier@imacs.polytechnique.fr<right-angle>">
+</para>
+
+
+<section "Thanks">
+<para>
+Sincere thanks to Brian J. Fox for writing <Meta-HTML> and Rene
+Seindal for maintaining this wonderful macro parser called GNU <m4>.
 </para>
 
 <footer>

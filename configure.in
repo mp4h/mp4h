@@ -11,8 +11,6 @@ VERSION="`$shtool version -l c -d short src/version.c`"
 LONG_VERSION="`$shtool version -l c -d long src/version.c`"
 $shtool echo -e "Configuring for %B$PACKAGE $LONG_VERSION %b"
 
-tmpdir=${TMPDIR-/tmp}
-AC_SUBST(tmpdir)
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE")

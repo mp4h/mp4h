@@ -12,9 +12,12 @@ configure
 configure.in
 doc/Makefile.in
 doc/en/Makefile.in
+doc/en/mp4h.html
 doc/en/mp4h.mp4h
 doc/fr/Makefile.in
+doc/fr/mp4h.html
 doc/fr/mp4h.mp4h
+doc/fr/tmp-mp4h.html
 doc/html.out
 doc/lang.en
 doc/lang.fr
@@ -49,7 +52,6 @@ src/output.c
 src/path.c
 src/symtab.c
 src/version.c
-tests/Makefile
 tests/Makefile.in
 tests/array-add-unique/01.in
 tests/array-add-unique/01.ok
@@ -152,6 +154,8 @@ tests/match/06.in
 tests/match/06.ok
 tests/misc/01.in
 tests/misc/01.ok
+tests/misc/02.in
+tests/misc/02.ok
 tests/set-var/01.in
 tests/set-var/01.ok
 tests/set-var/02.in

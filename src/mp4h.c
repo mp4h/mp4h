@@ -189,7 +189,7 @@ Debugging:\n\
       fputs (_("\
 \n\
 FLAGS is any of:\n\
-  t   trace for all macro calls, not only traceon'ed\n\
+  t   trace for all macro calls, not only debugging-on'ed\n\
   a   show actual arguments\n\
   e   show expansion\n\
   c   show before collect, after collect and after call\n\
