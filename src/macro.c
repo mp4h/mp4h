@@ -262,10 +262,7 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
 
   ch = peek_input ();
   if (IS_CLOSE (ch))
-    {
-      /*  Gobble closing bracket  */
-      advance_char ();
-    }
+    (void) next_token (&td, READ_BODY);
   else if (IS_SPACE(ch) || IS_ESCAPE(ch) || ch == '/')
     {
       do

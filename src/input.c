@@ -640,17 +640,6 @@ next_char (void)
 }
 
 /*--------------------------------------------------------------------.
-| This function is used in macro.c to gobble closing bracket          |
-| more efficiently than with call to next_token.                      |
-`--------------------------------------------------------------------*/
-
-void
-advance_char (void)
-{
-  (void) next_char ();
-}
-
-/*--------------------------------------------------------------------.
 | The function peek_input () is used to look at the next character in |
 | the input stream.  At any given time, it reads from the input_block |
 | on the top of the current input stack.                              |
