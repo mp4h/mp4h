@@ -1427,16 +1427,16 @@ mp4h_ifeq (MP4H_BUILTIN_ARGS)
   
   obstack_grow (obs, "<when <string-eq ", 17);
   dump_args (obs, (argc < 3 ? argc : 3), argv, " ");
-  obstack_grow (obs, ">><group separator=\" \" ", 23);
+  obstack_grow (obs, ">>", 2);
   obstack_grow (obs, ARG (3), strlen (ARG (3)));
-  obstack_grow (obs, "></when>", 8);
+  obstack_grow (obs, "</when>", 7);
   if (argc>4)
     {
       obstack_grow (obs, "<when <string-neq ", 18);
       dump_args (obs, 3, argv, " ");
-      obstack_grow (obs, ">><group separator=\" \" ", 23);
+      obstack_grow (obs, ">>", 2);
       obstack_grow (obs, ARG (4), strlen (ARG (4)));
-      obstack_grow (obs, "></when>", 8);
+      obstack_grow (obs, "</when>", 7);
     }
 }
 
@@ -1473,9 +1473,6 @@ mp4h_ifneq (MP4H_BUILTIN_ARGS)
 static void
 mp4h_when (MP4H_BUILTIN_ARGS)
 {
-  if (argc == 1)
-    return;
-
   /*
        This test succeeds if one of these 2 clauses is true
           a) there are at least 2 arguments

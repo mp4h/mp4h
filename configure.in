@@ -18,7 +18,6 @@ AC_DEFINE_UNQUOTED(VERSION, "$VERSION")
 
 AC_ARG_PROGRAM
 
-
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_MAKE_SET
@@ -42,6 +41,9 @@ AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
 AC_REPLACE_FUNCS(strtol obstack xmalloc xstrdup)
 AC_CHECK_FUNC(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
+
+dnl  Tidy is used to clean up HTML documentation
+AC_CHECK_PROG(TIDY, tidy, tidy, no)
 
 AC_OUTPUT(
    Makefile

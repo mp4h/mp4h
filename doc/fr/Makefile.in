@@ -11,6 +11,7 @@ PROGDIR         = $(top_srcdir)/src
 PROGRAM         = $(PROGDIR)/mp4h
 INCDIR          = ..
 DEPS            = ../list-tags
+TIDY            = @TIDY@
 TIDYOPT         = -latin1
 
 RM              = rm -f
@@ -29,7 +30,7 @@ all: mp4h.html mp4h.1
 mp4h.html: mp4h.mp4h $(INCDIR)/html.out
 	LC_CTYPE=fr_FR; export LC_CTYPE; \
 	PATH=$(PROGDIR):$(PATH) mp4h -D format=html -I $(INCDIR) mp4h.mp4h > $@
-	tidy $(TIDYOPT) -m $@
+	[ $(TIDY) = no ] || $(TIDY) $(TIDYOPT) -m $@
 
 mp4h.pod: mp4h.mp4h $(INCDIR)/pod.out $(PROGRAM) $(DEPS)
 	PATH=$(PROGDIR):$(PATH) mp4h -D format=pod -I $(INCDIR) mp4h.mp4h \
@@ -60,10 +61,7 @@ $(PROGRAM):
 # ------------------------------------------------
 
 clean:
-	$(RM) *.pod *.1 *.info *.texinfo
-
-realclean: clean
-	$(RM) *.html
+	$(RM) *.pod *.1 *.html *.info *.texinfo
 
 distclean: clean
 	$(RM) Makefile

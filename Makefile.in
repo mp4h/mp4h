@@ -125,7 +125,7 @@ FIND = find      # name of a GNU find
 GZIP = gzip      # where to find GNU Zip
 NAME = barbier   # name of maintainer who rolls the tarball
 
-EXCLUDE_FILES = CVS .cvsignore core mp4h-*.tar.gz
+EXCLUDE_FILES = CVS .cvsignore core mp4h-*.tar.gz debian
 
 NEWVERS = \
     $(VERSION_TOOL) -l c -p MP4H $$OPT src/version.c; \
@@ -147,7 +147,7 @@ _BUILDDIST = \
     echo "Creating tarball..."; \
     cd $(top_srcdir) && \
     $(TARBALL) -u $(NAME) -g mp4h -c '$(GZIP) --best' \
-        -e 'CVS,\.cvsignore,mp4h-.*' \
+        -e 'CVS,\.cvsignore,core,mp4h-.*,debian' \
         -o $${_tarball} $${_distname} .; \
     echo "Done"; \
     cd $$_cwd && ls -l $${_tarball}

@@ -12,4 +12,4 @@ This documentation describes <mp4h> version <get-var version>.
 
 <define-tag lang:note>Note</define-tag>
 
-<define-tag lang:tag-syntax>Syntax of the %0 tag</define-tag>
+<define-tag lang:tag-syntax>Syntax of the `%0' tag</define-tag>
