@@ -713,6 +713,11 @@ expand_unknown_tag (char *name, read_type expansion)
   boolean slash, single;
 
   expansion_level++;
+  array_current_line[expansion_level] = current_line;
+  if (expansion_level > nesting_limit)
+    MP4HERROR ((EXIT_FAILURE, 0,
+      _("ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
+           nesting_limit));
 
   symbol_name = xstrdup (name);
 
