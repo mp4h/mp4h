@@ -103,11 +103,10 @@ extern int errno;
 /* If FALSE is defined, we presume TRUE is defined too.  In this case,
    merely typedef boolean as being int.  Or else, define these all.  */
 #ifndef FALSE
-/* Do not use `enum boolean': this tag is used in SVR4 <sys/types.h>.  */
-typedef enum { FALSE = 0, TRUE = 1 } boolean;
-#else
-typedef int boolean;
+# define FALSE 0
+# define TRUE 1
 #endif
+typedef int boolean;
 
 char *mktemp ();
 
@@ -138,12 +137,12 @@ char *mktemp ();
 
 /* Various declarations.  */
 
-struct string
+struct _string
   {
     char *string;               /* characters of the string */
     size_t length;              /* length of the string */
   };
-typedef struct string STRING;
+typedef struct _string STRING;
 
 /* Memory allocation.  */
 voidstar xmalloc __P ((size_t));
@@ -158,7 +157,9 @@ void error __P ((int, int, const char *, ...));
 
 /* Those must come first.  */
 typedef void builtin_func ();
-typedef struct token_data token_data;
+typedef struct _token_data token_data;
+typedef enum _token_type token_type;
+typedef enum _token_data_type token_data_type;
 
 
 /* File: mp4h.c  --- global definitions.  */
@@ -276,7 +277,7 @@ void trace_post __P ((const char *, int, int, token_data **, const char *));
 /* File: input.c  --- lexical definitions.  */
 
 /* Various different token types.  */
-enum token_type
+enum _token_type
 {
   TOKEN_EOF,                    /* end of file */
   TOKEN_NONE,                   /* discardable token */
@@ -293,16 +294,16 @@ enum token_type
 };
 
 /* The data for a token, a macro argument, and a macro definition.  */
-enum token_data_type
+enum _token_data_type
 {
   TOKEN_VOID,
   TOKEN_TEXT,
   TOKEN_FUNC
 };
 
-struct token_data
+struct _token_data
 {
-  enum token_data_type type;
+  token_data_type type;
   union
     {
       struct
@@ -361,8 +362,6 @@ struct token_data
 
 extern int exp_flags;
 
-typedef enum token_type token_type;
-typedef enum token_data_type token_data_type;
 typedef int read_type;
 
 void input_init __P ((void));
@@ -481,7 +480,7 @@ void remove_special_chars __P ((char *, boolean));
 /* File symtab.c  --- symbol table definitions.  */
 
 /* Operation modes for lookup_symbol ().  */
-enum symbol_lookup
+enum _symbol_lookup
 {
   SYMBOL_LOOKUP,
   SYMBOL_INSERT,
@@ -489,9 +488,9 @@ enum symbol_lookup
 };
 
 /* Symbol table entry.  */
-struct symbol
+struct _symbol
 {
-  struct symbol *next;
+  struct _symbol *next;
   boolean traced;
   boolean container;
   boolean expand_args;
@@ -513,8 +512,8 @@ struct symbol
 #define SYMBOL_TEXT(S)          (TOKEN_DATA_TEXT (&(S)->data))
 #define SYMBOL_FUNC(S)          (TOKEN_DATA_FUNC (&(S)->data))
 
-typedef enum symbol_lookup symbol_lookup;
-typedef struct symbol symbol;
+typedef enum _symbol_lookup symbol_lookup;
+typedef struct _symbol symbol;
 typedef void hack_symbol ();
 
 #define HASHMAX 509             /* default, overridden by -Hsize */
@@ -543,14 +542,14 @@ extern int expansion_level;
 
 /* File: builtin.c  --- builtins.  */
 
-enum encoding_type
+enum _encoding_type
 {
   ENCODING_8BIT,                /* 1-byte char */
   ENCODING_UTF8                 /* UTF-8 */
 };
-typedef enum encoding_type encoding_type;
+typedef enum _encoding_type encoding_type;
 
-struct builtin
+struct _builtin
 {
   const char *name;
   boolean container;
@@ -558,7 +557,7 @@ struct builtin
   builtin_func *func;
 };
 
-typedef struct builtin builtin;
+typedef struct _builtin builtin;
 
 extern boolean visible_quotes;
 
@@ -697,7 +696,7 @@ void module_unload_all __P ((void));
 #define ARG(i)  (i<argc ? TOKEN_DATA_TEXT (argv[i]) : "")
 #define ARGBODY (TOKEN_DATA_TEXT (argv[argc]))
 
-enum mathop_type
+enum _mathop_type
 {
   MATHOP_ADD,                   /* addition */
   MATHOP_SUB,                   /* substraction */
@@ -708,7 +707,7 @@ enum mathop_type
   MATHOP_MOD                    /* modulus */
 };
 
-enum mathrel_type
+enum _mathrel_type
 {
   MATHREL_GT,
   MATHREL_LT,
@@ -716,8 +715,8 @@ enum mathrel_type
   MATHREL_NEQ 
 };
 
-typedef enum mathop_type mathop_type;
-typedef enum mathrel_type mathrel_type;
+typedef enum _mathop_type mathop_type;
+typedef enum _mathrel_type mathrel_type;
 
 typedef struct var_stack var_stack;
 struct var_stack
