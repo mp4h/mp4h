@@ -89,22 +89,6 @@ struct macro_definition
 typedef struct macro_definition macro_definition;
 
 
-
-/* Memory allocation.  */
-
-/*------------------------.
-| Failsafe free routine.  |
-`------------------------*/
-
-void
-xfree (voidstar p)
-{
-  if (p != NULL)
-    free (p);
-  p = NULL;
-}
-
-
 /*---------------------------------------------.
 | Print a usage message and exit with STATUS.  |
 `---------------------------------------------*/

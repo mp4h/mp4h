@@ -127,3 +127,12 @@ xrealloc (p, n)
     p = fixup_null_alloc (n);
   return p;
 }
+
+VOID
+xfree (p)
+     VOID *p;
+{
+  if (p != 0)
+    free(p);
+  p = 0;
+}
