@@ -401,8 +401,7 @@ main (int argc, char *const *argv, char *const *envp)
           else
             *macro_value++ = '\0';
           sym = lookup_variable (defines->macro, SYMBOL_INSERT);
-          if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
-              xfree (SYMBOL_TEXT (sym));
+          initialize_builtin (sym);
           SYMBOL_TYPE (sym) = TOKEN_TEXT;
           SYMBOL_TEXT (sym) = xstrdup (macro_value);
           break;
@@ -473,7 +472,7 @@ main (int argc, char *const *argv, char *const *envp)
   output_deallocate ();
   symtab_deallocate ();
   builtin_deallocate ();
-  
+
   xfree (current_file);
 
   exit (EXIT_SUCCESS);

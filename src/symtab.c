@@ -185,12 +185,8 @@ lookup_symbol (const char *name, symbol_lookup mode)
          symbol as "shadowed".  */
 
       sym = (symbol *) xmalloc (sizeof (symbol));
-      SYMBOL_TYPE (sym) = TOKEN_VOID;
-      SYMBOL_TRACED (sym) = SYMBOL_SHADOWED (sym) = FALSE;
+      initialize_builtin (sym);
       SYMBOL_NAME (sym) = xstrdup (lcname);
-      SYMBOL_HOOK_BEGIN (sym) = 0;
-      SYMBOL_HOOK_END (sym) = 0;
-
       SYMBOL_NEXT (sym) = *spp;
       (*spp) = sym;
 
@@ -247,7 +243,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 }
 
 /*----------------------------------------------------------------------.
-| The variables are stored in the same tables than symbols, but a '<'   |
+| The variables are stored in the same tables than symbols, but a '>'   |
 | is prepended to prevent conflicts between variables and symbols.      |
 `----------------------------------------------------------------------*/
 
@@ -258,7 +254,7 @@ lookup_variable (const char *name, symbol_lookup mode)
   symbol *var;
 
   internal_name = xmalloc (strlen (name) + 2);
-  *internal_name = '<';
+  *internal_name = '>';
   strcpy (internal_name+1, name);
   if (strncmp (internal_name+strlen (name)-1, "[]", 2) == 0)
       *(internal_name+strlen (name)-1) = '\0';

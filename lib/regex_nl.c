@@ -4212,6 +4212,11 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
                       RETALLOC (regs->end, regs->num_regs, regoff_t);
                       if (regs->start == NULL || regs->end == NULL)
 			{
+                          /*  Added by DB.  */
+                          if (regs->start)
+                            free (regs->start);
+                          else
+                            free (regs->end);
 			  FREE_VARIABLES ();
 			  return -2;
 			}

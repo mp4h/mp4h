@@ -362,6 +362,24 @@ find_builtin_by_name (const char *name)
 }
 
 
+/*-------------------------------.
+| Initialize a builtin symbol.   |
+`-------------------------------*/
+
+void
+initialize_builtin (symbol *sym)
+{
+  SYMBOL_TYPE (sym)        = TOKEN_VOID;
+  SYMBOL_FUNC (sym)        = NULL;
+  SYMBOL_TRACED (sym)      = FALSE;
+  SYMBOL_SHADOWED (sym)    = FALSE;
+  SYMBOL_CONTAINER (sym)   = FALSE;
+  SYMBOL_EXPAND_ARGS (sym) = FALSE;
+  SYMBOL_HOOK_BEGIN (sym)  = NULL;
+  SYMBOL_HOOK_END (sym)    = NULL;
+  SYMBOL_TEXT (sym)        = NULL;
+}
+
 /*-------------------------------------------------------------------------.
 | Install a builtin macro with name NAME, bound to the C function given in |
 | BP.  MODE is SYMBOL_INSERT or SYMBOL_PUSHDEF.  TRACED defines whether    |
@@ -375,14 +393,13 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode,
   symbol *sym;
 
   sym = lookup_symbol (name, mode);
-  SYMBOL_TYPE (sym) = TOKEN_FUNC;
-  SYMBOL_FUNC (sym) = bp->func;
+  initialize_builtin (sym);
+  SYMBOL_TYPE (sym)        = TOKEN_FUNC;
+  SYMBOL_FUNC (sym)        = bp->func;
   SYMBOL_TRACED (sym)      = traced;
   SYMBOL_SHADOWED (sym)    = FALSE;
   SYMBOL_CONTAINER (sym)   = bp->container;
   SYMBOL_EXPAND_ARGS (sym) = bp->expand_args;
-  SYMBOL_HOOK_BEGIN (sym)  = NULL;
-  SYMBOL_HOOK_END (sym)    = NULL;
 }
 
 /*------------------------------.
@@ -401,11 +418,9 @@ install_builtin_table (builtin *table)
 
 void
 init_break (void) {
+  initialize_builtin (&varbreak);
   SYMBOL_TYPE (&varbreak) = TOKEN_TEXT;
   SYMBOL_TEXT (&varbreak) = xstrdup ("");
-  SYMBOL_HOOK_BEGIN (&varbreak) = NULL;
-  SYMBOL_HOOK_END (&varbreak) = NULL;
-  SYMBOL_NAME (&varbreak) = NULL;
 }
 
 /*-------------------------------------------------------------------------.
@@ -422,14 +437,22 @@ define_user_macro (const char *name, char *text, symbol_lookup mode,
   char *begin, *cp;
   int offset, bracket_level = 0;
 
-  s = lookup_symbol (name, mode);
-  if (SYMBOL_TYPE (s) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (s));
+  s = lookup_symbol (name, SYMBOL_LOOKUP);
+  if (s)
+    {
+      xfree (SYMBOL_HOOK_BEGIN (s));
+      xfree (SYMBOL_HOOK_END (s));
+      xfree (SYMBOL_TEXT (s));
+    }
 
-  SYMBOL_TYPE (s) = TOKEN_TEXT;
+  s = lookup_symbol (name, SYMBOL_INSERT);
+  SYMBOL_TYPE (s)        = TOKEN_TEXT;
+  SYMBOL_CONTAINER (s)   = container;
+  SYMBOL_EXPAND_ARGS (s) = expand_args;
   if (space_delete)
     {
-      for (begin=text; *begin != '\0' && IS_SPACE(*begin); begin++) ;
+      for (begin=text; *begin != '\0' && IS_SPACE(*begin); begin++)
+        ;
       SYMBOL_TEXT (s) = xstrdup (begin);
       offset = 0;
       for (cp=SYMBOL_TEXT (s); *cp != '\0'; cp++)
@@ -480,12 +503,6 @@ define_user_macro (const char *name, char *text, symbol_lookup mode,
   else
     SYMBOL_TEXT (s) = xstrdup (text);
 
-  SYMBOL_TRACED (s)      = FALSE;
-  SYMBOL_SHADOWED (s)    = FALSE;
-  SYMBOL_CONTAINER (s)   = container;
-  SYMBOL_EXPAND_ARGS (s) = expand_args;
-  SYMBOL_HOOK_BEGIN (s)  = NULL;
-  SYMBOL_HOOK_END (s)    = NULL;
 #ifdef DEBUG_INPUT
   fprintf (stderr, "Define: %s\nText: %s\nContainer: %d\n",
     SYMBOL_NAME (s), SYMBOL_TEXT (s), SYMBOL_CONTAINER (s));
@@ -2406,7 +2423,10 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
 
   if (startpos >= 0)
     match_length = re_match (&buf, victim, length, startpos, &regs);
+
   xfree (buf.buffer);
+  xfree (buf.fastmap);
+  xfree (buf.translate);
 
   if (strcmp(action, "startpos") == 0)
     {
@@ -2898,8 +2918,7 @@ Warning:%s:%d: wrong index declaration in <%s>"),
             if (array_index == -1)
               {
                 /*  simple value.  */
-                if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-                  xfree (SYMBOL_TEXT (var));
+                xfree (SYMBOL_TEXT (var));
                 SYMBOL_TEXT (var) = xstrdup (value);
               }
             else
@@ -3098,18 +3117,20 @@ mp4h_preserve (MP4H_BUILTIN_ARGS)
     return;
 
   next = xmalloc (sizeof (var_stack));
-  var  = lookup_variable (ARG (1), SYMBOL_INSERT);
-  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-    next->text = xstrdup (SYMBOL_TEXT (var));
-  else
+  var  = lookup_variable (ARG (1), SYMBOL_LOOKUP);
+  if (var  && SYMBOL_TYPE (var) == TOKEN_TEXT)
     {
-      next->text = xstrdup ("");
+      next->text = xstrdup (SYMBOL_TEXT (var));
       xfree (SYMBOL_TEXT (var));
-      SYMBOL_TEXT (var) = xmalloc (1);
     }
+  else
+    next->text = xstrdup ("");
 
+  var  = lookup_variable (ARG (1), SYMBOL_INSERT);
+
+  initialize_builtin (var);
   SYMBOL_TYPE (var) = TOKEN_TEXT;
-  *(SYMBOL_TEXT (var)) = '\0';
+  SYMBOL_TEXT (var) = xstrdup ("");
 
   next->prev = vs;
   vs = next;
@@ -3127,13 +3148,13 @@ mp4h_restore (MP4H_BUILTIN_ARGS)
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  prev = vs->prev;
   var = lookup_variable (ARG (1), SYMBOL_INSERT);
 
   xfree (SYMBOL_TEXT (var));
-  SYMBOL_TEXT (var) = xstrdup (vs->text);
   SYMBOL_TYPE (var) = TOKEN_TEXT;
+  SYMBOL_TEXT (var) = xstrdup (vs->text);
 
+  prev = vs->prev;
   xfree (vs->text);
   xfree (vs);
   vs = prev;
@@ -3302,11 +3323,13 @@ mp4h_defvar (MP4H_BUILTIN_ARGS)
   if (var == NULL)
     {
       var = lookup_variable (ARG (1), SYMBOL_INSERT);
+      initialize_builtin (var);
       SYMBOL_TYPE (var) = TOKEN_TEXT;
       SYMBOL_TEXT (var) = xstrdup(ARG (2));
     }
   else if (strlen (SYMBOL_TEXT (var)) == 0)
     {
+      xfree (SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xstrdup(ARG (2));
     }
 }
@@ -3501,13 +3524,13 @@ mp4h_array_add_unique (MP4H_BUILTIN_ARGS)
   if (var == NULL)
     {
       var = lookup_variable (ARG (2), SYMBOL_INSERT);
-      SYMBOL_TEXT (var) = xstrdup (ARG (1));
       SYMBOL_TYPE (var) = TOKEN_TEXT;
+      SYMBOL_TEXT (var) = xstrdup (ARG (1));
     }
   else if (SYMBOL_TYPE (var) != TOKEN_TEXT || strlen (SYMBOL_TEXT (var)) == 0)
     {
-      SYMBOL_TEXT (var) = xstrdup (ARG (1));
       SYMBOL_TYPE (var) = TOKEN_TEXT;
+      SYMBOL_TEXT (var) = xstrdup (ARG (1));
     }
   else
     {
@@ -3621,8 +3644,8 @@ mp4h_array_concat (MP4H_BUILTIN_ARGS)
   if (var == NULL)
     {
       var = lookup_variable (ARG (1), SYMBOL_INSERT);
-      SYMBOL_TEXT (var) = xstrdup ("");
       SYMBOL_TYPE (var) = TOKEN_TEXT;
+      SYMBOL_TEXT (var) = xstrdup ("");
     }
   for (i=2; i<argc; i++)
     {

@@ -529,6 +529,7 @@ struct builtin
 
 typedef struct builtin builtin;
 
+void initialize_builtin __P ((symbol *));
 void builtin_init __P ((void));
 void builtin_deallocate __P ((void));
 void define_builtin __P ((const char *, const builtin *, symbol_lookup,
