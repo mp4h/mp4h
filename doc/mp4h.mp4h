@@ -1837,34 +1837,64 @@ size, type, ctime, mtime, atime, owner and group.
 </example>
 
 <tag:description include>
-[file=<var filename />]
-[cmd=<var command />]
+[<var filename />]
+file=<var filename /> | command=<var command-line />
 [alt=<var action />]
 [verbatim=true]
 </tag:description>
 
 <para>
-Read input from another file or a shell command.
+Insert the contents of a file in the file system - if the file attribute is given -,
+or the output from executing a system command - if the command attribute is given -
+into the input stream. 
+For backwards compatbility, if neither the file nor the command attributes are given,
+the first argument is taken as a file to include.
 </para>
 
 <attributes:description>
 <attributes:item "file=<var filename />">
-Path of the file being included.
+<para>
+The given file is read and inserted into the input stream.
+This attribute cannot be combined with the command attribute.
+</para>
+<para>
+Files are first searched in current directory, then in
+directories specified on command-line with the <optflag I /> option, next
+in directories listed in the MP4HPATH environment variable, and last
+under the compile-time location (<texttt>/usr/local/share/mp4h</texttt>
+by default).
+</para>
+</attributes:item>
+
+<attributes:item "command=<var command-line />">
+<para>
+The given command line is executed on the operating system, and the output
+of it is inserted in the input stream. This attribute cannot be combined
+with the file attribute.
+</para>
+<para>
+The given command line is executed using the
+popen(3) standard C library routine. The command is executed using the standard
+system shell, which on Posix compliant systems is sh(1).
+</para>
 </attributes:item>
 
 <attributes:item "alt=<var action />">
 If file is not found, this alternate action is handled. If this atribute
-is not set and file is not found, then an error is raised.
-</attributes:item>
-
-<attributes:item "cmd=<var command-line />">
-Read the output from executing a command.
+is not set and file is not found, then an error is raised. This attribute has no effect
+when the command attribute is specified.
 </attributes:item>
 
 <attributes:item "verbatim=true">
-Content is included without expansion.
+File content is included without expansion.
+This is similar to using the <m4 /> undivert macro with a filename as argument.
 </attributes:item>
 </attributes:description>
+
+<example>
+<include command="uname -a" />
+</example>
+
 
 <tag:description use>
 <var package />
@@ -2217,7 +2247,7 @@ be loaded more than once.
 <para>
 Last but not least, it will be possible in near future to add compiled
 modules.  Like almost everything, this feature comes with <m4/> and
-looks very nice.  This is a work in progress, there is an example of
+looks very nice.  This is a work in progress, there is an exemple of
 such a module in <mp4h/> sources.
 </para>
 
