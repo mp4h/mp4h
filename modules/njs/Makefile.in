@@ -9,8 +9,6 @@ top_srcdir      = @top_srcdir@
 top_builddir    = @top_srcdir@
 srcdir          = @srcdir@
 prefix          = @prefix@
-exec_prefix     = @exec_prefix@
-pkglibdir       = @pkglibdir@
 
 VPATH           = @srcdir@
 
