@@ -8,7 +8,17 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 1.0.2 and SNAP:
+  Changes between 1.0.2 and 1.0.3:
+
+    *) Fix localization (26-Jun-2000):
+       Localization was not fully effective because it uses some
+       internal tables which were not updated when l10n is modified.
+       [Denis Barbier]
+
+    *) Fix non-ASCII characters (26-Jun-2000):
+       Previous versions of mp4h had some problem of endianness,
+       which may occur with non-ASCII text.
+       [Max H. Duenki <duenki@isi.ee.ethz.ch>]
 
     *) Fix frozen state files mechanism (24-Jun-2000):
        Frozen state files are unusable in mp4h-1.0.2.

@@ -369,6 +369,7 @@ typedef int read_type;
 
 void input_init __P ((void));
 void input_deallocate __P ((void));
+void syntax_init __P ((void));
 int peek_input __P ((void));
 token_type next_token __P ((token_data *, read_type, boolean));
 void skip_line __P ((void));

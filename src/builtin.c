@@ -946,6 +946,9 @@ mp4h_mp4h_l10n (MP4H_BUILTIN_ARGS)
           decimal_point = my_locale->decimal_point;
         }
     }
+
+  /*  Compute syntax table */
+  syntax_init ();
 }
 
 #endif /* HAVE_LOCALE_H */

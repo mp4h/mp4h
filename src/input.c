@@ -133,8 +133,8 @@ struct input_block
       u_c;
       struct
         {
-          char *start; /* string value */
-          char *current; /* current value */
+          unsigned char *start;   /* string value */
+          unsigned char *current; /* current value */
         }
       u_s;
       struct
@@ -143,8 +143,8 @@ struct input_block
           char *name;           /* name of PREVIOUS input file */
           int lineno;           /* current line number for do */
           /* Yet another attack of "The curse of global variables" (sigh) */
-          int out_lineno;        /* current output line number do */
-          boolean advance_line;  /* start_of_input_line from next_char () */
+          int out_lineno;       /* current output line number do */
+          boolean advance_line; /* start_of_input_line from next_char () */
         }
       u_f;
       struct
@@ -494,15 +494,15 @@ push_string_finish (read_type expansion)
           || expansion == READ_BODY)
         {
           TOKEN_DATA_TYPE (&token_read) = TOKEN_TEXT;
-          TOKEN_DATA_TEXT (&token_read) = xstrdup (next->u.u_s.start);
-          next->u.u_s.current = next->u.u_s.start + strlen (next->u.u_s.start);
+          TOKEN_DATA_TEXT (&token_read) = xstrdup ((char *) next->u.u_s.start);
+          next->u.u_s.current = next->u.u_s.start + strlen ((char *) next->u.u_s.start);
         }
       else
         next->u.u_s.current = next->u.u_s.start;
 
       next->prev = isp;
       isp = next;
-      ret = isp->u.u_s.start;   /* for immediate use only */
+      ret = (char *) isp->u.u_s.start;   /* for immediate use only */
     }
   else
     obstack_free (current_input, next); /* people might leave garbage on it. */
@@ -752,11 +752,11 @@ skip_buffer (void)
 `---------------------------------------------------------------------*/
 
 static boolean
-match_comment (const char *s)
+match_comment (const unsigned char *s)
 {
   int n;                        /* number of characters matched */
   int ch;                       /* input character */
-  const char *t;
+  const unsigned char *t;
   struct obstack *st;
 
   ch = peek_input ();
@@ -794,7 +794,7 @@ match_comment (const char *s)
   ((s)[0] == (ch) \
    && (ch) != '\0' \
    && ((s)[1] == '\0' \
-       || (match_comment ((s) + 1))))
+       || (match_comment ((unsigned char *) (s) + 1))))
 
 
 
@@ -805,8 +805,6 @@ match_comment (const char *s)
 void
 input_init (void)
 {
-  int ch;
-
   current_file = _("NONE");
   current_line = 0;
   array_current_line = (int *) xmalloc (sizeof (int) * nesting_limit);
@@ -836,6 +834,21 @@ input_init (void)
   rquote.length  = strlen (rquote.string);
   visible_quotes = FALSE;
 
+  /* this function is defined in builtin.c and initializes the
+     varbreak symbol.  */
+  init_break ();
+
+  /* This routine tells whether we want extended regexp or not. */
+  set_regexp_extended (TRUE);
+  
+  syntax_init ();
+}
+
+void
+syntax_init (void)
+{
+  int ch;
+
   for (ch = 256; --ch > 0; )
     {
       if (isspace(ch))
@@ -853,14 +866,6 @@ input_init (void)
   set_syntax_internal(SYNTAX_CLOSE,  '>');
   set_syntax_internal(SYNTAX_ACTIVE, '\\');
   set_syntax_internal(SYNTAX_ACTIVE, '"');
-
-  /* this function is defined in builtin.c and initializes the
-     varbreak symbol.  */
-  init_break ();
-
-  /* This routine tells whether we want extended regexp or not. */
-  set_regexp_extended (TRUE);
-  
 }
 
 /*---------------------------------------------------------.
