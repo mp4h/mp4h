@@ -8,11 +8,11 @@
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
-;;;    alt=<exit status=1
-;;;        message="This file has to be compiled with one of the following lines
-;;;   ../../src/mp4h -D format=html mp4h.mp4h > mp4h.html
-;;;   ../../src/mp4h -D format=pod mp4h.mp4h > mp4h.pod
-;;;">
+    alt=<exit status=1
+        message="This file has to be compiled with one of the following lines
+   ../../src/mp4h -D format=html mp4h.mp4h -I .. > mp4h.html
+   ../../src/mp4h -D format=pod mp4h.mp4h -I .. > mp4h.pod
+">
 >
 
 <include list-tags>
