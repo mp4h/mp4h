@@ -412,7 +412,7 @@ names matching any of <var name1 />, <var name2 />....
 <img id="logo" src="logo.gif" name="Logo" alt="Our logo" />
 </example>
 
-<tag:description attributes-print>
+<tag:description attributes-quote>
 <value %attributes />
 </tag:description>
 
@@ -424,7 +424,7 @@ and values are surrounded by double quotes.
 <example>
 <define-tag foo whitespace=delete>
 %attributes
-<attributes-print %attributes />
+<attributes-quote %attributes />
 </define-tag>
 <foo id="logo" src="logo.gif" name="Logo" alt="Our logo" />
 </example>

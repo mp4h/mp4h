@@ -94,7 +94,7 @@ DECLARE (mp4h_let);
 DECLARE (mp4h_undef);
 DECLARE (mp4h_set_hook);
 DECLARE (mp4h_get_hook);
-DECLARE (mp4h_attributes_print);
+DECLARE (mp4h_attributes_quote);
 DECLARE (mp4h_attributes_remove);
 DECLARE (mp4h_attributes_extract);
 
@@ -235,7 +235,7 @@ builtin_tab[] =
   { "undef",            FALSE,    TRUE,   mp4h_undef },
   { "set-hook",          TRUE,    TRUE,   mp4h_set_hook },
   { "get-hook",         FALSE,    TRUE,   mp4h_get_hook },
-  { "attributes-print",    FALSE, TRUE,   mp4h_attributes_print },
+  { "attributes-quote",    FALSE, TRUE,   mp4h_attributes_quote },
   { "attributes-remove",   FALSE, TRUE,   mp4h_attributes_remove },
   { "attributes-extract",  FALSE, TRUE,   mp4h_attributes_extract },
 
@@ -965,7 +965,7 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
             }
           else if (sp != NULL
                    && strncasecmp (ARG (i)+special_chars, cp, strlen (cp)) == 0
-                   && *(ARG (i)+special_chars + strlen (cp)) == '=')
+                   && !IS_ALNUM(*(ARG (i)+special_chars + strlen (cp))))
             {
               if (!first)
                 obstack_1grow (obs, ' ');
@@ -2218,7 +2218,7 @@ mp4h_get_hook (MP4H_BUILTIN_ARGS)
 | emulated via mp4h builtins.                               |
 `----------------------------------------------------------*/
 static void
-mp4h_attributes_print (MP4H_BUILTIN_ARGS)
+mp4h_attributes_quote (MP4H_BUILTIN_ARGS)
 {
   int i;
 
@@ -2272,7 +2272,18 @@ mp4h_attributes_remove (MP4H_BUILTIN_ARGS)
     }
   xfree (to_remove);
 
-  mp4h_attributes_print (MP4H_BUILTIN_RECUR);
+  /*  Dirty hack to prevent aggregation of attributes into
+      a single argument.  When a group is begun in expand_macro (),
+      we finish it here.  */
+  if (expansion_level > 1 && (
+        expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
+        || expansion == READ_ATTR_QUOT))
+      obstack_1grow (obs, CHAR_BGROUP);
+  dump_args (obs, argc, argv, " ");
+  if (expansion_level > 1 && (
+        expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
+        || expansion == READ_ATTR_QUOT))
+      obstack_1grow (obs, CHAR_EGROUP);
 }
 
 static void
@@ -2289,7 +2300,7 @@ mp4h_attributes_extract (MP4H_BUILTIN_ARGS)
         || expansion == READ_ATTR_QUOT))
       obstack_1grow (obs, CHAR_EGROUP);
 
-  matching_attributes (obs, argc-1, argv+1, ARG (1), TRUE, FALSE);
+  matching_attributes (obs, argc-1, argv+1, ARG (1), FALSE, FALSE);
 
   if (expansion_level > 1 && (
         expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
