@@ -10,6 +10,14 @@
 
   Changes between 1.1.2 and 1.1.3:
 
+    *) New `real-path' tag  (24-Mar-2001):
+       Returns absolute pathname of a file.
+       [Anders Dinsen]
+
+    *) Clean-up src/builtin.c  (24-Mar-2001):
+       The mp4h_set_var_verbatim function is useless and removed.
+       [Anders Dinsen]
+
     *) Fix compilation on Tru64 (24-Mar-2001):
        [Stéphane Bortzmeyer]
 

@@ -65,7 +65,7 @@ AC_TYPE_SIZE_T
 AC_C_CONST
 
 AC_CHECK_HEADERS(limits.h locale.h memory.h stdarg.h string.h unistd.h time.h)
-AC_CHECK_HEADERS(pwd.h grp.h dirent.h sys/stat.h sys/types.h sys/times.h)
+AC_CHECK_HEADERS(pwd.h grp.h dirent.h sys/param.h sys/stat.h sys/types.h sys/times.h)
 
 AC_CHECK_FUNCS(mkstemp strerror tmpfile getpwuid getgrgid bcopy memmove)
 AC_FUNC_ALLOCA

@@ -35,7 +35,7 @@
 
 #if defined(HAVE_DIRENT_H) && defined(HAVE_SYS_STAT_H) && \
     defined(HAVE_SYS_TYPES_H) && defined(HAVE_PWD_H) && \
-    defined(HAVE_GRP_H)
+    defined(HAVE_GRP_H) && defined(HAVE_SYS_PARAM_H)
 #define HAVE_FILE_FUNCS 1
 #else
 #undef HAVE_FILE_FUNCS
@@ -49,6 +49,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <grp.h>
+#include <sys/param.h>
 #endif
 
 #include <sys/times.h>
@@ -59,5 +60,28 @@
 #define _SRC_VERSION_C_AS_HEADER_
 #include "version.c"
 #undef _SRC_VERSION_C_AS_HEADER_
+
+/*  From Perl 5.6  */
+#ifndef MAXPATHLEN
+#  ifdef PATH_MAX
+#    ifdef _POSIX_PATH_MAX
+#       if PATH_MAX > _POSIX_PATH_MAX
+/* MAXPATHLEN is supposed to include the final null character,
+ * as opposed to PATH_MAX and _POSIX_PATH_MAX. */
+#         define MAXPATHLEN (PATH_MAX+1)
+#       else
+#         define MAXPATHLEN (_POSIX_PATH_MAX+1)
+#       endif
+#    else
+#      define MAXPATHLEN (PATH_MAX+1)
+#    endif
+#  else
+#    ifdef _POSIX_PATH_MAX
+#       define MAXPATHLEN (_POSIX_PATH_MAX+1)
+#    else
+#       define MAXPATHLEN 1024	/* Err on the large side. */
+#    endif
+#  endif
+#endif
 
 #endif /* BUILTIN_H */

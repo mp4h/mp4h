@@ -78,6 +78,7 @@ DECLARE (mp4h_debugging_on);
 DECLARE (mp4h_get_file_properties);
 DECLARE (mp4h_directory_contents);
 DECLARE (mp4h_file_exists);
+DECLARE (mp4h_real_path);
 #endif /* HAVE_FILE_FUNCS */
 DECLARE (mp4h_date);
 
@@ -161,8 +162,8 @@ DECLARE (mp4h_match);
   /*  variable functions  */
 DECLARE (mp4h_get_var);
 DECLARE (mp4h_get_var_once);
+DECLARE (mp4h_set_var_x);
 DECLARE (mp4h_set_var);
-DECLARE (mp4h_set_var_verbatim);
 DECLARE (mp4h_unset_var);
 DECLARE (mp4h_preserve);
 DECLARE (mp4h_restore);
@@ -226,10 +227,12 @@ builtin_tab[] =
   { "get-file-properties", FALSE, TRUE,   mp4h_get_file_properties },
   { "directory-contents",  FALSE, TRUE,   mp4h_directory_contents },
   { "file-exists",         FALSE, TRUE,   mp4h_file_exists },
+  { "real-path",           FALSE, TRUE,   mp4h_real_path },
 #else
   { "get-file-properties", FALSE, TRUE,   mp4h_unsupported },
   { "directory-contents",  FALSE, TRUE,   mp4h_unsupported },
   { "file-exists",         FALSE, TRUE,   mp4h_unsupported },
+  { "real-path",           FALSE, TRUE,   mp4h_unsupported },
 #endif /* HAVE_FILE_FUNCS */
 
       /*  flow functions  */
@@ -316,8 +319,9 @@ builtin_tab[] =
       /*  variable functions  */
   { "get-var",          FALSE,    TRUE,   mp4h_get_var },
   { "get-var-once",     FALSE,    TRUE,   mp4h_get_var_once },
+  { "set-var-x",        TRUE,     TRUE,   mp4h_set_var_x },
   { "set-var",          FALSE,    TRUE,   mp4h_set_var },
-  { "set-var-verbatim", FALSE,    FALSE,  mp4h_set_var_verbatim },
+  { "set-var-verbatim", FALSE,    FALSE,  mp4h_set_var },
   { "unset-var",        FALSE,    TRUE,   mp4h_unset_var },
   { "preserve",         FALSE,    TRUE,   mp4h_preserve },
   { "restore",          FALSE,    TRUE,   mp4h_restore },
@@ -1380,6 +1384,35 @@ mp4h_file_exists (MP4H_BUILTIN_ARGS)
 
   if ((stat (ARG (1), &file)) != -1)
     obstack_grow (obs, "true", 4);
+}
+
+/*------------------------------------.
+| Returns a real (absolute) path name |
+`------------------------------------*/
+static void
+mp4h_real_path (MP4H_BUILTIN_ARGS)
+{
+  const char *pathname, *cp;
+  char *username;
+  int i;
+  size_t l;
+  struct passwd *pw;
+  char resolvedname[MAXPATHLEN];
+
+  CHECK_SAFETY_LEVEL(1);
+
+  pathname = predefined_attribute ("pathname", &argc, argv, FALSE);
+  if (!pathname)
+    MP4HERROR ((warning_status, 0,
+      _("Error:%s:%d: Required attribute `pathname' is not specified"),
+           CURRENT_FILE_LINE));
+  else
+    if (!realpath(pathname, resolvedname))
+      MP4HERROR ((warning_status, 0,
+        _("Error:%s:%d: Cannot form real path for `%s'"),
+          CURRENT_FILE_LINE, pathname));
+    else
+      obstack_grow(obs, resolvedname, strlen(resolvedname));
 }
 #endif /* HAVE_FILE_FUNCS */
 
@@ -3519,11 +3552,10 @@ mp4h_match (MP4H_BUILTIN_ARGS)
 /* Operation on variables: define, undefine, search, insert,...
    Variables are either strings or array of strings.  */
 
-/*---------------------------------------------------------------.
-| The function generic_variable is the generic function used by  |
-| mp4h_set_var, mp4h_set_var_verbatim, mp4h_get_var and          |
-| mp4h_get_var_once.                                             |
-`---------------------------------------------------------------*/
+/*----------------------------------------------------------------.
+| The function generic_variable is the generic function used by   |
+| mp4h_set_var, mp4h_set_var, mp4h_get_var and mp4h_get_var_once. |
+`----------------------------------------------------------------*/
 
 static void
 generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
@@ -3782,22 +3814,36 @@ Warning:%s:%d: wrong index declaration in <%s>"),
     }
 }
 
-/*--------------------------------------------------.
-| Define a variable.  Argument is evaluated first.  |
-`--------------------------------------------------*/
+/*-------------------------------------------------------.
+| Define a variable.  Value is found in the body.        |
+| Intentionally, variables cannot be indexed with this   |
+| tag, because an entire array can be assigned using     |
+| this.                                                  |
+`-------------------------------------------------------*/
+static void
+mp4h_set_var_x (MP4H_BUILTIN_ARGS)
+{
+  const char *name;
+  symbol *var;
+
+  name = predefined_attribute ("name", &argc, argv, FALSE);
+
+  var = lookup_variable (name, SYMBOL_INSERT);
+  if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+    xfree (SYMBOL_TEXT (var));
+  SYMBOL_TEXT (var) = xstrdup (ARGBODY);
+}
+
+/*----------------------------------------------------------------------.
+| Define a variable.  Argument is evaluated or not depending on whether |
+| the 'expand attributes' flag is on in the builtin_tab above. This     |
+| function thus duplicates for both set-var and set-var-varbatim tags.  |
+`----------------------------------------------------------------------*/
 static void
 mp4h_set_var (MP4H_BUILTIN_ARGS)
 {
+  /* verbatim argument is actually ignored for SYMBOL_INSERT */
   generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_INSERT, FALSE);
-}
-
-/*---------------------------------------------------.
-| Define a variable without expansion of its value.  |
-`---------------------------------------------------*/
-static void
-mp4h_set_var_verbatim (MP4H_BUILTIN_ARGS)
-{
-  generic_variable (MP4H_BUILTIN_RECUR, SYMBOL_INSERT, TRUE);
 }
 
 /*------------------------------.
