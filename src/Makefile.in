@@ -30,7 +30,7 @@ LIBTOOL  = @LIBTOOL@
 INCLTDL  = @INCLTDL@
 LIBLTDL  = @LIBLTDL@
 INCLUDES = -I$(top_srcdir)/lib -I$(top_srcdir)/pcre $(INCLTDL)
-LDADD    = $(LIBLTDL) ../lib/libmp4h.a ../pcre/libpcreposix.a ../pcre/libpcre.a
+LDADD    = $(LIBLTDL) ../lib/libmp4h.a ../pcre/libpcre.a
 CFLAGS   = @CFLAGS@
 COMPILE  = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
 CCLD     = $(CC)
@@ -68,7 +68,7 @@ mp4h: $(OBJECTS) $(LDADD)
 ../lib/libmp4h.a:
 	cd ../lib && $(MAKE) libmp4h.a
 
-../pcre/libpcre.a ../pcre/libpcreposix.a:
+../pcre/libpcre.a:
 	cd ../pcre && $(MAKE) all
 
 install:
@@ -102,15 +102,15 @@ depend:
 	$(MAKE) CPPFLAGS=-MM >> Makefile.in
 
 mp4h.o: mp4h.c mp4h.h ../lib/obstack.h version.c
-builtin.o: builtin.c mp4h.h ../lib/obstack.h builtin.h \
- ../pcre/pcreposix.h version.c
+builtin.o: builtin.c mp4h.h ../lib/obstack.h builtin.h ../pcre/pcre.h \
+ version.c
 debug.o: debug.c mp4h.h ../lib/obstack.h
 devel.o: devel.c mp4h.h ../lib/obstack.h
 freeze.o: freeze.c mp4h.h ../lib/obstack.h
 input.o: input.c mp4h.h ../lib/obstack.h
 macro.o: macro.c mp4h.h ../lib/obstack.h
-module.o: module.c mp4h.h ../lib/obstack.h builtin.h \
- ../pcre/pcreposix.h version.c ../libltdl/ltdl.h
+module.o: module.c mp4h.h ../lib/obstack.h builtin.h ../pcre/pcre.h \
+ version.c ../libltdl/ltdl.h
 output.o: output.c mp4h.h ../lib/obstack.h
 path.o: path.c mp4h.h ../lib/obstack.h
 symtab.o: symtab.c mp4h.h ../lib/obstack.h

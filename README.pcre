@@ -1,3 +1,17 @@
+
+                       Denis Barbier
+                       21 July 2000
+
+
+   Mp4h is shipped with a minimal version of the Perl Compatible
+   Regular Expression library. This library is licensed by
+   University of Cambridge and you must take care to follow these
+   requirements when modifying or distributing these files.
+   Anyway you should better download the latest sources from
+     ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
+
+                      ----------------
+
 PCRE LICENCE
 ------------
 

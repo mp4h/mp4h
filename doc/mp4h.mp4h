@@ -5,7 +5,7 @@
 
 <mp4h-l10n LC_ALL=C />
 <set-var package=mp4h />
-<set-var version=1.0.6 />
+<set-var version=1.0a701 />
 <set-var title="mp4h - A Macro Processor for HTML Documents" />
 
 <include <get-var format />.out
@@ -119,6 +119,7 @@ NUMBER is a combination of
 <option 32>remove trailing slash in tag attributes</option>
 <option 64>do not remove trailing star in tag name</option>
 <option 128>do not remove leading star in tag name</option>
+<option 256>do not add a space before trailing slash in tag attributes</option>
 <option 1024>suppress warnings about bad nested tags</option>
 <option 2048>suppress warnings about missing trailing slash</option>
 </option-list>
@@ -844,70 +845,6 @@ first character has a null index.
 <substring <get-var foo /> 4 6 />
 </example>
 
-<tag:description subst-in-string>
-<var string />
-<var regexp />
-[<var replacement />]
-[caseless=true]
-[singleline=true]
-</tag:description>
-
-<para>
-Replace a regular expression in a string by a replacement text.
-</para>
-
-<example>
-<set-var foo="abcdefghijk" />
-<subst-in-string <get-var foo /> "[c-e]" />
-<subst-in-string <get-var foo /> "([c-e])" "\\1 " />
-</example>
-
-<attributes:description>
-<attributes:item "caseless=true" />
-Comparison is case insensitive.
-
-<attributes:item "singleline=true" />
-when this attribute is used, the <command ^ /> symbol represents the
-beginning of string and <command $ /> the end of string.
-Otherwise they represent the beginning and end of lines.
-</attributes:description>
-
-<example>
-<set-var foo="abcdefghijk\nabcdefghijk\nabcdefghijk" />
-<subst-in-string <get-var foo /> ".$" "" />
-<subst-in-string <get-var foo /> ".$" "" singleline=true />
-</example>
-
-<note>
-Regular expression support is provided by the PCRE (Perl Compatible
-Regular Expressions) library package, which is open source software,
-copyright by the University of Cambridge.
-This is a very nice piece of software, latest versions are available at
-<URL src="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/" />.
-</note>
-
-<tag:description subst-in-var>
-<var name />
-<var regexp />
-[<var replacement />]
-[caseless=true]
-[singleline=true]
-</tag:description>
-
-<para>
-Performs substitutions inside variable content.
-</para>
-
-<attributes:description>
-<attributes:item "caseless=true" />
-Comparison is case insensitive.
-
-<attributes:item "singleline=true" />
-when this attribute is used, the <command ^ /> symbol represents the
-beginning of string and <command $ /> the end of string.
-Otherwise they represent the beginning and end of lines.
-</attributes:description>
-
 <tag:description string-eq>
 <var string1 />
 <var string2 />
@@ -983,16 +920,118 @@ Comparison is case insensitive.
 1:<string-compare "aAbBcC" "aabbcc" caseless=true />
 </example>
 
-<tag:description match>
+<tag:description char-offsets>
 <var string />
-<var regexp />
+<var character />
 [caseless=true]
-[action=report|extract|delete|startpos|endpos|length]
 </tag:description>
+
+<para>
+Prints an array containing indexes where the character appear in the
+string.
+</para>
 
 <attributes:description>
 <attributes:item "caseless=true" />
 Comparison is case insensitive.
+</attributes:description>
+
+<example>
+1:<char-offsets "abcdAbCdaBcD" a />
+2:<char-offsets "abcdAbCdaBcD" a caseless=true />
+</example>
+
+###
+###    Regexp functions
+###
+
+<subsection>Regular Expressions</subsection>
+
+<para>
+Regular expression support is provided by the PCRE (Perl Compatible
+Regular Expressions) library package, which is open source software,
+copyright by the University of Cambridge.
+This is a very nice piece of software, latest versions are available at
+<URL src="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/" />.
+</para>
+
+<para>
+In previous releases, POSIX regular expressions were implemented.
+For this reason, the following macros recognize two attributes,
+<attribute caseless=true /> and <attribute singleline=true|false />.
+But Perl allows a much better control on regular expressions with so
+called modifiers, which are assed to the new <attribute reflags />
+attribute.  It may contain one or more modifiers:
+<option-list>
+<option i>Matching is case insensitive</option>
+<option m>Treat string as multiple lines. When set, a <value ^ /> matches
+any beginning of line, and <value $ /> any end of line.  By default,
+they match begin and end of string.</option>
+<option s>Treat string as single line. A dot (<value . />) may also
+match a newline, whereas it does not by default.</option>
+<option x>Allow formatted regular expression, that means whitespaces,
+newlines and comments are removed from regular expression before
+processing.</option>
+</option-list>
+</para>
+
+<note>
+Attribute <attribute singleline=true /> is a synonym for the <attribute s />
+modifier, whereas <attribute singleline=false /> is a synonym for the
+<attribute m /> modifier.  This behaviour was different up to <mp4h/> 1.0.6.
+</note>
+
+<tag:description subst-in-string>
+<var string />
+<var regexp />
+[<var replacement />]
+[caseless=true]
+[singleline=true|false]
+[reflags=[imsx]]
+</tag:description>
+
+<para>
+Replace a regular expression in a string by a replacement text.
+</para>
+
+<example>
+<set-var foo="abcdefghijk" />
+<subst-in-string <get-var foo /> "[c-e]" />
+<subst-in-string <get-var foo /> "([c-e])" "\\1 " />
+</example>
+
+<example>
+<set-var foo="abcdefghijk\nabcdefghijk\nabcdefghijk" />
+<subst-in-string <get-var foo /> ".$" "" />
+<subst-in-string <get-var foo /> ".$" "" singleline=true />
+<subst-in-string <get-var foo /> "
+   ([a-c]) | [0-9]
+     " ":\\1:" reflags=sx />
+</example>
+
+<tag:description subst-in-var>
+<var name />
+<var regexp />
+[<var replacement />]
+[caseless=true]
+[singleline=true|false]
+[reflags=[imsx]]
+</tag:description>
+
+<para>
+Performs substitutions inside variable content.
+</para>
+
+<tag:description match>
+<var string />
+<var regexp />
+[caseless=true]
+[singleline=true|false]
+[reflags=[imsx]]
+[action=report|extract|delete|startpos|endpos|length]
+</tag:description>
+
+<attributes:description>
 <attributes:item "action=report" />
 Prints <true/> if string contains regexp.
 <attributes:item "action=extract" />
@@ -1016,27 +1055,6 @@ Prints the length of the expression matching regexp in string.
 4:<match "abcdefghijk" "[c-e]+" action=startpos />
 5:<match "abcdefghijk" "[c-e]+" action=endpos />
 6:<match "abcdefghijk" "[c-e]+" action=length />
-</example>
-
-<tag:description char-offsets>
-<var string />
-<var character />
-[caseless=true]
-</tag:description>
-
-<para>
-Prints an array containing indexes where the character appear in the
-string.
-</para>
-
-<attributes:description>
-<attributes:item "caseless=true" />
-Comparison is case insensitive.
-</attributes:description>
-
-<example>
-1:<char-offsets "abcdAbCdaBcD" a />
-2:<char-offsets "abcdAbCdaBcD" a caseless=true />
 </example>
 
 ###
@@ -2383,6 +2401,12 @@ When unset, they are removed.
 <option-desc>
 When set, leading star before tag name are preserved on output.
 When unset, they are removed.
+</option-desc>
+</option>
+<option 256>do not add a space before trailing slash in tag attributes
+<option-desc>
+By default, a space is inserted before trailing slash in tag attributes.
+When set, this space is not prepended.
 </option-desc>
 </option>
 <option 1024>suppress warnings about bad nested tags.

@@ -138,13 +138,15 @@ DECLARE (mp4h_upcase);
 DECLARE (mp4h_capitalize);
 DECLARE (mp4h_string_length);
 DECLARE (mp4h_substring);
-DECLARE (mp4h_subst_in_string);
-DECLARE (mp4h_subst_in_var);
-DECLARE (mp4h_string_compare);
-DECLARE (mp4h_match);
 DECLARE (mp4h_string_eq);
 DECLARE (mp4h_string_neq);
+DECLARE (mp4h_string_compare);
 DECLARE (mp4h_char_offsets);
+
+  /*  regexp functions  */
+DECLARE (mp4h_subst_in_string);
+DECLARE (mp4h_subst_in_var);
+DECLARE (mp4h_match);
 
   /*  variable functions  */
 DECLARE (mp4h_get_var);
@@ -280,19 +282,21 @@ builtin_tab[] =
   { "or",               FALSE,    TRUE,   mp4h_or },
 
       /*  string functions  */
-  { "string-length",    FALSE,    TRUE,   mp4h_string_length },
   { "downcase",         FALSE,    TRUE,   mp4h_downcase },
   { "upcase",           FALSE,    TRUE,   mp4h_upcase },
   { "capitalize",       FALSE,    TRUE,   mp4h_capitalize },
+  { "string-length",    FALSE,    TRUE,   mp4h_string_length },
   { "substring",        FALSE,    TRUE,   mp4h_substring },
-  { "subst-in-string",  FALSE,    TRUE,   mp4h_subst_in_string },
-  { "subst-in-var",     FALSE,    TRUE,   mp4h_subst_in_var },
-  { "string-compare",   FALSE,    TRUE,   mp4h_string_compare },
-  { "match",            FALSE,    TRUE,   mp4h_match },
   { "string-eq",        FALSE,    TRUE,   mp4h_string_eq },
   { "string-neq",       FALSE,    TRUE,   mp4h_string_neq },
+  { "string-compare",   FALSE,    TRUE,   mp4h_string_compare },
   { "char-offsets",     FALSE,    TRUE,   mp4h_char_offsets },
   
+      /*  regexp functions  */
+  { "subst-in-string",  FALSE,    TRUE,   mp4h_subst_in_string },
+  { "subst-in-var",     FALSE,    TRUE,   mp4h_subst_in_var },
+  { "match",            FALSE,    TRUE,   mp4h_match },
+
       /*  variable functions  */
   { "get-var",          FALSE,    TRUE,   mp4h_get_var },
   { "get-var-once",     FALSE,    TRUE,   mp4h_get_var_once },
@@ -612,16 +616,8 @@ builtin_deallocate (void)
   xfree (SYMBOL_TEXT (&varbreak));
 }
 
-/*
-     Regular expression support is provided by the PCRE library package,
-     which is open source software, copyright by the University of
-     Cambridge.
-     Latest sources are available from
-        ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
-*/
-
 static pcre *
-xregcomp (const char *pattern, int cflags)
+xre_compile (const char *pattern, int cflags)
 {
   pcre *patcomp;
   const char *errbuf;
@@ -756,7 +752,6 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
   pcre_extra *re_extra = NULL;
   const char *errptr = NULL;
   int rc, max_subexps;
-  int options = 0;
   int *match_ptr = NULL;
   boolean first = TRUE;
 
@@ -770,7 +765,7 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
   sprintf (name, "^%s$", list);
 
   /*  Compile this expression once  */
-  re = xregcomp (name, PCRE_CASELESS);
+  re = xre_compile (name, PCRE_CASELESS);
   if (re == NULL)
     {
       xfree (name);
@@ -812,7 +807,7 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
              xrealloc (match_ptr, sizeof (int) * max_subexps * 3);
           rc = pcre_exec (re, re_extra, ARG (i)+special_chars,
                   strlen (ARG (i)+special_chars), 0,
-                  options, match_ptr, max_subexps * 3);
+                  0, match_ptr, max_subexps * 3);
         }
       while (rc == PCRE_ERROR_NOMEMORY);
       max_subexps -= 10;
@@ -1295,7 +1290,6 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
   pcre *re = NULL;
   pcre_extra *re_extra = NULL;
   const char *errptr = NULL;
-  int options = 0;
   int *match_ptr = NULL;
 
   matching = predefined_attribute ("matching", &argc, argv, FALSE);
@@ -1310,7 +1304,7 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
 
   if (matching)
     {
-      re = xregcomp (matching, 0);
+      re = xre_compile (matching, 0);
       if (re == NULL)
         return;
       match_ptr = (int *)
@@ -1330,7 +1324,7 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
       length = strlen (entry->d_name);
       if (!matching ||
           (pcre_exec (re, re_extra, entry->d_name, length, 0,
-                    options, match_ptr, 3) > 0
+                    0, match_ptr, 3) > 0
            && match_ptr[1] - match_ptr[0] == length))
         {
           obstack_grow (obs, entry->d_name, length);
@@ -2816,6 +2810,156 @@ mp4h_substring (MP4H_BUILTIN_ARGS)
   obstack_grow (obs, text, strlen (text));
 }
 
+/*----------------------------------------------------------------.
+| Compares strings.  When caseless=true is specified, comparison  |
+| is performed without consideration of case.                     |
+`----------------------------------------------------------------*/
+static void
+mp4h_string_eq (MP4H_BUILTIN_ARGS)
+{
+  const char *caseless;
+
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
+  if (bad_argc (argv[0], argc, 0, 3))
+    return;
+
+  if (argc < 3)
+    {
+      if (*(ARG (1)) == '\0')
+        obstack_grow (obs, "true", 4);
+      return;
+    }
+  if (caseless && strcmp (caseless, "true") == 0)
+    {
+      if (strcasecmp (ARG (1), ARG (2)) == 0)
+        obstack_grow (obs, "true", 4);
+    }
+  else
+    {
+      if (strcmp (ARG (1), ARG (2)) == 0)
+        obstack_grow (obs, "true", 4);
+    }
+}
+
+static void
+mp4h_string_neq (MP4H_BUILTIN_ARGS)
+{
+  const char *caseless;
+
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
+  if (bad_argc (argv[0], argc, 0, 3))
+    return;
+
+  if (argc < 3)
+    {
+      if (*(ARG (1)) != '\0')
+        obstack_grow (obs, "true", 4);
+      return;
+    }
+  if (caseless && strcmp (caseless, "true") == 0)
+    {
+      if (strcasecmp (ARG (1), ARG (2)) != 0)
+        obstack_grow (obs, "true", 4);
+    }
+  else
+    {
+      if (strcmp (ARG (1), ARG (2)) != 0)
+        obstack_grow (obs, "true", 4);
+    }
+}
+
+/*-----------------------------------------------------------------.
+| This function compares two strings and returns this comparison.  |
+| If ``caseless=true'' is specified, this comparison is performed  |
+| without case.                                                    |
+`-----------------------------------------------------------------*/
+static void
+mp4h_string_compare (MP4H_BUILTIN_ARGS)
+{
+  const char *caseless;
+  int result;
+
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
+  if (bad_argc (argv[0], argc, 2, 3))
+    return;
+
+  if (caseless && strcmp (caseless, "true") == 0)
+    result = strcasecmp (ARG (1), ARG (2));
+  else
+    result = strcmp (ARG (1), ARG (2));
+
+  if (result < 0)
+    obstack_grow (obs, "less", 4);
+  else if (result > 0)
+    obstack_grow (obs, "greater", 7);
+  else
+    obstack_grow (obs, "equal", 5);
+}
+
+/*----------------------------------------------------------------.
+| First argument is a string, 2nd is a character.                 |
+| This function returns an array of numbers, which are locations  |
+| where character appear in the string.                           |
+`----------------------------------------------------------------*/
+static void
+mp4h_char_offsets (MP4H_BUILTIN_ARGS)
+{
+  const char *caseless;
+  char *cp;
+  char c;
+  boolean first = TRUE;
+
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
+  if (bad_argc (argv[0], argc, 2, 3))
+    return;
+
+  if (strlen (ARG (2)) > 1)
+    {
+      MP4HERROR ((warning_status, 0,
+        _("Warning:%s:%d: Second argument of <char-offsets> is not a char"),
+             CURRENT_FILE_LINE));
+      return;
+    }
+  c = ARG (2)[0];
+  if (caseless && strcmp (caseless, "true") == 0)
+    {
+      for (cp = ARG (1); *cp != '\0'; cp++)
+        {
+          if (tolower(*cp) == tolower(c))
+            {
+              if (!first)
+                obstack_1grow (obs, '\n');
+              else
+                first = FALSE;
+              shipout_int (obs, (int) (cp-ARG (1)));
+            }
+        }
+    }
+  else
+    {
+      for (cp = ARG (1); *cp != '\0'; cp++)
+        {
+          if (*cp == c)
+            {
+              if (!first)
+                obstack_1grow (obs, '\n');
+              else
+                first = FALSE;
+              shipout_int (obs, (int) (cp-ARG (1)));
+            }
+        }
+    }
+}
+
+
+/*
+     Regular expression support is provided by the PCRE library package,
+     which is open source software, copyright by the University of
+     Cambridge.
+     Latest sources are available from
+        ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
+*/
+
 /*-------------------------------------------------------------------------.
 | Function to perform substitution by regular expressions.  Used by the    |
 | builtins regexp and patsubst.  The changed text is placed on the         |
@@ -2903,7 +3047,7 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
   regexp = ARG (2);
   remove_special_chars (regexp, FALSE);
 
-  re = xregcomp (regexp, options);
+  re = xre_compile (regexp, options);
   if (re == NULL)
     return;
 
@@ -2914,7 +3058,7 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
       match_ptr = (int *)
          xrealloc (match_ptr, sizeof (int) * max_subexps * 3);
       rc  = pcre_exec (re, NULL, victim, length, 0,
-                          options, match_ptr, max_subexps * 3);
+                          0, match_ptr, max_subexps * 3);
     }
   while (rc == PCRE_ERROR_NOMEMORY);
 
@@ -2999,7 +3143,7 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   regexp = ARG (2);
   remove_special_chars (regexp, FALSE);
 
-  re = xregcomp (regexp, extra_re_flags);
+  re = xre_compile (regexp, extra_re_flags);
   if (re == NULL)
     return;
 
@@ -3069,21 +3213,61 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   xfree (match_ptr);
 }
 
+/*------------------------------------------------.
+| Routine parsing attributes to set regex flags.  |
+`------------------------------------------------*/
+static int
+regex_attributes (int *ptr_argc, token_data **argv)
+{
+  const char *singleline, *caseless, *reflags;
+  const char *cp;
+  int re_flags = 0;
+
+  singleline = predefined_attribute ("singleline", ptr_argc, argv, TRUE);
+  if (singleline)
+    {
+      if (strcmp (singleline, "true") == 0)
+        re_flags |= PCRE_DOTALL;
+      else
+        re_flags |= PCRE_MULTILINE;
+    }
+
+  caseless = predefined_attribute ("caseless", ptr_argc, argv, TRUE);
+  if (caseless && strcmp (caseless, "true") == 0)
+    re_flags |= PCRE_CASELESS;
+
+  /*  This one overrides previous options  */
+  reflags = predefined_attribute ("reflags", ptr_argc, argv, TRUE);
+  if (reflags)
+    {
+      re_flags = 0;
+      for (cp = reflags; *cp != '\0'; cp++)
+        {
+          switch (*cp)
+            {
+              case '-': break;
+              case 'i': re_flags |= PCRE_CASELESS; break;
+              case 'm': re_flags |= PCRE_MULTILINE; break;
+              case 's': re_flags |= PCRE_DOTALL; break;
+              case 'x': re_flags |= PCRE_EXTENDED; break;
+              default:
+                        MP4HERROR ((warning_status, 0, _("\
+Warning:%s:%d: unknown modifier `%c' in reflags"),
+                             CURRENT_FILE_LINE, *cp));
+                        break;
+            }
+        }
+    }
+
+  return re_flags;
+}
+
 static void
 mp4h_subst_in_string (MP4H_BUILTIN_ARGS)
 {
-  const char *singleline, *caseless;
-  int extra_re_flags = 0;
+  int extra_re_flags;
 
-  singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
-  if (singleline && strcmp (singleline, "true") == 0)
-    extra_re_flags |= PCRE_DOTALL;
-  else
-    extra_re_flags |= PCRE_MULTILINE;
-
-  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
-  if (caseless && strcmp (caseless, "true") == 0)
-    extra_re_flags |= PCRE_CASELESS;
+  extra_re_flags = regex_attributes (&argc, argv);
   subst_in_string (obs, argc, argv, extra_re_flags);
 }
 
@@ -3095,20 +3279,11 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   token_data td;
-  const char *singleline, *caseless;
-  int extra_re_flags = 0;
+  int extra_re_flags;
   char *text;
   struct obstack temp_obs;
 
-  singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
-  if (singleline && strcmp (singleline, "true") == 0)
-    extra_re_flags |= PCRE_DOTALL;
-  else
-    extra_re_flags |= PCRE_MULTILINE;
-
-  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
-  if (caseless && strcmp (caseless, "true") == 0)
-    extra_re_flags |= PCRE_CASELESS;
+  extra_re_flags = regex_attributes (&argc, argv);
 
   if (bad_argc (argv[0], argc, 3, 4))
     return;
@@ -3131,38 +3306,8 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
   obstack_free (&temp_obs, NULL);
 }
 
-/*-----------------------------------------------------------------.
-| This function compares two strings and returns this comparison.  |
-| If ``caseless=true'' is specified, this comparison is performed  |
-| without case.                                                    |
-`-----------------------------------------------------------------*/
-static void
-mp4h_string_compare (MP4H_BUILTIN_ARGS)
-{
-  const char *caseless;
-  int result;
-
-  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
-  if (bad_argc (argv[0], argc, 2, 3))
-    return;
-
-  if (caseless && strcmp (caseless, "true") == 0)
-    result = strcasecmp (ARG (1), ARG (2));
-  else
-    result = strcmp (ARG (1), ARG (2));
-
-  if (result < 0)
-    obstack_grow (obs, "less", 4);
-  else if (result > 0)
-    obstack_grow (obs, "greater", 7);
-  else
-    obstack_grow (obs, "equal", 5);
-}
-
 /*-------------------------------------------------------------------.
 | This function compares a string and a regular expression.          |
-| If ``caseless=true'' is specified, this comparison is case         |
-| insensitive.                                                       |
 | Attribute ``action'' can be                                        |
 |   report : returns "true" if string match the regular expression.  |
 |  extract : returns the portion of the string matched by the        |
@@ -3179,133 +3324,18 @@ static void
 mp4h_match (MP4H_BUILTIN_ARGS)
 {
   const char *action;
-  const char *caseless;
-  int extra_re_flags = 0;
+  int extra_re_flags;
+
+  extra_re_flags = regex_attributes (&argc, argv);
 
   action = predefined_attribute ("action", &argc, argv, TRUE);
-  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
-  if (bad_argc (argv[0], argc, 3, 4))
-    return;
-
   if (!action)
     action = "report";
 
-  if (caseless && strcmp (caseless, "true") == 0)
-    extra_re_flags = PCRE_CASELESS;
+  if (bad_argc (argv[0], argc, 3, 4))
+    return;
+
   string_regexp (obs, argc, argv, extra_re_flags, action);
-}
-
-/*----------------------------------------------------------------.
-| Compares strings.  When caseless=true is specified, comparison  |
-| is performed without consideration of case.                     |
-`----------------------------------------------------------------*/
-static void
-mp4h_string_eq (MP4H_BUILTIN_ARGS)
-{
-  const char *caseless;
-
-  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
-  if (bad_argc (argv[0], argc, 0, 3))
-    return;
-
-  if (argc < 3)
-    {
-      if (*(ARG (1)) == '\0')
-        obstack_grow (obs, "true", 4);
-      return;
-    }
-  if (caseless && strcmp (caseless, "true") == 0)
-    {
-      if (strcasecmp (ARG (1), ARG (2)) == 0)
-        obstack_grow (obs, "true", 4);
-    }
-  else
-    {
-      if (strcmp (ARG (1), ARG (2)) == 0)
-        obstack_grow (obs, "true", 4);
-    }
-}
-
-static void
-mp4h_string_neq (MP4H_BUILTIN_ARGS)
-{
-  const char *caseless;
-
-  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
-  if (bad_argc (argv[0], argc, 0, 3))
-    return;
-
-  if (argc < 3)
-    {
-      if (*(ARG (1)) != '\0')
-        obstack_grow (obs, "true", 4);
-      return;
-    }
-  if (caseless && strcmp (caseless, "true") == 0)
-    {
-      if (strcasecmp (ARG (1), ARG (2)) != 0)
-        obstack_grow (obs, "true", 4);
-    }
-  else
-    {
-      if (strcmp (ARG (1), ARG (2)) != 0)
-        obstack_grow (obs, "true", 4);
-    }
-}
-
-/*----------------------------------------------------------------.
-| First argument is a string, 2nd is a character.                 |
-| This function returns an array of numbers, which are locations  |
-| where character appear in the string.                           |
-`----------------------------------------------------------------*/
-static void
-mp4h_char_offsets (MP4H_BUILTIN_ARGS)
-{
-  const char *caseless;
-  char *cp;
-  char c;
-  boolean first = TRUE;
-
-  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
-  if (bad_argc (argv[0], argc, 2, 3))
-    return;
-
-  if (strlen (ARG (2)) > 1)
-    {
-      MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Second argument of <char-offsets> is not a char"),
-             CURRENT_FILE_LINE));
-      return;
-    }
-  c = ARG (2)[0];
-  if (caseless && strcmp (caseless, "true") == 0)
-    {
-      for (cp = ARG (1); *cp != '\0'; cp++)
-        {
-          if (tolower(*cp) == tolower(c))
-            {
-              if (!first)
-                obstack_1grow (obs, '\n');
-              else
-                first = FALSE;
-              shipout_int (obs, (int) (cp-ARG (1)));
-            }
-        }
-    }
-  else
-    {
-      for (cp = ARG (1); *cp != '\0'; cp++)
-        {
-          if (*cp == c)
-            {
-              if (!first)
-                obstack_1grow (obs, '\n');
-              else
-                first = FALSE;
-              shipout_int (obs, (int) (cp-ARG (1)));
-            }
-        }
-    }
 }
 
 

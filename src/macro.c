@@ -292,7 +292,7 @@ collect_arguments (char *symbol_name, read_type expansion,
   char last_char = ' ';
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-  TOKEN_DATA_TEXT (&td) = symbol_name;
+  TOKEN_DATA_TEXT (&td) = xstrdup (symbol_name);
   tdp = (token_data *) obstack_copy (arguments, (voidstar) &td, sizeof (td));
   obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
 
@@ -522,6 +522,7 @@ expand_macro (symbol *sym, read_type expansion)
 {
   struct obstack arguments, argptr, body;
   token_data **argv;
+  token_data *td;
   int argc, i;
   struct obstack *obs_expansion;
   const char *expanded;
@@ -568,6 +569,13 @@ expand_macro (symbol *sym, read_type expansion)
     }
   else
     {
+      if (SYMBOL_CONTAINER (sym))
+        {
+          TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
+          TOKEN_DATA_TEXT (td) = xstrdup ("");
+          obstack_grow (&argptr, (voidstar) &td, sizeof (td));
+        }
+
       argv = (token_data **) obstack_finish (&argptr);
       if (slash)
         {
@@ -728,6 +736,8 @@ expand_unknown_tag (char *name, read_type expansion)
 
   if (slash)
     {
+      if (! (exp_flags & EXP_NOSPACE_BSLASH))
+        obstack_1grow (obs_expansion, ' ');
       obstack_1grow (obs_expansion, CHAR_SLASH);
     }
   obstack_1grow (obs_expansion, '>');

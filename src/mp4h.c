@@ -142,6 +142,7 @@ Parser features:\n\
       HELP_EXP_FLAGS(   32, "remove trailing slash in tag attributes");
       HELP_EXP_FLAGS(   64, "do not remove trailing star in tag name");
       HELP_EXP_FLAGS(  128, "do not remove leading star in tag name");
+      HELP_EXP_FLAGS(  256, "do not add a space before trailing slash in tag attributes");
       HELP_EXP_FLAGS( 1024, "suppress warnings about bad nested tags");
       HELP_EXP_FLAGS( 2048, "suppress warnings about missing trailing slash");
 

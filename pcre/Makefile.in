@@ -29,25 +29,19 @@ RM = rm -f
 
 ##############################################################################
 
-OBJ = maketables.o get.o study.o pcre.o
+OBJ = maketables.o study.o pcre.o
 
 .SUFFIXES:
 .SUFFIXES: .o .c
 .c.o:
 	$(CC) -c $(CFLAGS) $(DEFS) $<
 
-all: libpcre.a libpcreposix.a
+all: libpcre.a
 
 libpcre.a: $(OBJ)
 	-$(RM) libpcre.a
 	$(AR) cru libpcre.a $(OBJ)
 	$(RANLIB) libpcre.a
-
-libpcreposix.a: pcreposix.o
-	-$(RM) libpcreposix.a
-	$(AR) cru libpcreposix.a pcreposix.o
-	$(RANLIB) libpcreposix.a
-
 
 # An auxiliary program makes the default character table source
 

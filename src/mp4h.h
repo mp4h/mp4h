@@ -358,6 +358,8 @@ struct token_data
                          (1 << 6)  /* Do not remove trailing slash in simple tag attributes */
 #define EXP_LEAVE_LEADING_STAR \
                          (1 << 7)  /* Do not remove trailing slash in simple tag attributes */
+#define EXP_NOSPACE_BSLASH \
+                         (1 << 8)  /* Do not add space before trailing slash in simple tag attributes */
 #define EXP_NOWARN_NEST  (1 << 10) /* Suppress warning about bad nested tags */
 #define EXP_NOWARN_SLASH (1 << 11) /* Suppress warning about missing trailing slash */
 

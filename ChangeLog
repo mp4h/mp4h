@@ -10,6 +10,27 @@
 
   Changes between 1.0.6 and SNAP:
 
+    *) New -X option (21-Jul-2000):
+       With -X=32, a trailing slash is appended to simple tag
+       attributes.  For readibility and to follow appendix C of
+       the XHTML 1.0 specifications, a space is inserted before
+       this trailing slash.  When value 256 is also set, this space
+       is not inserted.
+       [Denis Barbier]
+
+    *) Add support for modifiers in regexps (21-Jul-2000):
+       Only i, m, s and x modifiers have been added, U and X are
+       specific to PCRE and have not been implemented.
+       The `singleline' attribute has been changed.  It now accepts
+       two values, `true' (like the s modifier) and `false' (like the
+       m modifier).  Until now, `m' was the default, and singleline=true
+       switches to `s'.
+       [Denis Barbier]
+
+    *) Clean Up in PCRE files (21-Jul-2000):
+       Only used files are kept back.
+       [Denis Barbier]
+
     *) Use of the native API of PCRE (21-Jul-2000):
        And support for locales has been added.  Mp4h is now fully
        powered by PCRE.
