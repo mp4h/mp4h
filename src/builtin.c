@@ -1471,24 +1471,48 @@ mp4h_expand (MP4H_BUILTIN_ARGS)
 static void
 mp4h_if (MP4H_BUILTIN_ARGS)
 {
+  symbol *var;
+
   if (bad_argc (argv[0], argc, 0, 4))
     return;
   if (argc == 1)
     return;
 
-  obstack_grow (obs, "<when ", 6);
+  /*  The ``natural'' way to implement <if/> is with
+        obstack_grow (obs, "<when ", 6);
+        obstack_grow (obs, ARG (1), strlen (ARG (1)));
+        obstack_grow (obs, " >", 2);
+        obstack_grow (obs, ARG (2), strlen (ARG (2)));
+        obstack_grow (obs, "</when>", 7);
+      and a similar else-clause.
+      But this is broken, because ARG(2) may change the condition, and
+      then else-clause could be run too.
+      For this reason, the following implementation is preferred.
+  */
+  var = lookup_variable ("__cond_cnt", SYMBOL_LOOKUP);
+  if (var == NULL)
+    {
+      var = lookup_variable ("__cond_cnt", SYMBOL_INSERT);
+      SYMBOL_TEXT (var) = (char *) xstrdup ("0");
+      SYMBOL_TYPE (var) = TOKEN_TEXT;
+    }
+
+  obstack_grow (obs, "<increment __cond_cnt />", 24);
+  obstack_grow (obs, "<set-var __cond_var<get-var __cond_cnt />=", 42);
+  obstack_1grow (obs, CHAR_BGROUP);
   obstack_grow (obs, ARG (1), strlen (ARG (1)));
-  obstack_1grow (obs, '>');
+  obstack_1grow (obs, CHAR_EGROUP);
+  obstack_grow (obs, " />", 3);
+  obstack_grow (obs, "<when <get-var __cond_var<get-var __cond_cnt /> /> >", 52);
   obstack_grow (obs, ARG (2), strlen (ARG (2)));
   obstack_grow (obs, "</when>", 7);
   if (argc>3)
     {
-      obstack_grow (obs, "<when <not ", 11);
-      obstack_grow (obs, ARG (1), strlen (ARG (1)));
-      obstack_grow (obs, "/>>", 3);
+      obstack_grow (obs, "<when <not <get-var __cond_var<get-var __cond_cnt /> /> /> >", 60);
       obstack_grow (obs, ARG (3), strlen (ARG (3)));
       obstack_grow (obs, "</when>", 7);
     }
+  obstack_grow (obs, "<decrement __cond_cnt />", 24);
 }
 
 /*------------------------------------------------------.
@@ -1499,22 +1523,38 @@ mp4h_if (MP4H_BUILTIN_ARGS)
 static void
 mp4h_ifeq (MP4H_BUILTIN_ARGS)
 {
+  symbol *var;
+
   if (bad_argc (argv[0], argc, 0, 5))
     return;
-  
-  obstack_grow (obs, "<when <string-eq ", 17);
-  dump_args (obs, (argc < 3 ? argc : 3), argv, " ");
-  obstack_grow (obs, "/>>", 3);
+
+  var = lookup_variable ("__cond_cnt", SYMBOL_LOOKUP);
+  if (var == NULL)
+    {
+      var = lookup_variable ("__cond_cnt", SYMBOL_INSERT);
+      SYMBOL_TEXT (var) = (char *) xstrdup ("0");
+      SYMBOL_TYPE (var) = TOKEN_TEXT;
+    }
+  obstack_grow (obs, "<increment __cond_cnt />", 24);
+  obstack_grow (obs, "<set-var __cond_var<get-var __cond_cnt />=<string-eq ", 53);
+  obstack_1grow (obs, CHAR_BGROUP);
+  obstack_grow (obs, ARG (1), strlen (ARG (1)));
+  obstack_1grow (obs, CHAR_EGROUP);
+  obstack_1grow (obs, ' ');
+  obstack_1grow (obs, CHAR_BGROUP);
+  obstack_grow (obs, ARG (2), strlen (ARG (2)));
+  obstack_1grow (obs, CHAR_EGROUP);
+  obstack_grow (obs, " /> />", 6);
+  obstack_grow (obs, "<when <get-var __cond_var<get-var __cond_cnt /> /> >", 52);
   obstack_grow (obs, ARG (3), strlen (ARG (3)));
   obstack_grow (obs, "</when>", 7);
   if (argc>4)
     {
-      obstack_grow (obs, "<when <string-neq ", 18);
-      dump_args (obs, 3, argv, " ");
-      obstack_grow (obs, "/>>", 3);
+      obstack_grow (obs, "<when <not <get-var __cond_var<get-var __cond_cnt /> /> /> >", 60);
       obstack_grow (obs, ARG (4), strlen (ARG (4)));
       obstack_grow (obs, "</when>", 7);
     }
+  obstack_grow (obs, "<decrement __cond_cnt />", 24);
 }
 
 /*----------------------------------------------------------.
@@ -1525,22 +1565,38 @@ mp4h_ifeq (MP4H_BUILTIN_ARGS)
 static void
 mp4h_ifneq (MP4H_BUILTIN_ARGS)
 {
+  symbol *var;
+
   if (bad_argc (argv[0], argc, 0, 5))
     return;
 
-  obstack_grow (obs, "<when <string-neq ", 18);
-  dump_args (obs, (argc < 3 ? argc : 3), argv, " ");
-  obstack_grow (obs, "/>>", 3);
+  var = lookup_variable ("__cond_cnt", SYMBOL_LOOKUP);
+  if (var == NULL)
+    {
+      var = lookup_variable ("__cond_cnt", SYMBOL_INSERT);
+      SYMBOL_TEXT (var) = (char *) xstrdup ("0");
+      SYMBOL_TYPE (var) = TOKEN_TEXT;
+    }
+  obstack_grow (obs, "<increment __cond_cnt />", 24);
+  obstack_grow (obs, "<set-var __cond_var<get-var __cond_cnt />=<string-neq ", 54);
+  obstack_1grow (obs, CHAR_BGROUP);
+  obstack_grow (obs, ARG (1), strlen (ARG (1)));
+  obstack_1grow (obs, CHAR_EGROUP);
+  obstack_1grow (obs, ' ');
+  obstack_1grow (obs, CHAR_BGROUP);
+  obstack_grow (obs, ARG (2), strlen (ARG (2)));
+  obstack_1grow (obs, CHAR_EGROUP);
+  obstack_grow (obs, " /> />", 6);
+  obstack_grow (obs, "<when <get-var __cond_var<get-var __cond_cnt /> /> >", 52);
   obstack_grow (obs, ARG (3), strlen (ARG (3)));
   obstack_grow (obs, "</when>", 7);
   if (argc>4)
     {
-      obstack_grow (obs, "<when <string-eq ", 17);
-      dump_args (obs, 3, argv, " ");
-      obstack_grow (obs, "/>>", 3);
+      obstack_grow (obs, "<when <not <get-var __cond_var<get-var __cond_cnt /> /> /> >", 60);
       obstack_grow (obs, ARG (4), strlen (ARG (4)));
       obstack_grow (obs, "</when>", 7);
     }
+  obstack_grow (obs, "<decrement __cond_cnt />", 24);
 }
 
 /*----------------------------------------------------------------.
@@ -1585,11 +1641,11 @@ mp4h_while (MP4H_BUILTIN_ARGS)
 
       obstack_grow (obs, "<when ", 6);
       dump_args (obs, argc, argv, " ");
-      obstack_1grow (obs, '>');
+      obstack_grow (obs, " >", 2);
       obstack_grow (obs, ARGBODY, strlen (ARGBODY));
       obstack_grow (obs, "<while ", 7);
       dump_args (obs, argc, argv, " ");
-      obstack_1grow (obs, '>');
+      obstack_grow (obs, " >", 2);
       obstack_grow (obs, ARGBODY, strlen (ARGBODY));
       obstack_grow (obs, "</while>", 8);
       obstack_grow (obs, "</when>", 7);
@@ -2418,7 +2474,7 @@ mp4h_include (MP4H_BUILTIN_ARGS)
   obstack_grow (obs, ARG (1), strlen (ARG (1)));
   if (verbatim && strcmp (verbatim, "true") == 0)
     obstack_grow (obs, " verbatim=true", 14);
-  obstack_1grow (obs, '>');
+  obstack_grow (obs, " >", 2);
   if (alt)
     obstack_grow (obs, alt, strlen (alt));
   obstack_grow (obs, "</__include>", 12);
