@@ -10,6 +10,19 @@
 
   Changes between 1.1.2 and 1.1.3:
 
+    *) New <execute> tag (09-Mar-2001):
+       This tag reads output from arbitrary shell command.
+       [Anders Dinsen]
+
+    *) Add diversions (09-Mar-2001):
+       Push diversion mechanisms back into mp4h.
+       [Anders Dinsen]
+
+    *) Improve <date> tag (09-Mar-2001):
+       New `time' and `format' attributes make this tag much more
+       powerful.
+       [Anders Dinsen <anders@dinsen.net>]
+
     *) Remove special characters in debugging output (20-Feb-2001):
        [Axel Beckert <rse-wml@deuxchevaux.org>]
 

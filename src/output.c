@@ -556,3 +556,201 @@ shipout_text (struct obstack *obs, char *text)
   else
     after_left_angle = FALSE;
 }
+
+/* Functions for use by diversions.  */
+
+/*--------------------------------------------------------------------------.
+| Make a file for diversion DIVNUM, and install it in the diversion table.  |
+| Grow the size of the diversion table as needed.			    |
+`--------------------------------------------------------------------------*/
+
+/* The number of possible diversions is limited only by memory and
+   available file descriptors (each overflowing diversion uses one).  */
+
+void
+make_diversion (int divnum)
+{
+  struct diversion *diversion;
+
+  if (output_diversion)
+    {
+      output_diversion->file = output_file;
+      output_diversion->used = output_diversion->size - output_unused;
+      output_diversion = NULL;
+      output_file = NULL;
+      output_cursor = NULL;
+      output_unused = 0;
+    }
+
+  current_diversion = divnum;
+
+  if (divnum < 0)
+    return;
+
+  if (divnum >= diversions)
+    {
+      diversion_table = (struct diversion *)
+	xrealloc (diversion_table, (divnum + 1) * sizeof (struct diversion));
+      for (diversion = diversion_table + diversions;
+	   diversion <= diversion_table + divnum;
+	   diversion++)
+	{
+	  diversion->file = NULL;
+	  diversion->buffer = NULL;
+	  diversion->size = 0;
+	  diversion->used = 0;
+	}
+      diversions = divnum + 1;
+    }
+
+  output_diversion = diversion_table + divnum;
+  output_file = output_diversion->file;
+  output_cursor = output_diversion->buffer + output_diversion->used;
+  output_unused = output_diversion->size - output_diversion->used;
+  output_current_line = -1;
+}
+
+/*-------------------------------------------------------------------.
+| Insert a FILE into the current output file, in the same manner     |
+| diversions are handled.  This allows files to be included, without |
+| having them rescanned by m4.					     |
+`-------------------------------------------------------------------*/
+
+void
+insert_file (FILE *file)
+{
+  char buffer[COPY_BUFFER_SIZE];
+  size_t length;
+
+  /* Optimize out inserting into a sink.  */
+
+  if (!output_diversion)
+    return;
+
+  /* Insert output by big chunks.  */
+
+  while (length = read (fileno (file), buffer, COPY_BUFFER_SIZE),
+	 length != 0)
+    if (length == (size_t) -1)
+      MP4HERROR ((EXIT_FAILURE, errno, _("ERROR: Reading inserted file")));
+    else
+      output_text (buffer, length);
+}
+
+/*-------------------------------------------------------------------------.
+| Insert diversion number DIVNUM into the current output file.  The	   |
+| diversion is NOT placed on the expansion obstack, because it must not be |
+| rescanned.  When the file is closed, it is deleted by the system.	   |
+`-------------------------------------------------------------------------*/
+
+void
+insert_diversion (int divnum)
+{
+  struct diversion *diversion;
+
+  /* Do not care about unexisting diversions.  */
+
+  if (divnum <= 0 || divnum >= diversions)
+    return;
+
+  /* Also avoid undiverting into self.  */
+
+  diversion = diversion_table + divnum;
+  if (diversion == output_diversion)
+    return;
+
+  /* Effectively undivert only if an output stream is active.  */
+
+  if (output_diversion)
+    {
+      if (diversion->file)
+	{
+	  rewind (diversion->file);
+	  insert_file (diversion->file);
+	}
+      else if (diversion->buffer)
+	output_text (diversion->buffer, diversion->used);
+
+      output_current_line = -1;
+    }
+
+  /* Return all space used by the diversion.  */
+
+  if (diversion->file)
+    {
+      fclose (diversion->file);
+      diversion->file = NULL;
+    }
+  else if (diversion->buffer)
+    {
+      free (diversion->buffer);
+      diversion->buffer = NULL;
+      diversion->size = 0;
+      diversion->used = 0;
+    }
+}
+
+/*-------------------------------------------------------------------------.
+| Get back all diversions.  This is done just before exiting from main (), |
+| and from m4_undivert (), if called without arguments.			   |
+`-------------------------------------------------------------------------*/
+
+void
+undivert_all (void)
+{
+  int divnum;
+
+  for (divnum = 1; divnum < diversions; divnum++)
+    insert_diversion (divnum);
+}
+
+/*-------------------------------------------------------------.
+| Produce all diversion information in frozen format on FILE.  |
+`-------------------------------------------------------------*/
+
+void
+freeze_diversions (FILE *file)
+{
+  int saved_number;
+  int last_inserted;
+  int divnum;
+  struct diversion *diversion;
+  struct stat file_stat;
+  
+  saved_number = current_diversion;
+  last_inserted = 0;
+  make_diversion (0);
+  output_file = file;		/* kludge in the frozen file */
+
+  for (divnum = 1; divnum < diversions; divnum++)
+    {
+      diversion = diversion_table + divnum;
+      if (diversion->file || diversion->buffer)
+	{
+	  if (diversion->file)
+	    {
+	      fflush (diversion->file);
+	      if (fstat (fileno (diversion->file), &file_stat) < 0)
+		MP4HERROR ((EXIT_FAILURE, errno, _("Cannot stat diversion")));
+	      if (file_stat.st_size < 0
+		  || file_stat.st_size != (unsigned long) file_stat.st_size)
+		MP4HERROR ((EXIT_FAILURE, errno, _("Diversion too large")));
+	      fprintf (file, "D%d,%lu", divnum,
+		       (unsigned long) file_stat.st_size);
+	    }
+	  else
+	    fprintf (file, "D%d,%d\n", divnum, diversion->used);
+
+	  insert_diversion (divnum);
+	  putc ('\n', file);
+
+	  last_inserted = divnum;
+	}
+    }
+
+  /* Save the active diversion number, if not already.  */
+
+  if (saved_number != last_inserted)
+    fprintf (file, "D%d,0\n\n", saved_number);
+}
+

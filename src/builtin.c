@@ -118,6 +118,7 @@ DECLARE (mp4h_neq);
   /*  page functions  */
 DECLARE (mp4h_include);
 DECLARE (mp4h___include);
+DECLARE (mp4h_execute);
 DECLARE (mp4h_use);
 #ifdef WITH_MODULES
 DECLARE (mp4h_loadmodule);
@@ -174,6 +175,11 @@ DECLARE (mp4h_array_topvalue);
 DECLARE (mp4h_array_shift);
 DECLARE (mp4h_array_concat);
 DECLARE (mp4h_sort);
+
+  /*  diversion functions  */
+DECLARE (mp4h_divert);
+DECLARE (mp4h_divnum);
+DECLARE (mp4h_undivert);
 
 #undef DECLARE
 
@@ -266,6 +272,7 @@ builtin_tab[] =
       /*  page functions  */
   { "include",          FALSE,   FALSE,   mp4h_include },
   { "__include",        TRUE,     TRUE,   mp4h___include },
+  { "execute",          FALSE,    TRUE,   mp4h_execute },
   { "use",              FALSE,    TRUE,   mp4h_use },
 #ifdef WITH_MODULES
   { "loadmodule",       FALSE,    TRUE,   mp4h_loadmodule },
@@ -324,6 +331,11 @@ builtin_tab[] =
   { "array-shift",      FALSE,    TRUE,   mp4h_array_shift },
   { "array-concat",     FALSE,    TRUE,   mp4h_array_concat },
   { "sort",             FALSE,    TRUE,   mp4h_sort },
+
+      /*  diversion functions  */
+  { "divert",           FALSE,    TRUE,   mp4h_divert },
+  { "divnum",           FALSE,    TRUE,   mp4h_divnum },
+  { "undivert",         FALSE,    TRUE,   mp4h_undivert },
 
   { 0,                  FALSE,    FALSE,  0 },
 };
@@ -1365,31 +1377,49 @@ mp4h_file_exists (MP4H_BUILTIN_ARGS)
 static void
 mp4h_date (MP4H_BUILTIN_ARGS)
 {
-  time_t epoch_time;
+  time_t epoch_time = (time_t)0;
   char *ascii_time;
+  const char *format, *timespec;
   struct tm *timeptr;
   char *endp = NULL;
 
-  if (argc == 1)
-    epoch_time = time ((time_t *)NULL);
-  else
+  format = predefined_attribute ("format", &argc, argv, FALSE);
+  timespec = predefined_attribute ("time", &argc, argv, FALSE);
+  
+  if (!format && !timespec)
+    /* backwards compatible... */
+    if (argc > 1)
+      timespec = ARG (1);
+
+  if (timespec)
     {
-      epoch_time = strtol (ARG (1), &endp, 10);
+      epoch_time = strtol (timespec, &endp, 10);
       if (!endp)
-        {
-          MP4HERROR ((warning_status, 0,
-            _("Warning:%s:%d: Invalid value in date: %s"),
-                 CURRENT_FILE_LINE, ARG (1)));
-          return;
-        }
+	{
+	  MP4HERROR ((warning_status, 0,
+	    _("Warning:%s:%d: Invalid value in date: %s"),
+		 CURRENT_FILE_LINE, ARG (1)));
+	  return;
+	}
     }
+  else
+    epoch_time = time ((time_t *)NULL);
 
   timeptr = (struct tm *) localtime (&epoch_time);
-  ascii_time = (char *) asctime (timeptr);
-  
-  /*  Remove newline.  */
-  LAST_CHAR (ascii_time) = '\0';
-  obstack_grow (obs, ascii_time, strlen (ascii_time));
+  if (format) 
+    {
+      ascii_time = (char *)xmalloc(1000);
+      strftime(ascii_time, 1000, format, timeptr);
+      obstack_grow (obs, ascii_time, strlen (ascii_time));
+      xfree(ascii_time);
+    }
+  else
+    {
+      ascii_time = (char *) asctime (timeptr);
+      /*  Remove newline.  */
+      LAST_CHAR (ascii_time) = '\0';
+      obstack_grow (obs, ascii_time, strlen (ascii_time));
+    }
 }
 
 
@@ -2527,6 +2557,37 @@ mp4h___include (MP4H_BUILTIN_ARGS)
     read_file_verbatim (obs);
 
   xfree (filename);
+}
+
+/*------------------------------------------------------.
+| Execute a command and read the result.                |
+`------------------------------------------------------*/
+static void
+mp4h_execute (MP4H_BUILTIN_ARGS)
+{
+  const char *verbatim;
+  char *command;
+  FILE *fp;
+
+  verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  command = ARG (1);
+  remove_special_chars (command, TRUE);
+  fp = popen(command, "r");
+  if (fp == NULL)
+    {
+      MP4HERROR ((warning_status, errno,
+        _("Warning:%s:%d: Cannot execute %s"),
+             CURRENT_FILE_LINE, ARG (1)));
+      return;
+    }
+
+  push_file (fp, command);
+
+  if (verbatim && strcmp (verbatim, "true") == 0)
+    read_file_verbatim (obs);
 }
 
 /*-------------------------------------------------.
@@ -4437,6 +4498,76 @@ mp4h_sort (MP4H_BUILTIN_ARGS)
 }
 
 
+/* This section contains the macros "divert", "undivert" and "divnum" for
+   handling diversion.  The utility functions used lives in output.c.  */
+
+/*-----------------------------------------------------------------------.
+| Divert further output to the diversion given by ARGV[1].  Out of range |
+| means discard further output.						 |
+`-----------------------------------------------------------------------*/
+
+static void
+mp4h_divert (MP4H_BUILTIN_ARGS)
+{
+  int i = 0;
+
+  if (bad_argc (argv[0], argc, 1, 2))
+    return;
+
+  if (argc == 2 && !numeric_arg (argv[0], ARG (1), TRUE, &i))
+    return;
+
+  make_diversion (i);
+}
+
+/*-----------------------------------------------------.
+| Expand to the current diversion number, -1 if none.  |
+`-----------------------------------------------------*/
+
+static void
+mp4h_divnum (MP4H_BUILTIN_ARGS)
+{
+  if (bad_argc (argv[0], argc, 1, 1))
+    return;
+  shipout_int (obs, current_diversion);
+}
+
+/*-----------------------------------------------------------------------.
+| Bring back the diversion given by the argument list.  If none is	 |
+| specified, bring back all diversions.  GNU specific is the option of	 |
+| undiverting named files, by passing a non-numeric argument to undivert |
+| ().									 |
+`-----------------------------------------------------------------------*/
+
+static void
+mp4h_undivert (MP4H_BUILTIN_ARGS)
+{
+  int i, file;
+  FILE *fp;
+
+  if (argc == 1)
+    undivert_all ();
+  else
+    for (i = 1; i < argc; i++)
+      {
+	if (sscanf (ARG (i), "%d", &file) == 1)
+	  insert_diversion (file);
+	else
+	  {
+	    fp = path_search (ARG (i), (char **)NULL);
+	    if (fp != NULL)
+	      {
+		insert_file (fp);
+		fclose (fp);
+	      }
+	    else
+	      MP4HERROR ((warning_status, errno,
+			_("Cannot undivert %s"), ARG (i)));
+	  }
+      }
+}
+
+
 /*-------------------------------------------------------------------------.
 | This function handles all expansion of user defined and predefined       |
 | macros.  It is called with an obstack OBS, where the macros expansion    |
