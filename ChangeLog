@@ -10,6 +10,11 @@
 
   Changes between 1.2.0 and ???:
 
+    *) Improve documentation (29-Sep-2001):
+       Entities are now used in place of some tags, and some typos
+       are fixed.
+       [Anders Dinsen]
+
     *) Implement entity support (28-Sep-2001):
        [Anders Dinsen]
 
