@@ -207,7 +207,7 @@ make_room_for (int length)
       selected_diversion->file = tmpfile ();
       if (selected_diversion->file == NULL)
         MP4HERROR ((EXIT_FAILURE, errno,
-                  _("ERROR: Cannot create temporary file for diversion")));
+          _("ERROR: Cannot create temporary file for diversion")));
 
       if (selected_diversion->used > 0)
         {
@@ -217,7 +217,7 @@ make_room_for (int length)
                           selected_diversion->file);
           if (count != 1)
             MP4HERROR ((EXIT_FAILURE, errno,
-                      _("ERROR: Cannot flush diversion to temporary file")));
+              _("ERROR: Cannot flush diversion to temporary file")));
         }
 
       /* Reclaim the buffer space for other diversions.  */

@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.7.2>
+<set-var version=0.7.3>
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -21,7 +21,7 @@
 ;;;
 ;;;   Les caractères pour commentaires sont modifiés
 ;;;
-<eol-comment "###">
+<set-eol-comment "###">
 
 <header>
 <section "Introduction">
@@ -956,7 +956,7 @@ Et là: <get-var chiffres>
 <attributes:item "start=<var début>">
 Indique le point de départ à partir duquel le décalage s'opère.
 <example>
-<array-shift 2 chiffres start=2><get-var chiffres>
+<array-shift -2 chiffres start=2><get-var chiffres>
 </example>
 </attributes:description>
 
@@ -1557,17 +1557,22 @@ Fonction inverse de la précédente.
 <subsection "Divers">
 
 <tag:description __file__>
+[<var nom>]
 </tag:description>
 
 <para>
-Fonction qui retourne le nom du fichier en train d'être traité.
+Sans argument, la fonction retourne le nom du fichier en train d'être
+traité. S'il y a un argument, il est le nom du fichier retourné par les
+prochains appels à cette fonxction.
 </para>
 
 <tag:description __line__>
+[<var numéro>]
 </tag:description>
 <para>
-Fonction qui retourne le numéro de la ligne dans le fichier en train
-d'être traité.
+Sans argument, la fonction retourne le numéro de la ligne dans le
+fichier en train d'être traité. S'il y a un argument, il est le numéro
+de la ligne retourné par les prochains appels à cette fonxction.
 </para>
 
 <example>
@@ -1580,7 +1585,7 @@ numéro de la ligne n'est pas correct.
 d'être traité.
 </para>
 
-<tag:description version>
+<tag:description __version__>
 </tag:description>
 
 <para>
@@ -1641,39 +1646,10 @@ Ceci est un exemple de balise complexe;;;
 <bar>Corps de la fonction</bar>
 </example>
 
-<para>
-Les commandes ainsi définies peuvent avoir des attributs, comme toute
-balise HTML. Ces attributs sont séparés par un ou plusieurs espaces,
-tabulations ou sauts de lignes, et chaque attribut doit être une entité
-complète de <mp4h>. Par exemple, avec les définitionsa ci-dessus,
-<full-command bar> ne peut pas être un attribut,
-parce que la commande <full-command bar> est complexe.
-En revanche, il est possible d'écrire
-<code><foo <foo>></code>
-ou même
-<code><foo <foo name=src url=ici>></code>
-Dans les deux exemples ci-dessus, la commande <command foo> a un seul
-attribut.
-</para>
-
-<undef foo bar>
-<para>
-Dans certains cas, il est nécessaire de regrouper ensemble plusieurs
-chaînes de caractères pour en faire un seul attribut. Cela peut être
-fait soit avec des guillements anglo-saxons (double quotes), soit avec
-la commande <command group>.  Par exemple,
-<code><foo "Ceci est le 1er attribut"
-           <group et le second>></code>
-</para>
-
-<note>
-Contrairement au HTML, l'apostrophe ne peut pas servir à la place des
-guillements.
-</note>
-
 <undef href mail1 mail2 show-attributes show1 show2 bar>
 <para>
-Pour que ces attributs se retrouvent dans le texte de
+Les commandes ainsi définies peuvent avoir des attributs, comme toute
+balise HTML. Pour que ces attributs se retrouvent dans le texte de
 remplacement, les conventions suivantes ont été adoptées:
 <list>
 <item>Les attributs sont numérotés à partir de 0. Dans le texte de
@@ -1785,6 +1761,47 @@ fonctionnalités sont actuellement comprises dans <mp4h>, mais peuvent
 très bien être supprimées dans les versions futures.
 </note>
 
+<subsection "Attributs">
+
+<para>
+Les attributs sont séparés par un ou plusieurs espaces, tabulations ou
+sauts de lignes, et chaque attribut doit être une entité complète de
+<mp4h>. Par exemple, avec les définitionsa ci-dessus,
+<full-command bar> ne peut pas être un attribut,
+parce que la commande <full-command bar> est complexe.
+En revanche, il est possible d'écrire
+<code><foo <foo>></code>
+ou même
+<code><foo <foo name=src url=ici>></code>
+Dans les deux exemples ci-dessus, la commande <command foo> a un seul
+attribut.
+</para>
+
+<undef foo bar>
+<para>
+Dans certains cas, il est nécessaire de regrouper ensemble plusieurs
+chaînes de caractères pour en faire un seul attribut. Cela peut être
+fait soit avec des guillements anglo-saxons (double quotes), soit avec
+la commande <command group>.  Par exemple,
+<code><foo "Ceci est le 1er attribut"
+           <group et le second>></code>
+</para>
+
+<note>
+Contrairement au HTML, l'apostrophe ne peut pas servir à la place des
+guillements.
+</note>
+
+<para>
+Si des guillements apparaissent dans un argument, ils doivent être
+précédés d'une barre oblique inverse (backslash) <value "\\"> afin de ne
+pas être interprétés comme le caractère de fin de chaîne de caractères.
+<example>
+  <set-var texte="Texte avec un guillemet \" dedans">;;;
+  <get-var texte>
+</example>
+</para>
+
 <subsection "Schéma sumplifié">
 
 <para>
@@ -1802,6 +1819,33 @@ texte de remplacement de la commande.
 
 <para>
 Les caractères sont lus un par un, jusqu'à trouver un <left-angle>.
+Le nom de la commande est ensuite lu. Les attributs sont lus, avec ou
+sans expansion, selon la caractéristique de la commande. Enfin, si
+la commande est complexe, le corps de la balise est lue.
+Le texte de remplacement est mis sur la pile, en remplaçaant les mots
+commençant par un <value %>, comme <value %body>, <value %attributes>
+ainsi que <value %0>, <value %1>, etc.
+</para>
+
+<undef foo>
+<code>
+<define-tag foo>bar</define-tag>
+avant <foo> après
+</code>
+
+<code>
+<set-var nom="nom.png">
+<define-tag image><img %attributes border=0></define-tag>
+avant <image src=<get-var nom> alt="Hello, World!"> après
+</code>
+
+<code>
+<set-var nom="nom.png">
+<define-tag image attributes=verbatim><img %attributes border=0></define-tag>
+avant <image src=<get-var nom> alt="Hello, World!"> après
+</code>
+
+<para>
 Les caractères suivants sont lus pour déterminer le nom de la commande.
 Avec ce nom, les caractéristiques ci-dessus sont déterminées. Les
 attributs de la commande sont lus, soient tels quels, soient en les

@@ -169,12 +169,12 @@ extern int interactive;                 /* -e */
 extern int sync_output;                 /* -s */
 extern int debug_level;                 /* -d */
 extern int hash_table_size;             /* -H */
-extern int no_gnu_extensions;           /* -G */
-extern int prefix_all_builtins;         /* -P */
 extern int max_debug_argument_length;   /* -l */
 extern int suppress_warnings;           /* -Q */
 extern int warning_status;              /* -E */
 extern int nesting_limit;               /* -L */
+extern int frozen_dump;                 /* -F */
+
 
 /* Error handling.  */
 #define MP4HERROR(Arglist) (error Arglist)
@@ -345,6 +345,7 @@ void input_init __P ((void));
 int peek_input __P ((void));
 token_type next_token __P ((token_data *, read_type));
 void skip_line __P ((void));
+void input_close __P ((void));
 
 /* push back input */
 void push_file __P ((FILE *, const char *));
@@ -360,6 +361,8 @@ void read_file_verbatim __P ((struct obstack *));
 /* current input file, and line */
 extern const char *current_file;
 extern int current_line;
+extern int *array_current_line;
+#define CURRENT_FILE_LINE current_file, array_current_line[expansion_level]
 
 /* Begin and end quote */
 extern STRING lquote, rquote;

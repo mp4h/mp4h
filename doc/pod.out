@@ -128,22 +128,40 @@
 <para>B_LT_<lang:note>:_GT_ %body</para></define-tag>
 
 ;;;
+;;;    Lists
+;;;
+<define-tag list endtag=required>
+
+=over 2
+
+%body
+
+=back
+
+</define-tag>
+<define-tag item>
+
+=item *
+
+</define-tag>
+
+;;;
 ;;;    Example of MP4H code
 ;;;
-<eol-comment "###">
+<set-eol-comment "###">
 <define-tag three-colon>;;;</define-tag>
 <define-tag example endtag=required attributes=verbatim whitespace=delete>
 <set-var-verbatim verb-body=%ubody>
 <subst-in-var verb-body "<" "_LT_">
 <subst-in-var verb-body ">" "_GT_">
-<subst-in-var verb-body "^\n*" "" singleline=true>
+<subst-in-var verb-body "^\n+" "" singleline=true>
 <subst-in-var verb-body "^(.)" "   \\1">
 <set-var body=%body>
 <subst-in-var body "<" "_LT_">
 <subst-in-var body ">" "_GT_">
 <subst-in-var body "<three-colon>[^\n]*\n[ \t]*" "" singleline=true>
 <subst-in-var body "<three-colon>$" "">
-<subst-in-var body "^\n*" "" singleline=true>
+<subst-in-var body "^\n+" "" singleline=true>
 <subst-in-var body "^(.)" "   \\1">
 <group "<lang:example-source>:
 
@@ -155,13 +173,17 @@
 
 ">
 </define-tag>
-<eol-comment ";;;">
+<set-eol-comment ";;;">
 
 ;;;
 ;;;    Verbatim code
 ;;;
-<define-tag code endtag=required attributes=verbatim>
-<subst-in-string "%ubody" "^(.)" "   \\1">
+<define-tag code endtag=required attributes=verbatim whitespace=delete>
+<set-var-verbatim verb-body=%ubody>
+<subst-in-var verb-body "<" "_LT_">
+<subst-in-var verb-body ">" "_GT_">
+<subst-in-var verb-body "^(.)" "   \\1">
+<get-var-once verb-body>
 </define-tag>
 
 ;;;
@@ -173,7 +195,7 @@
 ;;;    HTML Comments
 ;;;
 <define-tag html:comment endtag=required>
-_LT_!--%body--_GT_
+<!--%body-->
 </define-tag>
 
 <define-tag pre endtag=required>

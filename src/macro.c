@@ -82,10 +82,10 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
     case TOKEN_MACDEF:
       break;
 
-    case TOKEN_SIMPLE:
     case TOKEN_QUOTED:
-    case TOKEN_STRING:
+    case TOKEN_SIMPLE:
     case TOKEN_SPACE:
+    case TOKEN_STRING:
       if (expansion_level > 0 && t == TOKEN_QUOTED)
         obstack_1grow (obs, CHAR_LQUOTE);
       shipout_text (obs, text, strlen (text));
@@ -129,7 +129,7 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
 
     default:
       MP4HERROR ((warning_status, 0,
-               _("INTERNAL ERROR: Bad token type in expand_token ()")));
+        _("INTERNAL ERROR: Bad token type in expand_token ()")));
       abort ();
     }
 }
@@ -172,8 +172,6 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
         case TOKEN_SPACE:
         case TOKEN_SIMPLE:
           text = TOKEN_DATA_TEXT (&td);
-          if (*text == '"' && group_level == 0)
-              in_string = !in_string;
           if ((IS_SPACE(*text) || IS_CLOSE(*text))
                && !in_string && (group_level == 0))
             {
@@ -237,8 +235,8 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
           break;
 
         default:
-          MP4HERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Bad token type in expand_argument ()")));
+          MP4HERROR ((warning_status, 0,
+            _("INTERNAL ERROR: Bad token type in expand_argument ()")));
           abort ();
         }
 
@@ -282,8 +280,8 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
           if (internal_abort)
             {
               MP4HERROR ((EXIT_FAILURE, 0,
-                    _("ERROR: EOF when reading argument of the `%s' tag"),
-                        SYMBOL_NAME(sym)));
+                _("ERROR:%s:%d: EOF when reading argument of the `%s' tag"),
+                     CURRENT_FILE_LINE, SYMBOL_NAME(sym)));
             }
           tdp = (token_data *)
             obstack_copy (arguments, (voidstar) &td, sizeof (td));
@@ -327,17 +325,17 @@ collect_body (symbol *sym, struct obstack *argptr)
         case TOKEN_EOF:
         case TOKEN_MACDEF:
           MP4HERROR ((EXIT_FAILURE, 0,
-                    _("ERROR: EOF when reading body of the `%s' tag"),
-                        SYMBOL_NAME(sym)));
+            _("ERROR:%s:%d: EOF when reading body of the `%s' tag"),
+                 CURRENT_FILE_LINE, SYMBOL_NAME(sym)));
           break;
 
         case TOKEN_BGROUP:
         case TOKEN_EGROUP:
           break;
 
+        case TOKEN_QUOTED:
         case TOKEN_SIMPLE:
         case TOKEN_SPACE:
-        case TOKEN_QUOTED:
         case TOKEN_STRING:
           if (expansion_level > 0 && t == TOKEN_QUOTED)
             obstack_1grow (&body, CHAR_LQUOTE);
@@ -403,7 +401,7 @@ collect_body (symbol *sym, struct obstack *argptr)
 
         default:
           MP4HERROR ((warning_status, 0,
-                    _("INTERNAL ERROR: Bad token type in collect_body ()")));
+            _("INTERNAL ERROR: Bad token type in collect_body ()")));
           abort ();
         }
     }
@@ -436,7 +434,7 @@ call_macro (symbol *sym, struct obstack *obs, int argc, token_data **argv,
 
     default:
       MP4HERROR ((warning_status, 0,
-                _("INTERNAL ERROR: Bad symbol type in call_macro ()")));
+        _("INTERNAL ERROR: Bad symbol type in call_macro ()")));
       abort ();
     }
 }
@@ -465,10 +463,11 @@ expand_macro (symbol *sym, read_type expansion)
   read_type attr_expansion;
 
   expansion_level++;
+  array_current_line[expansion_level] = current_line;
   if (expansion_level > nesting_limit)
-    MP4HERROR ((EXIT_FAILURE, 0, _("\
-ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
-              nesting_limit));
+    MP4HERROR ((EXIT_FAILURE, 0,
+      _("ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
+           nesting_limit));
 
   macro_call_id++;
   my_call_id = macro_call_id;
@@ -575,9 +574,9 @@ expand_unknown_macro (char *name, read_type expansion)
   symbol_name = xstrdup (name);
   expansion_level++;
   if (expansion_level > nesting_limit)
-    MP4HERROR ((EXIT_FAILURE, 0, _("\
-ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
-              nesting_limit));
+    MP4HERROR ((EXIT_FAILURE, 0,
+      _("ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
+           nesting_limit));
 
   macro_call_id++;
   my_call_id = macro_call_id;

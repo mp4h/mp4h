@@ -8,9 +8,23 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.7.3 and 0.7.2:
+
+    *) More comprehensive messages on error (18-Feb-2000):
+       When a warning is printed, it includes file name and line
+       number.
+       [Denis Barbier]
+
+    *) Fix support for frozen files (18-Feb-2000):
+       This is the first working version.
+       [Denis Barbier]
+
+    *) Merge synclines tags into <__file__> and <__line__> (16-Feb-2000):
+       [Denis Barbier]
+
   Changes between 0.7.2 and 0.7.1:
 
-    *) Add <synclines-push> and <synclines-pop> tag (16-Feb-2000):
+    *) Add <synclines-push> and <synclines-pop> tags (16-Feb-2000):
        These macros will help debugging within WML.
        [Denis Barbier]
 

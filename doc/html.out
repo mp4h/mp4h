@@ -130,7 +130,7 @@
 ;;;
 ;;;    Example of MP4H code
 ;;;
-<eol-comment "###">
+<set-eol-comment "###">
 <define-tag three-colon>;;;</define-tag>
 <define-tag example endtag=required
             attributes=verbatim whitespace=delete>
@@ -152,7 +152,7 @@
     <tr><td bgcolor="#ff99cc" width="80%"><pre><get-var-once body></pre></td></tr>
 </table>
 </define-tag>
-<eol-comment ";;;">
+<set-eol-comment ";;;">
 
 ;;;
 ;;;    Verbatim code

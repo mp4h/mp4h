@@ -205,7 +205,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
     default:
       MP4HERROR ((warning_status, 0,
-                _("INTERNAL ERROR: Illegal mode to symbol_lookup ()")));
+        _("INTERNAL ERROR: Illegal mode to symbol_lookup ()")));
       abort ();
     }
 }

@@ -111,18 +111,12 @@ include_init (void)
 void
 include_env_init (void)
 {
-  if (no_gnu_extensions)
-    return;
-
   search_path_env_init (&dirpath, getenv ("M4PATH"), FALSE);
 }
 
 void
 add_include_directory (const char *dir)
 {
-  if (no_gnu_extensions)
-    return;
-
   search_path_add (&dirpath, dir);
 
 #ifdef DEBUG_INCL
@@ -147,7 +141,7 @@ path_search (const char *dir, char **expanded_name)
     }
 
   /* If file not found, and filename absolute, fail.  */
-  if (*dir == '/' || no_gnu_extensions)
+  if (*dir == '/')
     return NULL;
 
   name = (char *) xmalloc (dirpath.max_length + 1 + strlen (dir) + 1);

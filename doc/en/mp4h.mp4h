@@ -21,7 +21,7 @@
 ;;;
 ;;;   Les caractères pour commentaires sont modifiés
 ;;;
-<eol-comment "###">
+<set-eol-comment "###">
 
 <header>
 <section "Introduction">

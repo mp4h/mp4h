@@ -185,6 +185,7 @@ const char *current_file;
 
 /* Current input line number.  */
 int current_line;
+int *array_current_line;
 
 /* Obstack for storing individual tokens.  */
 static struct obstack token_stack;
@@ -472,7 +473,7 @@ push_string_init (void)
   if (next != NULL)
     {
       MP4HERROR ((warning_status, 0,
-                _("INTERNAL ERROR: Recursive push_string!")));
+        _("INTERNAL ERROR: Recursive push_string!")));
       abort ();
     }
 
@@ -588,6 +589,14 @@ pop_wrapup (void)
   return TRUE;
 }
 
+void
+input_close(void)
+{
+  do
+    pop_input ();
+  while (isp);
+}
+
 /*-------------------------------------------------------------------.
 | When a MACRO token is seen, next_token () uses init_macro_token () |
 | to retrieve the value of the function pointer.                     |
@@ -599,7 +608,7 @@ init_macro_token (token_data *td)
   if (isp->funcs->read_func != macro_read)
     {
       MP4HERROR ((warning_status, 0,
-                _("INTERNAL ERROR: Bad call to init_macro_token ()")));
+        _("INTERNAL ERROR: Bad call to init_macro_token ()")));
       abort ();
     }
 
@@ -639,7 +648,7 @@ next_char (void)
       else
         {
           MP4HERROR ((warning_status, 0,
-                    _("INTERNAL ERROR: Input stack botch in next_char ()")));
+            _("INTERNAL ERROR: Input stack botch in next_char ()")));
           abort ();
         }
 
@@ -676,7 +685,7 @@ peek_input (void)
       else
         {
           MP4HERROR ((warning_status, 0,
-                    _("INTERNAL ERROR: Input stack botch in peek_input ()")));
+            _("INTERNAL ERROR: Input stack botch in peek_input ()")));
           abort ();
         }
 
@@ -785,6 +794,7 @@ input_init (void)
 
   current_file = _("NONE");
   current_line = 0;
+  array_current_line = (int *) xmalloc (sizeof (int) * nesting_limit);
 
   obstack_init (&token_stack);
   obstack_init (&input_stack);
@@ -1028,7 +1038,7 @@ next_token (token_data *td, read_type expansion)
               ch = next_char ();
               if (ch == CHAR_EOF)
                 MP4HERROR ((EXIT_FAILURE, 0,
-                        _("ERROR: EOF in string")));
+                   _("INTERNAL ERROR: EOF in string")));
 
               if (IS_BGROUP(ch) || IS_EGROUP(ch))
                 continue;
@@ -1037,12 +1047,10 @@ next_token (token_data *td, read_type expansion)
                   quote_level--;
                   if (quote_level == 0)
                       break;
-                  obstack_1grow (&token_stack, ch);
                 }
               else if (IS_LQUOTE(ch))
                 {
                   quote_level++;
-                  obstack_1grow (&token_stack, ch);
                 }
               else
                 {
@@ -1067,14 +1075,14 @@ next_token (token_data *td, read_type expansion)
               ch = next_char ();
               if (ch == CHAR_EOF)
                 MP4HERROR ((EXIT_FAILURE, 0,
-                        _("ERROR: EOF in string")));
+                   _("ERROR:%s:%d: EOF in string"), CURRENT_FILE_LINE));
 
               if (ch == '\\')
                 {
                   ch = next_char ();
                   if (ch == CHAR_EOF)
                     MP4HERROR ((EXIT_FAILURE, 0,
-                            _("ERROR: EOF in string")));
+                      _("ERROR:%s:%d: EOF in string"), CURRENT_FILE_LINE));
                   obstack_1grow (&token_stack, ch);
                 }
               else if (ch == '"')

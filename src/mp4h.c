@@ -65,6 +65,9 @@ const char *frozen_file_to_read = NULL;
 /* Name of frozen file to produce near completion.  */
 const char *frozen_file_to_write = NULL;
 
+/* True when -F flag is passed.  */
+int frozen_dump = 0;
+
 /* The name this program was run with. */
 const char *program_name;
 
@@ -114,7 +117,7 @@ static void
 stackovf_handler (void)
 {
   MP4HERROR ((EXIT_FAILURE, 0,
-            _("ERROR: Stack overflow.  (Infinite define recursion?)")));
+    _("ERROR: Stack overflow.  (Infinite define recursion?)")));
 }
 
 #endif /* USE_STACKOV */
@@ -277,12 +280,6 @@ main (int argc, char *const *argv, char *const *envp)
       case 0:
         break;
 
-      case 'B':                  /* compatibility junk */
-      case 'N':
-      case 'S':
-      case 'T':
-        break;
-
       case 'D':
       case 'U':
       case 't':
@@ -308,10 +305,7 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'F':
         frozen_file_to_write = optarg;
-        break;
-
-      case 'G':
-        no_gnu_extensions = 1;
+        frozen_dump = 1;
         break;
 
       case 'H':
@@ -323,10 +317,12 @@ main (int argc, char *const *argv, char *const *envp)
       case 'I':
         add_include_directory (optarg);
         break;
+
       case 'L':
         nesting_limit = atoi (optarg);
         break;
 
+      case 'Q':
         suppress_warnings = 1;
         break;
 
@@ -446,7 +442,7 @@ main (int argc, char *const *argv, char *const *envp)
 
         default:
           MP4HERROR ((warning_status, 0,
-                    _("INTERNAL ERROR: Bad code in deferred arguments")));
+            _("INTERNAL ERROR: Bad code in deferred arguments")));
           abort ();
         }
 
@@ -478,6 +474,7 @@ main (int argc, char *const *argv, char *const *envp)
               }
             else
               {
+                current_file = xstrdup (filename);
                 push_file (fp, filename);
                 xfree (filename);
               }
