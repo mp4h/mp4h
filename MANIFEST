@@ -229,6 +229,10 @@ tests/subst-in-string/02.in
 tests/subst-in-string/02.ok
 tests/subst-in-string/03.in
 tests/subst-in-string/03.ok
+tests/subst-in-string/04.in
+tests/subst-in-string/04.ok
+tests/subst-in-string/05.in
+tests/subst-in-string/05.ok
 tests/subst-in-var/01.in
 tests/subst-in-var/01.ok
 tests/subst-in-var/02.in
