@@ -18,9 +18,9 @@ INSTALL_DATA    = $(SHTOOL) install -c -m 644
 MKDIR           = $(SHTOOL) mkdir -f -p -m 755
 
 prefix          = @prefix@
-exec_prefix     = $(prefix)
+exec_prefix     = @exec_prefix@
 pkgdatadir      = @pkgdatadir@
-mandir          = $(prefix)/man
+mandir          = @mandir@
 manext          = 3
 
 # ------------------------------------------------
