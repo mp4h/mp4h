@@ -79,8 +79,6 @@ AC_FUNC_VPRINTF
 AC_REPLACE_FUNCS(strtol obstack xmalloc xstrdup)
 AC_CHECK_FUNC(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
 
-AM_WITH_DMALLOC
-
 AC_MSG_CHECKING([for HTML postprocessing])
 AC_ARG_WITH(tidy,dnl
 [  --with-tidy=PATH        post-process HTML documentation with tidy],[dnl
@@ -101,6 +99,9 @@ else
 fi
 AC_SUBST(WITH_MODULES_TRUE)
 AC_SUBST(WITH_MODULES_FALSE)
+
+dnl    Must be called after AM_WITH_MODULES
+AM_WITH_DMALLOC
 
 mp4h_libs="$LIBS"
 
