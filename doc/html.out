@@ -8,11 +8,11 @@
 ;;;
 ;;;    Set text in typewriter or bold face font
 ;;;    Constructs like <tt><tt>a</tt></tt> are valid but we
-;;;    prefer to avoid them.  In order to remove inner and not outer
-;;;    tags, we have to prevent attributes expansion
+;;;    prefer to avoid them.
 ;;;
 <set-var _text:tt=0 />
 <set-var _text:b=0 />
+<set-var _text:em=0 />
 <define-tag texttt endtag=required whitespace=delete>
 <increment _text:tt />
 <ifeq <get-var _text:tt /> 1 "<tt*>" />
@@ -21,12 +21,20 @@
 <decrement _text:tt />
 </define-tag>
 
-<define-tag textbf endtag=required attributes=verbatim whitespace=delete>
+<define-tag textbf endtag=required whitespace=delete>
 <increment _text:b />
 <ifeq <get-var _text:b /> 1 "<b*>" />
 %body
 <ifeq <get-var _text:b /> 1 "</b*>" />
 <decrement _text:b />
+</define-tag>
+
+<define-tag textem endtag=required whitespace=delete>
+<increment _text:em />
+<ifeq <get-var _text:em /> 1 "<em*>" />
+%body
+<ifeq <get-var _text:em /> 1 "</em*>" />
+<decrement _text:em />
 </define-tag>
 
 ;;;
@@ -38,7 +46,7 @@
 <define-tag m4><program m4 /></define-tag>
 <define-tag Meta-HTML><program Meta-HTML /></define-tag>
 
-<define-tag var><em>%attributes</em></define-tag>
+<define-tag var><textem>%attributes</textem></define-tag>
 <define-tag value><texttt>%attributes</texttt></define-tag>
 <define-tag command><texttt>%attributes</texttt></define-tag>
 <define-tag full-command><texttt>&lt;%attributes&gt;</texttt></define-tag>
@@ -101,7 +109,7 @@ This documentation describes <get-var package /> version <get-var version />.
 <set-var complex=* />
 <set-var verbatim=* />
 <set-var %attributes />
-<set-var list-attributes="%body" />
+<set-var list-attributes="%Ubody" />
 <subst-in-var list-attributes "^\n+" singleline=true />
 <subst-in-var list-attributes "\n+$" singleline=true />
 <para><a name="tag-%0">&nbsp;</a></para>

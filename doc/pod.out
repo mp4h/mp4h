@@ -8,26 +8,58 @@
 </define-tag>
 
 ;;;
+;;;    Set text in typewriter or bold face font
+;;;    Constructs like <tt><tt>a</tt></tt> are valid but we
+;;;    prefer to avoid them.
+;;;
+<set-var _text:tt=0 />
+<set-var _text:b=0 />
+<set-var _text:em=0 />
+<define-tag texttt endtag=required whitespace=delete>
+<increment _text:tt />
+<ifeq <get-var _text:tt /> 1 "C_LT_" />
+%body
+<ifeq <get-var _text:tt /> 1 "_GT_" />
+<decrement _text:tt />
+</define-tag>
+
+<define-tag textbf endtag=required whitespace=delete>
+<increment _text:b />
+<ifeq <get-var _text:b /> 1 "B_LT_" />
+%body
+<ifeq <get-var _text:b /> 1 "_GT_" />
+<decrement _text:b />
+</define-tag>
+
+<define-tag textem endtag=required whitespace=delete>
+<increment _text:em />
+<ifeq <get-var _text:em /> 1 "I_LT_" />
+%body
+<ifeq <get-var _text:em /> 1 "_GT_" />
+<decrement _text:em />
+</define-tag>
+
+;;;
 ;;;    Common names
 ;;;
-<define-tag program>B_LT_%attributes_GT_</define-tag>
+<define-tag program><textbf>%attributes</textbf></define-tag>
 <define-tag mp4h><program mp4h /></define-tag>
 <define-tag WML><program WML /></define-tag>
 <define-tag m4><program m4 /></define-tag>
 <define-tag Meta-HTML><program Meta-HTML /></define-tag>
 
-<define-tag var>I_LT_%attributes_GT_</define-tag>
-<define-tag value>C_LT_%attributes_GT_</define-tag>
-<define-tag command>C_LT_%attributes_GT_</define-tag>
-<define-tag full-command>C_LT_E_LT_lt_GT_%attributesE_LT_gt_GT__GT_</define-tag>
-<define-tag slash>C_LT_/_GT_</define-tag>
-<define-tag true>C_LT_true_GT_</define-tag>
-<define-tag optflag>C_LT_-%attributes_GT_</define-tag>
-<define-tag file>C_LT_%attributes_GT_</define-tag>
+<define-tag var><textem>%attributes</textem></define-tag>
+<define-tag value><texttt>%attributes</texttt></define-tag>
+<define-tag command><texttt>%attributes</texttt></define-tag>
+<define-tag full-command><texttt>E_LT_lt_GT_%attributesE_LT_gt_GT_</texttt></define-tag>
+<define-tag slash><texttt>S</texttt></define-tag>
+<define-tag true><texttt>true</texttt></define-tag>
+<define-tag optflag><texttt>-%attributes</texttt></define-tag>
+<define-tag file><texttt>%attributes</texttt></define-tag>
 <define-tag anchor></define-tag>
 
 <define-tag tag:slash><slash/></define-tag>
-<define-tag tag:V>C_LT_V_GT_</define-tag>
+<define-tag tag:V><texttt>V</texttt></define-tag>
 
 ;;;
 ;;;    Alias for writing URLs
