@@ -79,16 +79,8 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
     {                           /* TOKSW */
     case TOKEN_EOF:
     case TOKEN_MACDEF:
-      break;
-
     case TOKEN_BGROUP:
-      if (expansion == READ_ATTR_BODY)
-        obstack_1grow (obs, CHAR_BGROUP);
-      break;
-
     case TOKEN_EGROUP:
-      if (expansion == READ_ATTR_BODY)
-        obstack_1grow (obs, CHAR_EGROUP);
       break;
 
     case TOKEN_QUOTED:
@@ -508,9 +500,19 @@ expand_macro (symbol *sym, read_type expansion)
       for (i = 1; i < argc; i++)
         {
           obstack_1grow (obs_expansion, ' ');
-          obstack_1grow (obs_expansion, CHAR_BGROUP);
-          shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
-          obstack_1grow (obs_expansion, CHAR_EGROUP);
+          if (strlen (TOKEN_DATA_TEXT (argv[i])) == 0)
+            {
+              obstack_1grow (obs_expansion, CHAR_BGROUP);
+              obstack_1grow (obs_expansion, CHAR_EGROUP);
+            }
+          else if (strchr (TOKEN_DATA_TEXT (argv[i]), ' '))
+            {
+              obstack_1grow (obs_expansion, CHAR_BGROUP);
+              shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+              obstack_1grow (obs_expansion, CHAR_EGROUP);
+            }
+          else
+            shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
         }
       obstack_1grow (obs_expansion, '>');
       if (SYMBOL_CONTAINER (sym))
