@@ -434,6 +434,7 @@ main (int argc, char *const *argv)
               }
             else
               {
+                xfree (current_file);
                 current_file = xstrdup (filename);
                 push_file (fp, filename);
                 xfree (filename);

@@ -289,8 +289,7 @@ remove_special_chars (char *s, boolean restore_quotes)
       After that, string is shifyed.  */
   if (restore_quotes)
     {
-      for (cp=s; *cp != '\0' && *cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE
-             && *cp != CHAR_BGROUP && *cp != CHAR_EGROUP; cp++)
+      for (cp=s; *cp != '\0' && !(IS_GROUP (*cp)); cp++)
         {
           if (*cp == CHAR_QUOTE)
             *cp = '"';
@@ -298,8 +297,7 @@ remove_special_chars (char *s, boolean restore_quotes)
     }
   else
     {
-      for (cp=s; *cp != '\0' && *cp != CHAR_LQUOTE && *cp != CHAR_RQUOTE
-             && *cp != CHAR_BGROUP && *cp != CHAR_EGROUP; cp++)
+      for (cp=s; *cp != '\0' && !(IS_GROUP (*cp)); cp++)
         ;
     }
 
@@ -308,8 +306,7 @@ remove_special_chars (char *s, boolean restore_quotes)
 
   for ( ; *cp != '\0'; cp++)
     {
-      if (*cp == CHAR_LQUOTE || *cp == CHAR_RQUOTE
-       || *cp == CHAR_BGROUP || *cp == CHAR_EGROUP)
+      if (IS_GROUP (*cp))
         offset++;
       else if ((*cp == CHAR_QUOTE) && restore_quotes)
         *(cp-offset) = '"';
@@ -321,10 +318,11 @@ remove_special_chars (char *s, boolean restore_quotes)
 
 /*----------------------------------------------------.
 | Remove leading and trailing stars in tag names.     |
+| Remove trailing slash in tag attributes.            |
 `----------------------------------------------------*/
 
 static void
-remove_stars (char *s)
+remove_stars_and_slash (char *s)
 {
   int offset;
   register char *cp;
@@ -340,9 +338,20 @@ remove_stars (char *s)
 
   for ( ; *cp != '\0'; cp++)
     {
-      *(cp-offset) = *cp;
-      if (*cp == '<')
+      if (*cp == CHAR_SLASH)
         {
+          if (exp_flags & EXP_REMOVE_TRAILING_SLASH)
+            {
+              offset++;
+              if (cp > s && *(cp-1) == ' ')
+                offset++;
+            }
+          else
+            *(cp-offset) = '/';
+        }
+      else if (*cp == '<')
+        {
+          *(cp-offset) = *cp;
           if (*(cp+1) == '*' && !(exp_flags & EXP_LEAVE_LEADING_STAR))
             {
               offset++;
@@ -371,8 +380,10 @@ remove_stars (char *s)
                 cp--;
             }
         }
+      else
+        *(cp-offset) = *cp;
     }
-  *(cp-offset) = *cp;
+  *(cp-offset) = '\0';
 }
 
 /*------------------------------------------------------------------------.
@@ -465,9 +476,11 @@ shipout_text (struct obstack *obs, char *text)
   /* Restitute some special characters  */
   remove_special_chars (text, TRUE);
 
-  /* Remove leading and trailing stars in tag names  */
-  if (!(exp_flags & (EXP_LEAVE_TRAILING_STAR | EXP_LEAVE_TRAILING_STAR)))
-    remove_stars (text);
+  /* Remove leading and trailing stars in tag names
+     and trailing slash in attributes */
+  if (!(exp_flags & (EXP_LEAVE_TRAILING_STAR | EXP_LEAVE_TRAILING_STAR))
+      || (exp_flags & EXP_REMOVE_TRAILING_SLASH))
+    remove_stars_and_slash (text);
 
   if (*text == '\0')
     {

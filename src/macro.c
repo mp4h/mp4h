@@ -266,7 +266,7 @@ collect_arguments (char *symbol_name, read_type expansion,
   ch = peek_input ();
   if (IS_CLOSE (ch))
     (void) next_token (&td, READ_BODY, FALSE);
-  else if (IS_SPACE(ch) || IS_ESCAPE(ch) || ch == '/')
+  else if (IS_SPACE(ch) || IS_ESCAPE(ch) || IS_SLASH(ch))
     {
       do
         {
@@ -298,7 +298,7 @@ collect_arguments (char *symbol_name, read_type expansion,
         _("INTERNAL ERROR: Bad tag expression in `%s'"),
              CURRENT_FILE_LINE, symbol_name));
     }
-  return (last_char == '/');
+  return (IS_SLASH(last_char));
 }
 
 /*-----------------------------------------------------------------.
@@ -539,7 +539,7 @@ expand_macro (symbol *sym, read_type expansion)
       if (slash)
         {
           cp = TOKEN_DATA_TEXT (argv[argc-1]);
-          if (*cp == '/' && *(cp+1) == '\0')
+          if (IS_SLASH(*cp) && *(cp+1) == '\0')
             argc--;
           else if (LAST_CHAR (cp) == '/')
             LAST_CHAR (cp) = '\0';
@@ -598,11 +598,10 @@ expand_macro (symbol *sym, read_type expansion)
                 shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
             }
         }
-      if (!SYMBOL_CONTAINER (sym))
+      if (!SYMBOL_CONTAINER (sym) && slash)
         {
-          if (argc > 1)
-            obstack_1grow (obs_expansion, ' ');
-          obstack_1grow (obs_expansion, '/');
+          obstack_1grow (obs_expansion, ' ');
+          obstack_1grow (obs_expansion, CHAR_SLASH);
         }
 
       obstack_1grow (obs_expansion, '>');
@@ -644,7 +643,7 @@ expand_unknown_tag (char *name, read_type expansion)
   const char *expanded;
   char *symbol_name, *cp;
   read_type attr_expansion;
-  boolean slash;
+  boolean slash, single;
 
   expansion_level++;
 
@@ -668,20 +667,20 @@ expand_unknown_tag (char *name, read_type expansion)
          - tag name last character is a star
          - attributes are ended by a trailing slash
   */
+  single = slash;
   if (*(symbol_name) == '/')
-    slash = TRUE;
+    single = TRUE;
 
-  if (!slash && !(exp_flags & EXP_STAR_COMPLEX))
-    slash = (LAST_CHAR (symbol_name) == '*');
+  if (!single && !(exp_flags & EXP_STAR_COMPLEX))
+    single = (LAST_CHAR (symbol_name) == '*');
 
-  if (!slash && !(exp_flags & EXP_DFT_SIMPLE))
+  if (!single && !(exp_flags & EXP_DFT_SIMPLE))
     collect_body (symbol_name, expansion, &argptr, &body);
 
   argv = (token_data **) obstack_finish (&argptr);
 
-  /*  When this tag is no more processed, remove the trailing slash.  */
-  if ((exp_flags & EXP_REMOVE_TRAILING_SLASH) &&
-      expansion == READ_NORMAL && slash)
+  /*  Remove the trailing slash in single tags.  */
+  if (slash)
     {
       cp = TOKEN_DATA_TEXT (argv[argc-1]);
       if (*cp == '/' && *(cp+1) == '\0')
@@ -706,10 +705,15 @@ expand_unknown_tag (char *name, read_type expansion)
       obstack_1grow (obs_expansion, ' ');
       shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
     }
+  if (slash)
+    {
+      obstack_1grow (obs_expansion, ' ');
+      obstack_1grow (obs_expansion, CHAR_SLASH);
+    }
   obstack_1grow (obs_expansion, '>');
   if (expansion != READ_BODY)
     obstack_1grow (obs_expansion, CHAR_RQUOTE);
-  if (!slash && !(exp_flags & EXP_DFT_SIMPLE))
+  if (!single && !(exp_flags & EXP_DFT_SIMPLE))
     {
       shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[argc]), 0);
       if (expansion != READ_BODY)

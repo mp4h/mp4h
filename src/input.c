@@ -274,7 +274,8 @@ file_clean(void)
                     isp->u.u_f.name, isp->u.u_f.lineno);
 
   fclose (isp->u.u_f.file);
-  current_file = isp->u.u_f.name;
+  xfree (current_file);
+  current_file = xstrdup (isp->u.u_f.name);
   current_line = isp->u.u_f.lineno;
   output_current_line = isp->u.u_f.out_lineno;
   start_of_input_line = isp->u.u_f.advance_line;
@@ -310,7 +311,8 @@ push_file (FILE *fp, const char *title)
   i->u.u_f.out_lineno = output_current_line;
   i->u.u_f.advance_line = start_of_input_line;
 
-  current_file = obstack_copy0 (current_input, title, strlen (title));
+  xfree (current_file);
+  current_file = xstrdup (obstack_copy0 (current_input, title, strlen (title)));
   current_line = 1;
   output_current_line = -1;
 
@@ -805,7 +807,7 @@ match_comment (const unsigned char *s)
 void
 input_init (void)
 {
-  current_file = _("NONE");
+  current_file = xstrdup ("NONE");
   current_line = 0;
   array_current_line = (int *) xmalloc (sizeof (int) * nesting_limit);
 
@@ -866,6 +868,10 @@ syntax_init (void)
   set_syntax_internal(SYNTAX_CLOSE,  '>');
   set_syntax_internal(SYNTAX_ACTIVE, '\\');
   set_syntax_internal(SYNTAX_ACTIVE, '"');
+  set_syntax_internal(SYNTAX_GROUP, CHAR_LQUOTE);
+  set_syntax_internal(SYNTAX_GROUP, CHAR_RQUOTE);
+  set_syntax_internal(SYNTAX_GROUP, CHAR_BGROUP);
+  set_syntax_internal(SYNTAX_GROUP, CHAR_EGROUP);
 }
 
 /*---------------------------------------------------------.

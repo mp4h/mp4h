@@ -401,11 +401,15 @@ extern STRING lquote, rquote;
 /* Eof-of-line comment  */
 extern STRING eolcomm;
 
+/* Special characters used for grouping  */
 #define CHAR_LQUOTE '\1'
 #define CHAR_RQUOTE '\2'
 #define CHAR_BGROUP '\3'
 #define CHAR_EGROUP '\4'
+
+/* Some characters are replaced during input/output phases */
 #define CHAR_QUOTE  '\5'
+#define CHAR_SLASH  '\6'
 
 /* Default eof-of-line comment  */
 #define DEF_EOLCOMM  ";;;"
@@ -426,6 +430,7 @@ extern unsigned short syntax_table[256];
 #define SYNTAX_CLOSE    (0x0004)
 #define SYNTAX_ACTIVE   (0x0007)
 #define SYNTAX_ESCAPE   (0x0008)
+#define SYNTAX_GROUP    (0x0009)
 
 /* These are values to be assigned to syntax table entries, but they are
    used as bit masks with IS_ALNUM.*/
@@ -452,6 +457,8 @@ extern unsigned short syntax_table[256];
 #define IS_EGROUP(ch) (ch == CHAR_EGROUP)
 #define IS_LQUOTE(ch) (ch == CHAR_LQUOTE)
 #define IS_RQUOTE(ch) (ch == CHAR_RQUOTE)
+#define IS_GROUP(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_GROUP)
+#define IS_SLASH(ch)  (ch == CHAR_SLASH || ch == '/')
 
 void set_syntax __P ((int, const char *));
 void set_syntax_internal __P ((int, int));
