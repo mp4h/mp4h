@@ -10,6 +10,13 @@
 
   Changes between 1.0.5 and SNAP:
 
+    *) Fix <group> tag (17-Jul-2000):
+       This tag may contain any sequence of tags in attributes.  In
+       order to prevent extra removal of quotes in their expansion,
+       attributes must be read verbatim and expanded after <group>
+       is parsed.
+       [Denis Barbier]
+
     *) Add support for loadable modules (12-Jul-2000):
        This stage was easy because GNU m4 1.4n already has such
        support.  Work has to be done to provide a nice API to

@@ -218,7 +218,7 @@ builtin_tab[] =
 #endif /* HAVE_FILE_FUNCS */
 
       /*  flow functions  */
-  { "group",            FALSE,    TRUE,   mp4h_group },
+  { "group",            FALSE,    FALSE,  mp4h_group },
   { "compound",          TRUE,    TRUE,   mp4h_compound },
   { "noexpand",         FALSE,    FALSE,  mp4h_noexpand },
   { "expand",           FALSE,    TRUE,   mp4h_expand },
