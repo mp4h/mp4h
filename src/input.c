@@ -1231,7 +1231,14 @@ next_token (token_data *td, read_type expansion, boolean in_string)
           if (IS_OTHER(ch) || IS_NUM(ch))
             type = TOKEN_STRING;
           else if (IS_SPACE(ch))
-            type = TOKEN_SPACE;
+            {
+              while ((ch = next_char ()) != CHAR_EOF && (IS_SPACE(ch)))
+                {
+                  obstack_1grow (&token_stack, ch);
+                }
+              unget_input(ch);
+              type = TOKEN_SPACE;
+            }
           else if (IS_ACTIVE(ch))
             type = TOKEN_WORD;
           else
