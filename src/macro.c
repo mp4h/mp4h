@@ -74,7 +74,7 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
         token_data *td)
 {
   symbol *sym;
-  boolean append_semicolon;
+  char *append_semicolon;
   char *text = TOKEN_DATA_TEXT (td);
 
   switch (t)
@@ -148,19 +148,19 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
 
       if (IS_ALPHA (*text))
         {
-          append_semicolon = FALSE;
+          append_semicolon = NULL;
           if (LAST_CHAR (text) == ';')
             {
-              LAST_CHAR (text) = '\0';
-              append_semicolon = TRUE;
+              append_semicolon = text + strlen (text) - 1;
+              *append_semicolon = '\0';
             }
 
           sym = lookup_entity (text, SYMBOL_LOOKUP);
           if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID)
             {
-              shipout_text (obs, TOKEN_DATA_TEXT (td));
               if (append_semicolon)
-                obstack_1grow (obs, ';');
+                *(append_semicolon) = ';';
+              shipout_text (obs, TOKEN_DATA_TEXT (td));
             }
           else
             expand_entity (sym, expansion);
