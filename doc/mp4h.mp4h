@@ -28,35 +28,35 @@
 <section alt="Brief history and goals of mp4h">Introduction</section>
 
 <para>
-The <mp4h/> software is a macro-processor specifically designed to deal
+The &mp4h; software is a macro-processor specifically designed to deal
 with HTML documents.  It allows powerful programming constructs, with a
 syntax familiar to HTML authors.
 </para>
 
 <para>
 This software is based on
-<URL src="http://www.metahtml.org/" name="<Meta-HTML/>" />,
+<URL src="http://www.metahtml.org/" name="&Meta-HTML;" />,
 written by Brian J. Fox,  Even if both syntaxes look similar, source
-code is completely different.  Indeed, a subset of <Meta-HTML/> was used
-as a part of a more complex program, <WML/>
+code is completely different.  Indeed, a subset of &Meta-HTML; was used
+as a part of a more complex program, &WML;
 (<URL src="http://www.engelschall.com/sw/wml/" name="Website Meta Language" />)
 written by Ralf S. Engelschall and which i maintain since January 1999.
-For licensing reasons, it was hard to hack <Meta-HTML/> and so i decided
+For licensing reasons, it was hard to hack &Meta-HTML; and so i decided
 to write my own macro-processor.
 </para>
 
 <para>
-Instead of rewriting it from scratch, i preferred using another
+Instead of rewriting it from scratch, I preferred using another
 macro-processor engine. I chose
-<URL src="http://www.gnu.org/software/m4/" name="GNU <m4/>" />,
+<URL src="http://www.gnu.org/software/m4/" name="GNU &m4;" />,
 written by René Seindal, because of its numerous advantages :
 this software is stable, robust and very well documented.
-This version of <mp4h/> is derived from GNU <m4/> version 1.4n, which is a
+This version of &mp4h; is derived from GNU &m4; version 1.4n, which is a
 development version.
 </para>
 
 <para>
-The <mp4h/> software is not an HTML editor; its unique goal is to
+The &mp4h; software is not an HTML editor; its unique goal is to
 provide an easy way to define its own macros inside HTML documents.
 There is no plan to add functionalities to automagically produce valid
 HTML documents, if you want to clean up your code or validate it,
@@ -87,7 +87,7 @@ name is <file - />, then characters are read on standard input.
 
 <option-list>
 <option --help>display an help message and exit</option>
-<option --version>output <mp4h/> version information and exit</option>
+<option --version>output &mp4h; version information and exit</option>
 <option -E --fatal-warnings>stop execution after first warning</option>
 <option -Q --quiet --silent>suppress some warnings for builtins</option>
 <option -S --safety-level=<optmand NUMBER />>disable risky functions;
@@ -184,9 +184,9 @@ Flags are any of:
 <section alt="List of primitives">Description</section>
 
 <para>
-The <mp4h/> software is a macro-processor, which means that keywords are
+The &mp4h; software is a macro-processor, which means that keywords are
 replaced by other text.  This chapter describes all primitives.
-As <mp4h/> has been specially designed for HTML documents, its syntax is
+As &mp4h; has been specially designed for HTML documents, its syntax is
 very similar to HTML, with tags and attributes.  One important feature
 has no equivalent in HTML: comments until end of line.  All text
 following three colons is discarded until end of line, like
@@ -202,15 +202,15 @@ following three colons is discarded until end of line, like
 <subsection>Function Macros</subsection>
 
 <note>
-All examples in this documentation are processed through <mp4h/> with
+All examples in this documentation are processed through &mp4h; with
 expansion flags set to zero (see a description of possible expansion
 flags at the end of document), it is why simple tags contain a trailing
-slash. But <mp4h/> can output plain HTML files with other expansion
+slash. But &mp4h; can output plain HTML files with other expansion
 flags.
 </note>
 
 <para>
-The definition of new tags is the most common task provided by <mp4h/>.
+The definition of new tags is the most common task provided by &mp4h;.
 As with HTML, macro names are case insensitive.  In this documentation,
 only lowercase letters are used.
 There are two kinds of tags: simple and complex. A simple tag has the
@@ -226,7 +226,7 @@ body
 </name></code>
 
 <para>
-Since version 0.9.1, <mp4h/> knows XHTML syntax too, so your input file
+Since version 0.9.1, &mp4h; knows XHTML syntax too, so your input file
 may conform to HTML or XHTML syntax.  In this manual, we adopt the
 latter, which is why simple tags have a trailing slash in attributes.
 If you want to produce HTML files with this input file, you may either
@@ -235,8 +235,8 @@ choose an adequate <optflag -expansion /> flag or use a post-processor like
 </para>
 
 <para>
-When a simple tag is defined by <mp4h/>, it can be parsed even if the
-trailing slash is omitted, because <mp4h/> knows that this tag is
+When a simple tag is defined by &mp4h;, it can be parsed even if the
+trailing slash is omitted, because &mp4h; knows that this tag is
 simple.  But it is a good practice to always append a trailing slash to
 simple tags.
 </para>
@@ -503,7 +503,7 @@ But we want now to add an image attribute.  So we may write
 </example>
 
 <para>
-We need a mechanism to tell <mp4h/> that some attributes refer to
+We need a mechanism to tell &mp4h; that some attributes refer to
 specific HTML tags.  A solution is to prepend attribute with tag name,
 e.g.
 </para>
@@ -555,6 +555,38 @@ When there are subexpressions within regular expressions, they are
 printed instead of the whole expression.  Note also that i put a colon
 before the prefix in order not to mix them with XML namespaces.
 </para>
+
+###
+###    Entity functions
+###
+
+<subsection>Entities</subsection>
+
+<para>
+Entities are macros in the same way as tags, but they do not take
+any arguments. Whereas tags are normally used to mark up text,
+entities contain already marked up text.
+</para>
+
+<para>
+An entity has the following form:
+</para>
+
+<code>&entity;</code>
+
+<tag:description define-entity complex>
+<var name />
+</tag:description>
+
+<para>
+This function lets you define your own entities.
+First argument is the entity name. Replacement text is the function body.
+</para>
+
+<example>
+<define-entity foo>bar</define-entity>
+&foo;
+</example>
 
 ###
 ###    Variable functions
@@ -1032,7 +1064,7 @@ processing.</option>
 <note>
 Attribute <attribute singleline=true /> is a synonym for the <attribute s />
 modifier, whereas <attribute singleline=false /> is a synonym for the
-<attribute m /> modifier.  This behaviour was different up to <mp4h/> 1.0.6.
+<attribute m /> modifier.  This behaviour was different up to &mp4h; 1.0.6.
 </note>
 
 <tag:description subst-in-string>
@@ -1129,7 +1161,7 @@ Prints the length of the expression matching regexp in string.
 <subsection>Arrays</subsection>
 
 <para>
-With <mp4h/> one can easily deal with string arrays. Variables can be
+With &mp4h; one can easily deal with string arrays. Variables can be
 treated as a single value or as a newline separated list of strings.
 Thus after defining
 </para>
@@ -1890,7 +1922,7 @@ when the command attribute is specified.
 
 <attributes:item "verbatim=true">
 File content is included without expansion.
-This is similar to using the <m4 /> undivert macro with a filename as argument.
+This is similar to using the &m4; undivert macro with a filename as argument.
 </attributes:item>
 </attributes:description>
 
@@ -1949,7 +1981,7 @@ Delimiters are also written into output.
 
 <para>
 Diversions are a way of temporarily saving output.
-The output of <mp4h/> can at any time be diverted to a temporary file,
+The output of &mp4h; can at any time be diverted to a temporary file,
 and be reinserted into the output stream, undiverted, again at a later time. 
 </para>
 
@@ -1957,7 +1989,7 @@ and be reinserted into the output stream, undiverted, again at a later time.
 Numbered diversions are counted from 0 upwards,
 diversion number 0 being the normal output stream.
 The number of simultaneous diversions is limited mainly by the memory used
-to describe them, because <mp4h/> tries to keep diversions in memory.
+to describe them, because &mp4h; tries to keep diversions in memory.
 However, there is a limit to the overall memory usable by all diversions
 taken altogether. When this maximum is about to be exceeded, a
 temporary file is opened to receive the contents of the biggest
@@ -1979,7 +2011,7 @@ This can be used to suppress unwanted output. See the example below.
 </para>
 
 <para>
-When all <mp4h/> input will have been processed, all existing diversions
+When all &mp4h; input will have been processed, all existing diversions
 are automatically undiverted, in numerical order. 
 </para>
 
@@ -2005,13 +2037,13 @@ are undiverted, in numerical order.
 </para>
 
 <para>
-When diverted text is undiverted, it is not reread by <mp4h/>,
+When diverted text is undiverted, it is not reread by &mp4h;,
 but rather copied directly to the current output. It is therefore
 not an error to undivert into a diversion.
 </para>
 
 <para>
-Unlike <m4/>, the <mp4h/> undivert tag does not allow a file name
+Unlike &m4;, the &mp4h; undivert tag does not allow a file name
 as argument. The same can be accomplished with the include tag
 with the verbatim="true" attribute.
 </para>
@@ -2145,7 +2177,7 @@ this instruction.
 <tag:description __version__ />
 
 <para>
-Prints the version of <mp4h/>.
+Prints the version of &mp4h;.
 </para>
 
 <tag:description dnl />
@@ -2198,7 +2230,7 @@ is the number of clock ticks, and so is dependant of your CPU.
 
 <example>
 The number of clock ticks since the beginning of generation of
-this documentation by <mp4h/> is:
+this documentation by &mp4h; is:
 <timer/>
 </example>
 
@@ -2249,9 +2281,9 @@ be loaded more than once.
 
 <para>
 Last but not least, it will be possible in near future to add compiled
-modules.  Like almost everything, this feature comes with <m4/> and
+modules.  Like almost everything, this feature comes with &m4; and
 looks very nice.  This is a work in progress, there is an exemple of
-such a module in <mp4h/> sources.
+such a module in &mp4h; sources.
 </para>
 
 <section alt="Details about macro expansion">Macro expansion</section>
@@ -2291,7 +2323,7 @@ This is a complex tag
 <para>
 User defined macros may have attributes like HTML tags. To handle these
 attributes in replacement text, following conventions have been adopted
-(mostly derived from <Meta-HTML/>):
+(mostly derived from &Meta-HTML;):
 </para>
 
 <list>
@@ -2396,14 +2428,14 @@ After expansion: %attributes
 </list>
 
 <note>
-Input expansion is completely different in <Meta-HTML/> and in <mp4h/>.
-With <Meta-HTML/> it is sometimes necessary to use other constructs like
+Input expansion is completely different in &Meta-HTML; and in &mp4h;.
+With &Meta-HTML; it is sometimes necessary to use other constructs like
 <value %xbody /> and <value %qbody />.
-In order to improve compatibity with <Meta-HTML/>, these constructs are
+In order to improve compatibity with &Meta-HTML;, these constructs are
 recognized and are interpreted like <value %body />.
 Another feature provided for compatibility reason is the fact that for
 simple tags <value %body /> and <value %attributes /> are equivalent.
-These features are in the current <mp4h/> version but may disappear in
+These features are in the current &mp4h; version but may disappear in
 future releases.
 </note>
 
@@ -2412,7 +2444,7 @@ future releases.
 <pseudo-func foo />
 <para>
 Attributes are separated by spaces, tabulations or newlines, and each
-attribute must be a valid <mp4h/> entity. For instance with the
+attribute must be a valid &mp4h; entity. For instance with the
 definitions above, <full-command bar /> can not be an attribute since it
 must be finished by <full-command /bar />.
 But this is valid:
@@ -2565,10 +2597,10 @@ pages, you face up some weird problems, like in
 </code>
 
 <para>
-The question is how do <mp4h/> know that this input has some extra
-delimiters? The answer is that <mp4h/> should not try to handle some
+The question is how do &mp4h; know that this input has some extra
+delimiters? The answer is that &mp4h; should not try to handle some
 special delimiters, because it cannot handle all of them (there are ASP,
-ePerl, PHP,... and some of them are customizable). Now, remember that <mp4h/>
+ePerl, PHP,... and some of them are customizable). Now, remember that &mp4h;
 is a macro-processor, not an XML parser. So we must focus on macros,and
 format our input file so that it can be parsed without any problem.
 Previous example may be written
@@ -2605,7 +2637,7 @@ and footers with
 
 <para>
 Asterisks mark these tags as pseudo-simple tags, which means that they
-are complex HTML tags, but used as simple tags within <mp4h/> because
+are complex HTML tags, but used as simple tags within &mp4h; because
 tags would not be well nested otherwise.
 </para>
 
@@ -2733,8 +2765,8 @@ Mp4h has its own
 <section>Thanks</section>
 
 <para>
-Sincere thanks to Brian J. Fox for writing <Meta-HTML/> and Rene
-Seindal for maintaining this wonderful macro parser called GNU <m4/>.
+Sincere thanks to Brian J. Fox for writing &Meta-HTML; and Rene
+Seindal for maintaining this wonderful macro parser called GNU &m4;.
 </para>
 
 <footer/>

@@ -50,10 +50,10 @@
 ;;;    Common names
 ;;;
 <define-tag program><textbf>%attributes</textbf></define-tag>
-<define-tag mp4h><program mp4h /></define-tag>
-<define-tag WML><program WML /></define-tag>
-<define-tag m4><program m4 /></define-tag>
-<define-tag Meta-HTML><program Meta-HTML /></define-tag>
+<define-entity mp4h><program mp4h /></define-entity>
+<define-entity WML><program WML /></define-entity>
+<define-entity m4><program m4 /></define-entity>
+<define-entity Meta-HTML><program Meta-HTML /></define-entity>
 
 <define-tag var><textem>%attributes</textem></define-tag>
 <define-tag value><texttt>%attributes</texttt></define-tag>
