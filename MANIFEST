@@ -60,14 +60,14 @@ tests/array-add-unique/01.in
 tests/array-add-unique/01.ok
 tests/array-add-unique/02.in
 tests/array-add-unique/02.ok
-tests/array-append/01.in
-tests/array-append/01.ok
 tests/array-concat/01.in
 tests/array-concat/01.ok
 tests/array-member/01.in
 tests/array-member/01.ok
 tests/array-member/02.in
 tests/array-member/02.ok
+tests/array-push/01.in
+tests/array-push/01.ok
 tests/array-shift/01.in
 tests/array-shift/01.ok
 tests/array-shift/02.in
@@ -173,6 +173,8 @@ tests/sort/01.in
 tests/sort/01.ok
 tests/sort/02.in
 tests/sort/02.ok
+tests/sort/03.in
+tests/sort/03.ok
 tests/string-compare/01.in
 tests/string-compare/01.ok
 tests/string-compare/02.in
