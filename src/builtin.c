@@ -3740,6 +3740,7 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
   register int j;
   int length, istep;
   int array_index;
+  boolean newline;
 
   if (argc < 2)
     return;
@@ -3877,10 +3878,17 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                       }
                     if (cp)
                       {
+                        newline = ('\n' == *cp);
                         *cp  = '\0';
                         strcat (SYMBOL_TEXT (var), old_value);
                         strcat (SYMBOL_TEXT (var), value);
-                        cp = strchr (cp + 1, '\n');
+                        if (newline)
+                          {
+                            strcat (SYMBOL_TEXT (var), "\n");
+                            cp++;
+                          }
+                        else
+                          cp = strchr (cp + 1, '\n');
                         if (cp)
                           strcat (SYMBOL_TEXT (var), cp);
                       }
