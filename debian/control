@@ -1,0 +1,14 @@
+Source: mp4h
+Section: web
+Priority: optional
+Maintainer: Denis Barbier <barbier@imacs.polytechnique.fr>
+Standards-Version: 3.1.1
+
+Package: mp4h
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Macro Processor for HTML Documents
+ Mp4h is distributed under the GNU GPL. This is a macro processor
+ specifically designed for HTML documents, with powerful programming
+ features. It allows definition and expansion of new tags with a
+ syntax familiar to HTML authors.

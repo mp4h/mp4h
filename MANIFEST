@@ -10,6 +10,10 @@ aclocal.m4
 config.h.in
 configure
 configure.in
+debian/changelog
+debian/control
+debian/copyright
+debian/rules
 doc/Makefile.in
 doc/en/Makefile.in
 doc/en/mp4h.html

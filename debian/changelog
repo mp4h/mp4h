@@ -1,0 +1,10 @@
+mp4h (0.8.0-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Denis Barbier <barbier@imacs.polytechnique.fr>  Mon, 28 Feb 2000 21:46:36 +0100
+
+Local variables:
+mode: debian-changelog
+add-log-mailing-address: "barbier@imacs.polytechnique.fr"
+End:
