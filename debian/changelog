@@ -1,3 +1,10 @@
+mp4h (1.2.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Remove copyright mention from the control file (Closes: #103497)
+
+ -- Denis Barbier <barbier@debian.org>  Wed, 15 Aug 2001 00:30:47 +0200
+
 mp4h (1.1.2-3) unstable; urgency=low
 
   * Fix broken original tarball, it differed from 1.1.2-1
