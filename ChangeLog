@@ -10,6 +10,11 @@
 
   Changes between 1.2.3 and ???:
 
+    *) Run autoconf in libltdl/ subdirectory (02-Mar-2002):
+       The toplevel configure script could fail due to autoconf
+       version mismatch.
+       [Guido Draheim <<guidod-2002-@gmx.de>]
+
     *) Fix <attributes-extract> and <attributes-remove> tags (11-Jan-2002):
        Valueless attributes in these tags crashed mp4h.
        [Anders Dinsen]
