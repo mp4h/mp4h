@@ -584,8 +584,8 @@ ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
 
   if (expansion & READ_VERBATIM || expansion & READ_VERB_ATTR)
     expansion = READ_VERBATIM;
-  else
-    expansion = READ_ATTRIBUTE;
+  else if (expansion & READ_BODY)
+    expansion = READ_NORMAL;
 
   valid = collect_arguments (&unknown, expansion, &argptr, &arguments);
   if (valid)
