@@ -2935,6 +2935,7 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                     old_value = xstrdup ("");
                     length = strlen (value) + array_index;       
                   }
+                SYMBOL_TYPE (var) = TOKEN_TEXT;
                 SYMBOL_TEXT (var) = xmalloc (length);
                 *(SYMBOL_TEXT (var)) = '\0';
 
