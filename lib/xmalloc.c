@@ -19,20 +19,14 @@
 # include <config.h>
 #endif
 
-#if __STDC__
-# define VOID void
-#else
-# define VOID char
-#endif
-
 #include <sys/types.h>
 
 #if STDC_HEADERS
 # include <stdlib.h>
 #else
-VOID *calloc ();
-VOID *malloc ();
-VOID *realloc ();
+void *calloc ();
+void *malloc ();
+void *realloc ();
 void free ();
 #endif
 
@@ -52,11 +46,11 @@ void free ();
 
 /* Prototypes for functions defined here.  */
 #if defined (__STDC__) && __STDC__
-static VOID *fixup_null_alloc (size_t n);
-VOID *xmalloc (size_t n);
-VOID *xcalloc (size_t n, size_t s);
-VOID *xrealloc (VOID *p, size_t n);
-VOID xfree (VOID *p);
+static void *fixup_null_alloc (size_t n);
+void *xmalloc (size_t n);
+void *xcalloc (size_t n, size_t s);
+void *xrealloc (void *p, size_t n);
+void xfree (void *p);
 #endif
 
 
@@ -64,17 +58,17 @@ VOID xfree (VOID *p);
    The caller may set it to some other value.  */
 int xmalloc_exit_failure = EXIT_FAILURE;
 
-#if __STDC__ && (HAVE_VPRINTF || HAVE_DOPRNT)
+#if defined(HAVE_STDARG_H) && (HAVE_VPRINTF || HAVE_DOPRNT)
 void error (int, int, const char *, ...);
 #else
 void error ();
 #endif
 
-static VOID *
+static void *
 fixup_null_alloc (n)
      size_t n;
 {
-  VOID *p;
+  void *p;
 
   p = 0;
   if (n == 0)
@@ -86,11 +80,11 @@ fixup_null_alloc (n)
 
 /* Allocate N bytes of memory dynamically, with error checking.  */
 
-VOID *
+void *
 xmalloc (n)
      size_t n;
 {
-  VOID *p;
+  void *p;
 
   p = malloc (n);
   if (p == 0)
@@ -100,11 +94,11 @@ xmalloc (n)
 
 /* Allocate memory for N elements of S bytes, with error checking.  */
 
-VOID *
+void *
 xcalloc (n, s)
      size_t n, s;
 {
-  VOID *p;
+  void *p;
 
   p = calloc (n, s);
   if (p == 0)
@@ -116,9 +110,9 @@ xcalloc (n, s)
    with error checking.
    If P is NULL, run xmalloc.  */
 
-VOID *
+void *
 xrealloc (p, n)
-     VOID *p;
+     void *p;
      size_t n;
 {
   if (p == 0)
@@ -129,9 +123,9 @@ xrealloc (p, n)
   return p;
 }
 
-VOID
+void
 xfree (p)
-     VOID *p;
+     void *p;
 {
   if (p != 0)
     free(p);

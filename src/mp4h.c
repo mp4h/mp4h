@@ -456,10 +456,10 @@ main (int argc, char *const *argv)
               }
             else
               {
-                xfree (current_file);
+                xfree ((voidstar) current_file);
                 current_file = xstrdup (filename);
                 push_file (fp, filename);
-                xfree (filename);
+                xfree ((voidstar) filename);
               }
           }
         expand_input ();
@@ -481,7 +481,7 @@ main (int argc, char *const *argv)
   symtab_deallocate ();
   builtin_deallocate ();
 
-  xfree (current_file);
+  xfree ((voidstar) current_file);
 
   exit (EXIT_SUCCESS);
 }

@@ -37,11 +37,7 @@
 
 #include <sys/types.h>
 
-#if __STDC__
 # define voidstar void *
-#else
-# define voidstar char *
-#endif
 
 #include <stdio.h>
 #include <ctype.h>
@@ -150,8 +146,8 @@ struct string
 typedef struct string STRING;
 
 /* Memory allocation.  */
-voidstar xmalloc __P ((unsigned int));
-voidstar xrealloc __P ((voidstar , unsigned int));
+voidstar xmalloc __P ((size_t));
+voidstar xrealloc __P ((voidstar , size_t));
 void xfree __P ((voidstar));
 char *xstrdup __P ((const char *));
 #define obstack_chunk_alloc     xmalloc

@@ -766,5 +766,5 @@ expand_unknown_tag (char *name, read_type expansion)
   obstack_free (&argptr, NULL);
   obstack_free (&body, NULL);
 
-  xfree (symbol_name);
+  xfree ((voidstar) symbol_name);
 }

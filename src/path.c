@@ -169,7 +169,7 @@ path_search (const char *dir, char **expanded_name)
         }
     }
 
-  xfree (name);
+  xfree ((voidstar) name);
 
   return fp;
 }

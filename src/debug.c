@@ -32,7 +32,7 @@
 
 #include <sys/stat.h>
 
-#if __STDC__
+#ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -238,7 +238,7 @@ debug_message_prefix (void)
 | function trace_format ().  Understands only %S, %s and %d.           |
 `---------------------------------------------------------------------*/
 
-#if __STDC__
+#ifdef HAVE_STDARG_H
 static void
 trace_format (const char *fmt, ...)
 #else
@@ -246,19 +246,19 @@ static void
 trace_format (...)
 #endif
 {
-#if ! __STDC__
+#ifndef HAVE_STDARG_H
   const char *fmt;
 #endif
   va_list args;
   char ch;
 
-  int d, i;
+  int d;
   char nbuf[32];
   char *s;
   int slen;
   int maxlen;
 
-#if __STDC__
+#ifdef HAVE_STDARG_H
   va_start (args, fmt);
 #else
   va_start (args);
@@ -385,7 +385,7 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
               text = xstrdup (TOKEN_DATA_TEXT (argv[i]));
               remove_special_chars (text, FALSE);
               trace_format ("%S", text);
-              xfree (text);
+              xfree ((voidstar) text);
               break;
 
             case TOKEN_FUNC:
@@ -438,7 +438,7 @@ trace_post (const char *name, int id, int argc, token_data **argv,
       text = xstrdup (expanded);
       remove_special_chars (text, FALSE);
       trace_format (" -> %S", text);
-      xfree (text);
+      xfree ((voidstar) text);
     }
   trace_flush ();
 }

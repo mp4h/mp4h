@@ -123,7 +123,7 @@ output_init (void)
 void
 output_deallocate (void)
 {
-  xfree (diversion_table);
+  xfree ((voidstar) diversion_table);
 }
 
 #ifndef HAVE_TMPFILE

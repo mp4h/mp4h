@@ -268,7 +268,7 @@ module_unload_all(void)
 #endif /* DEBUG_MODULES */
 
       next = modules->next;
-      xfree(modules);
+      xfree ((voidstar) modules);
       modules = next;
     }
 

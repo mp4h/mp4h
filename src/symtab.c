@@ -86,11 +86,11 @@ symtab_init (void)
 static void
 free_symbol (symbol *sym)
 {
-  xfree (SYMBOL_NAME (sym));
-  xfree (SYMBOL_HOOK_BEGIN (sym));
-  xfree (SYMBOL_HOOK_END (sym));
+  xfree ((voidstar) SYMBOL_NAME (sym));
+  xfree ((voidstar) SYMBOL_HOOK_BEGIN (sym));
+  xfree ((voidstar) SYMBOL_HOOK_END (sym));
   if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (sym));
+    xfree ((voidstar) SYMBOL_TEXT (sym));
   xfree ((voidstar) sym);
 }
 
@@ -110,7 +110,7 @@ hash_table_free (symbol **s)
         }
     }
 
-  xfree (s);
+  xfree ((voidstar) s);
 }
 
 void
@@ -183,7 +183,7 @@ generic_lookup (const char *name, symbol_lookup mode)
 
   if (mode == SYMBOL_LOOKUP)
     {
-      xfree (lcname);
+      xfree ((voidstar) lcname);
       return cmp == 0 ? sym : NULL;
     }
 
@@ -235,7 +235,7 @@ generic_lookup (const char *name, symbol_lookup mode)
         _("INTERNAL ERROR: Illegal mode to symbol_lookup ()")));
       abort ();
     }
-  xfree (lcname);
+  xfree ((voidstar) lcname);
   return sym;
 }
 

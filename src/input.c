@@ -280,10 +280,10 @@ file_clean(void)
       should appear in error message instead of real file name.  */
   if (isp->prev != NULL)
     {
-      xfree (current_file);
+      xfree ((voidstar) current_file);
       current_file = xstrdup (isp->u.u_f.name);
     }
-  xfree (isp->u.u_f.name);
+  xfree ((voidstar) isp->u.u_f.name);
   current_line = isp->u.u_f.lineno;
   output_current_line = isp->u.u_f.out_lineno;
   start_of_input_line = isp->u.u_f.advance_line;
@@ -498,7 +498,7 @@ push_string_finish (read_type expansion)
   if (obstack_object_size (current_input) > 0)
     {
       obstack_1grow (current_input, '\0');
-      next->u.u_s.start = obstack_finish (current_input);
+      next->u.u_s.start = (unsigned char *) obstack_finish (current_input);
       if (expansion == READ_ATTR_VERB || expansion == READ_ATTR_ASIS
           || expansion == READ_BODY)
         {
@@ -536,7 +536,7 @@ push_wrapup (const char *s)
 
   i->funcs = &string_funcs;
 
-  i->u.u_s.start = obstack_copy0 (&wrapup_stack, s, strlen (s));
+  i->u.u_s.start = (unsigned char *) obstack_copy0 (&wrapup_stack, s, strlen (s));
   i->u.u_s.current = i->u.u_s.start;
 
   wsp = i;
@@ -890,10 +890,10 @@ syntax_init (void)
 void
 input_deallocate (void)
 {
-  xfree (array_current_line);
-  xfree (eolcomm.string);
-  xfree (lquote.string);
-  xfree (rquote.string);
+  xfree ((voidstar) array_current_line);
+  xfree ((voidstar) eolcomm.string);
+  xfree ((voidstar) lquote.string);
+  xfree ((voidstar) rquote.string);
 
   obstack_free (&token_stack, 0);
   obstack_free (&input_stack, 0);
@@ -979,7 +979,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
       type = TOKEN_STRING;
       obstack_grow (&token_stack, TOKEN_DATA_TEXT (&token_read),
               strlen (TOKEN_DATA_TEXT (&token_read)));
-      xfree (TOKEN_DATA_TEXT (&token_read));
+      xfree ((voidstar) TOKEN_DATA_TEXT (&token_read));
       TOKEN_DATA_TYPE (&token_read) = TOKEN_VOID;
     }
 
