@@ -1972,7 +1972,8 @@ Change comment characters.
 </tag:description>
 
 <para>
-By default, all characters between "<@[" and "]@>" pairs are read without 
+By default, all characters between <texttt><begin-quote/></texttt> and
+<texttt><end-quote/></texttt> pairs are read without 
 parsing.  When called without argument, this macro inhibates this
 feature.  When called with two arguments, it redefines begin and end
 delimiters.  Begin delimiter must begin with a left-angle bracket, and

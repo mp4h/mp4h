@@ -200,6 +200,13 @@ This documentation describes <get-var package /> version <get-var version />.
 <define-tag item endtag=required><li>%body</li></define-tag>
 
 ;;;
+;;;    Quotes
+;;;
+<set-quotes />
+<define-tag begin-quote><@[</define-tag>
+<define-tag end-quote>]@></define-tag>
+
+;;;
 ;;;    Example of mp4h code
 ;;;
 <set-eol-comment "###" />

@@ -293,6 +293,13 @@ by the Foundation.
 </define-tag>
 
 ;;;
+;;;    Quotes
+;;;
+<set-quotes />
+<define-tag begin-quote><@@[</define-tag>
+<define-tag end-quote>]@@></define-tag>
+
+;;;
 ;;;    Example of mp4h code
 ;;;
 <set-eol-comment "###" />
