@@ -52,6 +52,7 @@ SUBDIRS = \
    get-file-properties \
    directory-contents \
    file-exists \
+   real-path \
    Misc \
    attributes-remove \
    attributes-extract \

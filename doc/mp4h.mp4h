@@ -93,6 +93,7 @@ name is <file - />, then characters are read on standard input.
 0 means no filtering, 1 disable <command execute /> and 2 disable this
 one too plus all filesystem related functions:
 <command file-exists />,
+<command real-path />,
 <command get-file-properties />,
 <command directory-contents /> and
 <command include />.
@@ -585,6 +586,22 @@ This command sets variables.
 As above but attributes are read verbatim.
 </para>
 
+<tag:description set-var-x complex>
+name=<var variable-name />
+</tag:description>
+
+<para>
+This command assigns a variable the value of the body of the
+command. This is particularly useful when variable values contain
+newlines and/or quotes.
+</para>
+
+<para>
+Note that the variable can not be indexed with this command.
+Note also, that this command behaves as set-var-verbatim: The body
+is not expanded until the variable is shown with get-var.
+</para>
+
 <tag:description get-var>
 <var name />
 [<var name />] ...
@@ -599,6 +616,9 @@ The first index of arrays is 0 by convention.
 <example>
 <set-var version="0.10.1" />
 This is version <get-var version />
+<set-var-x name="osversion">Operating sytem is
+"<include command="uname" /><include command="uname -r" />"</set-var-x>
+<get-var osversion />
 </example>
 
 <example>
@@ -1776,6 +1796,25 @@ Returns a newline separated list of files contained in a given directory.
 <directory-contents . matching=".*\\.mp4h$" />
 </example>
 
+<tag:description real-path>
+patname=<var pathname />
+</tag:description>
+
+<para>
+Resolves all symbolic links, extra ``/'' characters and references
+to /./ and /../ in pathname, and expands into the resulting absolute pathname.
+All but the last component of pathname must exist when real-path is called.
+</para>
+
+<para>
+This tag is particularly useful when comparing if file or directory names
+are identical.
+</para>
+
+<example>
+<real-path pathname="mp4h.mp4h" />
+</example>
+
 <tag:description file-exists>
 <var filename />
 </tag:description>
@@ -1835,6 +1874,7 @@ Content is included without expansion.
 Load definitions from a package file.
 </para>
 
+
 <tag:description comment complex />
 
 <para>
@@ -1868,6 +1908,104 @@ Delimiters are also written into output.
 </attributes:item>
 </attributes:description>
 
+###
+###    Diversion functions
+###
+
+<subsection>Diversion functions</subsection>
+
+<para>
+Diversions are a way of temporarily saving output.
+The output of <mp4h/> can at any time be diverted to a temporary file,
+and be reinserted into the output stream, undiverted, again at a later time. 
+</para>
+
+<para>
+Numbered diversions are counted from 0 upwards,
+diversion number 0 being the normal output stream.
+The number of simultaneous diversions is limited mainly by the memory used
+to describe them, because <mp4h/> tries to keep diversions in memory.
+However, there is a limit to the overall memory usable by all diversions
+taken altogether. When this maximum is about to be exceeded, a
+temporary file is opened to receive the contents of the biggest
+diversion still in memory, freeing this memory for other diversions.
+So, it is theoretically possible that the number of diversions be
+limited by the number of available file descriptors.
+</para>
+
+<tag:description divert>
+[ divnum=<var diversion-number /> ]
+</tag:description>
+
+<para>
+Output is diverted using this tag, where diversion-number is the diversion
+to be used. If the divnum attribute is left out, diversion-number is assumed
+to be zero.
+If output is diverted to a non-existent diversion, it is simply discarded.
+This can be used to suppress unwanted output. See the example below.
+</para>
+
+<para>
+When all <mp4h/> input will have been processed, all existing diversions
+are automatically undiverted, in numerical order. 
+</para>
+
+<para>
+Several calls of divert with the same argument do not overwrite the previous diverted text, but append to it.
+</para>
+
+<example>
+<divert divnum="-1"/>
+This is sent nowhere...
+<divert/>
+This is output.
+</example>
+
+<tag:description undivert>
+[ divnum=<var diversion-number /> ]
+</tag:description>
+
+<para>
+This tag explicitly undiverts diverted text saved in the diversion with the
+specified number. If the divnum attribute is not given, all diversions
+are undiverted, in numerical order.
+</para>
+
+<para>
+When diverted text is undiverted, it is not reread by <mp4h/>,
+but rather copied directly to the current output. It is therefore
+not an error to undivert into a diversion.
+</para>
+
+<para>
+Unlike <m4/>, the <mp4h/> undivert tag does not allow a file name
+as argument. The same can be accomplished with the include tag
+with the verbatim="true" attribute.
+</para>
+
+<example>
+<divert divnum="1"/>
+This text is diverted.
+<divert/>
+This text is not diverted.
+<undivert divnum="1"/>
+</example>
+
+<tag:description divnum>
+</tag:description>
+
+<para>
+This tag expands to the number of the current diversion.
+</para>
+
+<example>
+Initial <divnum/>
+<divert divnum="1"/>
+Diversion one: <divnum/>
+<divert divnum="2"/>
+Diversion two: <divnum/>
+<divert/>
+</example>
 ###
 ###    Debugging
 ###
