@@ -1,0 +1,4 @@
+<set-var a="
+1" />
+<set-var a[5]=2 />
+<get-var a[5] />
