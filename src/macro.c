@@ -1,4 +1,4 @@
-/* Mp4h -- A macro processor for HTML documents
+/* mp4h -- A macro processor for HTML documents
    Copyright 2000, Denis Barbier
    All rights reserved.
 
@@ -237,9 +237,11 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
 | Collect all the arguments to a call of the macro SYM.  The arguments are |
 | stored on the obstack ARGUMENTS and a table of pointers to the arguments |
 | on the obstack ARGPTR.                                                   |
+| If there is a space character before closing bracket, this function      |
+| returns TRUE, otherwise FALSE.                                           |
 `-------------------------------------------------------------------------*/
 
-static void
+static boolean
 collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
                    struct obstack *arguments)
 {
@@ -247,7 +249,7 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
   token_data td;
   token_data *tdp;
   char *last_addr;
-  boolean more_args;
+  boolean more_args, spaced = FALSE;
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
@@ -281,8 +283,12 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
           remove white spaces before closing brackets.  */
       if (TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT
           && strlen (TOKEN_DATA_TEXT (tdp)) == 0)
-        argptr->next_free = last_addr;
+        {
+          argptr->next_free = last_addr;
+          spaced = TRUE;
+        }
     }
+  return spaced;
 }
 
 /*-----------------------------------------------------------------.
@@ -444,7 +450,7 @@ expand_macro (symbol *sym, read_type expansion)
   struct obstack *obs_expansion;
   const char *expanded;
   char *cp;
-  boolean traced;
+  boolean traced, spaced;
   int my_call_id;
   read_type attr_expansion;
 
@@ -475,7 +481,7 @@ expand_macro (symbol *sym, read_type expansion)
   else
     attr_expansion = READ_ATTRIBUTE;
 
-  collect_arguments (sym, attr_expansion, &argptr, &arguments);
+  spaced = collect_arguments (sym, attr_expansion, &argptr, &arguments);
   argc = obstack_object_size (&argptr) / sizeof (token_data *);
 
   if (SYMBOL_CONTAINER (sym))
@@ -486,12 +492,15 @@ expand_macro (symbol *sym, read_type expansion)
   else
     {
       argv = (token_data **) obstack_finish (&argptr);
-      cp = TOKEN_DATA_TEXT (argv[argc-1]);
-      /*   Remove a possible trailing slash from list of arguments.  */
-      if (*cp == '/' && *(cp+1) == '\0')
-        argc--;
-      else if (*(cp + strlen (cp) - 1) == '/')
-        *(cp + strlen (cp) - 1) = '\0';
+      if (!spaced)
+        {
+          cp = TOKEN_DATA_TEXT (argv[argc-1]);
+          /*   Remove a possible trailing slash from list of arguments.  */
+          if (*cp == '/' && *(cp+1) == '\0')
+            argc--;
+          else if (*(cp + strlen (cp) - 1) == '/')
+            *(cp + strlen (cp) - 1) = '\0';
+        }
     }
 
   if (traced)

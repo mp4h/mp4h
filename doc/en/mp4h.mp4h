@@ -4,8 +4,8 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.9.1>
-<set-var title="Mp4h - A Macro Processeur for HTML Documents">
+<set-var version=0.9.2>
+<set-var title="mp4h - A Macro Processeur for HTML Documents">
 
 <include <get-var format>.out
     alt=<exit status=1
@@ -877,8 +877,20 @@ array.
 </tag:description>
 
 <para>
-Remove the toplevel vale of an array and returns this string.
+Remove the toplevel value of an array and returns this string.
 </para>
+
+<tag:description array-topvalue>
+<var name>
+</tag:description>
+
+<para>
+Prints the last entry of an array.
+</para>
+
+<example>
+<array-topvalue digits>
+</example>
 
 <tag:description array-add-unique>
 <var name>

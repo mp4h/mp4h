@@ -1,4 +1,4 @@
-/* Mp4h -- A macro processor for HTML documents
+/* mp4h -- A macro processor for HTML documents
    Copyright 2000, Denis Barbier
    All rights reserved.
 
@@ -153,6 +153,7 @@ DECLARE (mp4h_array_add_unique);
 DECLARE (mp4h_array_member);
 DECLARE (mp4h_array_push);
 DECLARE (mp4h_array_pop);
+DECLARE (mp4h_array_topvalue);
 DECLARE (mp4h_array_shift);
 DECLARE (mp4h_array_concat);
 DECLARE (mp4h_sort);
@@ -286,6 +287,7 @@ builtin_tab[] =
   { "array-member",     FALSE,    TRUE,   mp4h_array_member },
   { "array-push",       FALSE,    TRUE,   mp4h_array_push },
   { "array-pop",        FALSE,    TRUE,   mp4h_array_pop },
+  { "array-topvalue",   FALSE,    TRUE,   mp4h_array_topvalue },
   { "array-shift",      FALSE,    TRUE,   mp4h_array_shift },
   { "array-concat",     FALSE,    TRUE,   mp4h_array_concat },
   { "sort",             FALSE,    TRUE,   mp4h_sort },
@@ -3796,6 +3798,29 @@ mp4h_array_pop (MP4H_BUILTIN_ARGS)
       shipout_string (obs, SYMBOL_TEXT (var), 0);
       *(SYMBOL_TEXT (var)) = '\0';
     }
+}
+
+/*-------------------------------------------.
+| Prints the value with the highest index.   |
+`-------------------------------------------*/
+static void
+mp4h_array_topvalue (MP4H_BUILTIN_ARGS)
+{
+  symbol *var;
+  char *cp;
+
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
+  if (var == NULL)
+    return;
+
+  cp = strrchr (SYMBOL_TEXT (var), '\n');
+  if (cp)
+    shipout_string (obs, cp+1, 0);
+  else
+    shipout_string (obs, SYMBOL_TEXT (var), 0);
 }
 
 /*-----------------------------------------------------------------.

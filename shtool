@@ -6,7 +6,7 @@
 ##  See http://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
-##  Version 1.4.8 (12-Mar-2000)
+##  Version 1.4.9 (16-Apr-2000)
 ##  Ingredients: 6/17 available modules
 ##
 
@@ -47,12 +47,12 @@
 ##
 ##  Not available commands (because module was not built-in):
 ##    mdate      Pretty-print modification time of a file or dir
-##    table      Pretty print a field-separated list as a table
+##    table      Pretty-print a field-separated list as a table
 ##    prop       Display progress with a running propeller
-##    move       Move files with simultan substitution
+##    move       Move files with simultaneous substitution
 ##    mkln       Make link with calculation of relative paths
-##    mkshadow   Make a shadow tree
-##    guessos    Simple OS/platform guesser
+##    mkshadow   Make a shadow tree through symbolic links
+##    guessos    Simple operating system guesser
 ##    arx        Extended archive command
 ##    slo        Separate linker options by library class
 ##    scpp       Sharing C Pre-Processor
@@ -65,7 +65,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
-    echo "This is GNU shtool, version 1.4.8 (12-Mar-2000)"
+    echo "This is GNU shtool, version 1.4.9 (16-Apr-2000)"
     echo "Copyright (c) 1994-2000 Ralf S. Engelschall <rse@engelschall.com>"
     echo "Report bugs to <bug-shtool@gnu.org>"
     echo ''
@@ -96,15 +96,15 @@ if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
     echo '  mkshadow [-v] [-t] [-a] <src-dir> <dst-dir>'
     echo '  guessos  '
     echo '  arx      [-t] [-C<cmd>] <op> <archive> [<file> ...]'
-    echo '  slo      -- -L<dir> -l<lib> [ -L<dir> -l<lib> ... ]'
-    echo '  scpp     [-v] [-p] [-o<ofile>] [-t<tfile>] [-M<mark>] [-D<dname>]'
-    echo '           [-C<cname>] <file> [<file> ...]'
+    echo '  slo      [-p<str>] -- -L<dir> -l<lib> [-L<dir> -l<lib> ...]'
+    echo '  scpp     [-v] [-p] [-f<filter>] [-o<ofile>] [-t<tfile>] [-M<mark>]'
+    echo '           [-D<dname>] [-C<cname>] <file> [<file> ...]'
     echo '  path     [-s] [-r] [-d] [-b] [-m] [-p<path>] <str> [<str> ...]'
     echo ''
     exit 0
 fi
 if [ ".$1" = ".-v" -o ".$1" = ."--version" ]; then
-    echo "GNU shtool 1.4.8 (12-Mar-2000)"
+    echo "GNU shtool 1.4.9 (16-Apr-2000)"
     exit 0
 fi
 if [ ".$1" = ".-d" -o ".$1" = ."--debug" ]; then
@@ -168,7 +168,6 @@ case $tool in
     fixperm )
         str_tool="fixperm"
         str_usage="[-v] [-t] <path> [<path> ...]"
-        gen_tmpfile=yes
         arg_spec="1+"
         opt_spec="v.t."
         opt_v=no
@@ -387,8 +386,8 @@ echo )
     term_bold='' 
     term_norm=''
     if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%[Bb]'`" != . ]; then
-        #   the most important terminals we directly know
         case $TERM in
+            #   for the most important terminal types we directly know the sequences
             xterm|xterm*|vt220|vt220*)
                 term_bold=`awk 'BEGIN { printf("%c%c%c%c", 27, 91, 49, 109); }' </dev/null 2>/dev/null`
                 term_norm=`awk 'BEGIN { printf("%c%c%c", 27, 91, 109); }' </dev/null 2>/dev/null`
@@ -397,35 +396,37 @@ echo )
                 term_bold=`awk 'BEGIN { printf("%c%c%c%c%c%c", 27, 91, 49, 109, 0, 0); }' </dev/null 2>/dev/null`
                 term_norm=`awk 'BEGIN { printf("%c%c%c%c%c", 27, 91, 109, 0, 0); }' </dev/null 2>/dev/null`
                 ;;
-        esac
-        #   then try a possibly existing "tput" or "tcout" utility
-        paths=`echo $PATH | sed -e 's/:/ /g'`
-        for tool in tput tcout; do
-            for dir in $paths; do
-                if [ -r "$dir/$tool" ]; then
-                    for seq in bold md smso; do # smso is last
-                        bold="`$dir/$tool $seq 2>/dev/null`"
-                        if [ ".$bold" != . ]; then
-                            term_bold="$bold"
+            #   for all others, we try to use a possibly existing `tput' or `tcout' utility
+            * )
+                paths=`echo $PATH | sed -e 's/:/ /g'`
+                for tool in tput tcout; do
+                    for dir in $paths; do
+                        if [ -r "$dir/$tool" ]; then
+                            for seq in bold md smso; do # 'smso' is last
+                                bold="`$dir/$tool $seq 2>/dev/null`"
+                                if [ ".$bold" != . ]; then
+                                    term_bold="$bold"
+                                    break
+                                fi
+                            done
+                            if [ ".$term_bold" != . ]; then
+                                for seq in sgr0 me rmso reset; do # 'reset' is last
+                                    norm="`$dir/$tool $seq 2>/dev/null`"
+                                    if [ ".$norm" != . ]; then
+                                        term_norm="$norm"
+                                        break
+                                    fi
+                                done
+                            fi
                             break
                         fi
                     done
-                    if [ ".$term_bold" != . ]; then
-                        for seq in sgr0 me rmso reset; do # 'reset' is last
-                            norm="`$dir/$tool $seq 2>/dev/null`"
-                            if [ ".$norm" != . ]; then
-                                term_norm="$norm"
-                                break
-                            fi
-                        done
+                    if [ ".$term_bold" != . -a ".$term_norm" != . ]; then
+                        break;
                     fi
-                    break
-                fi
-            done
-            if [ ".$term_bold" != . -a ".$term_norm" != . ]; then
-                break;
-            fi
-        done
+                done
+                ;;
+        esac
         if [ ".$term_bold" = . -o ".$term_norm" = . ]; then
             echo "$msgprefix:Warning: unable to determine terminal sequence for bold mode" 1>&2
         fi
@@ -569,7 +570,7 @@ echo )
         echo $seo "$text"
     else
         #   the harder part: echo -n is best, because
-        #   awk complains about some \xx sequences.
+        #   awk may complain about some \xx sequences.
         if [ ".$minusn" != . ]; then
             echo $seo $minusn "$text"
         else
@@ -695,17 +696,17 @@ mkdir )
     
     errstatus=0
     for p in ${1+"$@"}; do
-        #   when the directory already exists...
+        #   if the directory already exists...
         if [ -d "$p" ]; then
             if [ ".$opt_f" = .no ]; then
-                echo "$msgprefix:Error: file exists: $p" 1>&2
+                echo "$msgprefix:Error: directory already exists: $p" 1>&2
                 errstatus=1
                 break
             else
                 continue
             fi
         fi
-        #   when the directory has to be created
+        #   if the directory has to be created...
         if [ ".$opt_p" = .no ]; then
             if [ ".$opt_t" = .yes ]; then
                 echo "mkdir $p" 1>&2
@@ -719,7 +720,7 @@ mkdir )
                            -e 's/\// /g' \
                            -e 's/^%/\//'`
             shift
-            pathcomp=
+            pathcomp=''
             for d in ${1+"$@"}; do
                 pathcomp="$pathcomp$d"
                 case "$pathcomp" in
@@ -754,18 +755,11 @@ fixperm )
     paths="$*"
     
     #   check whether the test command supports the -x option
-    cat >$tmpfile <<EOT
-if [ -x / ] || [ -x /bin ] || [ -x /bin/ls ]; then
-    exit 0
-fi
-exit 1
-EOT
-    if sh $tmpfile 2>/dev/null; then
+    if [ -x /bin/sh ] 2>/dev/null; then
         minusx="-x"
     else
         minusx="-r"
     fi
-    rm -f $tmpfile
     
     #   iterate over paths
     for p in $paths; do
@@ -817,18 +811,11 @@ tarball )
     srcs="$*"
     
     #   check whether the test command supports the -x option
-    cat >$tmpfile <<EOT
-if [ -x / ] || [ -x /bin ] || [ -x /bin/ls ]; then
-    exit 0
-fi
-exit 1
-EOT
-    if sh $tmpfile 2>/dev/null; then
+    if [ -x /bin/sh ] 2>/dev/null; then
         minusx="-x"
     else
         minusx="-r"
     fi
-    rm -f $tmpfile
     
     #   find the tools
     paths="`echo $PATH |\
@@ -946,14 +933,14 @@ EOT
                 echo "chown -R $opt_u $tmpdir/$tarname >/dev/null 2>&1" 2>&1
             fi
             chown -R $opt_u $tmpdir/$tarname >/dev/null 2>&1 ||\
-            echo "$msgprefix:Warning: cannot set user name \`$opt_u' (need root priviledges)"
+            echo "$msgprefix:Warning: cannot set user name \`$opt_u' (would require root priviledges)"
         fi
         if [ ".$opt_g" != . ]; then
             if [ ".$opt_t" = .yes ]; then
                 echo "chgrp -R $opt_g $tmpdir/$tarname >/dev/null 2>&1" 2>&1
             fi
             chgrp -R $opt_g $tmpdir/$tarname >/dev/null 2>&1 ||\
-            echo "$msgprefix:Warning: cannot set group name \`$opt_g' (need root priviledges)"
+            echo "$msgprefix:Warning: cannot set group name \`$opt_g' (would require root priviledges)"
         fi
         if [ ".$opt_t" = .yes ]; then
             echo "(cd $tmpdir && $prg_find $tarname -type f -depth -print | sort | xargs $prg_tar cf -) | cat $compress >$tmpfile.out" 1>&2
@@ -1173,7 +1160,7 @@ EOT
             cat >$tmpfile <<'EOT'
 /*
 **  @FILE@ -- Version Information
-**  [automatically generated and maintained by shtool]
+**  [automatically generated and maintained by GNU shtool]
 */
 
 #ifdef _AS_HEADER
@@ -1198,7 +1185,7 @@ const char @PREFIX@_VersionStr[] = "@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@
 const char @PREFIX@_Hello[]      = "This is @NAME@, Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@-@MONTH@-@YEAR@)";
 const char @PREFIX@_GNUVersion[] = "@NAME@ Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 const char @PREFIX@_WhatID[]     = "@(#)@NAME@ Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@-@MONTH@-@YEAR@)";
-const char @PREFIX@_RCSIdentID[] = "$Id: @NAME@ @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ @DAY@-@MONTH@-@YEAR@ $";
+const char @PREFIX@_RCSIdentID[] = "$Id: shtool,v 1.12 2000/04/17 21:39:41 barbier Exp $";
 const char @PREFIX@_WebID[]      = "@NAME@/@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 const char @PREFIX@_PlainID[]    = "@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 
@@ -1209,7 +1196,7 @@ EOT
             cat >$tmpfile <<'EOT'
 ##
 ##  @FILE@ -- Version Information
-##  [automatically generated and maintained by shtool]
+##  [automatically generated and maintained by GNU shtool]
 ##
 
 $@PREFIX@_Version    = 0x@HEX@;
@@ -1217,7 +1204,7 @@ $@PREFIX@_VersionStr = "@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@-@MONTH@-@YE
 $@PREFIX@_Hello      = "This is @NAME@, Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@-@MONTH@-@YEAR@)";
 $@PREFIX@_GNUVersion = "@NAME@ Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 $@PREFIX@_WhatID     = "@(#)@NAME@ Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@-@MONTH@-@YEAR@)";
-$@PREFIX@_RCSIdentID = "\$Id: @NAME@ @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ @DAY@-@MONTH@-@YEAR@ $/";
+$@PREFIX@_RCSIdentID = "\$Id: shtool,v 1.12 2000/04/17 21:39:41 barbier Exp $/";
 $@PREFIX@_WebID      = "@NAME@/@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 $@PREFIX@_PlainID    = "@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 

@@ -8,7 +8,17 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 0.9.1 and SNAP:
+  Changes between 0.9.1 and 0.9.2:
+
+    *) New array-topvalue tag (18-Apr-2000):
+       This tag prints the last entry in an array.
+       [Denis Barbier]
+
+    *) Better handling of trailing slashes (18-Apr-2000):
+       It was very difficult to prevent suppression of trailing slash
+       in attributes.  Now it can be done by putting spaces between this
+       slash and the closing bracket.
+       [Nobuyuki Tsuchimura]
 
     *) Many cosmetic changes (13-Apr-2000):
        Mp4h is now spelled mp4h in lowercase letters in all files.

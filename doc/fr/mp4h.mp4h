@@ -5,8 +5,8 @@
 
 <mp4h-l10n LC_CTYPE=fr>
 <set-var package=mp4h>
-<set-var version=0.9.1>
-<set-var title="Mp4h - Un macro processeur pour HTML">
+<set-var version=0.9.2>
+<set-var title="mp4h - Un macro processeur pour HTML">
 
 <include <get-var format>.out
     alt=<exit status=1
@@ -921,6 +921,18 @@ Ajoute une ou plusieurs lignes à la fin du tableau.
 <para>
 Enlève la dernière ligne du tableau et l'affiche.
 </para>
+
+<tag:description array-topvalue>
+<var nom>
+</tag:description>
+
+<para>
+Affiche la dernière ligne du tableau.
+</para>
+
+<example>
+<array-topvalue chiffres>
+</example>
 
 <tag:description array-add-unique>
 <var nom>
