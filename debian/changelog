@@ -1,3 +1,9 @@
+mp4h (1.1.2-2) unstable; urgency=low
+
+  * Fix another bug with some conditionals: <ifeq>, <ifneq>
+
+ -- Denis Barbier <barbier@debian.org>  Wed, 14 Feb 2001 22:03:46 +0100
+
 mp4h (1.1.2-1) unstable; urgency=low
 
   * New upstream version.
