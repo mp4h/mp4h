@@ -333,7 +333,7 @@ Attributes: %Uattributes
 
 <para>
 This command is similar to the previous one, except that no operation is
-performed if this command was still defined.
+performed if this command was already defined.
 </para>
 
 <tag:description let>
