@@ -10,6 +10,15 @@
 
   Changes between 0.9.5 and SNAP:
 
+    *) Remove trailing star in tag name (04-Jun-2000):
+       Because of new parsing scheme, complex HTML tags must be well
+       nested.  When this is not the case, e.g. only begin or end tag is
+       to be processed, there must be a way to let mp4h believe that
+       following tag is simple without putting a trailing slash in
+       attributes.  This is done by appending a star to the tag name,
+       both in begin and end tag.  This star is automatically removed.
+       [Denis Barbier]
+
     *) New tags added (04-Jun-2000):
        Tags <lb/>, <rb/> and <dq/> allow protection of the following
        special characters: `<', `>' and '"'.

@@ -616,6 +616,10 @@ expand_unknown_tag (char *name, read_type expansion)
   slash = collect_arguments (symbol_name, attr_expansion, &argptr, &arguments);
   argc  = obstack_object_size (&argptr) / sizeof (token_data *);
 
+  /*  This is a simple tag if either
+         - tag name last character is a star
+         - attributes are ended by a trailing slash
+  */
   if ((!slash) && (exp_flags & EXP_INV_COMPLEX))
     slash = (LAST_CHAR (symbol_name) == '*');
 
@@ -623,6 +627,10 @@ expand_unknown_tag (char *name, read_type expansion)
     collect_body (symbol_name, &argptr, &body);
 
   argv = (token_data **) obstack_finish (&argptr);
+
+  /*  When this tag is no more processed, remove the trailing star.  */
+  if (expansion_level == 0 && LAST_CHAR (symbol_name) == '*')
+    LAST_CHAR (symbol_name) = '\0';
 
   obs_expansion = push_string_init ();
   obstack_1grow (obs_expansion, '<');
