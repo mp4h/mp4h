@@ -10,7 +10,7 @@ CFLAGS += -g
 endif
 
 build: build-stamp
-build-stamp: config.status libltdl/config.status
+build-stamp: config.status
 	dh_testdir
 	$(MAKE)
 	touch build-stamp
