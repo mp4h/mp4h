@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.8.3>
+<set-var version=0.8.4>
 <set-var title="MP4H - A Macro Processeur for HTML Documents">
 
 <include <get-var format>.out
@@ -1336,6 +1336,24 @@ Breaks the innermost <command while> loop.
   <ifeq <get-var i> 5 <break>>;;;
 </while>
 </example>
+
+<tag:description return>
+[up=number]
+<var string>
+</tag:description>
+
+<para>
+This command immediately exits from the innermost macro.
+A message may also be inserted.  But this macro changes token parsing
+so its use may become very hazardous in some situations.
+</para>
+
+<attributes:description>
+<attributes:item "up=<var number>">
+This attribute determines how much levels have to be exited.  By default
+only one level is skipped.  If a negative value is put then all current
+macros are exited from.
+</attributes:description>
 
 <tag:description warning>
 </tag:description>
