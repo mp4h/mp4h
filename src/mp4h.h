@@ -651,7 +651,7 @@ void reload_frozen_state __P ((const char *));
 
 /* File: module.c --- dynamic modules */
 
-#ifdef WITH_MODULES
+#if defined(WITH_MODULES) || defined(MP4H_MODULE)
 
 typedef void module_init_t __P ((struct obstack *));
 typedef void module_finish_t __P ((void));
