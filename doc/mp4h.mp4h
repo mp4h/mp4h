@@ -185,6 +185,14 @@ following three colons is discarded until end of line, like
 
 <subsection "Function Macros" />
 
+<note>
+All examples in this documentation are processed through <mp4h/> with
+expansion flags set to zero (see a description of possible expansion
+flags at the end of document), it is why simple tags contain a trailing
+slash. But <mp4h/> can output plain HTML files with other expansion
+flags.
+</note>
+
 <para>
 The definition of new tags is the most common task provided by <mp4h/>.
 As with HTML, macro names are case insensitive.  In this documentation,
