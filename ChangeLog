@@ -8,6 +8,12 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.0.0 and 1.0.1:
+
+    *) Fix '<*' form on some platforms (21-Jun-2000):
+       At least on SunOS, an error is reported under some circumstances.
+       [Denis Barbier]
+
   Changes between 0.9.5 and 1.0.0:
 
     *) Numerous clean-ups and documentation enhancements (19-Jun-2000):
@@ -15,6 +21,8 @@
        It should be useful to any HTML (or XHTML) writer which wants a
        simple but powerful macro-processor.
        Documentation is enhanced, but need some more work.
+       Expansion behaviour has been deeply reviewed since 0.9.5, see
+       documentation for details.
        [Denis Barbier]
 
     *) Change expansion flags (18-Jun-2000):
@@ -23,7 +31,7 @@
        [Denis Barbier]
 
     *) Change valid tag names (17-Jun-2000):
-       Valid tag names now match [a-zA-Z_][a-zA-Z_0-9:*-]*
+       Valid tag names now match [a-zA-Z_][a-zA-Z_0-9:-]*
        Previous versions also accept `%' sign, which is removed
        not to conflict with ASP notation.
        [Denis Barbier]
@@ -46,7 +54,8 @@
     *) Change default behaviour (13-Jun-2000):
        The removal of trailing star in tag name is suppressed, because
        it cannot deal with all cases.  The only right approach is to
-       use a post-processor.
+       use a post-processor (this brilliant thought has changed on
+       18-Jun-2000).
        Escaping mechanism has also been reviewed.
        [Denis Barbier]
 

@@ -212,6 +212,13 @@ choose an adequate <optflag -expansion /> flag or use a post-processor like
 </para>
 
 <para>
+When a simple tag is defined by <mp4h/>, it can be parsed even if the
+trailing slash is omitted, because <mp4h/> knows that this tag is
+simple.  But it is a good practice to always append a trailing slash to
+simple tags.
+</para>
+
+<para>
 <anchor name="noteattr" />
 In macro descriptions below, a slash indicates a simple tag, and a V
 letter that attributes are read verbatim (without expansion) (see the
@@ -335,7 +342,7 @@ Delete a command definition.
 
 <tag:description set-hook complex>
 <var name />
-[position=[before|after]
+[position=before|after]
 [action=insert|append|replace]
 </tag:description>
 
@@ -357,7 +364,7 @@ After</set-hook>
 
 <tag:description get-hook>
 <var name />
-[position=[before|after]
+[position=before|after]
 </tag:description>
 
 <para>
@@ -1512,7 +1519,7 @@ Returns a newline separated list of files contained in a given directory.
 </para>
 
 <example>
-<directory-contents . matching=".*\.mp4h$" />
+<directory-contents . matching=".*\\.mp4h$" />
 </example>
 
 <tag:description file-exists>
@@ -2105,7 +2112,7 @@ tag name.
 </para>
 
 <para>
-Sometimes HTML tags are not parsable,as in this javascript code.
+Sometimes HTML tags are not parsable, as in this javascript code:
 <code>
   ...
     document.write('<*img src="foo.gif"');
@@ -2122,48 +2129,69 @@ That said we can now understand what the <optflag -expansion /> flag is
 for.  It controls how expansion is performed by mp4h.  It is followed by
 an integer, which is a bit sum of the following values
 <option-list>
-<option 1>do not parse unknown tags.  When set, HTML tags are not
-parsed.  When unset, HTML tags are parsed, i.e. that attributes and/or
-body is collected.
+<option 1>do not parse unknown tags.
+<option-desc>
+When set, HTML tags are not parsed.
+When unset, HTML tags are parsed, i.e. that attributes and/or body is
+collected.
+</option-desc>
 </option>
 <option 2>unknown tags are assumed being simple.
+<option-desc>
 When set, HTML tags are simple by default.
 When unset, HTML tags are complex by default, unless their attribute
 contain a trailing slash or a trailing star appear just after tag name
 (see below).
+</option-desc>
 </option>
 <option 4>trailing star in tag name do not make this tag simple.
+<option-desc>
 When set, trailing star in tag name has no special effect.
-When unset, it causs an HTML tag to be simple.
+When unset, it causes an HTML tag to be simple.
+</option-desc>
 </option>
 <option 8>an unmatched end tag closes all previous unmatched begin tags.
+<option-desc>
 When set, all missing end closing tags are automatically inserted.
 When unset, an unmatched end tag is discarded and interpreted as normal
-text, so processing continues until matching and tag is found.
+text, so processing goes on until matching and tag is found.
+</option-desc>
 </option>
 <option 16>interpret backslashes as printf.
+<option-desc>
 When set, backslashes before non special characters are removed.
 When unset, they are preserved.
+</option-desc>
 </option>
 <option 32>remove trailing slash in tag attributes.
+<option-desc>
 When set, remove trailing slash in tag attributes on output.
 When unset, they are preserved.
+</option-desc>
 </option>
 <option 64>do not remove trailing star in tag name.
+<option-desc>
 When set, trailing star after tag name are preserved on output.
 When unset, they are removed.
+</option-desc>
 </option>
 <option 128>do not remove leading star in tag name.
+<option-desc>
 When set, leading star before tag name are preserved on output.
 When unset, they are removed.
+</option-desc>
 </option>
 <option 1024>suppress warnings about bad nested tags.
+<option-desc>
 When set, warnings about bad nested tags are not displayed.
 When unset, they are printed on standard error.
+</option-desc>
 </option>
 <option 2048>suppress warnings about missing trailing slash.
+<option-desc>
 When set, warnings about missing trailing slash are not displayed.
 When unset, they are printed on standard error.
+</option-desc>
 </option>
 </option-list>
 </para>

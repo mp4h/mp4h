@@ -3,6 +3,7 @@ Section: web
 Priority: optional
 Maintainer: Denis Barbier <barbier@imacs.polytechnique.fr>
 Standards-Version: 3.1.1
+Build-Depends: tidy
 
 Package: mp4h
 Architecture: any

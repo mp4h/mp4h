@@ -55,7 +55,7 @@ check: test
 install: all
 	$(MKDIR) $(bindir) $(mandir)/man1
 	$(INSTALL_PROGRAM) src/mp4h $(bindir)/mp4h
-	$(INSTALL_DATA) doc/en/mp4h.1 $(mandir)/man1/mp4h.1
+	$(INSTALL_DATA) doc/mp4h.1 $(mandir)/man1/mp4h.1
 
 # ------------------------------------------------
 #   CLEANUP

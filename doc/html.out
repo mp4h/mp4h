@@ -281,6 +281,11 @@ This documentation describes <get-var package /> version <get-var version />.
 <tr valign=top><td>%attributes</td><td>%body</td></tr>
 </define-tag>
 
+<define-tag option-desc endtag=required>
+<br />
+%body
+</define-tag>
+
 <define-tag optmand attributes=verbatim>;;;
 <texttt>%attributes</texttt>;;;
 </define-tag>

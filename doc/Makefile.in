@@ -9,7 +9,7 @@ top_srcdir      = @top_srcdir@
 VPATH           = @srcdir@
 PROGDIR         = $(top_srcdir)/src
 PROGRAM         = $(PROGDIR)/mp4h
-FLAGS           = -X 0
+FLAGS           = -X 32
 DEPS            = list-tags
 TIDY            = @TIDY@
 

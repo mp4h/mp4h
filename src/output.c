@@ -465,12 +465,23 @@ shipout_text (struct obstack *obs, char *text, int length)
   if (output_diversion == NULL)
     return;
 
+  /* `text' is always a null-terminated string, so we can compute
+     its length.  */
+  if (strlen (text) > length)
+    *(text+length) = '\0';
+
   /* Restitute some special characters  */
   length -= remove_special_chars (text, TRUE);
 
   /* Remove leading and trailing stars in tag names  */
   if (!(exp_flags & (EXP_LEAVE_TRAILING_STAR | EXP_LEAVE_TRAILING_STAR)))
     remove_stars (text, &length);
+
+  if (length <= 0)
+    {
+      after_left_angle = FALSE;
+      return;
+    }
 
   /* Output TEXT to a file, or in-memory diversion buffer.  */
 

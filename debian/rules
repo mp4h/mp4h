@@ -8,7 +8,7 @@ DEB_BUILD_ARCH = any
 build: build-stamp
 build-stamp:
 	dh_testdir
-	./configure --prefix=/usr
+	./configure --prefix=/usr --with-tidy=/usr/bin/tidy
 	$(MAKE)
 	touch build-stamp
 
@@ -30,9 +30,9 @@ install-stamp: build-stamp
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_installdocs README
+	dh_installdocs README CREDITS doc/mp4h.html
 	dh_installmanpages
-	dh_installchangelogs
+	dh_installchangelogs ChangeLog
 	dh_strip
 	dh_compress
 	dh_fixperms
