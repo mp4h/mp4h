@@ -477,6 +477,9 @@ void remove_special_chars __P ((char *, boolean));
 
 /* File symtab.c  --- symbol table definitions.  */
 
+/*  Default case sensitiveness  */
+#define CASELESS_DEFAULT 3
+
 /* Operation modes for lookup_symbol ().  */
 enum _symbol_lookup
 {
@@ -523,6 +526,7 @@ extern symbol **symtab;
 
 void symtab_init __P ((void));
 void symtab_deallocate __P ((void));
+void caseless_init __P ((int));
 symbol *lookup_symbol __P ((const char *, symbol_lookup));
 symbol *lookup_entity __P ((const char *, symbol_lookup));
 symbol *lookup_variable __P ((const char *, symbol_lookup));

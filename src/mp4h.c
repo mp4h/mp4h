@@ -139,6 +139,9 @@ Preprocessor features:\n\
       fputs (_("\
 \n\
 Parser features:\n\
+  -c, --case=NUMBER            set tags (1), variables (2) or entities (4)\n\
+                               case insensitive.  Default value is 3, i.e.\n\
+                               only entities are case sensitive\n\
   -e, --encoding=NAME          specify document encoding\n\
   -X, --expansion=NUMBER       set parser behaviour according to the bits\n\
                                of NUMBER, with (star marks current flags)\n\
@@ -219,6 +222,7 @@ static const struct option long_options[] =
   {"synclines", no_argument, NULL, 's'},
   {"safety-level", required_argument, NULL, 'S'},
   {"encoding", required_argument, NULL, 'e'},
+  {"case", required_argument, NULL, 'c'},
 
   {"help", no_argument, NULL, 'h'},
   {"version", no_argument, NULL, 'V'},
@@ -231,7 +235,7 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
-#define OPTSTRING "D:e:EF:H:I:L:QR:U:X:d:hl:o:sS:Ot:V"
+#define OPTSTRING "c:D:e:EF:H:I:L:QR:U:X:d:hl:o:sS:Ot:V"
 
 int
 main (int argc, char *const *argv)
@@ -244,6 +248,7 @@ main (int argc, char *const *argv)
   macro_definition *defines;
   FILE *fp;
   char *filename;
+  int caseless = CASELESS_DEFAULT;
 
   program_name = argv[0];
 
@@ -262,6 +267,12 @@ main (int argc, char *const *argv)
         usage (EXIT_FAILURE);
 
       case 0:
+        break;
+
+      case 'c':
+        caseless = atoi (optarg);
+        if (caseless <= 0)
+          caseless = CASELESS_DEFAULT;
         break;
 
       case 'D':
@@ -386,6 +397,7 @@ main (int argc, char *const *argv)
   output_init ();
   include_env_init ();
   symtab_init ();
+  caseless_init (caseless);
   locale_init ();
 
   if (frozen_file_to_read)

@@ -62,6 +62,15 @@ symbol **file_tab;
 /* Any of previous pointers.  */
 symbol **symtab;
 
+/* True if tags are case insensitive  */
+boolean caseless_tag;
+
+/* True if variables are case insensitive  */
+boolean caseless_var;
+
+/* True if entities are case insensitive  */
+boolean caseless_ent;
+
 static void
 hash_table_init (symbol **s)
 {
@@ -82,6 +91,14 @@ symtab_init (void)
   hash_table_init (entity_tab);
   hash_table_init (sym_tab);
   symtab = sym_tab;
+}
+
+void
+caseless_init (int caseless)
+{
+  caseless_tag = ((caseless & 1) == 1);
+  caseless_var = ((caseless & 2) == 2);
+  caseless_ent = ((caseless & 4) == 4);
 }
 
 /*--------------------------------------------.
@@ -163,7 +180,7 @@ hash (const char *s)
 `------------------------------------------------------------------------*/
 
 static symbol *
-generic_lookup (const char *name, symbol_lookup mode)
+generic_lookup (const char *name, symbol_lookup mode, boolean caseless)
 {
   int h, cmp = 1;
   symbol *sym, *prev;
@@ -172,8 +189,11 @@ generic_lookup (const char *name, symbol_lookup mode)
   char *cp;
 
   lcname = xstrdup (name);
-  for (cp=lcname; *cp != '\0'; cp++)
-    *cp = tolower (*cp);
+  if (caseless)
+    {
+      for (cp=lcname; *cp != '\0'; cp++)
+        *cp = tolower (*cp);
+    }
 
   h = hash (lcname);
   sym = symtab[h];
@@ -249,28 +269,28 @@ symbol *
 lookup_symbol (const char *name, symbol_lookup mode)
 {
   symtab = sym_tab;
-  return generic_lookup (name, mode);
+  return generic_lookup (name, mode, caseless_tag);
 }
 
 symbol *
 lookup_entity (const char *name, symbol_lookup mode)
 {
   symtab = entity_tab;
-  return generic_lookup (name, mode);
+  return generic_lookup (name, mode, caseless_ent);
 }
 
 symbol *
 lookup_variable (const char *name, symbol_lookup mode)
 {
   symtab = var_tab;
-  return generic_lookup (name, mode);
+  return generic_lookup (name, mode, caseless_var);
 }
 
 symbol *
 lookup_file (const char *name, symbol_lookup mode)
 {
   symtab = file_tab;
-  return generic_lookup (name, mode);
+  return generic_lookup (name, mode, FALSE);
 }
 
 /*----------------------------------------------------------------------.
