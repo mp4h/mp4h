@@ -33,13 +33,25 @@
 #ifndef BUILTIN_H
 #define BUILTIN_H 1
 
+#if defined(HAVE_DIRENT_H) && defined(HAVE_SYS_STAT_H) && \
+    defined(HAVE_SYS_TYPES_H) && defined(HAVE_PWD_H) && \
+    defined(HAVE_GRP_H)
+#define HAVE_FILE_FUNCS 1
+#else
+#undef HAVE_FILE_FUNCS
+#endif
+
 #include "mp4h.h"
 #include "regex.h"
-#include <pwd.h>
-#include <grp.h>
+
+#ifdef HAVE_FILE_FUNCS
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <pwd.h>
+#include <grp.h>
+#endif
+
 #include <sys/times.h>
 #include <math.h>
 #include <locale.h>

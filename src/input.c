@@ -1098,15 +1098,11 @@ next_token (token_data *td, read_type expansion)
             obstack_1grow (&token_stack, '\n');
           else if (ch == 't')
             obstack_1grow (&token_stack, '\t');
-          else if (ch == '"')
-            obstack_1grow (&token_stack, '"');
-          else if (ch == '\\')
-            obstack_1grow (&token_stack, '\\');
+          else if (ch == 'r')
+            obstack_1grow (&token_stack, '\r');
           else
-            {
-              obstack_1grow (&token_stack, '\\');
-              obstack_1grow (&token_stack, ch);
-            }
+            obstack_1grow (&token_stack, ch);
+
           type = TOKEN_STRING;
         }
       else if (ch == '"' || ch == '\\')

@@ -11,9 +11,12 @@
 <header>
 <section "Description">
 
+<para>
 The <mp4h> program is a macro processor specifically designed for HTML
 documents.  One can define and use its own tags very easily.
+</para>
 
+<para>
 This software was originally written as a piece of a more complex
 program, <WML> (Website Meta Language
 <URL http://www.engelschall.com/sw/wml/>).
@@ -21,11 +24,14 @@ program, <WML> (Website Meta Language
 by Brian J. Fox) to perform macro substitutions.  For license reasons,
 it was difficult to hack <Meta-HTML> into <WML>, so a replacement for
 this program was needed. 
+</para>
 
+<para>
 Then I pick up GNU <m4> <URL http://www.gnu.org/software/m4/>,
 written by René Seindal, because of its numerous advantages : this software is
 stable, robust, well documented and runs fast.  This version of <mp4h>
 is derived from GNU <m4> 1.4n, which is a development version.
+</para>
 
 <section "General description">
 
@@ -36,7 +42,7 @@ is derived from GNU <m4> 1.4n, which is a development version.
 <subsection "Macro functions">
 
 <tag:description define-tag complex>
-macro-name
+<var name>
 [attributes=verbatim]
 [type=simple|complex]
 </tag:description>
@@ -56,19 +62,356 @@ This function defines a new tag.
 </example>
 
 <tag:description preserve>
-name
+<var name>
 </tag:description>
 
 <tag:description restore>
-name
+<var name>
 </tag:description>
 
 <tag:description let>
-new old
+<var new> <var old>
 </tag:description>
 
 <tag:description undef>
-name
+<var name>
+</tag:description>
+
+;;;
+;;;    Variable functions
+;;;
+
+<subsection "Variable functions">
+
+<tag:description set-var>
+<var name>=<var value>
+[<var name>=<var value>] ...
+</tag:description>
+
+<tag:description set-var-verbatim verbatim>
+<var name>=<var value>
+[<var name>=<var value>] ...
+</tag:description>
+
+<tag:description get-var>
+<var name>
+[<var name>] ...
+</tag:description>
+
+<tag:description get-var-once verbatim>
+<var name>
+[<var name>] ...
+</tag:description>
+
+<tag:description unset-var>
+<var name>
+[<var name>] ...
+</tag:description>
+
+<tag:description var-exists>
+<var name>
+</tag:description>
+
+<tag:description increment>
+<var name>
+[amount=<var value>]
+</tag:description>
+
+<tag:description decrement>
+<var name>
+[amount=<var value>]
+</tag:description>
+
+<tag:description copy-var>
+<var src>
+<var dest>
+</tag:description>
+
+<tag:description defvar>
+<var name>
+<var value>
+</tag:description>
+
+<tag:description symbol-info>
+<var name>
+</tag:description>
+
+;;;
+;;;    String functions
+;;;
+
+<subsection "String functions">
+
+<tag:description string-length>
+<var string>
+</tag:description>
+
+<tag:description downcase>
+<var string>
+</tag:description>
+
+<tag:description upcase>
+<var string>
+</tag:description>
+
+<tag:description substring>
+<var string>
+[<var start> [<var end>]]
+</tag:description>
+
+<tag:description subst-in-string>
+<var string>
+<var regexp>
+[<var replacement>]
+</tag:description>
+
+<tag:description subst-in-var>
+<var name>
+<var regexp>
+[<var replacement>]
+</tag:description>
+
+<tag:description string-eq>
+<var string1>
+<var string2>
+[caseless=true]
+</tag:description>
+
+<tag:description string-neq>
+<var string1>
+<var string2>
+[caseless=true]
+</tag:description>
+
+<tag:description string-compare>
+<var string1>
+<var string2>
+[caseless=true]
+</tag:description>
+
+<tag:description match>
+<var string>
+<var regexp>
+[caseless=true]
+[action=report|extract|delete|startpos|endpos|length]
+</tag:description>
+
+<tag:description char-offsets>
+<var string>
+<var character>
+[caseless=true]
+</tag:description>
+
+<tag:description set-regexp-syntax>
+[type=basic|extended]
+</tag:description>
+
+<tag:description get-regexp-syntax>
+</tag:description>
+
+;;;
+;;;    Array functions
+;;;
+
+<subsection "Array functions">
+
+<tag:description array-size>
+<var name>
+</tag:description>
+
+<tag:description array-append>
+<var name>
+<var value>
+</tag:description>
+
+<tag:description array-member>
+<var name>
+<var value>
+[caseless=true]
+</tag:description>
+
+<tag:description array-add-unique>
+<var name>
+<var value>
+[caseless=true]
+</tag:description>
+
+<tag:description array-shift>
+<var offset>
+<var name>
+[start=<var start>]
+</tag:description>
+
+<tag:description array-concat>
+<var name>
+[<var name>] ...
+</tag:description>
+
+<tag:description foreach complex>
+<var variable>
+<var array>
+[start=<var start>]
+[end=<var end>]
+[step=<var step>]
+[iter=<var iter>]
+</tag:description>
+
+<tag:description sort>
+<var name>
+[caseless=true]
+[numeric=true]
+[sortorder=reverse]
+</tag:description>
+
+;;;
+;;;    Relational operators
+;;;
+
+<subsection "Relational operators">
+
+<tag:description not>
+<var string>
+[<var string>] ...
+</tag:description>
+
+<tag:description and>
+<var string>
+[<var string>] ...
+</tag:description>
+
+<tag:description or>
+<var string>
+[<var string>] ...
+</tag:description>
+
+<tag:description gt>
+<var number1>
+<var number2>
+</tag:description>
+
+<tag:description lt>
+<var number1>
+<var number2>
+</tag:description>
+
+<tag:description eq>
+<var number1>
+<var number2>
+</tag:description>
+
+<tag:description neq>
+<var number1>
+<var number2>
+</tag:description>
+
+;;;
+;;;    Flow functions
+;;;
+
+<subsection "Flow functions">
+
+<tag:description if verbatim>
+<var string>
+<var then-clause>
+[<var else-clause>]
+</tag:description>
+
+<tag:description when complex>
+<var string>
+</tag:description>
+
+<tag:description while verbatim complex>
+<var cond>
+</tag:description>
+
+<tag:description ifeq verbatim>
+<var string1>
+<var string2>
+<var then-clause>
+[<var else-clause>]
+</tag:description>
+
+<tag:description ifneq verbatim>
+<var string1>
+<var string2>
+<var then-clause>
+[<var else-clause>]
+</tag:description>
+
+<tag:description group verbatim>
+<var statement>
+[<var statement>] ...
+</tag:description>
+
+<tag:description var-case verbatim>
+<var string1>=<var value1> <var statement1>
+[<var string2>=<var value2> <var statement2> ...
+</tag:description>
+
+<tag:description break>
+</tag:description>
+
+;;;
+;;;    Numerical operators
+;;;
+
+<subsection "Numerical operators">
+
+<tag:description add>
+<var number1>
+<var number2>
+</tag:description>
+
+<tag:description substract>
+<var number1>
+<var number2>
+</tag:description>
+
+<tag:description multiply>
+<var number1>
+<var number2>
+</tag:description>
+
+<tag:description divide>
+<var number1>
+<var number2>
+</tag:description>
+
+<tag:description modulo>
+<var number1>
+<var number2>
+</tag:description>
+
+<tag:description min>
+<var number1>
+<var number2>
+</tag:description>
+
+<tag:description max>
+<var number1>
+<var number2>
+</tag:description>
+
+;;;
+;;;    File functions
+;;;
+
+<subsection "File functions">
+
+<tag:description get-file-properties>
+<var filename>
+</tag:description>
+
+<tag:description directory-contents>
+<var dirname>
+</tag:description>
+
+<tag:description file-exists>
+<var filename>
+</tag:description>
+
+<tag:description include>
+<var filename>
 </tag:description>
 
 ;;;
@@ -78,27 +421,44 @@ name
 <subsection "Debugging">
 
 <tag:description debugmode>
-name
+<var string>
 </tag:description>
 
 <tag:description function-def>
-name
+<var name>
 </tag:description>
 
 <tag:description debugging-on>
-name
+<var name>
 </tag:description>
 
 <tag:description debugging-off>
-name
+<var name>
 </tag:description>
 
 ;;;
-;;;    Variable functions
+;;;    Misc
 ;;;
 
-<tag:description set-var>
-name=value
+<subsection "Miscellaneous">
+
+<tag:description date>
+[epoch]
+</tag:description>
+
+<tag:description timer>
+</tag:description>
+
+<tag:description __file__>
+</tag:description>
+
+<tag:description __line__>
+</tag:description>
+
+<tag:description mp4h:version>
+</tag:description>
+
+<tag:description comment complex>
 </tag:description>
 
 <section Bugs>

@@ -63,7 +63,7 @@
 <tr>
 <th>Name</th>
 <th>Complex</th>
-<th><concat "Verbatim arguments"></th>
+<th><group "Verbatim arguments"></th>
 <th>Attributes</th>
 </tr>
 <tr valign=top>
@@ -83,6 +83,7 @@
 <restore complex>
 </define-tag>
 
+<define-tag var><em>%attributes</em></define-tag>
 ;;;
 ;;;    Paragraphs
 ;;;

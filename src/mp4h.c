@@ -31,7 +31,6 @@
 #include "mp4h.h"
 
 #include <getopt.h>
-#include <signal.h>
 
 #define _AS_HEADER
 #include "version.c"

@@ -28,7 +28,6 @@ RM              = rm -f
 prefix          = @prefix@
 exec_prefix     = @exec_prefix@
 bindir          = @bindir@
-mandir          = ${exec_prefix}/man
 tmpdir          = @tmpdir@
 
 # ------------------------------------------------
@@ -63,9 +62,7 @@ check: test
 
 install: all
 	$(MKDIR) $(bindir)
-	$(MKDIR) $(mandir)/man1
 	$(INSTALL_PROGRAM) mp4h $(bindir)/mp4h
-	$(INSTALL_DATA) mp4h.1 $(mandir)/man1/mp4h.1
 
 # ------------------------------------------------
 #   CLEANUP
