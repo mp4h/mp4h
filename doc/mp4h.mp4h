@@ -5,7 +5,7 @@
 
 <mp4h-l10n LC_ALL=C />
 <set-var package=mp4h />
-<set-var version=1.0.3 />
+<set-var version=1.0a401 />
 <set-var title="mp4h - A Macro Processor for HTML Documents" />
 
 <include <get-var format />.out
@@ -375,6 +375,46 @@ Print current hooks of a macro.
 Text inserted with position=before:<get-hook foo position=before />!
 Text inserted with position=after:<get-hook foo position=after />!
 </example>
+
+<tag:description attributes-extract>
+<var name1 />
+[,<var name2 />[,<var name3 />...]]
+</tag:description>
+
+<para>
+Extract from <value %attributes /> the <value attr=value /> pairs for
+names matching any of <var name1 />, <var name2 />....
+</para>
+
+<example>
+<define-tag img whitespace=delete>
+<img* <attributes-extract name,src,alt %attributes /> />
+</define-tag>
+<img id="logo" src="logo.gif" name="Logo" alt="Our logo" />
+</example>
+
+<tag:description attributes-remove>
+<var name1 />
+[,<var name2 />[,<var name3 />...]]
+</tag:description>
+
+<para>
+Remove from <value %attributes /> the <value attr=value /> pairs for
+names matching any of <var name1 />, <var name2 />....
+</para>
+
+<example>
+<define-tag img whitespace=delete>
+<img* <attributes-remove name,src,alt %attributes /> />
+</define-tag>
+<img id="logo" src="logo.gif" name="Logo" alt="Our logo" />
+</example>
+
+<note>
+The two previous functions are special, because unlike all other macros,
+their expansion do not form a group.  This is necessary to parse the
+resulting list of attributes.
+</note>
 
 ###
 ###    Variable functions
@@ -1831,7 +1871,7 @@ letter.
 <item/>Sequence <value %# /> prints number of attributes.
 
 <item/>Sequence <value %% /> is replaced by <value % />, which is useful in
-nested efinitions.
+nested definitions.
 <example>
 <define-tag outer>;;;
 outer, # attributes: %#

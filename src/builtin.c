@@ -93,6 +93,8 @@ DECLARE (mp4h_let);
 DECLARE (mp4h_undef);
 DECLARE (mp4h_set_hook);
 DECLARE (mp4h_get_hook);
+DECLARE (mp4h_attributes_extract);
+DECLARE (mp4h_attributes_remove);
 
   /*  math functions  */
 DECLARE (mp4h_add);
@@ -230,6 +232,8 @@ builtin_tab[] =
   { "undef",            FALSE,    TRUE,   mp4h_undef },
   { "set-hook",          TRUE,    TRUE,   mp4h_set_hook },
   { "get-hook",         FALSE,    TRUE,   mp4h_get_hook },
+  { "attributes-extract",  FALSE, TRUE,   mp4h_attributes_extract },
+  { "attributes-remove",   FALSE, TRUE,   mp4h_attributes_remove },
 
       /*  numerical relational operators  */
   { "gt",               FALSE,    TRUE,   mp4h_gt },
@@ -752,15 +756,16 @@ shipout_string (struct obstack *obs, const char *s, int len)
   obstack_grow (obs, s, len);
 }
 
-/*----------------------------------------------------------------------.
-| Print ARGC arguments from the table ARGV to obstack OBS, separated by |
-| SEP, and quoted by the current quotes, if QUOTED is TRUE.             |
-`----------------------------------------------------------------------*/
+/*----------------------------------------------------------.
+| Print ARGC arguments from the table ARGV to obstack OBS,  |
+| separated by SEP.                                         |
+`----------------------------------------------------------*/
 
 static void
 dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
 {
   int i;
+  char *cp;
 
   for (i = 1; i < argc; i++)
     {
@@ -768,12 +773,14 @@ dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
         obstack_grow (obs, sep, strlen (sep));
 
       obstack_1grow (obs, CHAR_BGROUP);
+      /*   Remove surrounding double quotes  */
       if (*ARG (i) == '"' && *(ARG (i) + strlen (ARG (i))) == '"')
         obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 2));
       else if (*ARG (i) == CHAR_QUOTE && *(ARG (i) + strlen (ARG (i))) == CHAR_QUOTE)
         obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 2));
       else
         obstack_grow (obs, ARG (i), strlen (ARG (i)));
+
       obstack_1grow (obs, CHAR_EGROUP);
     }
 }
@@ -1053,7 +1060,7 @@ mp4h_debugging_on (MP4H_BUILTIN_ARGS)
   else
     for (i = 1; i < argc; i++)
       {
-        s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_LOOKUP);
+        s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
         if (s != NULL)
           set_trace (s, (char *) obs);
         else
@@ -1078,7 +1085,7 @@ mp4h_debugging_off (MP4H_BUILTIN_ARGS)
   else
     for (i = 1; i < argc; i++)
       {
-        s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_LOOKUP);
+        s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
         if (s != NULL)
           set_trace (s, NULL);
         else
@@ -1951,27 +1958,27 @@ generic_set_hook (MP4H_BUILTIN_ARGS, boolean before, int action)
         if (before)
           {
             xfree (SYMBOL_HOOK_BEGIN (sym));
-            SYMBOL_HOOK_BEGIN (sym) = xstrdup (TOKEN_DATA_TEXT (argv[argc]));
+            SYMBOL_HOOK_BEGIN (sym) = xstrdup (ARGBODY);
           }
         else
           {
             xfree (SYMBOL_HOOK_END (sym));
-            SYMBOL_HOOK_END (sym) = xstrdup (TOKEN_DATA_TEXT (argv[argc]));
+            SYMBOL_HOOK_END (sym) = xstrdup (ARGBODY);
           }
         return;
 
       /*  Insert before the current hooks */
       case 1:
-        text = (char *) xmalloc (strlen (hook) + strlen (TOKEN_DATA_TEXT (argv[argc])) + 1);
-        strcpy (text, TOKEN_DATA_TEXT (argv[argc]));
+        text = (char *) xmalloc (strlen (hook) + strlen (ARGBODY) + 1);
+        strcpy (text, ARGBODY);
         strcat (text, hook);
         break;
 
       /*  Append after the current hooks */
       case 2:
-        text = (char *) xmalloc (strlen (hook) + strlen (TOKEN_DATA_TEXT (argv[argc])) + 1);
+        text = (char *) xmalloc (strlen (hook) + strlen (ARGBODY) + 1);
         strcpy (text, hook);
-        strcat (text, TOKEN_DATA_TEXT (argv[argc]));
+        strcat (text, ARGBODY);
         break;
 
       default:
@@ -2043,6 +2050,133 @@ mp4h_get_hook (MP4H_BUILTIN_ARGS)
 
   if (hook)
     obstack_grow (obs, hook, strlen (hook));
+}
+
+/*----------------------------------------------------------.
+| These 2 functions allow any manipulations of attributes.  |
+| There is no need to define similar routines for           |
+| %Aattributes and %Uattributes, because they can be        |
+| emulated via mp4h builtins.                               |
+`----------------------------------------------------------*/
+static void
+mp4h_attributes_remove (MP4H_BUILTIN_ARGS)
+{
+  char *cp, *next, *to_remove;
+  int i;
+
+  if (bad_argc (argv[0], argc, 2, 0))
+    return;
+
+  to_remove = xstrdup (ARG (1));
+
+  /*  Shift attributes to remove the first one .  */
+  for (i=2; i<argc; i++)
+    argv[i-1]=argv[i];
+  argc--;
+
+  for (cp=to_remove; cp != NULL; )
+    {
+      next = strchr (cp, ',');
+      if (next)
+        {
+          *next = '\0';
+          next++;
+        }
+      predefined_attribute (cp, &argc, argv, FALSE);
+      cp = next;
+    }
+
+  /*  Dirty hack to prevent aggregation of attributes into
+      a single argument.  When a group is begun in expand_macro (),
+      we finish it here.  */
+  if (expansion_level > 1 && (
+        expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
+        || expansion == READ_ATTR_QUOT))
+      obstack_1grow (obs, CHAR_EGROUP);
+  for (i = 1; i < argc; i++)
+    {
+      if (i > 1)
+        obstack_1grow (obs, ' ');
+
+      cp = strchr (ARG (i), '=');
+      if (cp)
+        {
+          *cp = '\0';
+          obstack_grow (obs, ARG (i), strlen (ARG (i)));
+          obstack_grow (obs, "=\"", 2);
+          obstack_grow (obs, cp+1, strlen (cp+1));
+          obstack_1grow (obs, '"');
+        }
+      else
+        obstack_grow (obs, ARG (i), strlen (ARG (i)));
+    }
+  if (expansion_level > 1 && (
+        expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
+        || expansion == READ_ATTR_QUOT))
+      obstack_1grow (obs, CHAR_BGROUP);
+
+  xfree (to_remove);
+}
+
+static void
+mp4h_attributes_extract (MP4H_BUILTIN_ARGS)
+{
+  char *cp, *next, *sp;
+  int i;
+  boolean first = TRUE;
+
+  if (bad_argc (argv[0], argc, 2, 0))
+    return;
+
+  /*  Dirty hack to prevent aggregation of attributes into
+      a single argument.  When a group is begun in expand_macro (),
+      we finish it here.  */
+  if (expansion_level > 1 && (
+        expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
+        || expansion == READ_ATTR_QUOT))
+      obstack_1grow (obs, CHAR_EGROUP);
+
+  for (cp=ARG (1); cp != NULL; )
+    {
+      next = strchr (cp, ',');
+      if (next)
+        {
+          *next = '\0';
+          next++;
+        }
+      for (i=2; i<argc; i++)
+        {
+          sp = strchr (ARG (i), '=');
+          if (sp == NULL && strcasecmp (ARG (i), cp) == 0)
+            {
+              if (!first)
+                obstack_1grow (obs, ' ');
+              first = FALSE;
+              obstack_grow (obs, ARG (i), strlen (ARG (i)));
+            }
+          else if (sp != NULL
+                   && strncasecmp (ARG (i), cp, strlen (cp)) == 0
+                   && (*(ARG (i) + strlen (cp)) == '=' ||
+                       *(ARG (i) + strlen (cp)) == '[' ||
+                       IS_SPACE (*(ARG (i) + strlen (cp)) )))
+            {
+              if (!first)
+                obstack_1grow (obs, ' ');
+              first = FALSE;
+              *sp = '\0';
+              obstack_grow (obs, ARG (i), strlen (ARG (i)));
+              obstack_grow (obs, "=\"", 2);
+              obstack_grow (obs, sp+1, strlen (sp+1));
+              obstack_1grow (obs, '"');
+              *sp = '=';
+            }
+        }
+      cp = next;
+    }
+  if (expansion_level > 1 && (
+        expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
+        || expansion == READ_ATTR_QUOT))
+      obstack_1grow (obs, CHAR_BGROUP);
 }
 
 
@@ -2337,8 +2471,8 @@ mp4h___include (MP4H_BUILTIN_ARGS)
   fp = path_search (ARG (1), &filename);
   if (fp == NULL)
     {
-      if (*(TOKEN_DATA_TEXT (argv[argc])) != '\0')
-        shipout_string (obs, TOKEN_DATA_TEXT (argv[argc]), 0);
+      if (*(ARGBODY) != '\0')
+        shipout_string (obs, ARGBODY, 0);
       else
         {
           MP4HERROR ((warning_status, errno,
@@ -3520,6 +3654,7 @@ mp4h_restore (MP4H_BUILTIN_ARGS)
     return;
 
   var = lookup_variable (ARG (1), SYMBOL_INSERT);
+
   if (SYMBOL_TYPE (var) == TOKEN_TEXT)
     xfree (SYMBOL_TEXT (var));
   SYMBOL_TEXT (var) = xstrdup (vs->text);
@@ -3914,6 +4049,7 @@ mp4h_array_push (MP4H_BUILTIN_ARGS)
       strcat (old_value, ARG (2));
       xfree (SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xstrdup (old_value);
+      xfree (old_value);
     }
 }
 

@@ -409,7 +409,7 @@ INTERNAL ERROR: Bad token data type (trace_pre ())")));
 
   if (debug_level & DEBUG_TRACE_CALL)
     {
-      trace_format (" -> ???");
+      trace_format (" -> %d args", argc);
       trace_flush ();
     }
 }

@@ -8,6 +8,19 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.0.3 and SNAP:
+
+    *) New tags to affect attributes (28-Jun-2000):
+       The <attributes-extract> and <attributes-remove> tags allow
+       extraction and removal of specific attributes from %attributes.
+       [Denis Barbier, Ralf S. Engelschall]
+
+    *) Reintroduce support for dmalloc (28-Jun-2000):
+       Original m4 sources provide support for dmalloc, a great
+       malloc debugger.  This support is activated via the --with-dmalloc
+       flag at configure time.
+       [Denis Barbier]
+
   Changes between 1.0.2 and 1.0.3:
 
     *) Fix localization (26-Jun-2000):
