@@ -31,7 +31,10 @@
 /* Code for all builtin macros, initialisation of symbol table, and
    expansion of user defined macros.  */
 
+#define MP4H_MODULE
 #include "mp4h.h"
+#undef MP4H_MODULE
+
 #include "builtin.h"
 
 /* Initialisation of builtin and predefined macros.  The table

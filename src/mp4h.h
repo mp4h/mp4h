@@ -659,4 +659,51 @@ void module_unload_all __P ((void));
 # define DEBUG_INCL
 #endif
 
+
+/*  Stuff for compiling builtins and loadable modules.  */
+
+#ifdef MP4H_MODULE
+
+#define MP4H_BUILTIN_ARGS struct obstack *obs, int argc, token_data **argv, \
+                            read_type expansion
+#define MP4H_BUILTIN_PROTO struct obstack *, int, token_data **, read_type
+#define MP4H_BUILTIN_RECUR obs, argc, argv, expansion
+
+#define DECLARE(name) \
+  static void name __P ((MP4H_BUILTIN_PROTO))
+
+#define ARG(i)  (i<argc ? TOKEN_DATA_TEXT (argv[i]) : "")
+#define ARGBODY (TOKEN_DATA_TEXT (argv[argc]))
+
+enum mathop_type
+{
+  MATHOP_ADD,                   /* addition */
+  MATHOP_SUB,                   /* substraction */
+  MATHOP_MUL,                   /* multiplication */
+  MATHOP_DIV,                   /* division */
+  MATHOP_MIN,                   /* minimum */
+  MATHOP_MAX,                   /* maximum */
+  MATHOP_MOD                    /* modulus */
+};
+
+enum mathrel_type
+{
+  MATHREL_GT,
+  MATHREL_LT,
+  MATHREL_EQ,
+  MATHREL_NEQ 
+};
+
+typedef enum mathop_type mathop_type;
+typedef enum mathrel_type mathrel_type;
+
+typedef struct var_stack var_stack;
+struct var_stack
+{
+    var_stack *prev;
+    char *text;
+};
+
+#endif
+
 #endif /* MP4H_H */

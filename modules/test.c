@@ -16,8 +16,9 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <mp4h.h>                       /* These are obligatory */
-#include <builtin.h>
+#define MP4H_MODULE
+#include <mp4h.h>
+#undef MP4H_MODULE
 
 #define mp4h_macro_table                test_LTX_mp4h_macro_table
 #define mp4h_init_module                test_LTX_mp4h_init_module

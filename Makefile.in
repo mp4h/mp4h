@@ -33,6 +33,7 @@ LIBTOOL         = @LIBTOOL@
 #   installation tools
 SHTOOL          = $(top_srcdir)/shtool
 INSTALL_PROGRAM = $(SHTOOL) install -c -s -m 755
+INSTALL_SCRIPT  = $(SHTOOL) install -c -m 755
 INSTALL_DATA    = $(SHTOOL) install -c -m 644
 MKDIR           = $(SHTOOL) mkdir -p -f -m 755
 VERSION_TOOL    = $(SHTOOL) version
@@ -44,7 +45,7 @@ RM              = rm -f
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
 
-all: $(SHTOOL) all-recursive
+all: $(SHTOOL) mp4h-config mp4h-config.1 all-recursive
 
 # ------------------------------------------------
 #   TEST SUITE
@@ -66,14 +67,35 @@ test: all
 
 check: test
 
+mp4h-config: mp4h-config.src
+	sed -e '/^=head1/,/^=cut/d' \
+        -e '/^__END__/,$$d' \
+        -e 's|\@VERSION\@|$(VERSION)|g' \
+        -e 's|\@prefix\@|$(prefix)|g' \
+        -e 's|\@pkglibdir\@|$(pkglibdir)|g' \
+        -e 's|\@includedir\@|$(includedir)|g' \
+        -e 's|\@mandir\@|$(mandir)|g' \
+        -e 's|\@CC\@|$(CC)|g' \
+        -e 's|\@CFLAGS\@|$(CFLAGS)|g' \
+          < mp4h-config.src >$@ && chmod a+x $@
+
+mp4h-config.1: mp4h-config.src
+	cp mp4h-config.src mp4h-config.pod
+	pod2man --section=1 --center="Web Tools" --release="Web Tools" \
+            mp4h-config.pod |\
+            sed -e 's|\@VERSION\@|$(VERSION)|g' > $@
+	rm -f mp4h-config.pod
+
 # ------------------------------------------------
 #   INSTALLATION
 # ------------------------------------------------
 
 install: all
 	$(MKDIR) $(bindir) $(mandir)/man1 $(pkgdatadir)
-	$(MKDIR) $(prefex)/include $(pkglibdir)
+	$(MKDIR) $(prefix)/include $(pkglibdir)
 	$(INSTALL_PROGRAM) src/mp4h $(bindir)/mp4h
+	$(INSTALL_SCRIPT) mp4h-config $(bindir)/mp4h-config
+	$(INSTALL_DATA) mp4h-config.1 $(mandir)/man1/mp4h-config.1
 	$(INSTALL_DATA) doc/mp4h.1 $(mandir)/man1/mp4h.1
 	$(INSTALL_DATA) src/mp4h.h $(prefix)/include/mp4h.h
 	@dir=packages; target='$@'; $(RECURS_TARGET)
