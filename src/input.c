@@ -77,10 +77,7 @@ static void lex_debug __P ((void));
    SYNTAX_IGNORE        *Character to be deleted from input as if not present
    SYNTAX_OTHER         Any character with no special meaning to mp4h
    SYNTAX_SPACE         Whitespace (ignored when leading macro arguments)
-   SYNTAX_CLOSE         Close list of macro arguments
-   SYNTAX_ACTIVE        This caracter is a macro name by itself
 
-   SYNTAX_ESCAPE        Use this character to prefix all macro names
    SYNTAX_ALPHA         Alphabetic characters (can start macro names)
    SYNTAX_NUM           Numeric characters
    SYNTAX_ALNUM         Alphanumeric characters (can form macro names)
@@ -96,13 +93,11 @@ static void lex_debug __P ((void));
    The precedence as implemented by next_token () is:
 
    SYNTAX_IGNORE        *Filtered out below next_token ()
-   SYNTAX_ESCAPE        Reads macro name iff set, else next
    SYNTAX_ALPHA         Reads macro name
 
    SYNTAX_OTHER and SYNTAX_NUM
                         Reads all SYNTAX_OTHER and SYNTAX_NUM 
    SYNTAX_SPACE         Reads all SYNTAX_SPACE
-   SYNTAX_ACTIVE        Returns a single char as a word
    the rest             Returned as a single char
 
    SYNTAX_DOLLAR is not currently used.  The character $ is treated as a
@@ -871,12 +866,6 @@ syntax_init (void)
     }
   /* set_syntax_internal(SYNTAX_IGNORE, 0); */
 
-  set_syntax_internal(SYNTAX_ESCAPE, '<');
-  set_syntax_internal(SYNTAX_CLOSE,  '>');
-  set_syntax_internal(SYNTAX_ESCAPE, '&');
-  set_syntax_internal(SYNTAX_CLOSE,  ';');
-  set_syntax_internal(SYNTAX_ACTIVE, '\\');
-  set_syntax_internal(SYNTAX_ACTIVE, '"');
   set_syntax_internal(SYNTAX_GROUP, CHAR_LQUOTE);
   set_syntax_internal(SYNTAX_GROUP, CHAR_RQUOTE);
   set_syntax_internal(SYNTAX_GROUP, CHAR_BGROUP);
@@ -1011,7 +1000,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
         }
 
       (void) next_char ();
-      if (IS_ESCAPE(ch))             /* ESCAPED WORD */
+      if (IS_TAG(ch))             /* ESCAPED WORD */
         {
           if (lquote.length > 0 && MATCH (ch, lquote.string))
             {
@@ -1072,13 +1061,44 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                 type = TOKEN_SIMPLE;        /* escape before eof */
             }
         }
-      else if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
-        skip_line ();
       else if (IS_CLOSE(ch))
         {
           obstack_1grow (&token_stack, ch);
           type = TOKEN_SIMPLE;
         }
+      else if (IS_ENTITY(ch))             /* entity  */
+        {
+          obstack_1grow (&token_stack, ch);
+          if ((ch = peek_input ()) != CHAR_EOF)
+            {
+              if (IS_ALPHA(ch))
+                {
+                  ch = next_char ();
+                  obstack_1grow (&token_stack, ch);
+                  while ((ch = next_char ()) != CHAR_EOF && IS_ALNUM(ch))
+                    {
+                      obstack_1grow (&token_stack, ch);
+                    }
+
+                  if (ch == ';')
+                    {
+                      obstack_1grow (&token_stack, ch);
+                      type = TOKEN_ENTITY;
+                    }
+                  else
+                    {
+                      type = TOKEN_STRING;
+                      unget_input(ch);
+                    }
+                }
+              else
+                type = TOKEN_STRING;
+            }
+          else
+            type = TOKEN_SIMPLE;        /* escape before eof */
+        }
+      else if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
+        skip_line ();
       else if (expansion == READ_BODY)
         {
           if (ch == '"')
@@ -1086,7 +1106,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
           else
             obstack_1grow (&token_stack, ch);
           while ((ch = next_char ()) != CHAR_EOF
-                  && ! IS_ESCAPE(ch) && ! IS_CLOSE (ch))
+                  && ! IS_TAG(ch) && ! IS_CLOSE (ch))
             {
               if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
                 {
@@ -1252,8 +1272,6 @@ next_token (token_data *td, read_type expansion, boolean in_string)
               unget_input(ch);
               type = TOKEN_SPACE;
             }
-          else if (IS_ACTIVE(ch))
-            type = TOKEN_WORD;
           else
             type = TOKEN_SIMPLE;
         }
@@ -1322,6 +1340,10 @@ print_token (const char *s, token_type t, token_data *td)
       fprintf (stderr, "word\t\"%s\"\n", TOKEN_DATA_TEXT (td));
       break;
 
+    case TOKEN_ENTITY:
+      fprintf (stderr, "entity\t\"%s\"\n", TOKEN_DATA_TEXT (td));
+      break;
+
     case TOKEN_STRING:
       fprintf (stderr, "string\t\"%s\"\n", TOKEN_DATA_TEXT (td));
       break;
@@ -1356,6 +1378,11 @@ print_token (const char *s, token_type t, token_data *td)
 
     case TOKEN_NONE:
       fprintf (stderr, "none\n");
+      break;
+
+    default:
+      MP4HERROR ((warning_status, 0,
+        _("INTERNAL ERROR: unknown token in print_token")));
       break;
     }
   return 0;

@@ -289,6 +289,7 @@ enum _token_type
   TOKEN_EGROUP,                 /* end group */
   TOKEN_SPACE,                  /* whitespace */
   TOKEN_WORD,                   /* an identifier */
+  TOKEN_ENTITY,                 /* an entity */
   TOKEN_SIMPLE,                 /* a single character */
   TOKEN_MACDEF                  /* a macros definition (see "defn") */
 };
@@ -425,9 +426,6 @@ extern unsigned short syntax_table[256];
 
 #define SYNTAX_IGNORE   (0x0001)
 #define SYNTAX_SPACE    (0x0002)
-#define SYNTAX_CLOSE    (0x0004)
-#define SYNTAX_ACTIVE   (0x0007)
-#define SYNTAX_ESCAPE   (0x0008)
 #define SYNTAX_GROUP    (0x0009)
 
 /* These are values to be assigned to syntax table entries, but they are
@@ -443,9 +441,6 @@ extern unsigned short syntax_table[256];
 #define IS_OTHER(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_OTHER)
 #define IS_IGNORE(ch) ((syntax_table[(int)(ch)]) == SYNTAX_IGNORE)
 #define IS_SPACE(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_SPACE)
-#define IS_CLOSE(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_CLOSE)
-#define IS_ACTIVE(ch) ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ACTIVE)
-#define IS_ESCAPE(ch) ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ESCAPE)
 #define IS_ALPHA(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ALPHA)
 #define IS_NUM(ch)    ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_NUM)
 #define IS_ALNUM(ch)  ((((syntax_table[(int)(ch)]) & SYNTAX_ALNUM) != 0) \
@@ -457,6 +452,9 @@ extern unsigned short syntax_table[256];
 #define IS_RQUOTE(ch) (ch == CHAR_RQUOTE)
 #define IS_GROUP(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_GROUP)
 #define IS_SLASH(ch)  (ch == CHAR_SLASH || ch == '/')
+#define IS_TAG(ch)    (ch == '<')
+#define IS_CLOSE(ch)  (ch == '>')
+#define IS_ENTITY(ch) (ch == '&')
 
 void set_syntax __P ((int, const char *));
 void set_syntax_internal __P ((int, int));
