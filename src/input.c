@@ -841,10 +841,6 @@ input_init (void)
   rquote.length  = strlen (rquote.string);
   visible_quotes = FALSE;
 
-  /* this function is defined in builtin.c and initializes the
-     varbreak symbol.  */
-  init_break ();
-
   syntax_init ();
 }
 

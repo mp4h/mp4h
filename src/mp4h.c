@@ -397,8 +397,12 @@ main (int argc, char *const *argv)
   output_init ();
   include_env_init ();
   symtab_init ();
+  break_init ();
   caseless_init (caseless);
-  locale_init ();
+#ifdef HAVE_LOCALE_H
+  locale_init (LC_ALL, NULL);
+#endif
+  pcre_init ();
 
   if (frozen_file_to_read)
     reload_frozen_state (frozen_file_to_read);
@@ -494,9 +498,12 @@ main (int argc, char *const *argv)
   /* Free memory */
   input_deallocate ();
   debug_deallocate ();
+  include_deallocate ();
   output_deallocate ();
   symtab_deallocate ();
+  break_deallocate ();
   builtin_deallocate ();
+  pcre_deallocate ();
 
   xfree ((voidstar) current_file);
 

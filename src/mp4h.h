@@ -570,13 +570,16 @@ extern int safety_level;
 /* Document encoding */
 extern encoding_type document_encoding;
 
-void locale_init __P ((void));
+void locale_init __P ((int, char *));
+void pcre_init __P ((void));
+void pcre_deallocate __P ((void));
 void initialize_builtin __P ((symbol *));
 void builtin_init __P ((void));
 void builtin_deallocate __P ((void));
 void clear_tag_attr __P ((void));
 void define_builtin __P ((const char *, const builtin *, boolean));
-void init_break __P ((void));
+void break_init __P ((void));
+void break_deallocate __P ((void));
 void define_user_macro __P ((const char *, char *, symbol_lookup,
                              boolean, boolean, boolean));
 void undivert_all __P ((void));
@@ -603,6 +606,7 @@ const char * predefined_attribute __P ((const char *, int *, token_data **, bool
 
 void include_init __P ((void));
 void include_env_init __P ((void));
+void include_deallocate __P ((void));
 void add_include_directory __P ((const char *));
 FILE *path_search __P ((const char *, char **));
 

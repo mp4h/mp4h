@@ -54,7 +54,9 @@
 
 #include <sys/times.h>
 #include <math.h>
+#ifdef HAVE_LOCALE_H
 #include <locale.h>
+#endif
 #include <time.h>
 
 #define _SRC_VERSION_C_AS_HEADER_

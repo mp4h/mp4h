@@ -332,9 +332,10 @@ collect_arguments (char *symbol_name, read_type expansion,
   char last_char = ' ';
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-  TOKEN_DATA_TEXT (&td) = xstrdup (symbol_name);
+  TOKEN_DATA_TEXT (&td) = symbol_name;
   tdp = (token_data *) obstack_copy (arguments, (voidstar) &td, sizeof (td));
   obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
+  TOKEN_DATA_TYPE (&td) = TOKEN_VOID;
 
   ch = peek_input ();
   if (IS_CLOSE (ch))
@@ -614,7 +615,7 @@ expand_macro (symbol *sym, read_type expansion)
       if (SYMBOL_CONTAINER (sym))
         {
           TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-          TOKEN_DATA_TEXT (&td) = xstrdup ("");
+          TOKEN_DATA_TEXT (&td) = "";
           tdp = (token_data *) obstack_copy (&arguments,
                   (voidstar) &td, sizeof (td));
           obstack_grow (&argptr, (voidstar) &tdp, sizeof (tdp));

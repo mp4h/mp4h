@@ -87,6 +87,24 @@ include_init (void)
   dirpath.max_length = strlen (PKGDATADIR);
 }
 
+void
+include_deallocate (void)
+{
+  search_path *path, *path_next;
+
+  if (!dirpath.list)
+    return;
+
+  path = dirpath.list;
+  while (path)
+    {
+      path_next = path->next;
+      xfree ((voidstar) path->dir);
+      xfree ((voidstar) path);
+      path = path_next;
+    }
+}
+
 
 /* Functions for normal input path search */
 

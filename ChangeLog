@@ -10,6 +10,9 @@
 
   Changes between 1.2.1 and ???:
 
+    *) Fix memory leaks (15-Oct-2001):
+       [Denis Barbier]
+
     *) Fix arrays (15-Oct-2001):
        Insertion of values inside arrays did fail under some
        circumstance.

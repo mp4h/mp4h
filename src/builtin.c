@@ -360,6 +360,7 @@ static void generic_set_hook __P ((MP4H_BUILTIN_PROTO, boolean, int));
 static void math_relation __P ((MP4H_BUILTIN_PROTO, mathrel_type));
 static void mathop_functions __P ((MP4H_BUILTIN_PROTO, mathop_type));
 static void updowncase __P ((struct obstack *, int, token_data **, boolean));
+static void varstack_check __P ((void));
 
 static boolean safe_strtod __P ((const char *, const char *, double *));
 static boolean safe_strtol __P ((const char *, const char *, long int *));
@@ -525,10 +526,16 @@ install_builtin_table (builtin *table)
 }
 
 void
-init_break (void) {
+break_init (void) {
   initialize_builtin (&varbreak);
   SYMBOL_TYPE (&varbreak) = TOKEN_TEXT;
   SYMBOL_TEXT (&varbreak) = xstrdup ("");
+}
+
+void
+break_deallocate (void) {
+  xfree ((voidstar) SYMBOL_TEXT (&varbreak));
+  SYMBOL_TYPE (&varbreak) = TOKEN_VOID;
 }
 
 /*-------------------------------------------------------------------------.
@@ -546,12 +553,11 @@ define_user_macro (const char *name, char *text, symbol_lookup mode,
   int offset, bracket_level = 0;
 
   s = lookup_symbol (name, mode);
+  xfree ((voidstar) SYMBOL_HOOK_BEGIN (s));
+  xfree ((voidstar) SYMBOL_HOOK_END (s));
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
-    {
-      xfree ((voidstar) SYMBOL_HOOK_BEGIN (s));
-      xfree ((voidstar) SYMBOL_HOOK_END (s));
-      xfree ((voidstar) SYMBOL_TEXT (s));
-    }
+    xfree ((voidstar) SYMBOL_TEXT (s));
+
   initialize_builtin (s);
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
@@ -672,8 +678,7 @@ builtin_deallocate (void)
       xfree ((voidstar) bt);
       bt = bt_next;
     }
-
-  xfree ((voidstar) SYMBOL_TEXT (&varbreak));
+  varstack_check ();
 }
 
 static pcre *
@@ -828,12 +833,10 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
 
   /*  Compile this expression once  */
   re = xre_compile (name, PCRE_CASELESS);
-  if (re == NULL)
-    {
-      xfree ((voidstar) name);
-      return;
-    }
   xfree ((voidstar) name);
+  if (re == NULL)
+    return;
+
   if (argc>2)
     {
       re_extra = pcre_study (re, 0, &errptr);
@@ -856,9 +859,12 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
           special_chars++;
         }
 
-      cp = strchr (ARG (i)+special_chars, '=');
-      if (cp)
-        *cp  = '\0';
+      if (*(ARG (i)+special_chars) != '\0')
+        {
+          cp = strchr (ARG (i)+special_chars, '=');
+          if (cp)
+            *cp  = '\0';
+        }
 
       /*  Ensure that all subexpressions are stored  */
       max_subexps = 0;
@@ -912,6 +918,7 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
         }
     }
   pcre_free (re);
+  pcre_free (re_extra);
   xfree ((voidstar) match_ptr);
 }
 
@@ -967,22 +974,34 @@ mp4h_bp___line__ (MP4H_BUILTIN_ARGS)
     numeric_arg (argv[0], ARG (1), FALSE, &current_line);
 }
 
+/*-----------------------------.
+| Initialize character table.  |
+`-----------------------------*/
+
+void
+pcre_init (void)
+{
+  re_tableptr = pcre_maketables ();
+}
+
+void
+pcre_deallocate (void)
+{
+  pcre_free ((voidstar) re_tableptr);
+}
+
 /*---------------------.
 | Initialize locales.  |
 `---------------------*/
 
-void
-locale_init (void)
-{
 #ifdef HAVE_LOCALE_H
-  setlocale (LC_ALL, NULL);
+void
+locale_init (int category, char *value)
+{
+  setlocale (category, value);
   my_locale = localeconv ();
   decimal_point = my_locale->decimal_point;
-  re_tableptr = pcre_maketables ();
-#endif
 }
-
-#ifdef HAVE_LOCALE_H
 
 /*---------------------------.
 | Change locale attributes.  |
@@ -1021,10 +1040,9 @@ mp4h_bp_mp4h_l10n (MP4H_BUILTIN_ARGS)
         _("Warning:%s:%d: unknown locale `%s'"), CURRENT_FILE_LINE, ARG (i)));
       else
         {
-          setlocale (category, cp+1);
-          my_locale = localeconv ();
-          decimal_point = my_locale->decimal_point;
-          re_tableptr = pcre_maketables ();
+          locale_init (category, cp+1);
+          pcre_deallocate ();
+          pcre_init ();
         }
     }
 
@@ -1407,6 +1425,7 @@ mp4h_bp_directory_contents (MP4H_BUILTIN_ARGS)
   if (matching)
     {
       pcre_free (re);
+      pcre_free (re_extra);
       xfree ((voidstar) match_ptr);
     }
   closedir (dir);
@@ -2156,56 +2175,47 @@ generic_set_hook (MP4H_BUILTIN_ARGS, boolean before, int action)
   sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
   if (sym == NULL)
     return;
+
   if (before)
     hook = SYMBOL_HOOK_BEGIN (sym);
   else
     hook = SYMBOL_HOOK_END (sym);
   
   if (!hook)
-    {
-      hook = "";
-      action = 0;
-    }
+    action = 0;
 
   switch (action)
     {
       /*  Replace current hooks */
       case 0:
-        if (before)
-          {
-            xfree ((voidstar) SYMBOL_HOOK_BEGIN (sym));
-            SYMBOL_HOOK_BEGIN (sym) = xstrdup (ARGBODY);
-          }
-        else
-          {
-            xfree ((voidstar) SYMBOL_HOOK_END (sym));
-            SYMBOL_HOOK_END (sym) = xstrdup (ARGBODY);
-          }
-        return;
+        text = xstrdup (ARGBODY);
+        break;
 
       /*  Insert before the current hooks */
       case 1:
         text = (char *) xmalloc (strlen (hook) + strlen (ARGBODY) + 1);
-        sprintf (text, "%s%s", ARGBODY, hook);
+        strcpy (text, ARGBODY);
+        strcat (text, hook);
         break;
 
       /*  Append after the current hooks */
       case 2:
         text = (char *) xmalloc (strlen (hook) + strlen (ARGBODY) + 1);
-        sprintf (text, "%s%s", hook, ARGBODY);
+        strcpy (text, hook);
+        strcat (text, ARGBODY);
         break;
 
       default:
         MP4HERROR ((warning_status, 0,
           _("INTERNAL ERROR: Illegal value in generic_set_hook ()")));
-      abort ();
+        abort ();
     }
 
+  xfree ((voidstar) hook);
   if (before)
-    SYMBOL_HOOK_BEGIN (sym) = xstrdup (text);
+    SYMBOL_HOOK_BEGIN (sym) = text;
   else
-    SYMBOL_HOOK_END (sym) = xstrdup (text);
-  xfree ((voidstar) text);
+    SYMBOL_HOOK_END (sym) = text;
 }
 
 static void
@@ -2820,14 +2830,14 @@ mp4h_bp_load (MP4H_BUILTIN_ARGS)
       realname = xstrdup (library);
       logical_to_physical_paths (&realname);
       library_load (realname, obs);
-      xfree (realname);
+      xfree ((voidstar) realname);
     }
   if (module)
     {
       realname = xstrdup (module);
       logical_to_physical_paths (&realname);
       module_load (realname, obs);
-      xfree (realname);
+      xfree ((voidstar) realname);
     }
 }
 
@@ -3593,6 +3603,7 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
     }
 
   pcre_free (re);
+  pcre_free (re_extra);
   xfree ((voidstar) match_ptr);
 }
 
@@ -3952,8 +3963,8 @@ Warning:%s:%d: wrong index declaration in <%s>"),
             if (var == NULL)
               return;
 
-            value = xstrdup (SYMBOL_TEXT (var));
-            old_value = value;
+            old_value = xstrdup (SYMBOL_TEXT (var));
+            value = old_value;
             cp = strchr (value, '\n');
             if (array_index == 0)
               {
@@ -4010,8 +4021,9 @@ mp4h_bp_set_var_x (MP4H_BUILTIN_ARGS)
 
   var = lookup_variable (name, SYMBOL_INSERT);
   if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (var));
+    xfree ((voidstar) SYMBOL_TEXT (var));
   SYMBOL_TEXT (var) = xstrdup (ARGBODY);
+  SYMBOL_TYPE (var) = TOKEN_TEXT;
 }
 
 /*----------------------------------------------------------------------.
@@ -4103,14 +4115,33 @@ mp4h_bp_restore (MP4H_BUILTIN_ARGS)
     {
       var = lookup_variable (ARG (i), SYMBOL_INSERT);
 
+      if (!vs)
+        {
+          MP4HERROR ((warning_status, 0, _("\
+WARNING:%s:%d: variable stack empty, it means <%s> already gobbled all data"),
+                    CURRENT_FILE_LINE, argv[0]));
+          return;
+        }
       if (SYMBOL_TYPE (var) == TOKEN_TEXT)
         xfree ((voidstar) SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xstrdup (vs->text);
+      SYMBOL_TYPE (var) = TOKEN_TEXT;
 
       prev = vs->prev;
       xfree ((voidstar) vs->text);
       xfree ((voidstar) vs);
       vs = prev;
+    }
+}
+
+static void
+varstack_check (void)
+{
+  if (vs)
+    {
+      MP4HERROR ((warning_status, 0, _("\
+WARNING:%s:%d: variable stack not empty, it means <preserve> pushed more items than <restore> popped"),
+                    CURRENT_FILE_LINE));
     }
 }
 
@@ -4264,6 +4295,7 @@ mp4h_bp_copy_var (MP4H_BUILTIN_ARGS)
     xfree ((voidstar) SYMBOL_TEXT (var2));
 
   SYMBOL_TEXT (var2) = xstrdup(SYMBOL_TEXT (var1));
+  SYMBOL_TYPE (var2) = TOKEN_TEXT;
 }
 
 /*--------------------------------.
