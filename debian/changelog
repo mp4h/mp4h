@@ -1,3 +1,9 @@
+mp4h (1.2.3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Denis Barbier <barbier@debian.org>  Fri, 26 Oct 2001 00:04:48 +0200
+
 mp4h (1.2.2-1) unstable; urgency=low
 
   * New upstream release

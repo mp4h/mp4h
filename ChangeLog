@@ -8,6 +8,12 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.2.2 and 1.2.3:
+
+    *) Fix leading space added by <attributes-quote> (25-Oct-2001):
+       This space must not be added when attribute is empty.
+       [Denis Barbier]
+
   Changes between 1.2.1 and 1.2.2:
 
     *) Leading space added by <attributes-quote> (18-Oct-2001):
