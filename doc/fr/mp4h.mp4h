@@ -9,7 +9,7 @@
 <mp4h-l10n LC_NUMERIC=C>
 
 <set-var package=mp4h>
-<set-var version=0.9.5>
+<set-var version=0.9a6>
 <set-var title="mp4h - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -1597,6 +1597,35 @@ Le corps de cette balise est supprimé.
 <para>
 Permet de modifier les caractères servant de commentaires.
 </para>
+
+<tag:description set-quotes>
+[<var chaîne-début> <var chaîne-fin>]
+</tag:description>
+
+<set-quotes>
+<para>
+Par défaut, les caractères entre les séquences <command "<@["> et
+<command "]@>"> sont lus tels quels, sans aucun traitement.  Cela permet
+d'afficher une chaîne de caractères comportant des balises mais ne
+pouvant être correctement interprêtée par <mp4h>. La commande <command
+set-quotes> permet de changer ces délimiteurs. S'il n'y a aucun
+argument, cette protection est désactivée. S'il y a deux arguments, ils
+correspondent respectivement au délimiteur de début (qui doit commencer
+par un <left-angle>) et au délimiteur de fin (qui doit se terminer par
+un <right-angle>).
+</para>
+
+<para>
+<b>Attention</b> : il faut toujours faire appel à <command set-quotes>
+sans aergument avant de changer ces délimiteurs, pour être certain que
+les arguments seront correctement lus.
+</para>
+
+<undef as-is>
+<example>
+<set-quotes><set-quotes "<as-is>" "</as-is>">
+<as-is><set-var</as-is>
+</example>
 
 ###
 ###    Aide au déboguage
