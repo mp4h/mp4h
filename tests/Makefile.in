@@ -51,7 +51,7 @@ SUBDIRS = \
    get-file-properties \
    directory-contents \
    file-exists \
-   misc
+   Misc
 
 #   common tools
 RM      = rm -f
