@@ -805,7 +805,7 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
           if (cp)
             next->text = xstrdup (cp+1);
           else
-            next->text = xstrdup ("");
+            next->text = xstrdup (key);
           tag_attr = next;
 
           if (lowercase)
