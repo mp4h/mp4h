@@ -1,0 +1,3 @@
+<define-entity foo>hello</define-entity>
+<define-entity bar>&foo;</define-entity>&bar;
+<define-entity foo>hello world</define-entity>&bar;

@@ -1,0 +1,5 @@
+<define-tag foo>foo tag</define-tag>
+<define-entity bar><foo></define-entity>
+&bar;
+<define-tag foo>new foo tag</define-tag>
+&bar;
