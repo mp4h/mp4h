@@ -253,7 +253,7 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
   token_data *tdp;
   char *last_addr;
   boolean more_args;
-  char last_char;
+  char last_char = ' ';
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
@@ -262,8 +262,11 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
 
   ch = peek_input ();
   if (IS_CLOSE (ch))
-    next_token (&td, expansion);
-  else if (IS_SPACE(ch) || IS_ESCAPE(ch))
+    {
+      /*  Gobble closing bracket  */
+      advance_char ();
+    }
+  else if (IS_SPACE(ch) || IS_ESCAPE(ch) || ch == '/')
     {
       do
         {
@@ -288,6 +291,12 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
       if (TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT
           && strlen (TOKEN_DATA_TEXT (tdp)) == 0)
         argptr->next_free = last_addr;
+    }
+  else
+    {
+      MP4HERROR ((warning_status, 0,
+        _("INTERNAL ERROR: Bad tag expression in `%s'"),
+             CURRENT_FILE_LINE, SYMBOL_NAME (sym)));
     }
   return (last_char == '/');
 }
