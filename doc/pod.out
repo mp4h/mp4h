@@ -221,7 +221,7 @@ Output:
 <set-var-verbatim verb-body=%ubody />
 <subst-in-var verb-body "<" "_LT_" />
 <subst-in-var verb-body ">" "_GT_" />
-<subst-in-var verb-body "^" "   " />
+<subst-in-var verb-body "^" "   " reflags=m />
 <get-var-once verb-body />
 </define-tag>
 

@@ -208,9 +208,7 @@ following form:
 
 <code><name [attributes]/></code>
 
-<para>
 whereas a complex tag looks like:
-</para>
 
 <code><name [attributes]>
 body
@@ -264,18 +262,14 @@ important to note that
 
 <code><define-tag foo>bar</define-tag></code>
 
-<para>
 and
-</para>
 
 <code><define-tag foo>
 bar
 </define-tag></code>
 
-<para>
 are not equivalent, the latter form contains two newlines that were not
 present in the former.
-</para>
 
 <pseudo-func foo />
 <attributes:description>
@@ -1031,10 +1025,10 @@ Replace a regular expression in a string by a replacement text.
 <example>
 <set-var foo="abcdefghijk\nabcdefghijk\nabcdefghijk" />
 <subst-in-string <get-var foo /> ".$" "" />
-<subst-in-string <get-var foo /> ".$" "" singleline=true />
+<subst-in-string <get-var foo /> ".$" "" singleline=false />
 <subst-in-string <get-var foo /> "
    ([a-c]) | [0-9]
-     " ":\\1:" reflags=sx />
+     " ":\\1:" reflags=x />
 </example>
 
 <tag:description subst-in-var>
@@ -1115,9 +1109,8 @@ Thus after defining
 3" />
 </code>
 
-<para>
 one can view its content or one of these values:
-</para>
+
 <set-var digits="0\n1\n2\n3" />
 <example>
 <get-var digits />
@@ -2218,9 +2211,7 @@ But this is valid:
 
 <code><foo <foo/> /></code>
 
-<para>
 or even
-</para>
 
 <code><foo <foo name=src url=ici /> /></code>
 
@@ -2359,9 +2350,11 @@ expansion with
 When you want to embed some server-side scripting language in your
 pages, you face up some weird problems, like in
 </para>
+
 <code>
 <a href=<%= $url %>>Hello</a>
 </code>
+
 <para>
 The question is how do <mp4h/> know that this input has some extra
 delimiters? The answer is that <mp4h/> should not try to handle some
@@ -2386,6 +2379,7 @@ Another common problem is when we need to print only a begin or an end
 tag alone.  For instance it is very desirable to define its own headers
 and footers with
 </para>
+
 <code>
 <define-tag header>
 <html*>
@@ -2414,6 +2408,7 @@ tag name.
 <para>
 Sometimes HTML tags are not parsable, as in this javascript code:
 </para>
+
 <code>
   ...
     document.write('<*img src="foo.gif"');
@@ -2511,10 +2506,8 @@ Run
 <code>
   mp4h -h
 </code>
-<para>
 to find default value. Current value matches HTML syntax, and it will
 tend to zero when XHTML syntax becomes more familiar.
-</para>
 
 <section>Author</section>
 
