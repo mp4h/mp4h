@@ -144,6 +144,58 @@ struct _string
   };
 typedef struct _string STRING;
 
+/* Those must come first.  */
+typedef void builtin_func ();
+
+/* Various different token types.  */
+enum _token_type
+{
+  TOKEN_EOF,                    /* end of file */
+  TOKEN_NONE,                   /* discardable token */
+  TOKEN_STRING,                 /* a string */
+  TOKEN_QUOTED,                 /* a quoted string */
+  TOKEN_QUOTE,                  /* begin delimiter of a quoted string
+                                   to expand */
+  TOKEN_BGROUP,                 /* begin group */
+  TOKEN_EGROUP,                 /* end group */
+  TOKEN_SPACE,                  /* whitespace */
+  TOKEN_WORD,                   /* an identifier */
+  TOKEN_ENTITY,                 /* an entity */
+  TOKEN_SIMPLE,                 /* a single character */
+  TOKEN_MACDEF                  /* a macros definition (see "defn") */
+};
+typedef enum _token_type token_type;
+
+/* The data for a token, a macro argument, and a macro definition.  */
+enum _token_data_type
+{
+  TOKEN_VOID,
+  TOKEN_TEXT,
+  TOKEN_FUNC
+};
+typedef enum _token_data_type token_data_type;
+
+struct _token_data
+{
+  token_data_type type;
+  union
+    {
+      struct
+        {
+          char *text;
+        }
+      u_t;
+      struct
+        {
+          builtin_func *func;
+          boolean traced;
+        }
+      u_f;
+    }
+  u;
+};
+typedef struct _token_data token_data;
+
 /* Memory allocation.  */
 voidstar xmalloc __P ((size_t));
 voidstar xrealloc __P ((voidstar , size_t));
@@ -154,12 +206,6 @@ char *xstrdup __P ((const char *));
 
 /* Other library routines.  */
 void error __P ((int, int, const char *, ...));
-
-/* Those must come first.  */
-typedef void builtin_func ();
-typedef struct _token_data token_data;
-typedef enum _token_type token_type;
-typedef enum _token_data_type token_data_type;
 
 
 /* File: mp4h.c  --- global definitions.  */
@@ -275,52 +321,6 @@ void trace_post __P ((const char *, int, int, token_data **, const char *));
 
 
 /* File: input.c  --- lexical definitions.  */
-
-/* Various different token types.  */
-enum _token_type
-{
-  TOKEN_EOF,                    /* end of file */
-  TOKEN_NONE,                   /* discardable token */
-  TOKEN_STRING,                 /* a string */
-  TOKEN_QUOTED,                 /* a quoted string */
-  TOKEN_QUOTE,                  /* begin delimiter of a quoted string
-                                   to expand */
-  TOKEN_BGROUP,                 /* begin group */
-  TOKEN_EGROUP,                 /* end group */
-  TOKEN_SPACE,                  /* whitespace */
-  TOKEN_WORD,                   /* an identifier */
-  TOKEN_ENTITY,                 /* an entity */
-  TOKEN_SIMPLE,                 /* a single character */
-  TOKEN_MACDEF                  /* a macros definition (see "defn") */
-};
-
-/* The data for a token, a macro argument, and a macro definition.  */
-enum _token_data_type
-{
-  TOKEN_VOID,
-  TOKEN_TEXT,
-  TOKEN_FUNC
-};
-
-struct _token_data
-{
-  token_data_type type;
-  union
-    {
-      struct
-        {
-          char *text;
-        }
-      u_t;
-      struct
-        {
-          builtin_func *func;
-          boolean traced;
-        }
-      u_f;
-    }
-  u;
-};
 
 #define TOKEN_DATA_TYPE(Td)         ((Td)->type)
 #define TOKEN_DATA_TEXT(Td)         ((Td)->u.u_t.text)
