@@ -2506,7 +2506,7 @@ user defined macros the replacement text</item>
 </list>
 
 <para>
-Characters are read on input until a <lb/> is found.
+Characters are read on input until a left angle bracket is found.
 Then macro name is read. After that attributes are read, verbatim or not
 depending on how this macro as been defined. And if this macro is
 complex, its body is read verbatim. When this is finished, some special
