@@ -1798,45 +1798,34 @@ size, type, ctime, mtime, atime, owner and group.
 </example>
 
 <tag:description include>
-<var filename />
+[file=<var filename />]
+[cmd=<var command />]
 [alt=<var action />]
 [verbatim=true]
 </tag:description>
 
 <para>
-Read input from another file.
+Read input from another file or a shell command.
 </para>
 
 <attributes:description>
+<attributes:item "file=<var filename />">
+Path of the file being included.
+</attributes:item>
+
 <attributes:item "alt=<var action />">
 If file is not found, this alternate action is handled. If this atribute
 is not set and file is not found, then an error is raised.
 </attributes:item>
 
-<attributes:item "verbatim=true">
-File content is included without expansion.
-</attributes:item>
-</attributes:description>
-
-<tag:description execute>
-<var command-line />
-[verbatim=true]
-</tag:description>
-
-<para>
+<attributes:item "cmd=<var command-line />">
 Read the output from executing a command.
-</para>
+</attributes:item>
 
-<attributes:description>
 <attributes:item "verbatim=true">
-Output is included without expansion.
+Content is included without expansion.
 </attributes:item>
 </attributes:description>
-
-<example>
-<execute "uname -a" />
-</example>
-
 
 <tag:description use>
 <var package />
@@ -2090,7 +2079,7 @@ be loaded more than once.
 <para>
 Last but not least, it will be possible in near future to add compiled
 modules.  Like almost everything, this feature comes with <m4/> and
-looks very nice.  This is a work in progress, there is an exemple of
+looks very nice.  This is a work in progress, there is an example of
 such a module in <mp4h/> sources.
 </para>
 
