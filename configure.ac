@@ -2,14 +2,19 @@
 # Copyright (C) 1991-1998 Free Software Foundation, Inc.
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT
+#
+#    Is there a better way to insert some code before AC_INIT?
+#
+m4_divert_text([BODY], [shtool=$srcdir/shtool
+PACKAGE=mp4h
+VERSION="`$shtool version -l c -d short $srcdir/src/version.c`"
+])
+
+AC_INIT([$PACKAGE], [$VERSION])
 AC_CONFIG_SRCDIR([src/mp4h.c])
 AC_CONFIG_HEADER(config.h)
 
-shtool=./shtool
-PACKAGE=mp4h
-VERSION="`$shtool version -l c -d short src/version.c`"
-LONG_VERSION="`$shtool version -l c -d long src/version.c`"
+LONG_VERSION="`$shtool version -l c -d long $srcdir/src/version.c`"
 $shtool echo -e "Configuring for %B$PACKAGE $LONG_VERSION %b"
 
 AC_SUBST([PACKAGE])
