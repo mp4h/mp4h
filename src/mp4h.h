@@ -333,9 +333,9 @@ struct token_data
 /* The status of processing. */
 #define READ_NORMAL    1                     /* normal expansion of macros */
 #define READ_ATTRIBUTE (READ_NORMAL << 1)    /* when reading macro arguments */
-#define READ_VERB_ATTR (READ_ATTRIBUTE << 1) /* attributes are not expanded */
-#define READ_VERBATIM  (READ_VERB_ATTR << 1) /* macros are not expanded */
-#define READ_BODY      (READ_VERBATIM << 1)  /* when reading body function */
+#define READ_ATTR_VERB (READ_ATTRIBUTE << 1) /* attributes are not expanded */
+#define READ_BODY      (READ_ATTR_VERB << 1) /* when reading body function */
+#define READ_ATTR_BODY (READ_BODY << 1)
 
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
@@ -372,6 +372,7 @@ extern STRING eolcomm;
 #define CHAR_RQUOTE '\2'
 #define CHAR_BGROUP '\3'
 #define CHAR_EGROUP '\4'
+#define CHAR_QUOTE  '\5'
 
 #define DEF_EOLCOMM  ";;;"
 
@@ -440,7 +441,7 @@ extern int current_diversion;
 extern int output_current_line;
 
 void output_init __P ((void));
-void shipout_text __P ((struct obstack *, const char *, int));
+void shipout_text __P ((struct obstack *, char *, int));
 void shipout_string __P ((struct obstack *obs, const char *s, int len));
 void make_diversion __P ((int));
 void insert_diversion __P ((int));

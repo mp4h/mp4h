@@ -8,7 +8,15 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 0.7.3 and 0.7.2:
+  Changes between 0.8.0 and 0.7.2:
+
+    *) English documentation (28-Feb-2000):
+       [Denis Barbier]
+
+    *) Internal changes in macro parser (26-Feb-2000):
+       The macro parser is remade in order to be more robust. Expansion
+       modes are now explained in the doc.
+       [Denis Barbier]
 
     *) More comprehensive messages on error (18-Feb-2000):
        When a warning is printed, it includes file name and line

@@ -1,0 +1,100 @@
+##
+##  Makefile --  MP4H Makefile for main program
+##
+
+@SET_MAKE@
+SHELL = /bin/sh
+
+top_srcdir      = @top_srcdir@
+srcdir          = @srcdir@
+VPATH           = @srcdir@
+
+# ------------------------------------------------
+#   DEFINITIONS
+# ------------------------------------------------
+
+CONFIG_HEADER = ../config.h
+
+CC      = @CC@
+AR      = ar
+RANLIB  = @RANLIB@
+
+DEFS     = @DEFS@ -I. -I$(srcdir) -I..
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS  = @LDFLAGS@ -lm
+INCLUDES = -I$(top_srcdir)/lib 
+LDADD    = ../lib/libmp4h.a
+CFLAGS   = @CFLAGS@
+COMPILE  = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+CCLD     = $(CC)
+LINK     = $(CCLD) $(CFLAGS) $(LDFLAGS) -o $@
+LIBS     = @LIBS@
+
+SOURCES = mp4h.c builtin.c debug.c freeze.c input.c \
+    macro.c output.c path.c symtab.c version.c
+HEADERS = mp4h.h builtin.h
+OBJECTS = $(SOURCES:.c=.o)
+
+# ------------------------------------------------
+#   COMPILATION RULES
+# ------------------------------------------------
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+.c.o:
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -c $<
+
+# ------------------------------------------------
+#   DEFAULT TARGET
+# ------------------------------------------------
+
+all: mp4h
+
+mp4h: $(OBJECTS) $(LDADD)
+	@rm -f $@
+	$(LINK) $(OBJECTS) $(LDADD) $(LIBS)
+
+../lib/libmp4h.a:
+	cd ../lib && $(MAKE) libmp4h.a
+
+# ------------------------------------------------
+#   CLEANUP
+# ------------------------------------------------
+
+clean:
+	-rm -f *.o mp4h core
+
+distclean: clean
+	-rm -f Makefile
+
+# ------------------------------------------------
+#   TEST SUITE
+# ------------------------------------------------
+
+check: all
+	cd ../tests && $(MAKE) $@
+
+test: check
+
+# ------------------------------------------------
+#   TEST SUITE
+# ------------------------------------------------
+
+depend:
+	$(MAKE) clean
+	$(MAKE) CPPFLAGS=-MM >> Makefile.in
+
+mp4h.o: mp4h.c mp4h.h ../lib/obstack.h version.c
+builtin.o: builtin.c mp4h.h ../lib/obstack.h builtin.h ../lib/regex.h \
+ version.c
+debug.o: debug.c mp4h.h ../lib/obstack.h
+freeze.o: freeze.c mp4h.h ../lib/obstack.h
+input.o: input.c mp4h.h ../lib/obstack.h
+macro.o: macro.c mp4h.h ../lib/obstack.h
+output.o: output.c mp4h.h ../lib/obstack.h
+path.o: path.c mp4h.h ../lib/obstack.h
+symtab.o: symtab.c mp4h.h ../lib/obstack.h
+version.o: version.c
+
+##EOF##

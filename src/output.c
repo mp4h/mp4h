@@ -324,11 +324,13 @@ output_text (const char *text, int length)
 `-------------------------------------------------------------------------*/
 
 void
-shipout_text (struct obstack *obs, const char *text, int length)
+shipout_text (struct obstack *obs, char *text, int length)
 {
   static boolean start_of_output_line = TRUE;
   char line[20];
   const char *cursor;
+  register int i;
+  register char *cp;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
 
@@ -342,6 +344,11 @@ shipout_text (struct obstack *obs, const char *text, int length)
 
   if (output_diversion == NULL)
     return;
+
+  /* Restitute double quote characters */
+  for (cp=text, i=0; i<length; cp++, i++)
+    if (*cp == CHAR_QUOTE)
+      *cp = '"';
 
   /* Output TEXT to a file, or in-memory diversion buffer.  */
 

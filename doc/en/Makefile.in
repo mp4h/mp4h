@@ -26,6 +26,7 @@ all: mp4h.html mp4h.1
 
 mp4h.html: mp4h.mp4h $(INCDIR)/html.out $(PROGRAM) $(DEPS)
 	PATH=$(PROGDIR):$(PATH) mp4h -D format=html -I $(INCDIR) mp4h.mp4h > $@
+	tidy $@ >/dev/null
 
 mp4h.pod: mp4h.mp4h $(INCDIR)/pod.out $(PROGRAM) $(DEPS)
 	PATH=$(PROGDIR):$(PATH) mp4h -D format=pod -I $(INCDIR) mp4h.mp4h \
@@ -56,7 +57,10 @@ $(PROGRAM):
 # ------------------------------------------------
 
 clean:
-	$(RM) *.html *.pod *.1 *.info *.texinfo
+	$(RM) *.pod *.1 *.info *.texinfo
+
+realclean: clean
+	$(RM) *.html
 
 distclean: clean
 	$(RM) Makefile

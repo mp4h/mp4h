@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.7.3>
+<set-var version=0.8.0>
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -33,13 +33,13 @@ programmation, avec une syntaxe familière aux auteurs de documents HTML.
 </para>
 
 <para>
-Ce programme est un clone de
+Ce programme est dérivé de
 <URL src="http://www.metahtml.org/" name="<Meta-HTML>">,
 écrit par Brian J. Fox,  Il en reprend une partie de l'interface
 utilisateur, mais pas le code source.
 En effet, <Meta-HTML> était utilisé à l'intérieur du programme <WML>
 (<URL src="http://www.engelschall.com/sw/wml/" name="Website Meta Language">)
-écrit par Ralf S. Engelschall et que je maintiens depuis février 1998.
+écrit par Ralf S. Engelschall et que je maintiens depuis janvier 1999.
 Pour des raisons de licences, il était difficile de faire des
 modifications dans <Meta-HTML>, et j'ai décidé d'écrire mon propre
 macro-processeur.
@@ -61,7 +61,7 @@ propres balises dans un document HTML, et n'est en aucune façon un
 éditeur HTML. Ce n'est donc pas la peine de demander d'ajouter des
 fonctionnalités pour modifier la mise en page du document final, il y a
 peu de chances que je le fasse. Pour avoir un résultat correct, il
-suffit d'utiliser un post-processur du type de
+suffit d'utiliser un post-processeur comme
 <URL src="http://www.w3.org/People/Raggett/tidy/" name="tidy">.
 </para>
 
@@ -75,7 +75,9 @@ un argument, l'option courte doit l'accepter aussi.
 
 <para>
 La syntaxe générale d'appel de <mp4h> est
+
 <code>mp4h [options] [fichier [fichier] ...]</code>
+
 Les options sont décrites ci-dessous. Si aucun fichier n'est spécifié
 sur la ligne de commande, ou s'il a pour nom <file ->, alors les
 caractères sont lus sur l'entrée standard.
@@ -145,7 +147,7 @@ d'appel récursif</option>
 <option l>affiche le numéro de la ligne dans le fichier d'entrée</option>
 <option p>affiche le résultat de a recherche de fichiers dans
 l'arborescence</option>
-<option i>affiche les changements dans le fichier d'entrée</option>
+<option i>affiche les changements de fichiers d'entrée</option>
 <option V>raccourci pour tous ces drapeaux</option>
 </option-list>
 </para>
@@ -240,13 +242,14 @@ Définit une balise complexe
 <undef foo>
 <example>
 <define-tag foo endtag=required>;;;
-body is: %body</define-tag>
+Le corps est : %body</define-tag>
 <foo>Here it is</foo>
 </example>
 
 <attributes:item "attributes=verbatim">
-Par défaut, les attributs sont évalués lors de l'appel de la fonction.
-Lorsque cet attribut est utilisé, les arguments ne sont pas évalués.
+Par défaut, les attributs sont évalués avant d'être insérés dans le
+texte de remplacement. Lorsque cet attribut est utilisé, les arguments
+sont insérés sans développement.
 
 <undef foo bar>
 <example>
@@ -272,7 +275,7 @@ n'est effectuée si la commande est déjà définie.
 </para>
 
 <tag:description let>
-<var new> <var old>
+<var nouveau> <var ancien>
 </tag:description>
 
 <para>
@@ -319,8 +322,8 @@ des manipulations qui sont difficilement accessibles avec des fonctions.
 </para>
 
 <tag:description set-var>
-<var nom>=<var valeur>
-[<var nom>=<var valeur>] ...
+<var nom>[=<var valeur>]
+[<var nom>[=<var valeur>]] ...
 </tag:description>
 
 <para>
@@ -328,8 +331,8 @@ Cette commande permet de définir des variables.
 </para>
 
 <tag:description set-var-verbatim verbatim>
-<var nom>=<var valeur>
-[<var nom>=<var valeur>] ...
+<var nom>[=<var valeur>]
+[<var nom>[=<var valeur>]] ...
 </tag:description>
 
 <para>
@@ -525,7 +528,7 @@ quux</define-tag>
 <subsection "Manipulation de chaînes de caractères">
 
 <tag:description string-length>
-<var string>
+<var chaîne>
 </tag:description>
 
 <para>
@@ -545,7 +548,7 @@ ligne comptent pour un caractère.
 </example>
 
 <tag:description downcase>
-<var string>
+<var chaîne>
 </tag:description>
 
 <para>
@@ -557,7 +560,7 @@ Convertit les caractères en minuscules.
 </example>
 
 <tag:description upcase>
-<var string>
+<var chaîne>
 </tag:description>
 
 <para>
@@ -569,7 +572,7 @@ Convertit les caractères en majuscules.
 </example>
 
 <tag:description capitalize>
-<var string>
+<var chaîne>
 </tag:description>
 
 <para>
@@ -582,8 +585,8 @@ chaque mot.
 </example>
 
 <tag:description substring>
-<var string>
-[<var start> [<var end>]]
+<var chaîne>
+[<var début> [<var fin>]]
 </tag:description>
 
 <para>
@@ -600,9 +603,9 @@ caractère est représenté par l'indice 0.
 </example>
 
 <tag:description subst-in-string>
-<var string>
+<var chaîne>
 <var regexp>
-[<var replacement>]
+[<var remplacement>]
 [singleline=true]
 </tag:description>
 
@@ -616,6 +619,13 @@ Effectue une substitution dans la chaîne de caractères.
 <subst-in-string <get-var foo> "([c-e])" "\\1 ">
 </example>
 
+<attributes:description>
+<attributes:item "singleline=true">
+Lorsque cet attribut est utilisé, le symbole <command ^> représente le
+début de la chaîne et le <command $> la fin de la chaîne. Sinon, ils
+représentent respectivement un début de ligne et une fin de ligne.
+</attributes:description>
+
 <example>
 <set-var foo="abcdefghijk\nabcdefghijk\nabcdefghijk">
 <subst-in-string <get-var foo> ".$" "">
@@ -625,7 +635,7 @@ Effectue une substitution dans la chaîne de caractères.
 <tag:description subst-in-var>
 <var nom>
 <var regexp>
-[<var replacement>]
+[<var remplacement>]
 [singleline=true]
 </tag:description>
 
@@ -634,8 +644,8 @@ Effectue une substitution dans une variable.
 </para>
 
 <tag:description string-eq>
-<var string1>
-<var string2>
+<var chaîne1>
+<var chaîne2>
 [caseless=true]
 </tag:description>
 
@@ -661,8 +671,8 @@ des caractères.
 </example>
 
 <tag:description string-neq>
-<var string1>
-<var string2>
+<var chaîne1>
+<var chaîne2>
 [caseless=true]
 </tag:description>
 
@@ -688,8 +698,8 @@ des caractères.
 </example>
 
 <tag:description string-compare>
-<var string1>
-<var string2>
+<var chaîne1>
+<var chaîne2>
 [caseless=true]
 </tag:description>
 
@@ -715,17 +725,11 @@ des caractères.
 </example>
 
 <tag:description match>
-<var string>
+<var chaîne>
 <var regexp>
 [caseless=true]
 [action=report|extract|delete|startpos|endpos|length]
 </tag:description>
-
-<para>
-Compare deux chaînes de caractères et retourne une des valeurs <value
-less>, <value greater> ou <value equal> suivant que le premier argument
-est inférieur, supérieur, ou égal au second.
-</para>
 
 <attributes:description>
 <attributes:item "caseless=true">
@@ -763,8 +767,8 @@ correspond à l'expression régulière.
 </example>
 
 <tag:description char-offsets>
-<var string>
-<var character>
+<var chaîne>
+<var caractère>
 [caseless=true]
 </tag:description>
 
@@ -1521,7 +1525,7 @@ Cette commande prend le même argument que l'option <optflag d>.
 Indique dans quel fichier les instructions de déboguage doivent être
 écrites. Si le nom de fichier est vide, l'affichage de ces instructions
 se fait de nouveau dans la sortie erreur standard. Si le nom du fichier
-est <fle ->, l'affichage est supprimé.
+est <file ->, l'affichage est supprimé.
 </para>
 
 <para>
@@ -1627,8 +1631,9 @@ compilation de cette documentation par <mp4h>, voici le nombre de cycles
 
 <para>
 Cette partie décrit les mécanismes utilisés pour le remplacement des
-macros. Elle se veut aussi précise que possible, aussi n'hésitez pas à me
-signaler toute erreur ou omission.
+macros. Elle se veut aussi précise que possible, aussi n'hésitez pas à
+<URL src="mailto:barbier@imacs.polytechnique.fr" name="me signaler">
+toute erreur ou omission.
 </para>
 
 <subsection "Généralités">
@@ -1802,7 +1807,7 @@ pas être interprétés comme le caractère de fin de chaîne de caractères.
 </example>
 </para>
 
-<subsection "Schéma sumplifié">
+<subsection "Évaluation des commandes">
 
 <para>
 Les commandes ont les caractéristiques suivantes:
@@ -1821,66 +1826,82 @@ texte de remplacement de la commande.
 Les caractères sont lus un par un, jusqu'à trouver un <left-angle>.
 Le nom de la commande est ensuite lu. Les attributs sont lus, avec ou
 sans expansion, selon la caractéristique de la commande. Enfin, si
-la commande est complexe, le corps de la balise est lue.
+la commande est complexe, le corps de la balise est lu.
 Le texte de remplacement est mis sur la pile, en remplaçaant les mots
 commençant par un <value %>, comme <value %body>, <value %attributes>
 ainsi que <value %0>, <value %1>, etc.
 </para>
 
-<undef foo>
-<code>
-<define-tag foo>bar</define-tag>
-avant <foo> après
-</code>
+<note>
+Par défaut, les attributs sont évalués avant la commande elle-même.
+</note>
 
-<code>
-<set-var nom="nom.png">
-<define-tag image><img %attributes border=0></define-tag>
-avant <image src=<get-var nom> alt="Hello, World!"> après
-</code>
-
-<code>
-<set-var nom="nom.png">
-<define-tag image attributes=verbatim><img %attributes border=0></define-tag>
-avant <image src=<get-var nom> alt="Hello, World!"> après
-</code>
-
+<define-tag text-tt endtag=required whitespace=delete>
+<tt>%body</tt>
+</define-tag>
 <para>
-Les caractères suivants sont lus pour déterminer le nom de la commande.
-Avec ce nom, les caractéristiques ci-dessus sont déterminées. Les
-attributs de la commande sont lus, soient tels quels, soient en les
-développant, jusqu'au <right-angle> final. 
+Considérons l'exemple suivant, qui permet de mettre du texte en police
+bâton:
+<code>
+<define-tag text-tt endtag=required whitespace=delete>
+<tt>%body</tt>
+</define-tag>
+</code>
 </para>
 
-<subsection "Mécanisme d'expansion des commandes">
+<para>
+Cet exemple a un inconvénient, comme le montre l'exemple ci-dessous:
+<example>
+<text-tt>Ceci est un <text-tt>essai</text-tt></text-tt>
+</example>
+Nous souhaiterions que les balises intérieures soient supprimées.
+</para>
 
-<step-by-step>
-<step start>
-Les caractères sont lus un par un, jusqu'à trouver un «<left-angle>».
-Si le caractère suivant est une lettre, un underscore
-(<command _>) ou un signe de pourcentage (<command %>), alors cela
-signifie que ce qui suit est le nom d'une commande et le processus
-continue en <step-ref parse-name>. Dans le cas contraire, le signe
-<left-angle> est traité comme un caractère ordinaire, et est simplement
-affiché. Retour en <step-ref start>.
+<set-var _text:tt=0>
+<define-tag text-tt endtag=required whitespace=delete>
+<increment _text:tt>
+<ifeq <get-var _text:tt> 1 "<tt>">
+%body
+<ifeq <get-var _text:tt> 1 "</tt>">
+<decrement _text:tt>
+</define-tag>
+<para>
+L'idée qui vient de suite est d'utiliser une variable pour savoir si
+on est déjà à l'intérieur d'une de ces balises:
+<code>
+<set-var _text:tt=0>
+<define-tag text-tt endtag=required whitespace=delete>
+<increment _text:tt>
+<ifeq <get-var _text:tt> 1 "<tt>">
+%body
+<ifeq <get-var _text:tt> 1 "</tt>">
+<decrement _text:tt>
+</define-tag>
+</code>
+<example>
+<text-tt>Ceci est un <text-tt>essai</text-tt></text-tt>
+</example>
+</para>
 
-<step parse-name>
-Une fois la première lettre d'un mot trouvée, les caractères sont 
-lus tant qu'ils sont susceptibles de former le nom d'une commande.
-D'un point de vue formel, voici comment est défini le nom d'une
-commande:
-<code>nom ::= [A-Za-z%_][A-Za-z0-9%_:*-]</code>
+<undef opt>
+<para>
+Mais si nous utilisons des balises simples, comme dans l'exemple
+ci-dessous, notre définition ne marche plus parce que les attributs sont
+développés avant la commande elle-même:
+<example>
+<define-tag opt><text-tt>%attributes</text-tt></define-tag>
+<opt "Ceci est un <opt essai>">
+</example>
+</para>
 
-<step command>
-Ce nom est ensuite comparé à la liste des noms de commandes connus.
-Si la commande existe, aller en <step-ref parse-attribute>.
-Sinon. Les attributs sont lus comme s'il s'agissait d'une commande
-normale, le résultat est affiché et le programme retourne en <step-ref
-start>.
-
-<step parse-attribute>
-blah blah blah à finir.
-
-</step-by-step>
+<undef opt>
+<para>
+Pour remédier à ce problème, il convient donc d'empêcher que les
+attributs soient développés en premier. Il convient donc d'écrire:
+<example>
+<define-tag opt attributes=verbatim><text-tt>%attributes</text-tt></define-tag>
+<opt "Ceci est un <opt essai>">
+</example>
+</para>
 
 <footer>

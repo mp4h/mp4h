@@ -88,7 +88,8 @@
    <if <get-var verbatim> "" "<tag:V>">
 
 <foreach attr list-attributes>;;;
-<if <get-var attr> <group C_LT_<get-var attr>_GT_ " ">>;;;
+<if <get-var attr> <group C_LT_<get-var attr>_GT_>>;;;
+ ;;;
 </foreach>
 
 =back
@@ -223,23 +224,3 @@
 <define-tag optmand>C_LT_%attributes_GT_</define-tag>
 <define-tag optopt>C_LT_[%attributes]_GT_</define-tag>
 
-;;;
-;;;   Macros to draw a numbered list, with refs.
-;;;
-<define-tag step-by-step endtag=required>
-<set-var __step=>;;;
-<set-var __istep=0>;;;
-<define-tag step-ref></define-tag>;;;
-<define-tag step><array-append %%0 __step></define-tag>;;;
-<set-var dummy="%body">;;;
-<define-tag step>
-=item <increment __istep><get-var __istep>. </define-tag>
-<define-tag step-ref><add 1 <array-member %%0 __step>></define-tag>;;;
-
-=over 2
-
-%body
-
-=back
-
-</define-tag>

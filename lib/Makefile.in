@@ -1,0 +1,60 @@
+##
+##  Makefile --  MP4H Makefile for library
+##
+
+@SET_MAKE@
+SHELL = /bin/sh
+
+top_srcdir      = @top_srcdir@
+srcdir          = @srcdir@
+VPATH           = @srcdir@
+
+# ------------------------------------------------
+#   DEFINITIONS
+# ------------------------------------------------
+
+CC       = @CC@
+AR       = ar
+RANLIB   = @RANLIB@
+
+CONFIG_HEADER = ../config.h
+LIBADD   = @LIBOBJS@
+DEFS     = @DEFS@ -I. -I$(srcdir) -I..
+CPPFLAGS = @CPPFLAGS@
+CFLAGS   = @CFLAGS@
+COMPILE  = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+
+SOURCES  = error.c regex_nl.c
+OBJECTS  = $(SOURCES:.c=.o)
+
+# ------------------------------------------------
+#   COMPILATION RULES
+# ------------------------------------------------
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+.c.o:
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -c $<
+
+# ------------------------------------------------
+#   DEFAULT TARGET
+# ------------------------------------------------
+
+all: libmp4h.a
+
+libmp4h.a: $(OBJECTS) $(LIBADD)
+	-rm -f $@
+	$(AR) cru $@ $(OBJECTS) $(LIBADD)
+	$(RANLIB) $@
+
+# ------------------------------------------------
+#   CLEANUP
+# ------------------------------------------------
+
+clean:
+	-rm -f *.a *.o
+
+distclean: clean
+	-rm -f Makefile
+

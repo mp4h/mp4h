@@ -80,6 +80,8 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
     {                           /* TOKSW */
     case TOKEN_EOF:
     case TOKEN_MACDEF:
+    case TOKEN_BGROUP:
+    case TOKEN_EGROUP:
       break;
 
     case TOKEN_QUOTED:
@@ -93,10 +95,6 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
         obstack_1grow (obs, CHAR_RQUOTE);
       break;
 
-    case TOKEN_BGROUP:
-    case TOKEN_EGROUP:
-      break;
-
     case TOKEN_WORD:
       if (IS_ESCAPE(*text))
         text++;
@@ -105,26 +103,18 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
          If another character is found, this string is not a
          macro, it could be ePerl delimiters.  */
 
-      if (*text == '/' ||
-          (!isalpha((int) *text) && *text != '%' && *text != '_'))
+      if (! IS_ALPHA (*text))
         {
           expand_unknown_macro (text, expansion);
           break;
         }
       sym = lookup_symbol (text, SYMBOL_LOOKUP);
       if (sym == NULL)
-        {
-          expand_unknown_macro (text, expansion);
-        }
+        expand_unknown_macro (text, expansion);
       else if (SYMBOL_TYPE (sym) == TOKEN_VOID)
-        {
-          shipout_text (obs, TOKEN_DATA_TEXT (td),
-                                strlen (TOKEN_DATA_TEXT (td)));
-        }
+        shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
       else
-        {
-          expand_macro (sym, expansion);
-        }
+        expand_macro (sym, expansion);
       break;
 
     default:
@@ -205,7 +195,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
 
         case TOKEN_QUOTE:
           if (group_level == 0)
-              in_string = !in_string;
+            in_string = !in_string;
           break;
 
         case TOKEN_QUOTED:
@@ -219,10 +209,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
           break;
 
         case TOKEN_WORD:
-          if (expansion & READ_VERB_ATTR)
-              expand_token (obs, READ_VERBATIM, t, &td);
-          else
-              expand_token (obs, expansion, t, &td);
+          expand_token (obs, expansion, t, &td);
           break;
 
         case TOKEN_MACDEF:
@@ -248,10 +235,9 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp)
 | Collect all the arguments to a call of the macro SYM.  The arguments are |
 | stored on the obstack ARGUMENTS and a table of pointers to the arguments |
 | on the obstack ARGPTR.                                                   |
-| Returns FALSE when arguments are not valid                               |
 `-------------------------------------------------------------------------*/
 
-static boolean
+static void
 collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
                    struct obstack *arguments)
 {
@@ -295,11 +281,6 @@ collect_arguments (symbol *sym, read_type expansion, struct obstack *argptr,
           && strlen (TOKEN_DATA_TEXT (tdp)) == 0)
         argptr->next_free = last_addr;
     }
-  else
-    {
-      return FALSE;
-    }
-  return TRUE;
 }
 
 /*-----------------------------------------------------------------.
@@ -356,7 +337,7 @@ collect_body (symbol *sym, struct obstack *argptr)
                   /*  gobble closing bracket */
                   do
                     {
-                      t = next_token (&td, READ_VERBATIM);
+                      t = next_token (&td, READ_BODY);
                     }
                   while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)));
                   obstack_1grow (&body, '\0');
@@ -378,7 +359,7 @@ collect_body (symbol *sym, struct obstack *argptr)
                   /*  gobble closing bracket */
                   do
                     {
-                      t = next_token (&td, READ_VERBATIM);
+                      t = next_token (&td, READ_BODY);
                       obstack_grow (&body, TOKEN_DATA_TEXT (&td),
                               strlen(TOKEN_DATA_TEXT (&td)) );
                     }
@@ -389,13 +370,9 @@ collect_body (symbol *sym, struct obstack *argptr)
             {
               newsym = lookup_symbol (text, SYMBOL_LOOKUP);
               if (newsym == NULL || SYMBOL_TYPE (newsym) == TOKEN_VOID)
-                {
-                  expand_unknown_macro (text, READ_VERBATIM);
-                }
+                expand_unknown_macro (text, READ_ATTR_BODY);
               else
-                {
-                  expand_macro (newsym, READ_VERBATIM);
-                }
+                expand_macro (newsym, READ_ATTR_BODY);
             }
           break;
 
@@ -458,7 +435,7 @@ expand_macro (symbol *sym, read_type expansion)
   int argc, i;
   struct obstack *obs_expansion;
   const char *expanded;
-  boolean traced, valid;
+  boolean traced;
   int my_call_id;
   read_type attr_expansion;
 
@@ -480,38 +457,29 @@ expand_macro (symbol *sym, read_type expansion)
   if (traced && (debug_level & DEBUG_TRACE_CALL))
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
 
-  if (expansion & READ_VERBATIM)
-    attr_expansion = expansion;
-  else if (SYMBOL_EXPAND_ARGS (sym))
-      attr_expansion = expansion | READ_ATTRIBUTE;
+  if (expansion == READ_ATTR_BODY || expansion == READ_BODY)
+    attr_expansion = READ_ATTR_BODY;
+  else if (expansion == READ_ATTR_VERB || ! SYMBOL_EXPAND_ARGS (sym))
+    attr_expansion = READ_ATTR_VERB;
   else
-      attr_expansion = expansion | READ_VERB_ATTR;
+    attr_expansion = READ_ATTRIBUTE;
 
-  valid = collect_arguments (sym, attr_expansion, &argptr, &arguments);
-  if (valid)
-    {
-      save_argptr = argptr;
-      argc = obstack_object_size (&argptr) / sizeof (token_data *);
-      argv = (token_data **) obstack_finish (&argptr);
+  collect_arguments (sym, attr_expansion, &argptr, &arguments);
+  save_argptr = argptr;
+  argc = obstack_object_size (&argptr) / sizeof (token_data *);
+  argv = (token_data **) obstack_finish (&argptr);
 
-      if (SYMBOL_CONTAINER (sym))
-        {
-          collect_body (sym, &save_argptr);
-          argv = (token_data **) obstack_finish (&save_argptr);
-        }
-    }
-  else
+  if (SYMBOL_CONTAINER (sym))
     {
-      argc = 0;
-      argv = NULL;
-      expansion = READ_VERBATIM;
+      collect_body (sym, &save_argptr);
+      argv = (token_data **) obstack_finish (&save_argptr);
     }
 
   if (traced)
     trace_pre (SYMBOL_NAME (sym), my_call_id, argc, argv);
 
   obs_expansion = push_string_init ();
-  if (!(expansion & READ_VERBATIM) && !(expansion & READ_VERB_ATTR))
+  if (expansion == READ_NORMAL || expansion == READ_ATTRIBUTE)
     {
       if (expansion_level > 1)
         obstack_1grow (obs_expansion, CHAR_BGROUP);
@@ -522,26 +490,20 @@ expand_macro (symbol *sym, read_type expansion)
   else
     {
       obstack_1grow (obs_expansion, '<');
-      obstack_grow (obs_expansion, SYMBOL_NAME (sym),
-          strlen (SYMBOL_NAME (sym)));
+      shipout_string (obs_expansion, SYMBOL_NAME (sym), 0);
 
       for (i = 1; i < argc; i++)
         {
           obstack_1grow (obs_expansion, ' ');
           shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
         }
-      if (valid)
+      obstack_1grow (obs_expansion, '>');
+      if (SYMBOL_CONTAINER (sym))
         {
+          shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[argc]), 0);
+          obstack_grow (obs_expansion, "</", 2);
+          shipout_string (obs_expansion, SYMBOL_NAME (sym), 0);
           obstack_1grow (obs_expansion, '>');
-          if (SYMBOL_CONTAINER (sym))
-            {
-              obstack_grow(obs_expansion, TOKEN_DATA_TEXT (argv[argc]),
-                  strlen(TOKEN_DATA_TEXT (argv[argc])));
-              obstack_grow (obs_expansion, "</", 2);
-              obstack_grow (obs_expansion, SYMBOL_NAME (sym),
-                  strlen (SYMBOL_NAME (sym)));
-              obstack_1grow (obs_expansion, '>');
-            }
         }
     }
   expanded = push_string_finish (expansion);
@@ -564,9 +526,9 @@ expand_unknown_macro (char *name, read_type expansion)
   token_data **argv;
   int argc, i;
   struct obstack *obs_expansion;
-  char *symbol_name;
+  char *symbol_name, *cp;
   const char *expanded;
-  boolean traced, valid;
+  boolean traced;
   int my_call_id;
 
   /* The ``name'' pointer points to a region which is modified
@@ -595,23 +557,16 @@ expand_unknown_macro (char *name, read_type expansion)
   if (traced && (debug_level & DEBUG_TRACE_CALL))
     trace_prepre (SYMBOL_NAME (&unknown), my_call_id);
 
-
-  if (expansion & READ_VERBATIM || expansion & READ_VERB_ATTR)
-    expansion = READ_VERBATIM;
-  else if (expansion & READ_BODY)
-    expansion = READ_NORMAL;
-
-  valid = collect_arguments (&unknown, expansion, &argptr, &arguments);
-  if (valid)
-    {
-      argc = obstack_object_size (&argptr) / sizeof (token_data *);
-      argv = (token_data **) obstack_finish (&argptr);
-    }
+  if (expansion == READ_ATTR_BODY)
+    expansion = READ_ATTR_BODY;
+  else if (expansion == READ_ATTR_VERB || expansion == READ_BODY)
+    expansion = READ_ATTR_VERB;
   else
-    {
-      argc = 0;
-      argv = NULL;
-    }
+    expansion = READ_ATTRIBUTE;
+
+  collect_arguments (&unknown, expansion, &argptr, &arguments);
+  argc = obstack_object_size (&argptr) / sizeof (token_data *);
+  argv = (token_data **) obstack_finish (&argptr);
 
   if (traced)
     trace_pre (SYMBOL_NAME (&unknown), my_call_id, argc, argv);
@@ -620,14 +575,38 @@ expand_unknown_macro (char *name, read_type expansion)
   obstack_1grow (obs_expansion, '<');
   obstack_grow (obs_expansion, symbol_name, strlen (symbol_name));
 
-  for (i = 1; i < argc; i++)
+  /*  Replace `name=val' attributes by name="val" */
+#if 0
+  if (expansion_level > 1)
     {
-      obstack_1grow (obs_expansion, ' ');
-      shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+      for (i = 1; i < argc; i++)
+        {
+          obstack_1grow (obs_expansion, ' ');
+          shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+        }
     }
-  if (valid)
-    obstack_1grow (obs_expansion, '>');
-  expanded = push_string_finish (READ_VERBATIM);
+  else
+#endif
+    {
+      for (i = 1; i < argc; i++)
+        {
+          obstack_1grow (obs_expansion, ' ');
+          cp = strchr (TOKEN_DATA_TEXT (argv[i]), '=');
+          if (cp != NULL && *(cp+1) != '"' && *(cp+1) != CHAR_QUOTE)
+            {
+              *cp = '\0';
+              shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+              obstack_1grow (obs_expansion, '=');
+              obstack_1grow (obs_expansion, CHAR_QUOTE);
+              shipout_string (obs_expansion, cp + 1, 0);
+              obstack_1grow (obs_expansion, CHAR_QUOTE);
+            }
+          else
+            shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+        }
+    }
+  obstack_1grow (obs_expansion, '>');
+  expanded = push_string_finish (READ_BODY);
 
   if (traced)
     trace_post (SYMBOL_NAME (&unknown), my_call_id, argc, argv, expanded);

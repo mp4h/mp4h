@@ -619,7 +619,10 @@ dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
 
       if (expansion_level > 0)
         obstack_1grow (obs, CHAR_BGROUP);
-      shipout_string (obs, TOKEN_DATA_TEXT (argv[i]), 0);
+      if (*ARG (i) == '"' && *(ARG (i) + strlen (ARG (i))) == '"')
+        obstack_grow (obs, ARG (i) + 1, strlen (ARG (i) - 1));
+      else
+        obstack_grow (obs, ARG (i), strlen (ARG (i)));
       if (expansion_level > 0)
         obstack_1grow (obs, CHAR_EGROUP);
     }
@@ -900,11 +903,9 @@ mp4h_function_def (MP4H_BUILTIN_ARGS)
   switch (SYMBOL_TYPE (s))
     {
     case TOKEN_TEXT:
-      if (expansion_level > 1)
-        obstack_1grow (obs, CHAR_LQUOTE);
+      obstack_1grow (obs, CHAR_LQUOTE);
       shipout_string (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
-      if (expansion_level > 1)
-        obstack_1grow (obs, CHAR_RQUOTE);
+      obstack_1grow (obs, CHAR_RQUOTE);
       break;
 
     case TOKEN_FUNC:
@@ -1801,7 +1802,7 @@ mp4h_include (MP4H_BUILTIN_ARGS)
 {
   const char *alt, *verbatim;
 
-  alt = predefined_attribute ("alt", &argc, argv, FALSE);
+  alt = predefined_attribute ("alt", &argc, argv, TRUE);
   verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -1827,7 +1828,7 @@ mp4h___include (MP4H_BUILTIN_ARGS)
   FILE *fp;
   char *filename = NULL;
 
-  alt = predefined_attribute ("alt", &argc, argv, FALSE);
+  alt = predefined_attribute ("alt", &argc, argv, TRUE);
   verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
 
   if (bad_argc (argv[0], argc, 2, 2))
@@ -1837,7 +1838,8 @@ mp4h___include (MP4H_BUILTIN_ARGS)
   if (fp == NULL)
     {
       if (alt)
-        obstack_grow (obs, alt, strlen(alt));
+        /*  Remove CHAR_LQUOTE and CHAR_RQUOTE */
+        obstack_grow (obs, alt + 1, strlen(alt) - 1);
       else
         {
           MP4HERROR ((warning_status, errno,
@@ -1898,7 +1900,7 @@ static void
 mp4h_frozen_dump (MP4H_BUILTIN_ARGS)
 {
   if (frozen_dump)
-    input_close;
+    input_close ();
 }
 
 
@@ -2367,8 +2369,10 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
   obstack_grow (obs, "<set-var-verbatim ", 18);
   obstack_grow (obs, ARG (1), strlen (ARG (1)));
   obstack_1grow (obs, '=');
+  obstack_1grow (obs, CHAR_BGROUP);
   argv[1] = &td;
   subst_in_string (obs, argc, argv, s);
+  obstack_1grow (obs, CHAR_EGROUP);
   obstack_1grow (obs, '>');
 }
 
@@ -3572,12 +3576,12 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
       if (isdigit ((int) *text))
         {
           char *endp;
-          i = (int)strtol (text, &endp, 10);
+          i = (int)strtol (text, &endp, 10) + 1;
           text = endp;
-          if (i+1 < argc)
+          if (i < argc)
             {
               obstack_1grow (obs, CHAR_BGROUP);
-              shipout_string (obs, ARG (i+1), 0);
+              obstack_grow (obs, ARG (i), strlen (ARG (i)));
               obstack_1grow (obs, CHAR_EGROUP);
             }
         }

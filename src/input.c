@@ -506,7 +506,7 @@ push_string_finish (read_type expansion)
     {
       obstack_1grow (current_input, '\0');
       next->u.u_s.start = obstack_finish (current_input);
-      if (expansion & READ_VERBATIM)
+      if (expansion == READ_ATTR_VERB || expansion == READ_BODY || expansion == READ_ATTR_BODY)
         {
           TOKEN_DATA_TYPE (&token_read) = TOKEN_TEXT;
           TOKEN_DATA_TEXT (&token_read) = xstrdup (next->u.u_s.start);
@@ -955,11 +955,7 @@ next_token (token_data *td, read_type expansion)
         }
 
       (void) next_char ();
-      if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
-        {
-          skip_line ();
-        }
-      else if (IS_ESCAPE(ch))             /* ESCAPED WORD */
+      if (IS_ESCAPE(ch))             /* ESCAPED WORD */
         {
           obstack_1grow (&token_stack, ch);
           if ((ch = peek_input ()) != CHAR_EOF)
@@ -986,20 +982,32 @@ next_token (token_data *td, read_type expansion)
                     }
                   unget_input(ch);
 
-                  type = TOKEN_WORD;
+                  ch = peek_input ();
+                  if (IS_SPACE(ch) || IS_CLOSE(ch))
+                    type = TOKEN_WORD;
+                  else
+                    type = TOKEN_STRING;
                 }
               else
-                {
-                  type = TOKEN_STRING;
-                }
+                type = TOKEN_STRING;
             }
           else
             type = TOKEN_SIMPLE;        /* escape before eof */
         }
-      else if (expansion & READ_BODY)
+      else if (IS_CLOSE(ch))
         {
           obstack_1grow (&token_stack, ch);
-          while ((ch = next_char ()) != CHAR_EOF && ! (IS_ESCAPE(ch)))
+          type = TOKEN_SIMPLE;
+        }
+      else if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
+        skip_line ();
+      else if (expansion == READ_BODY)
+        {
+          if (ch == '"')
+            obstack_1grow (&token_stack, CHAR_QUOTE);
+          else
+            obstack_1grow (&token_stack, ch);
+          while ((ch = next_char ()) != CHAR_EOF && ! IS_ESCAPE(ch))
             {
               if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
                 {
@@ -1007,7 +1015,10 @@ next_token (token_data *td, read_type expansion)
                   ch = CHAR_EOF;
                   break;
                 }
-              obstack_1grow (&token_stack, ch);
+              if (ch == '"')
+                obstack_1grow (&token_stack, CHAR_QUOTE);
+              else
+                obstack_1grow (&token_stack, ch);
             }
           unget_input(ch);
 
@@ -1049,72 +1060,120 @@ next_token (token_data *td, read_type expansion)
                       break;
                 }
               else if (IS_LQUOTE(ch))
-                {
-                  quote_level++;
-                }
+                quote_level++;
               else
-                {
-                  obstack_1grow (&token_stack, ch);
-                }
+                obstack_1grow (&token_stack, ch);
             }
           type = TOKEN_QUOTED;
         }
       else if (IS_BGROUP(ch))             /* BEGIN GROUP */
-        {
-          type = TOKEN_BGROUP;
-        }
+        type = TOKEN_BGROUP;
       else if (IS_EGROUP(ch))             /* END GROUP */
+        type = TOKEN_EGROUP;
+      else if (ch == '"')                 /* QUOTED STRING */
         {
-          type = TOKEN_EGROUP;
-        }
-                                     /* QUOTED STRING, NOT EXPANDED */
-      else if (ch == '"' && (expansion & READ_VERB_ATTR))
-        {
-          while (1)
-            {
-              ch = next_char ();
-              if (ch == CHAR_EOF)
-                MP4HERROR ((EXIT_FAILURE, 0,
-                   _("ERROR:%s:%d: EOF in string"), CURRENT_FILE_LINE));
+          switch (expansion)
+          {
+            case READ_NORMAL:
+            case READ_BODY:
+              obstack_1grow (&token_stack, CHAR_QUOTE);
+              type = TOKEN_SIMPLE;
+              break;
 
-              if (ch == '\\')
+            case READ_ATTRIBUTE:
+              type = TOKEN_QUOTE;
+              break;
+
+            case READ_ATTR_VERB:
+            case READ_ATTR_BODY:
+              if (expansion == READ_ATTR_BODY)
+                obstack_1grow (&token_stack, '"');
+              else
+                obstack_1grow (&token_stack, CHAR_BGROUP);
+              while (1)
                 {
                   ch = next_char ();
                   if (ch == CHAR_EOF)
                     MP4HERROR ((EXIT_FAILURE, 0,
-                      _("ERROR:%s:%d: EOF in string"), CURRENT_FILE_LINE));
-                  obstack_1grow (&token_stack, ch);
+                       _("ERROR:%s:%d: EOF in string"), CURRENT_FILE_LINE));
+
+                  if (ch == '"')
+                    break;
+                  else if (ch == '\\')
+                    {
+                      if (expansion == READ_ATTR_VERB)
+                        {
+                          ch = next_char ();
+                          if (ch == 'n')
+                            obstack_1grow (&token_stack, '\n');
+                          else if (ch == 't')
+                            obstack_1grow (&token_stack, '\t');
+                          else if (ch == 'r')
+                            obstack_1grow (&token_stack, '\r');
+                          else if (ch == '"')
+                            obstack_1grow (&token_stack, CHAR_QUOTE);
+                          else if (ch == CHAR_EOF)
+                            MP4HERROR ((EXIT_FAILURE, 0,
+                              _("ERROR:%s:%d: EOF in string"), CURRENT_FILE_LINE));
+                          else
+                            obstack_1grow (&token_stack, ch);
+                        }
+                      else
+                        {
+                          obstack_1grow (&token_stack, ch);
+                          ch = next_char ();
+                          obstack_1grow (&token_stack, ch);
+                        }
+                    }
+                  else
+                    obstack_1grow (&token_stack, ch);
                 }
+              if (expansion == READ_ATTR_BODY)
+                obstack_1grow (&token_stack, '"');
+              else
+                obstack_1grow (&token_stack, CHAR_EGROUP);
+              type = TOKEN_STRING;
+              break;
+
+            default:
+              MP4HERROR ((warning_status, 0,
+                _("INTERNAL ERROR: Unknown expansion type")));
+              abort ();
+          }
+        }
+      else if (ch == '\\')
+        {
+          switch (expansion)
+          {
+            case READ_NORMAL:
+            case READ_ATTR_VERB:
+            case READ_ATTR_BODY:
+            case READ_BODY:
+              obstack_1grow (&token_stack, ch);
+              type = TOKEN_SIMPLE;
+              break;
+
+            case READ_ATTRIBUTE:
+              ch = next_char();
+              if (ch == 'n')
+                obstack_1grow (&token_stack, '\n');
+              else if (ch == 't')
+                obstack_1grow (&token_stack, '\t');
+              else if (ch == 'r')
+                obstack_1grow (&token_stack, '\r');
               else if (ch == '"')
-                break;
+                obstack_1grow (&token_stack, CHAR_QUOTE);
               else
                 obstack_1grow (&token_stack, ch);
-            }
-          type = TOKEN_STRING;
-        }
-                                     /* QUOTED STRING BEFORE EXPANSION*/
-      else if (ch == '"' && (expansion & READ_ATTRIBUTE))
-        {
-          type = TOKEN_QUOTE;
-        }
-      else if (ch == '\\' && (expansion & READ_ATTRIBUTE))
-        {
-          ch = next_char();
-          if (ch == 'n')
-            obstack_1grow (&token_stack, '\n');
-          else if (ch == 't')
-            obstack_1grow (&token_stack, '\t');
-          else if (ch == 'r')
-            obstack_1grow (&token_stack, '\r');
-          else
-            obstack_1grow (&token_stack, ch);
 
-          type = TOKEN_STRING;
-        }
-      else if (ch == '"' || ch == '\\')
-        {
-          obstack_1grow (&token_stack, ch);
-          type = TOKEN_SIMPLE;
+              type = TOKEN_STRING;
+              break;
+
+            default:
+              MP4HERROR ((warning_status, 0,
+                _("INTERNAL ERROR: Unknown expansion type")));
+              abort ();
+          }
         }
       else /* EVERYTHING ELSE */
         {
