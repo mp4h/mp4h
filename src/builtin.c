@@ -145,8 +145,6 @@ DECLARE (mp4h_match);
 DECLARE (mp4h_string_eq);
 DECLARE (mp4h_string_neq);
 DECLARE (mp4h_char_offsets);
-DECLARE (mp4h_set_regexp_syntax);
-DECLARE (mp4h_get_regexp_syntax);
 
   /*  variable functions  */
 DECLARE (mp4h_get_var);
@@ -294,8 +292,6 @@ builtin_tab[] =
   { "string-eq",        FALSE,    TRUE,   mp4h_string_eq },
   { "string-neq",       FALSE,    TRUE,   mp4h_string_neq },
   { "char-offsets",     FALSE,    TRUE,   mp4h_char_offsets },
-  { "set-regexp-syntax",FALSE,    TRUE,   mp4h_set_regexp_syntax },
-  { "get-regexp-syntax",FALSE,    TRUE,   mp4h_get_regexp_syntax },
   
       /*  variable functions  */
   { "get-var",          FALSE,    TRUE,   mp4h_get_var },
@@ -352,9 +348,6 @@ static symbol varbreak;
 
 /*  Stack preserve/restore variables.  */
 static var_stack *vs = NULL;
-
-/*  Flags used in regexps */
-static int regex_flags = 0;
 
 /*  Global variables needed by sort algorithms.  */
 static boolean sort_caseless;
@@ -614,18 +607,13 @@ builtin_deallocate (void)
   xfree (SYMBOL_TEXT (&varbreak));
 }
 
-/*------------------------------------------------------------------------.
-| Initialise regexp syntax to use extended or regular POSIX expressions.  |
-`------------------------------------------------------------------------*/
-
-void
-set_regexp_extended (boolean extended)
-{
-  if (extended)
-    regex_flags = REG_EXTENDED;
-  else
-    regex_flags = 0;
-}
+/*
+     Regular expression support is provided by the PCRE library package,
+     which is open source software, copyright by the University of
+     Cambridge.
+     Latest sources are available from
+        ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
+*/
 
 static boolean
 xregcomp (regex_t *preg, const char *pattern, int cflags)
@@ -778,7 +766,7 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv,
   sprintf (name, "^%s$", list);
 
   /*  Compile this expression once  */
-  if (!xregcomp (&re, name, regex_flags | REG_ICASE))
+  if (!xregcomp (&re, name, REG_ICASE))
     {
       regfree (&re);
       xfree (name);
@@ -1297,7 +1285,7 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
 
   if (matching)
     {
-      if (!xregcomp (&re, matching, regex_flags))
+      if (!xregcomp (&re, matching, 0))
         return;
     }
 
@@ -2876,7 +2864,7 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
   regexp = ARG (2);
   remove_special_chars (regexp, FALSE);
 
-  if (!xregcomp (&re, regexp, regex_flags | extra_re_flags))
+  if (!xregcomp (&re, regexp, extra_re_flags))
     return;
 
   /* Accept any number of subexpressions */
@@ -2966,7 +2954,7 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   regexp = ARG (2);
   remove_special_chars (regexp, FALSE);
 
-  if (!xregcomp (&re, regexp, regex_flags | extra_re_flags))
+  if (!xregcomp (&re, regexp, extra_re_flags))
     return;
 
   offset = 0;
@@ -3257,48 +3245,6 @@ mp4h_char_offsets (MP4H_BUILTIN_ARGS)
               shipout_int (obs, (int) (cp-ARG (1)));
             }
         }
-    }
-}
-
-/*-------------------------------------------------------------------.
-| This function allows to choose between basic and extended regular  |
-| expressions.                                                       |
-`-------------------------------------------------------------------*/
-static void
-mp4h_set_regexp_syntax (MP4H_BUILTIN_ARGS)
-{
-  const char *regexp;
-
-  regexp = predefined_attribute ("type", &argc, argv, TRUE);
-  if (bad_argc (argv[0], argc, 1, 2))
-    return;
-
-  if (!regexp)
-    regexp = "extended";
-
-  set_regexp_extended (strcmp (regexp, "basic") != 0);
-}
-
-/*-------------------------------------------.
-| This function shows which regexp is used.  |
-`-------------------------------------------*/
-static void
-mp4h_get_regexp_syntax (MP4H_BUILTIN_ARGS)
-{
-  switch (regex_flags)
-    {
-      case REG_EXTENDED:
-        obstack_grow (obs, "extended", 8);
-        break;
-
-      case 0:
-        obstack_grow (obs, "basic", 5);
-        break;
-
-      default:
-        MP4HERROR ((warning_status, 0,
-          _("INTERNAL ERROR: wrong syntax option in <%s>"), ARG (0)));
-        break;
     }
 }
 

@@ -843,9 +843,6 @@ input_init (void)
      varbreak symbol.  */
   init_break ();
 
-  /* This routine tells whether we want extended regexp or not. */
-  set_regexp_extended (TRUE);
-  
   syntax_init ();
 }
 

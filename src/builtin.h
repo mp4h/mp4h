@@ -41,7 +41,7 @@
 #undef HAVE_FILE_FUNCS
 #endif
 
-#include "regex.h"
+#include "pcreposix.h"
 
 #ifdef HAVE_FILE_FUNCS
 #include <dirent.h>

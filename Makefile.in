@@ -22,7 +22,7 @@ VPATH           = @srcdir@
 # ------------------------------------------------
 
 @WITH_MODULES_TRUE@MODULES_DIRS    = libltdl modules
-SUBDIRS         = lib $(MODULES_DIRS) src doc packages tests
+SUBDIRS         = pcre lib $(MODULES_DIRS) src doc packages tests
 SDP             =
 MP4H_VERSION    = @VERSION@
 

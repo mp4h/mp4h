@@ -563,7 +563,6 @@ void builtin_init __P ((void));
 void builtin_deallocate __P ((void));
 void clear_tag_attr __P ((void));
 void define_builtin __P ((const char *, const builtin *, boolean));
-void set_regexp_extended __P ((boolean));
 void init_break __P ((void));
 void define_user_macro __P ((const char *, char *, symbol_lookup,
                              boolean, boolean, boolean));

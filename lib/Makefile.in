@@ -24,7 +24,7 @@ CPPFLAGS = @CPPFLAGS@
 CFLAGS   = @CFLAGS@
 COMPILE  = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
 
-SOURCES  = error.c regex.c
+SOURCES  = error.c
 OBJECTS  = $(SOURCES:.c=.o)
 
 # ------------------------------------------------
