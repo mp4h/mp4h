@@ -242,10 +242,10 @@ This documentation describes <get-var package /> version <get-var version />.
 ;;;    Verbatim code
 ;;;
 <define-tag code endtag=required attributes=verbatim whitespace=delete>
-<set-var-verbatim verb-body=%Ubody />;;;
-<subst-in-var verb-body "&" "&amp;" />;;;
-<subst-in-var verb-body "<" "&lt;" />;;;
-<subst-in-var verb-body ">" "&gt;" />;;;
+<set-var-verbatim verb-body=%Ubody />
+<subst-in-var verb-body "&" "&amp;" />
+<subst-in-var verb-body "<" "&lt;" />
+<subst-in-var verb-body ">" "&gt;" />
 <pre><get-var verb-body /></pre>
 </define-tag>
 
@@ -262,14 +262,14 @@ This documentation describes <get-var package /> version <get-var version />.
 &lt;!--%body--&gt;
 </define-tag>
 
-<define-tag option-list endtag=required>
+<define-tag option-list endtag=required whitespace=delete>
 <table cellspacing=2 border=0 summary="">
 %body
 </table>
 </define-tag>
 
-<define-tag option endtag=required>
-<tr valign=top><td>%attributes</td><td>%body</td></tr>
+<define-tag option endtag=required>;;;
+<tr valign=top><td>%attributes</td><td>%body</td></tr>;;;
 </define-tag>
 
 <define-tag option-desc endtag=required>

@@ -3,7 +3,6 @@
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
-<mp4h-l10n LC_ALL=C />
 <set-var package=mp4h />
 <set-var version=1.1.0 />
 <set-var title="mp4h - A Macro Processor for HTML Documents" />
@@ -74,9 +73,11 @@ an argument, short option do too.
 
 <para>
 Syntax call is
+</para>
 
 <code>mp4h [options] [filename [filename] ...]</code>
 
+<para>
 Options are described below.  If no filename is specified, or if its
 name is <file - />, then characters are read on standard input.
 </para>
@@ -110,6 +111,8 @@ set parser behaviour according to the bits of <optmand NUMBER /></option>
 
 <para>
 NUMBER is a combination of
+</para>
+
 <option-list>
 <option 1>do not parse unknown tags</option>
 <option 2>unknown tags are assumed being simple</option>
@@ -123,7 +126,7 @@ NUMBER is a combination of
 <option 1024>suppress warnings about bad nested tags</option>
 <option 2048>suppress warnings about missing trailing slash</option>
 </option-list>
-</para>
+
 <para>
 In version <get-var version />, default value is 3114=2+8+32+1024+2048.
 </para>
@@ -152,6 +155,8 @@ redirect debug and trace output</option>
 
 <para>
 Flags are any of:
+</para>
+
 <option-list>
 <option t>trace for all macro calls, not only debugging-on'ed</option>
 <option a>show actual arguments</option>
@@ -164,7 +169,6 @@ Flags are any of:
 <option i>show changes in input files</option>
 <option V>shorthand for all of the above flags</option>
 </option-list>
-</para>
 
 <section alt="List of primitives">Description</section>
 
@@ -175,10 +179,10 @@ As <mp4h/> has been specially designed for HTML documents, its syntax is
 very similar to HTML, with tags and attributes.  One important feature
 has no equivalent in HTML: comments until end of line.  All text
 following three colons is discarded until end of line, like
+</para>
 
 <code>;;;  This is a comment</code>
 
-</para>
 
 ###
 ###    Defining new macros
@@ -200,16 +204,17 @@ As with HTML, macro names are case insensitive.  In this documentation,
 only lowercase letters are used.
 There are two kinds of tags: simple and complex. A simple tag has the
 following form:
+</para>
 
 <code><name [attributes]/></code>
 
+<para>
 whereas a complex tag looks like:
+</para>
 
 <code><name [attributes]>
 body
 </name></code>
-
-</para>
 
 <para>
 Since version 0.9.1, <mp4h/> knows XHTML syntax too, so your input file
@@ -245,23 +250,29 @@ chapter on macro expansion for further details).
 <para>
 This function lets you define your own tags.  First argument is the
 command name. Replacement text is the function body.
+</para>
 
 <example>
 <define-tag foo>bar</define-tag>
 <foo />
 </example>
 
+<para>
 Even if spaces have usually few incidence on HTML syntax, it is
 important to note that
+</para>
 
 <code><define-tag foo>bar</define-tag></code>
 
+<para>
 and
+</para>
 
 <code><define-tag foo>
 bar
 </define-tag></code>
 
+<para>
 are not equivalent, the latter form contains two newlines that were not
 present in the former.
 </para>
@@ -452,6 +463,7 @@ In those two functions, names of attributes may be regular expressions.
 Main goal of these primitives is to help writing macros accepting any
 kind of attributes without having to declare them. A canonical example
 is
+</para>
 <example>
 <define-tag href whitespace=delete>
 <preserve url name />
@@ -462,10 +474,10 @@ is
 </define-tag>
 <href class=web url="http://www.foo.com" name="Welcome" />
 </example>
-</para>
 
 <para>
 But we want now to add an image attribute.  So we may write
+</para>
 <example>
 <define-tag href whitespace=delete>
 <preserve url name image />
@@ -482,12 +494,12 @@ But we want now to add an image attribute.  So we may write
 </define-tag>
 <href class=web url="http://www.foo.com" name="Welcome" image="foo.png"/>
 </example>
-</para>
 
 <para>
 We need a mechanism to tell <mp4h/> that some attributes refer to
 specific HTML tags.  A solution is to prepend attribute with tag name,
 e.g.
+</para>
 <example>
 <define-tag href whitespace=delete>
 <preserve url name image />
@@ -505,10 +517,14 @@ e.g.
 <href a:class=web img:id=logo img:border=1
       url="http://www.foo.com" name="Welcome" image="foo.png" />
 </example>
+
+<para>
 This example shows that regular expressions may be used within
 attributes names, but it is still incomplete, because we want to remove
 prefix from attributes.  One solution is with <command subst-in-string />,
 but there is a more elegant one:
+</para>
+
 <example>
 <define-tag href whitespace=delete>
 <preserve url name image />
@@ -526,6 +542,8 @@ but there is a more elegant one:
 <href :a:class=web :img:id=logo :img:border=1
       url="http://www.foo.com" name="Welcome" image="foo.png" />
 </example>
+
+<para>
 When there are subexpressions within regular expressions, they are
 printed instead of the whole expression.  Note also that i put a colon
 before the prefix in order not to mix them with XML namespaces.
@@ -971,6 +989,8 @@ For this reason, the following macros recognize two attributes,
 But Perl allows a much better control on regular expressions with so
 called modifiers, which are assed to the new <attribute reflags />
 attribute.  It may contain one or more modifiers:
+</para>
+
 <option-list>
 <option i>Matching is case insensitive</option>
 <option m>Treat string as multiple lines. When set, a <value ^ /> matches
@@ -982,7 +1002,6 @@ match a newline, whereas it does not by default.</option>
 newlines and comments are removed from regular expression before
 processing.</option>
 </option-list>
-</para>
 
 <note>
 Attribute <attribute singleline=true /> is a synonym for the <attribute s />
@@ -1087,6 +1106,7 @@ Prints the length of the expression matching regexp in string.
 With <mp4h/> one can easily deal with string arrays. Variables can be
 treated as a single value or as a newline separated list of strings.
 Thus after defining
+</para>
 
 <code>
 <set-var digits="0
@@ -1095,13 +1115,14 @@ Thus after defining
 3" />
 </code>
 
+<para>
 one can view its content or one of these values:
+</para>
 <set-var digits="0\n1\n2\n3" />
 <example>
 <get-var digits />
 <get-var digits[2] />
 </example>
-</para>
 
 <tag:description array-size>
 <var name />
@@ -1641,6 +1662,7 @@ If step is negative, array is treated in reverse order.
 <pseudo-func test />
 <para>
 This command performs multiple conditions with a single instruction.
+</para>
 
 <example>
 <set-var i=0 />
@@ -1655,10 +1677,8 @@ This command performs multiple conditions with a single instruction.
 <set-var x=1 y=2 /><test/>
 <set-var x=0 y=2 /><test/>
 </example>
-</para>
 
-<tag:description break>
-</tag:description>
+<tag:description break />
 
 <para>
 Breaks the innermost <command while /> loop.
@@ -1693,6 +1713,7 @@ file.
 </attributes:description>
 
 <tag:description warning>
+<var string />
 </tag:description>
 
 <para>
@@ -1718,11 +1739,10 @@ Selects the code returned by the program (-1 by default).
 </attributes:item>
 </attributes:description>
 
-<tag:description at-end-of-file>
-</tag:description>
+<tag:description at-end-of-file complex />
 
 <para>
-This is a special command: all attributes are stored and will be
+This is a special command: its content is stored and will be
 expanded after end of input.
 </para>
 
@@ -1795,8 +1815,7 @@ File content is included without expansion.
 Load definitions from a package file.
 </para>
 
-<tag:description comment complex>
-</tag:description>
+<tag:description comment complex />
 
 <para>
 This tag does nothing, its body is simply discarded.
@@ -1849,10 +1868,10 @@ future releases.
 <para>
 Prints the replacement text of a user defined macro. For instance, the
 macro used to generate all examples of this documentation is
+</para>
 <example>
 <function-def example />
 </example>
-</para>
 
 <tag:description debugmode>
 <var string />
@@ -1932,15 +1951,13 @@ wrong. Indeed the number line is the end of the entire block containing
 this instruction.
 </para>
 
-<tag:description __version__>
-</tag:description>
+<tag:description __version__ />
 
 <para>
 Prints the version of <mp4h/>.
 </para>
 
-<tag:description dnl>
-</tag:description>
+<tag:description dnl />
 
 <para>
 Discard all characters until newline is reached. This macro ensures that
@@ -1970,8 +1987,7 @@ is no argument, current local time is printed.
 <date <get-var info[2] /> />
 </example>
 
-<tag:description timer>
-</tag:description>
+<tag:description timer />
 
 <para>
 Prints the time spent since last call to this macro.  The printed value
@@ -2012,6 +2028,7 @@ the decimal point. Default is to print numbers in the "%6.f" format.
 <mp4h-output-radix 6 />
 
 <section alt="Extending mp4h with external pacages">External packages</section>
+
 <para>
 It is possible to include external files with the <command include />
 command.  Files are first searched in current directory, then in
@@ -2046,7 +2063,10 @@ if you have any suggestion.
 
 <subsection>Basics</subsection>
 
+<para>
 Let us begin with some examples:
+</para>
+
 <pseudo-func foo />
 <undef bar />
 <example>
@@ -2070,6 +2090,8 @@ This is a complex tag
 User defined macros may have attributes like HTML tags. To handle these
 attributes in replacement text, following conventions have been adopted
 (mostly derived from <Meta-HTML/>):
+</para>
+
 <list>
 <item>Sequence <value %name /> is replaced by the command name.</item>
 
@@ -2170,7 +2192,6 @@ After expansion: %attributes
 
 <item>Modifiers <value A /> and <value U /> can be combined.</item>
 </list>
-</para>
 
 <note>
 Input expansion is completely different in <Meta-HTML/> and in <mp4h/>.
@@ -2193,13 +2214,17 @@ attribute must be a valid <mp4h/> entity. For instance with the
 definitions above, <full-command bar /> can not be an attribute since it
 must be finished by <full-command /bar />.
 But this is valid:
+</para>
 
 <code><foo <foo/> /></code>
 
+<para>
 or even
+</para>
 
 <code><foo <foo name=src url=ici /> /></code>
 
+<para>
 In these examples, the <command foo /> tag has only one argument.
 </para>
 
@@ -2207,11 +2232,10 @@ In these examples, the <command foo /> tag has only one argument.
 Under certain circumstances it is necessary to group multiple statements
 into a single one. This can be done with double quotes or with the
 <command group /> primitive, e.g.
+</para>
 
 <code><foo "This is the 1st attribute"
            <group and the second /> /></code>
-
-</para>
 
 <note>
 Unlike HTML single quotes can not replace doube quotes for this purpose.
@@ -2220,16 +2244,17 @@ Unlike HTML single quotes can not replace doube quotes for this purpose.
 <para>
 If double quotes appear in an argument, they must be escaped by a
 backslash <value "<bs/>" />.
+</para>
 <example>
   <set-var text="Text with double quotes \" inside" />
   <get-var text />
 </example>
-</para>
 
 <subsection>Macro evaluation</subsection>
 
 <para>
 Macros are characterized by
+</para>
 <list>
 <item>name</item>
 <item>container status (simple or complex)</item>
@@ -2238,7 +2263,6 @@ Macros are characterized by
 <item>for primitives, adress of corresponding code in memory and for
 user defined macros the replacement text</item>
 </list>
-</para>
 
 <para>
 Characters are read on input until a <lb/> is found.
@@ -2259,6 +2283,7 @@ By default attributes are evaluated before any replacement.
 </define-tag>
 <para>
 Consider the following example, to change text in typewriter font:
+</para>
 
 <code>
 <define-tag text-tt endtag=required whitespace=delete>
@@ -2266,15 +2291,13 @@ Consider the following example, to change text in typewriter font:
 </define-tag>
 </code>
 
-</para>
-
 <para>
 This definition has a major drawback:
+</para>
 <example>
 <text-tt>This is an <text-tt>example</text-tt></text-tt>
 </example>
 We would like the inner tags be removed.
-</para>
 
 <set-var _text:tt=0 />
 <define-tag text-tt endtag=required whitespace=delete>
@@ -2287,6 +2310,7 @@ We would like the inner tags be removed.
 <para>
 First idea is to use an auxiliary variable to know whether we still
 are inside such an environment:
+</para>
 
 <code>
 <set-var _text:tt=0 />
@@ -2298,43 +2322,47 @@ are inside such an environment:
 <decrement _text:tt />
 </define-tag>
 </code>
-(presence of asterisks in HTML tags is explained in next section).
+<para>
+(the presence of asterisks in HTML tags is explained in next section).
+</para>
 
 <example>
 <text-tt>This is an <text-tt>example</text-tt></text-tt>
 </example>
-</para>
 
 <pseudo-func opt />
 <para>
 But if we use simple tags, as in the example below, our definition does
 not seem to work. It is because attributes are expanded before they are
 put into replacement text.
+</para>
 <example>
 <define-tag opt><text-tt>%attributes</text-tt></define-tag>
 <opt "This is an <opt example />" />
 </example>
-</para>
 
 <pseudo-func opt />
 <para>
 If we want to prevent this problem we have to forbid attributes
 expansion with
+</para>
 <example>
 <define-tag opt attributes=verbatim>;;;
 <text-tt>%attributes</text-tt>;;;
 </define-tag>
 <opt "This is an <opt example />" />
 </example>
-</para>
 
 <subsection>Expansion flags</subsection>
+
 <para>
 When you want to embed some server-side scripting language in your
 pages, you face up some weird problems, like in
+</para>
 <code>
 <a href=<%= $url %>>Hello</a>
 </code>
+<para>
 The question is how do <mp4h/> know that this input has some extra
 delimiters? The answer is that <mp4h/> should not try to handle some
 special delimiters, because it cannot handle all of them (there are ASP,
@@ -2342,9 +2370,13 @@ ePerl, PHP,... and some of them are customizable). Now, remember that <mp4h/>
 is a macro-processor, not an XML parser. So we must focus on macros,and
 format our input file so that it can be parsed without any problem.
 Previous example may be written
+</para>
+
 <code>
 <a href="<%= $url %>">Hello</a>
 </code>
+
+<para>
 because quotes prevent inner right-angle bracket from closing the
 <command a /> tag. 
 </para>
@@ -2353,6 +2385,7 @@ because quotes prevent inner right-angle bracket from closing the
 Another common problem is when we need to print only a begin or an end
 tag alone.  For instance it is very desirable to define its own headers
 and footers with
+</para>
 <code>
 <define-tag header>
 <html*>
@@ -2366,10 +2399,13 @@ and footers with
 </html*>
 </define-tag>
 </code>
+
+<para>
 Asterisks mark these tags as pseudo-simple tags, which means that they
 are complex HTML tags, but used as simple tags within <mp4h/> because
 tags would not be well nested otherwise.
 </para>
+
 <para>
 This asterisk is called ``trailing star'', it appears at the end of the
 tag name.
@@ -2377,6 +2413,7 @@ tag name.
 
 <para>
 Sometimes HTML tags are not parsable, as in this javascript code:
+</para>
 <code>
   ...
     document.write('<*img src="foo.gif"');
@@ -2384,6 +2421,7 @@ Sometimes HTML tags are not parsable, as in this javascript code:
     document.write('>');
   ...
 </code>
+<para>
 The ``leading star'' is an asterisk between left-angle bracket and
 tag name, which prevents this tag from being parsed.
 </para>
@@ -2392,6 +2430,8 @@ tag name, which prevents this tag from being parsed.
 That said we can now understand what the <optflag -expansion /> flag is
 for.  It controls how expansion is performed by mp4h.  It is followed by
 an integer, which is a bit sum of the following values
+</para>
+
 <option-list>
 <option 1>do not parse unknown tags.
 <option-desc>
@@ -2464,28 +2504,32 @@ When unset, they are printed on standard error.
 </option-desc>
 </option>
 </option-list>
-</para>
 
 <para>
 Run
+</para>
 <code>
   mp4h -h
 </code>
+<para>
 to find default value. Current value matches HTML syntax, and it will
 tend to zero when XHTML syntax becomes more familiar.
 </para>
 
 <section>Author</section>
+
 <para>
 <URL src="mailto:barbier@imacs.polytechnique.fr"
      name="Denis Barbier" />
 </para>
+
 <para>
 Mp4h has its own
 <URL src="http://www.engelschall.com/sw/mp4h/" name="homepage" />.
 </para>
 
 <section>Thanks</section>
+
 <para>
 Sincere thanks to Brian J. Fox for writing <Meta-HTML/> and Rene
 Seindal for maintaining this wonderful macro parser called GNU <m4/>.

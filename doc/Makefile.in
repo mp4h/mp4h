@@ -33,7 +33,7 @@ RM              = rm -f
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
 
-all: $(PROGRAM) mp4h.html mp4h.1
+all: $(PROGRAM) mp4h.1 mp4h.html
 
 install:
 	@:
@@ -44,7 +44,7 @@ install:
 
 mp4h.html: mp4h.mp4h html.out $(PROGRAM) $(DEPS)
 	$(PROGRAM) $(FLAGS) -D format=html mp4h.mp4h > $@
-	$(TIDY) $(TIDYOPT) -m $@
+	-$(TIDY) $(TIDYOPT) -m $@
 
 mp4h.pod: mp4h.mp4h pod.out $(PROGRAM) $(DEPS)
 	$(PROGRAM) $(FLAGS) -D format=pod mp4h.mp4h \
