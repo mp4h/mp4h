@@ -3863,21 +3863,22 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                     cp = old_value;
                     for (j=0; j<array_index; j++)
                       {
-                        cp = strchr (cp + 1, '\n');
+                        cp = strchr (cp, '\n');
                         if (!cp)
                           {
+                            /*  Add newlines before value at the bottom  */
                             strcat (SYMBOL_TEXT (var), old_value);
                             for (; j<array_index; j++)
                               strcat (SYMBOL_TEXT (var), "\n");
                             strcat (SYMBOL_TEXT (var), value);
                           }
+                        else
+                          cp++;
                       }
                     if (cp)
                       {
                         *cp  = '\0';
-                        cp++;
                         strcat (SYMBOL_TEXT (var), old_value);
-                        strcat (SYMBOL_TEXT (var), "\n");
                         strcat (SYMBOL_TEXT (var), value);
                         cp = strchr (cp + 1, '\n');
                         if (cp)

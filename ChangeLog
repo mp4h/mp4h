@@ -8,6 +8,13 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.2.1 and ???:
+
+    *) Fix arrays (05-Oct-2001):
+       Insertion of values inside arrays did fail under some
+       circumstance.
+       [Ghislaine Labouret <Ghislaine.Labouret@hsc.fr>]
+
   Changes between 1.2.0 and 1.2.1:
 
     *) Add support for case sensitiveness (30-Sep-2001):
