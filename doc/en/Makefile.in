@@ -1,0 +1,62 @@
+##
+##  Makefile -- MP4H Documentation
+##
+
+@SET_MAKE@
+SHELL = /bin/sh
+
+top_srcdir      = @top_srcdir@
+VPATH           = @srcdir@
+PROGRAM         = $(top_srcdir)/src/mp4h
+INCDIR          = ..
+
+RM              = rm -f
+
+# ------------------------------------------------
+#   THE DEFAULT TARGETS
+# ------------------------------------------------
+
+all: mp4h.html mp4h.1 mp4h.info
+
+# ------------------------------------------------
+#   DOCUMENTATION
+# ------------------------------------------------
+
+mp4h.html: mp4h.mp4h $(INCDIR)/html.out $(PROGRAM)
+	$(top_srcdir)/src/mp4h -D format=html -I $(INCDIR) mp4h.mp4h > $@
+
+mp4h.pod: mp4h.mp4h $(INCDIR)/pod.out $(PROGRAM)
+	$(top_srcdir)/src/mp4h -D format=pod -I $(INCDIR) mp4h.mp4h \
+	| sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
+
+mp4h.1: mp4h.pod
+	pod2man --section=1 \
+            --center="HTML Tools" \
+            --release="HTML Tools" \
+        mp4h.pod > $@
+
+mp4h.texinfo: mp4h.mp4h $(INCDIR)/texinfo.out $(PROGRAM)
+	$(top_srcdir)/src/mp4h -D format=texinfo -I $(INCDIR) mp4h.mp4h \
+	| sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
+
+mp4h.info: mp4h.texinfo
+	makeinfo mp4h.texinfo
+
+# ------------------------------------------------
+#   PROGRAM
+# ------------------------------------------------
+
+$(PROGRAM):
+	cd $(top_srcdir)/src && $(MAKE)
+
+# ------------------------------------------------
+#   CLEANUP
+# ------------------------------------------------
+
+clean:
+	$(RM) *.html *.pod *.1 *.info *.texinfo
+
+distclean: clean
+	$(RM) Makefile
+
+##EOF##

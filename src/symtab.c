@@ -117,19 +117,19 @@ lookup_symbol (const char *name, symbol_lookup mode)
   int h, cmp = 1;
   symbol *sym, *prev;
   symbol **spp;
-  char *ucname;
+  char *lcname;
   char *cp;
 
-  ucname = xstrdup (name);
-  for (cp=ucname; *cp != '\0'; cp++)
+  lcname = xstrdup (name);
+  for (cp=lcname; *cp != '\0'; cp++)
     *cp = tolower (*cp);
 
-  h = hash (ucname);
+  h = hash (lcname);
   sym = symtab[h];
 
   for (prev = NULL; sym != NULL; prev = sym, sym = sym->next)
     {
-      cmp = strcmp (SYMBOL_NAME (sym), ucname);
+      cmp = strcmp (SYMBOL_NAME (sym), lcname);
       if (cmp >= 0)
         break;
     }
@@ -164,7 +164,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
       sym = (symbol *) xmalloc (sizeof (symbol));
       SYMBOL_TYPE (sym) = TOKEN_VOID;
       SYMBOL_TRACED (sym) = SYMBOL_SHADOWED (sym) = FALSE;
-      SYMBOL_NAME (sym) = xstrdup (ucname);
+      SYMBOL_NAME (sym) = xstrdup (lcname);
 
       SYMBOL_NEXT (sym) = *spp;
       (*spp) = sym;
@@ -188,7 +188,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
           free_symbol (sym);
           sym = *spp;
         }
-      while (sym != NULL && strcmp (ucname, SYMBOL_NAME (sym)) == 0);
+      while (sym != NULL && strcmp (lcname, SYMBOL_NAME (sym)) == 0);
       return NULL;
 
     case SYMBOL_POPDEF:

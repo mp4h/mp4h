@@ -1,0 +1,181 @@
+
+;;;
+;;;    Sectioning
+;;;
+<define-tag section>
+@chapter %attributes
+</define-tag>
+<define-tag subsection>
+@section %attributes
+</define-tag>
+
+;;;
+;;;    Common names
+;;;
+<define-tag program>@code{%attributes}</define-tag>
+<define-tag mp4h><program mp4h></define-tag>
+<define-tag WML><program WML></define-tag>
+<define-tag m4><program m4></define-tag>
+<define-tag Meta-HTML><program Meta-HTML></define-tag>
+
+;;;
+;;;    Alias for writing URLs
+;;;
+<define-tag URL whitespace=delete>
+<preserve name>
+<preserve src>
+<set-var %attributes>
+<get-var name> @url{<get-var src>}
+<restore src>
+<restore name>
+</define-tag>
+
+;;;
+;;;    Header of the TeXinfo document
+;;;
+<define-tag header>
+\input texinfo
+@c %**start of header
+@setfilename mp4h.info
+@settitle <get-var title>
+@finalout
+@c %**end of header
+
+<set-var fileinfo[]="<get-file-properties mp4h.mp4h>">;;;
+<set-var filedate="<date <get-var fileinfo[3]>>">
+@set UPDATED <get-var filedate>
+@set EDITION <get-var version>
+@set VERSION <get-var version>
+
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* mp4h: (mp4h).                 A macro processor for HTML documents.
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
+@ifinfo
+This file documents the @code{mp4h} utility.
+
+Copyright (C) 2000  Denis Barbier
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+
+@end ignore
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by the Foundation.
+@end ifinfo
+
+@titlepage
+@title mp4h, version @value{VERSION}
+@subtitle A macro processor for HTML documents
+@subtitle Edition @value{EDITION}, @value{UPDATED}
+@author by Denis Barbier
+
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 2000 Denis Barbier
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by the Foundation.
+@end titlepage
+
+@ifinfo
+@node Top, (dir), (dir), (dir)
+@top @code{mp4h}
+@end ifinfo
+
+</define-tag>
+
+;;;
+;;;    Footer of the TeXinfo document
+;;;
+<define-tag footer>;;;
+@summarycontents
+@contents
+@bye
+</define-tag>
+
+;;;
+;;;    Description of MP4H tags
+;;;
+<define-tag tag:description endtag=required whitespace=delete>
+<preserve complex>
+<preserve verbatim>
+<set-var complex=*>
+<set-var verbatim=*>
+<set-var %attributes>
+<set-var list-attributes[]="%body">
+<subst-in-var list-attributes "^\n" "">
+<group "@multitable {qqqqqqqqqqqqqqqqq} {Complex} {attributes} {qqqqqqqqqqq}
+@item Name @tab Complex @tab Verbatim attributes @tab Attributes
+@item %0 @tab <if <get-var complex> N Y> @tab <if <get-var verbatim> N Y> @tab 
+    <foreach attr list-attributes>@code{<get-var attr>} </foreach>
+@end multitable
+">
+<restore verbatim>
+<restore complex>
+</define-tag>
+
+<define-tag var>@var{%attributes}</define-tag>
+;;;
+;;;    Paragraphs
+;;;
+<define-tag para endtag=required>
+%body
+</define-tag>
+
+;;;
+;;;    Example of MP4H code
+;;;
+<define-tag example endtag=required attributes=verbatim>
+
+@example
+Source code:
+%ubody
+
+Output:
+%body
+@end example
+
+@noindent
+</define-tag>
+
+;;;
+;;;    HTML Comments
+;;;
+<define-tag html:comment endtag=required>
+_LT_!--%body--_GT_
+</define-tag>
+
+<define-tag pre endtag=required>
+%body
+</define-tag>
+

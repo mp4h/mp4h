@@ -14,10 +14,23 @@
 <define-tag m4><program m4></define-tag>
 <define-tag Meta-HTML><program Meta-HTML></define-tag>
 
+<define-tag var><em>%attributes</em></define-tag>
+<define-tag value><tt>%attributes</tt></define-tag>
+<define-tag left-angle>&lt;</define-tag>
+<define-tag right-angle>&gt;</define-tag>
+<define-tag true><tt>true</tt></define-tag>
+
 ;;;
 ;;;    Alias for writing URLs
 ;;;
-<define-tag URL><tt>&lt;URL:%attributes&gt;</tt></define-tag>
+<define-tag URL whitespace=delete>
+<preserve name>
+<preserve src>
+<set-var %attributes>
+<a href="<get-var src>"><tt><get-var name></tt></a>
+<restore src>
+<restore name>
+</define-tag>
 
 ;;;
 ;;;    Header of the HTML document
@@ -26,16 +39,15 @@
 <html>
 <head>
 <meta name="Author"    content="Denis Barbier">
-<meta name="Generator" content="mp4h <mp4h:varsion>">
+<meta name="Generator" content="mp4h <version>">
 <meta name="Created"   content="29-Nov-1999">
 <set-var fileinfo[]="<get-file-properties mp4h.mp4h>">;;;
-<meta name="Modified"  content="<epoch <get-var fileinfo[3]>>">
+<meta name="Modified"  content="<date <get-var fileinfo[3]>>">
 <title><get-var title></title>
 </head>
 <body>
 
 <h1><get-var title></h1>
-<p>This documentation describes MP4H version <get-var version></p>
 </define-tag>
 
 ;;;
@@ -81,7 +93,16 @@
 <restore complex>
 </define-tag>
 
-<define-tag var><em>%attributes</em></define-tag>
+<define-tag attributes:description endtag=required>
+<ul>
+%body
+</ul>
+</define-tag>
+
+<define-tag attributes:item>
+<LI><attribute %0><br>
+</define-tag>
+
 ;;;
 ;;;    Paragraphs
 ;;;
@@ -95,15 +116,33 @@
 <subst-in-var verb-body "&" "&amp;">;;;
 <subst-in-var verb-body "<" "&lt;">;;;
 <subst-in-var verb-body ">" "&gt;">;;;
+<set-var body=%body>;;;
+<subst-in-var body "&" "&amp;">;;;
+<subst-in-var body "<" "&lt;">;;;
+<subst-in-var body ">" "&gt;">;;;
 <table border=2 cellpadding=0 cellspacing=0>
     <tr><th bgcolor="#ccccff">Source</th></tr>
-    <tr><td bgcolor="#ccff99"><pre><get-var verb-body></pre></td></tr>
+    <tr><td bgcolor="#ccff99"><pre><get-var-once verb-body></pre></td></tr>
     <tr><th bgcolor="#ccccff">Output</th></tr>
-    <tr>
-        <td bgcolor="#ff99cc">%body</td>
-    </tr>
+    <tr><td bgcolor="#ff99cc"><pre><get-var body></pre></td></tr>
 </table>
 </define-tag>
+
+;;;
+;;;    Verbatim code
+;;;
+<define-tag code endtag=required attributes=verbatim whitespace=delete>
+<set-var-verbatim verb-body=%ubody>;;;
+<subst-in-var verb-body "&" "&amp;">;;;
+<subst-in-var verb-body "<" "&lt;">;;;
+<subst-in-var verb-body ">" "&gt;">;;;
+<pre><get-var verb-body></pre>
+</define-tag>
+
+;;;
+;;;    Attributes
+;;;
+<define-tag attribute><tt>%attributes</tt></define-tag>
 
 ;;;
 ;;;    HTML Comments
@@ -111,3 +150,4 @@
 <define-tag html:comment endtag=required>
 &lt;!--%body--&gt;
 </define-tag>
+

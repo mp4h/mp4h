@@ -353,6 +353,9 @@ struct obstack *push_string_init __P ((void));
 const char *push_string_finish __P ((read_type));
 void reallocate_current_obs __P ((const char *));
 
+/* read a file verbatim */
+void read_file_verbatim __P ((struct obstack *));
+
 /* current input file, and line */
 extern const char *current_file;
 extern int current_line;
@@ -535,9 +538,6 @@ void expand_user_macro __P ((struct obstack *, symbol *, int, token_data **,
 
 const builtin *find_builtin_by_addr __P ((builtin_func *));
 const builtin *find_builtin_by_name __P ((const char *));
-
-const char * predefined_attribute __P ((const char *, int *, token_data **,
-                                        boolean, boolean));
 
 
 /* File: path.c  --- path search for include files.  */

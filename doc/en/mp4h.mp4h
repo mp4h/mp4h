@@ -1,14 +1,18 @@
 ;;;
 ;;;  mp4h.mp4h -- Documentation for mp4h
+;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
-<set-var package=mp4h>
-<set-var version="@LONG_VERSION@">
-<set-var title="MP4H - A Macro Processor for HTML">
+<include "version">
 
-<when <get-var format>>
+<if <not <get-var format>>
+  <exit status=1
+        message="This file has to be compiled with one of the following lines
+   ../../src/mp4h -D format=html mp4h.mp4h > mp4h.html
+   ../../src/mp4h -D format=pod mp4h.mp4h > mp4h.pod
+">>
+
 <include <get-var format>.out>
-</when>
 
 <header>
 <section "Description">
@@ -36,13 +40,26 @@ stable, robust, well documented and runs fast.  This version of <mp4h>
 is derived from GNU <m4> 1.4n, which is a development version.
 </para>
 
-<section "General description">
+<section "Language Reference">
+
+<para>
+The program <mp4h> is a macro processor, this means that internal macros are
+expanded and replaced by some other text.  In this chapter the full list of
+internal macros is described.
+</para>
 
 ;;;
 ;;;    Definition of new macros
 ;;;
 
 <subsection "Macro functions">
+
+<para>
+Defining new macros is the most common task performed by
+macro-processors.  As <mp4h> is designed for HTML documents, its syntax
+has been defined to be easy to learn by HTML authors.  An 
+composed of 
+</para>
 
 <tag:description define-tag complex>
 <var name>
@@ -55,7 +72,8 @@ Avec whitespace=delete
   * les sauts de ligne sont supprimes
 
 <para>
-This function defines a new tag.
+This function lets you define new tags.  First argument is the macro
+name.
 </para>
 
 <example>
@@ -89,6 +107,10 @@ This function defines a new tag.
 ;;;
 
 <subsection "Variable functions">
+
+<para>
+qqq
+</para>
 
 <tag:description set-var>
 <var name>=<var value>
@@ -464,7 +486,7 @@ This function defines a new tag.
 <tag:description __line__>
 </tag:description>
 
-<tag:description mp4h:version>
+<tag:description version>
 </tag:description>
 
 <tag:description comment complex>

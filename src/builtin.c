@@ -42,7 +42,7 @@ DECLARE (mp4h___file__);
 DECLARE (mp4h___line__);
 DECLARE (mp4h_timer);
 DECLARE (mp4h_unsupported);
-DECLARE (mp4h_mp4h_version);
+DECLARE (mp4h_version);
 
   /*  debug functions  */
 DECLARE (mp4h_debugmode);
@@ -59,27 +59,27 @@ DECLARE (mp4h_file_exists);
 DECLARE (mp4h_date);
 
   /*  flow functions  */
+DECLARE (mp4h_group);
 DECLARE (mp4h_if);
-DECLARE (mp4h_when);
-DECLARE (mp4h_while);
 DECLARE (mp4h_ifeq);
 DECLARE (mp4h_ifneq);
-DECLARE (mp4h_group);
+DECLARE (mp4h_when);
+DECLARE (mp4h_while);
+DECLARE (mp4h_foreach);
 DECLARE (mp4h_var_case);
 DECLARE (mp4h_break);
+DECLARE (mp4h_warning);
+DECLARE (mp4h_exit);
 
   /*  macro functions  */
 DECLARE (mp4h_define_tag);
+DECLARE (mp4h_provide_tag);
 DECLARE (mp4h_preserve);
 DECLARE (mp4h_restore);
 DECLARE (mp4h_let);
 DECLARE (mp4h_undef);
 
   /*  math functions  */
-DECLARE (mp4h_gt);
-DECLARE (mp4h_lt);
-DECLARE (mp4h_eq);
-DECLARE (mp4h_neq);
 DECLARE (mp4h_add);
 DECLARE (mp4h_substract);
 DECLARE (mp4h_multiply);
@@ -87,6 +87,10 @@ DECLARE (mp4h_divide);
 DECLARE (mp4h_modulo);
 DECLARE (mp4h_min);
 DECLARE (mp4h_max);
+DECLARE (mp4h_gt);
+DECLARE (mp4h_lt);
+DECLARE (mp4h_eq);
+DECLARE (mp4h_neq);
 
   /*  page functions  */
 DECLARE (mp4h_include);
@@ -132,7 +136,6 @@ DECLARE (mp4h_array_add_unique);
 DECLARE (mp4h_array_member);
 DECLARE (mp4h_array_shift);
 DECLARE (mp4h_array_concat);
-DECLARE (mp4h_foreach);
 DECLARE (mp4h_sort);
 
 #undef DECLARE
@@ -153,7 +156,7 @@ builtin_tab[] =
   { "__line__",         FALSE,    TRUE,   mp4h___line__ },
   { "timer",            FALSE,    TRUE,   mp4h_timer },
   { "date",             FALSE,    TRUE,   mp4h_date },
-  { "mp4h:version",     FALSE,    TRUE,   mp4h_mp4h_version },
+  { "version",          FALSE,    TRUE,   mp4h_version },
 
       /*  debug functions  */
   { "debugmode",        FALSE,    TRUE,   mp4h_debugmode },
@@ -173,17 +176,21 @@ builtin_tab[] =
 #endif /* HAVE_FILE_FUNCS */
 
       /*  flow functions  */
+  { "group",            FALSE,    FALSE,  mp4h_group },
   { "if",               FALSE,    FALSE,  mp4h_if },
-  { "when",             TRUE,     TRUE,   mp4h_when },
-  { "while",            TRUE,     FALSE,  mp4h_while },
   { "ifeq",             FALSE,    FALSE,  mp4h_ifeq },
   { "ifneq",            FALSE,    FALSE,  mp4h_ifneq },
-  { "group",            FALSE,    FALSE,  mp4h_group },
+  { "when",             TRUE,     TRUE,   mp4h_when },
+  { "while",            TRUE,     FALSE,  mp4h_while },
+  { "foreach",          TRUE,     TRUE,   mp4h_foreach },
   { "var-case",         FALSE,    FALSE,  mp4h_var_case },
   { "break",            FALSE,    TRUE,   mp4h_break },
+  { "warning",          FALSE,    TRUE,   mp4h_warning },
+  { "exit",             FALSE,    TRUE,   mp4h_exit },
 
       /*  macro functions  */
   { "define-tag",       TRUE,     TRUE,   mp4h_define_tag },
+  { "provide-tag",      TRUE,     TRUE,   mp4h_provide_tag },
   { "preserve",         FALSE,    TRUE,   mp4h_preserve },
   { "restore",          FALSE,    TRUE,   mp4h_restore },
   { "let",              FALSE,    TRUE,   mp4h_let },
@@ -248,7 +255,6 @@ builtin_tab[] =
   { "array-member",     FALSE,    TRUE,   mp4h_array_member },
   { "array-shift",      FALSE,    TRUE,   mp4h_array_shift },
   { "array-concat",     FALSE,    TRUE,   mp4h_array_concat },
-  { "foreach",          TRUE,     TRUE,   mp4h_foreach },
   { "sort",             FALSE,    TRUE,   mp4h_sort },
 
   { 0,                  FALSE,    FALSE,  0 },
@@ -608,9 +614,9 @@ dump_args (struct obstack *obs, int argc, token_data **argv, const char *sep)
 | value associated with the key named ``key''.                              |
 `--------------------------------------------------------------------------*/
 
-const char *
+static const char *
 predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
-                      boolean container, boolean remove)
+                      boolean lowercase)
 {
   char *attr = NULL;
   char *cp, *lower;
@@ -634,10 +640,8 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
           if (remove)
             {
               /* remove this attribute from argv[].  */
-              for (j=i+1; j<*ptr_argc; j++)
+              for (j=i+1; j<=*ptr_argc; j++)
                 argv[j-1] = argv[j];
-              if (container)
-                argv[*ptr_argc - 1] = argv[*ptr_argc];
 
               (*ptr_argc)--;
             }
@@ -645,7 +649,7 @@ predefined_attribute (const char *key, int *ptr_argc, token_data **argv,
       i++;
     }
 
-  if (attr)
+  if (attr && lowercase)
     for (lower=attr; *lower != '\0'; lower++)
       *lower = tolower (*lower);
 
@@ -721,7 +725,7 @@ mp4h_unsupported (MP4H_BUILTIN_ARGS)
 }
 
 static void
-mp4h_mp4h_version (MP4H_BUILTIN_ARGS)
+mp4h_version (MP4H_BUILTIN_ARGS)
 {
   obstack_grow (obs, MP4H_PlainID, strlen (MP4H_PlainID));
 }
@@ -948,7 +952,7 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
   struct re_pattern_buffer buf; /* compiled regular expression */
   const char *msg;              /* error message from re_compile_pattern */
 
-  matching = predefined_attribute ("matching", &argc, argv, FALSE, TRUE);
+  matching = predefined_attribute ("matching", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
@@ -1045,6 +1049,18 @@ mp4h_date (MP4H_BUILTIN_ARGS)
     and right if non null.  String-based tests are false if
     followed by a null string, and right otherwise.  */
 
+/*----------------------------------------------------------.
+| Group multiple tags into one.  This is useful when        |
+| combined with tests like <if>, <ifeq>, ....               |
+`----------------------------------------------------------*/
+static void
+mp4h_group (MP4H_BUILTIN_ARGS)
+{
+  obstack_1grow (obs, CHAR_BGROUP);
+  dump_args (obs, argc, argv, "");
+  obstack_1grow (obs, CHAR_EGROUP);
+}
+
 /*--------------------------------------------------------------.
 | If followed by a non-empty string, second argument is         |
 | expanded, otherwise 3rd argument is read.                     |
@@ -1068,6 +1084,58 @@ mp4h_if (MP4H_BUILTIN_ARGS)
       obstack_grow (obs, ARG (1), strlen (ARG (1)));
       obstack_grow (obs, ">>", 2);
       obstack_grow (obs, ARG (3), strlen (ARG (3)));
+      obstack_grow (obs, "</when>", 7);
+    }
+}
+
+/*------------------------------------------------------.
+| String comparisons.                                   |
+| If 2nd and 3rd arguments are equal,  4th argument is  |
+| expanded, otherwise 5th argument is expanded.         |
+`------------------------------------------------------*/
+static void
+mp4h_ifeq (MP4H_BUILTIN_ARGS)
+{
+  if (bad_argc (argv[0], argc, 0, 5))
+    return;
+  
+  obstack_grow (obs, "<when <string-eq ", 17);
+  dump_args (obs, (argc < 3 ? argc : 3), argv, " ");
+  obstack_grow (obs, ">>", 2);
+  obstack_grow (obs, ARG (3), strlen (ARG (3)));
+  obstack_grow (obs, "</when>", 7);
+  if (argc>4)
+    {
+      obstack_grow (obs, "<when <string-neq ", 18);
+      dump_args (obs, 3, argv, " ");
+      obstack_grow (obs, ">>", 2);
+      obstack_grow (obs, ARG (4), strlen (ARG (4)));
+      obstack_grow (obs, "</when>", 7);
+    }
+}
+
+/*----------------------------------------------------------.
+| String comparisons.                                       |
+| If 2nd and 3rd arguments are not equal, 4th argument is   |
+| expanded, otherwise 5th argument is expanded.             |
+`----------------------------------------------------------*/
+static void
+mp4h_ifneq (MP4H_BUILTIN_ARGS)
+{
+  if (bad_argc (argv[0], argc, 0, 5))
+    return;
+
+  obstack_grow (obs, "<when <string-neq ", 18);
+  dump_args (obs, (argc < 3 ? argc : 3), argv, " ");
+  obstack_grow (obs, ">>", 2);
+  obstack_grow (obs, ARG (3), strlen (ARG (3)));
+  obstack_grow (obs, "</when>", 7);
+  if (argc>4)
+    {
+      obstack_grow (obs, "<when <string-eq ", 17);
+      dump_args (obs, 3, argv, " ");
+      obstack_grow (obs, ">>", 2);
+      obstack_grow (obs, ARG (4), strlen (ARG (4)));
       obstack_grow (obs, "</when>", 7);
     }
 }
@@ -1125,68 +1193,84 @@ mp4h_while (MP4H_BUILTIN_ARGS)
     }
 }
 
-/*------------------------------------------------------.
-| String comparisons.                                   |
-| If 2nd and 3rd arguments are equal,  4th argument is  |
-| expanded, otherwise 5th argument is expanded.         |
-`------------------------------------------------------*/
+/*---------------------------------------------------------------------.
+| This is a container tag.  First argument is the name of a variable,  |
+| second is the name of an array.  Body function is evaluated for each |
+| element of this array, this element being put into the variable.     |
+`---------------------------------------------------------------------*/
 static void
-mp4h_ifeq (MP4H_BUILTIN_ARGS)
+mp4h_foreach (MP4H_BUILTIN_ARGS)
 {
-  if (bad_argc (argv[0], argc, 0, 5))
-    return;
-  
-  obstack_grow (obs, "<when <string-eq ", 17);
-  dump_args (obs, (argc < 3 ? argc : 3), argv, " ");
-  obstack_grow (obs, ">>", 2);
-  obstack_grow (obs, ARG (3), strlen (ARG (3)));
-  obstack_grow (obs, "</when>", 7);
-  if (argc>4)
-    {
-      obstack_grow (obs, "<when <string-neq ", 18);
-      dump_args (obs, 3, argv, " ");
-      obstack_grow (obs, ">>", 2);
-      obstack_grow (obs, ARG (4), strlen (ARG (4)));
-      obstack_grow (obs, "</when>", 7);
-    }
-}
+  symbol *var;
+  char *value;
+  const char *start, *end, *step;
+  int ind_start, ind_end, ind_step;
+  int length;
+  int i;
 
-/*----------------------------------------------------------.
-| String comparisons.                                       |
-| If 2nd and 3rd arguments are not equal, 4th argument is   |
-| expanded, otherwise 5th argument is expanded.             |
-`----------------------------------------------------------*/
-static void
-mp4h_ifneq (MP4H_BUILTIN_ARGS)
-{
-  if (bad_argc (argv[0], argc, 0, 5))
+  start  = predefined_attribute ("start", &argc, argv, TRUE);
+  end    = predefined_attribute ("end", &argc, argv, TRUE);
+  step   = predefined_attribute ("step", &argc, argv, TRUE);
+
+  if (bad_argc (argv[0], argc, 3, 3))
     return;
 
-  obstack_grow (obs, "<when <string-neq ", 18);
-  dump_args (obs, (argc < 3 ? argc : 3), argv, " ");
-  obstack_grow (obs, ">>", 2);
-  obstack_grow (obs, ARG (3), strlen (ARG (3)));
-  obstack_grow (obs, "</when>", 7);
-  if (argc>4)
-    {
-      obstack_grow (obs, "<when <string-eq ", 17);
-      dump_args (obs, 3, argv, " ");
-      obstack_grow (obs, ">>", 2);
-      obstack_grow (obs, ARG (4), strlen (ARG (4)));
-      obstack_grow (obs, "</when>", 7);
-    }
-}
+  var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
+  if (var == NULL)
+    return;
 
-/*----------------------------------------------------------.
-| Group multiple tags into one.  This is useful when        |
-| combined with tests like <if>, <ifeq>, ....               |
-`----------------------------------------------------------*/
-static void
-mp4h_group (MP4H_BUILTIN_ARGS)
-{
-  obstack_1grow (obs, CHAR_BGROUP);
-  dump_args (obs, argc, argv, "");
-  obstack_1grow (obs, CHAR_EGROUP);
+  if (start)
+    numeric_arg (argv[0], start, TRUE, &ind_start);
+  else
+    ind_start = 0;
+
+  if (end)
+    numeric_arg (argv[0], end, TRUE, &ind_end);
+  else
+    ind_end = array_size (var);
+
+  if (step)
+    numeric_arg (argv[0], step, TRUE, &ind_step);
+  else
+    ind_step = 1;
+
+  if (ind_step > 0)
+    {
+      for (i=ind_start; i<ind_end; i+=ind_step)
+        {
+          value = array_value (var, i, &length);
+          obstack_grow (obs, "<set-var ", 9);
+          obstack_grow (obs, ARG (1), strlen (ARG (1)));
+          obstack_1grow (obs, '=');
+          obstack_1grow (obs, CHAR_LQUOTE);
+          obstack_grow (obs, value, length);
+          obstack_1grow (obs, CHAR_RQUOTE);
+          obstack_1grow (obs, '>');
+          obstack_grow (obs, ARGBODY, strlen (ARGBODY));
+        }
+    }
+  else if (ind_step < 0)
+    {
+      for (i=ind_end-1; i>=ind_start; i+=ind_step)
+        {
+          value = array_value (var, i, &length);
+          obstack_grow (obs, "<set-var ", 9);
+          obstack_grow (obs, ARG (1), strlen (ARG (1)));
+          obstack_1grow (obs, '=');
+          obstack_1grow (obs, CHAR_LQUOTE);
+          obstack_grow (obs, value, length);
+          obstack_1grow (obs, CHAR_RQUOTE);
+          obstack_1grow (obs, '>');
+          obstack_grow (obs, ARGBODY, strlen (ARGBODY));
+        }
+    }
+  else
+    {
+      MP4HERROR ((warning_status, 0,
+         _("Warning: Null step is ignored in <foreach> loop")));
+      return;
+    }
+ 
 }
 
 /*---------------------------------------------------------------.
@@ -1237,6 +1321,35 @@ mp4h_break (MP4H_BUILTIN_ARGS)
     SYMBOL_TEXT (&varbreak) = xstrdup ("true");
 }
 
+/*-----------------------------.
+| Writes a message to stderr.  |
+`-----------------------------*/
+static void
+mp4h_warning (MP4H_BUILTIN_ARGS)
+{
+    MP4HERROR ((warning_status, 0,
+      _("%s"), ARG (1)));
+}
+
+/*--------------------.
+| Immediately exits.  |
+`--------------------*/
+static void
+mp4h_exit (MP4H_BUILTIN_ARGS)
+{
+  const char *status, *message;
+  int rc = 0;
+
+  status = predefined_attribute ("status", &argc, argv, TRUE);
+  if (status)
+    numeric_arg (argv[0], status, FALSE, &rc);
+  message = predefined_attribute ("message", &argc, argv, FALSE);
+  if (message)
+    MP4HERROR ((warning_status, 0,
+      _("%s"), message));
+  exit (rc);
+}
+
 
 
 /*  Macro functions: defining, undefining, examining or changing
@@ -1255,13 +1368,13 @@ mp4h_define_tag (MP4H_BUILTIN_ARGS)
   boolean container = FALSE;
   boolean space_delete = FALSE;
 
-  attributes = predefined_attribute ("attributes", &argc, argv, TRUE, TRUE);
+  attributes = predefined_attribute ("attributes", &argc, argv, TRUE);
   if (attributes && strcmp (attributes, "verbatim") == 0)
     expand_args = FALSE;
-  endtag = predefined_attribute ("endtag", &argc, argv, TRUE, TRUE);
+  endtag = predefined_attribute ("endtag", &argc, argv, TRUE);
   if (endtag && strcmp (endtag, "required") == 0)
     container = TRUE;
-  whitespace = predefined_attribute ("whitespace", &argc, argv, TRUE, TRUE);
+  whitespace = predefined_attribute ("whitespace", &argc, argv, TRUE);
   if (whitespace && strcmp (whitespace, "delete") == 0)
     space_delete = TRUE;
 
@@ -1298,7 +1411,20 @@ mp4h_define_tag (MP4H_BUILTIN_ARGS)
             _("INTERNAL ERROR: Bad token data type in mp4h_define_tag ()")));
       abort ();
     }
-  return;
+}
+
+/*-------------------------------------.
+| Define tags if not already defined   |
+`-------------------------------------*/
+
+static void
+mp4h_provide_tag (MP4H_BUILTIN_ARGS)
+{
+  symbol *sym;
+
+  sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
+  if (sym == NULL)
+    mp4h_define_tag (MP4H_BUILTIN_RECUR);
 }
 
 /*-----------------------------------------------------.
@@ -1509,7 +1635,7 @@ mp4h_neq (MP4H_BUILTIN_ARGS)
 | If all arguments are integer values, round-offs must  |
 | be performed at each step.                            |
 `------------------------------------------------------*/
-#define MATH_ARG_LOOP(ops) for (i=3; i<argc; i++) \
+#define MATH_ARG_LOOP(ops) for (i=2; i<argc; i++) \
     {val = strtod (ARG (i), 0); ops;\
      if (result_int) result = floor (result);}
 
@@ -1519,44 +1645,15 @@ mathop_functions (mathop_type mathop, MP4H_BUILTIN_ARGS)
   double val, result;
   int i;
   char svalue[128];
-  char decimal_point;
   char *pos_decimal_point;
-  struct lconv *locales;
   boolean result_int = TRUE;
 
   if (bad_argc (argv[0], argc, 3, 0))
     return;
   
-  if (strcmp (ARG (1), "add") == 0)
-    mathop = MATHOP_ADD;
-  else if (strcmp (ARG (1), "sub") == 0)
-    mathop = MATHOP_SUB;
-  else if (strcmp (ARG (1), "mul") == 0)
-    mathop = MATHOP_MUL;
-  else if (strcmp (ARG (1), "div") == 0)
-    mathop = MATHOP_DIV;
-  else if (strcmp (ARG (1), "min") == 0)
-    mathop = MATHOP_MIN;
-  else if (strcmp (ARG (1), "max") == 0)
-    mathop = MATHOP_MAX;
-  else if (strcmp (ARG (1), "mod") == 0)
-    mathop = MATHOP_MOD;
-  else
-    {
-      MP4HERROR ((warning_status, 0,
-                _("Bad math operator: `%s'\n"), ARG (1)));
-      return;
-    }
-
   /*  If all operands are integers, an integer must be returned.  */
-  locales = localeconv ();
-  if (locales == NULL)
-    decimal_point = '.';
-  else
-    decimal_point = *(locales->decimal_point);
-
-  for (i=2; i<argc; i++)
-    if (strchr (ARG (i), decimal_point) != NULL)
+  for (i=1; i<argc; i++)
+    if (strchr (ARG (i), '.') != NULL)
       result_int = FALSE;
 
   if (mathop == MATHOP_MOD)
@@ -1564,7 +1661,7 @@ mathop_functions (mathop_type mathop, MP4H_BUILTIN_ARGS)
       /* Modulus is a special case since operands must be integers,
          and having more than 2 operands is illegal.  */
 
-      if (bad_argc (argv[0], argc, 4, 4))
+      if (bad_argc (argv[0], argc, 3, 3))
         return;
       if (!result_int)
         {
@@ -1575,8 +1672,8 @@ mathop_functions (mathop_type mathop, MP4H_BUILTIN_ARGS)
         {
           int val1, val2;
 
-          val1 = strtol (ARG (2), (char **)NULL, 10);
-          val2 = strtol (ARG (3), (char **)NULL, 10);
+          val1 = strtol (ARG (1), (char **)NULL, 10);
+          val2 = strtol (ARG (2), (char **)NULL, 10);
           val1 %= val2;
           shipout_int (obs, val1);
         }
@@ -1584,7 +1681,7 @@ mathop_functions (mathop_type mathop, MP4H_BUILTIN_ARGS)
     }
 
   /*  Initialization.  */
-  result = strtod (ARG (2), 0);
+  result = strtod (ARG (1), 0);
 
   /*  Loop on operands.  */
   switch (mathop)
@@ -1615,7 +1712,7 @@ mathop_functions (mathop_type mathop, MP4H_BUILTIN_ARGS)
   sprintf (svalue, "%f", result);
   if (result_int)
     {
-      pos_decimal_point = strchr (svalue, decimal_point);
+      pos_decimal_point = strchr (svalue, '.');
       if (pos_decimal_point)
         *pos_decimal_point = '\0';
     }
@@ -1675,8 +1772,12 @@ mp4h_max (MP4H_BUILTIN_ARGS)
 static void
 mp4h_include (MP4H_BUILTIN_ARGS)
 {
+  const char *alt, *verbatim;
   FILE *fp;
   char *filename = NULL;
+
+  alt = predefined_attribute ("alt", &argc, argv, TRUE);
+  verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -1684,12 +1785,21 @@ mp4h_include (MP4H_BUILTIN_ARGS)
   fp = path_search (ARG (1), &filename);
   if (fp == NULL)
     {
-      MP4HERROR ((warning_status, errno,
+      if (alt)
+        obstack_grow (obs, alt, strlen(alt));
+      else
+        {
+          MP4HERROR ((warning_status, errno,
                   _("Cannot open %s"), ARG (1)));
+        }
       return;
     }
 
   push_file (fp, filename);
+
+  if (verbatim)
+    read_file_verbatim (obs);
+
   xfree (filename);
 }
 
@@ -2093,7 +2203,7 @@ mp4h_subst_in_string (MP4H_BUILTIN_ARGS)
   const char *singleline;
   boolean s;
 
-  singleline = predefined_attribute ("singleline", &argc, argv, FALSE, TRUE);
+  singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
   s = (singleline
        && (*singleline == '\0' || strcmp (singleline, "true") == 0));
   subst_in_string (obs, argc, argv, s);
@@ -2110,7 +2220,7 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
   const char *singleline;
   boolean s;
 
-  singleline = predefined_attribute ("singleline", &argc, argv, FALSE, TRUE);
+  singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
   s = (singleline
        && (*singleline == '\0' || strcmp (singleline, "true") == 0));
 
@@ -2147,7 +2257,7 @@ mp4h_string_compare (MP4H_BUILTIN_ARGS)
   const char *caseless;
   int result;
 
-  caseless = predefined_attribute ("caseless", &argc, argv, FALSE, TRUE);
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 3))
     return;
 
@@ -2185,7 +2295,7 @@ mp4h_match (MP4H_BUILTIN_ARGS)
 {
   const char *action;
 
-  action = predefined_attribute ("action", &argc, argv, FALSE, TRUE);
+  action = predefined_attribute ("action", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 3, 4))
     return;
 
@@ -2205,7 +2315,7 @@ mp4h_string_eq (MP4H_BUILTIN_ARGS)
 {
   const char *caseless;
 
-  caseless = predefined_attribute ("caseless", &argc, argv, FALSE, TRUE);
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 0, 3))
     return;
 
@@ -2232,7 +2342,7 @@ mp4h_string_neq (MP4H_BUILTIN_ARGS)
 {
   const char *caseless;
 
-  caseless = predefined_attribute ("caseless", &argc, argv, FALSE, TRUE);
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 0, 3))
     return;
 
@@ -2267,7 +2377,7 @@ mp4h_char_offsets (MP4H_BUILTIN_ARGS)
   char c;
   boolean first = TRUE;
 
-  caseless = predefined_attribute ("caseless", &argc, argv, FALSE, TRUE);
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 3))
     return;
 
@@ -2317,7 +2427,7 @@ mp4h_set_regexp_syntax (MP4H_BUILTIN_ARGS)
 {
   const char *regexp;
 
-  regexp = predefined_attribute ("type", &argc, argv, FALSE, TRUE);
+  regexp = predefined_attribute ("type", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 1, 2))
     return;
 
@@ -2605,7 +2715,7 @@ mp4h_get_var_once (MP4H_BUILTIN_ARGS)
 static void
 mp4h_unset_var (MP4H_BUILTIN_ARGS)
 {
-  lookup_symbol (ARG (1), SYMBOL_DELETE);
+  lookup_variable (ARG (1), SYMBOL_DELETE);
 }
 
 /*----------------------------.
@@ -2614,10 +2724,10 @@ mp4h_unset_var (MP4H_BUILTIN_ARGS)
 static void
 mp4h_var_exists (MP4H_BUILTIN_ARGS)
 {
-  symbol *sym;
+  symbol *var;
 
-  sym = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
-  if (sym != NULL)
+  var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
+  if (var != NULL)
     shipout_text (obs, "true", 4);
 }
 
@@ -2632,7 +2742,7 @@ mp4h_increment (MP4H_BUILTIN_ARGS)
   char buf[128];
   const char *amount;
 
-  amount = predefined_attribute ("amount", &argc, argv, FALSE, TRUE);
+  amount = predefined_attribute ("amount", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
@@ -2643,6 +2753,8 @@ mp4h_increment (MP4H_BUILTIN_ARGS)
     return;
 
   var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
+  if (var == NULL)
+    return;
   if (!numeric_arg (argv[0], SYMBOL_TEXT (var), TRUE, &value))
     return;
   if (!numeric_arg (argv[0], amount, TRUE, &incr))
@@ -2663,7 +2775,7 @@ mp4h_decrement (MP4H_BUILTIN_ARGS)
   char buf[128];
   const char *amount;
 
-  amount = predefined_attribute ("amount", &argc, argv, FALSE, TRUE);
+  amount = predefined_attribute ("amount", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
@@ -2674,6 +2786,8 @@ mp4h_decrement (MP4H_BUILTIN_ARGS)
     return;
 
   var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
+  if (var == NULL)
+    return;
   if (!numeric_arg (argv[0], SYMBOL_TEXT (var), TRUE, &value))
     return;
   if (!numeric_arg (argv[0], amount, TRUE, &incr))
@@ -2796,7 +2910,7 @@ array_size (symbol *var)
   char *cp;
   int result = 0;
 
-  if (SYMBOL_TEXT (var) != NULL && strlen (SYMBOL_TEXT (var)) > 0)
+  if (var != NULL && SYMBOL_TEXT (var) != NULL && strlen (SYMBOL_TEXT (var)) > 0)
     {
       result++;
       for (cp=SYMBOL_TEXT (var); *cp != '\0'; cp++)
@@ -2852,13 +2966,14 @@ static void
 mp4h_array_size (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
-  int result = 0;
+  int result = -1;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
   var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
-  result = array_size (var);
+  if (var != NULL)
+    result = array_size (var);
   shipout_int (obs, result);
 }
 
@@ -2939,7 +3054,7 @@ mp4h_array_member (MP4H_BUILTIN_ARGS)
   symbol *var;
   const char *caseless;
 
-  caseless = predefined_attribute ("caseless", &argc, argv, FALSE, TRUE);
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 3, 3))
     return;
 
@@ -2963,15 +3078,18 @@ mp4h_array_add_unique (MP4H_BUILTIN_ARGS)
   const char *caseless;
   int exists;
 
-  caseless = predefined_attribute ("caseless", &argc, argv, FALSE, TRUE);
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 3, 3))
     return;
 
   var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
   if (var == NULL)
-    var = lookup_variable (ARG (2), SYMBOL_INSERT);
-
-  if (SYMBOL_TYPE (var) != TOKEN_TEXT || strlen (SYMBOL_TEXT (var)) == 0)
+    {
+      var = lookup_variable (ARG (2), SYMBOL_INSERT);
+      SYMBOL_TEXT (var) = xstrdup (ARG (1));
+      SYMBOL_TYPE (var) = TOKEN_TEXT;
+    }
+  else if (SYMBOL_TYPE (var) != TOKEN_TEXT || strlen (SYMBOL_TEXT (var)) == 0)
     {
       SYMBOL_TEXT (var) = xstrdup (ARG (1));
       SYMBOL_TYPE (var) = TOKEN_TEXT;
@@ -2987,6 +3105,7 @@ mp4h_array_add_unique (MP4H_BUILTIN_ARGS)
           strcat (value, ARG (1));
           xfree (SYMBOL_TEXT (var));
           SYMBOL_TEXT (var) = xstrdup (value);
+          xfree (value);
         }
     }
 }
@@ -3027,7 +3146,7 @@ mp4h_array_shift (MP4H_BUILTIN_ARGS)
     }
 
   ind_start = 0;
-  start = predefined_attribute ("start", &argc, argv, FALSE, TRUE);
+  start = predefined_attribute ("start", &argc, argv, TRUE);
   if (start)
     {
       if (!numeric_arg (argv[0], start, TRUE, &ind_start))
@@ -3110,69 +3229,6 @@ mp4h_array_concat (MP4H_BUILTIN_ARGS)
 }
 
 /*---------------------------------------------------------------------.
-| This is a container tag.  First argument is the name of a variable,  |
-| second is the name of an array.  Body function is evaluated for each |
-| element of this array, this element being put into the variable.     |
-`---------------------------------------------------------------------*/
-static void
-mp4h_foreach (MP4H_BUILTIN_ARGS)
-{
-  symbol *var;
-  char *value;
-  const char *start, *end, *step, *iter;
-  int ind_start, ind_end, ind_step;
-  int length;
-  int i;
-
-  start  = predefined_attribute ("start", &argc, argv, TRUE, TRUE);
-  end    = predefined_attribute ("end", &argc, argv, TRUE, TRUE);
-  step   = predefined_attribute ("step", &argc, argv, TRUE, TRUE);
-  iter   = predefined_attribute ("iter", &argc, argv, TRUE, TRUE);
-
-  if (bad_argc (argv[0], argc, 3, 3))
-    return;
-
-  var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
-  if (var == NULL)
-    return;
-
-  if (start)
-    numeric_arg (argv[0], start, TRUE, &ind_start);
-  else
-    ind_start = 0;
-
-  if (end)
-    numeric_arg (argv[0], end, TRUE, &ind_end);
-  else
-    ind_end = array_size (var);
-
-  if (step)
-    numeric_arg (argv[0], step, TRUE, &ind_step);
-  else
-    ind_step = 1;
-
-  if (ind_step == 0)
-    {
-      MP4HERROR ((warning_status, 0,
-         _("Warning: Null step is ignored in <foreach> loop")));
-      return;
-    }
- 
-  for (i=ind_start; i<ind_end; i+=ind_step)
-    {
-      value = array_value (var, i, &length);
-      obstack_grow (obs, "<set-var ", 9);
-      obstack_grow (obs, ARG (1), strlen (ARG (1)));
-      obstack_1grow (obs, '=');
-      obstack_1grow (obs, CHAR_LQUOTE);
-      obstack_grow (obs, value, length);
-      obstack_1grow (obs, CHAR_RQUOTE);
-      obstack_1grow (obs, '>');
-      obstack_grow (obs, ARGBODY, strlen (ARGBODY));
-    }
-}
-
-/*---------------------------------------------------------------------.
 | This function is used to sort arrays.  Arguments are either strings  |
 | or numerical values.                                                 |
 `---------------------------------------------------------------------*/
@@ -3220,9 +3276,9 @@ mp4h_sort (MP4H_BUILTIN_ARGS)
   char **array;
   int length, size, i;
 
-  caseless  = predefined_attribute ("caseless", &argc, argv, FALSE, TRUE);
-  sortorder = predefined_attribute ("sortorder", &argc, argv, FALSE, TRUE);
-  numeric   = predefined_attribute ("numeric", &argc, argv, FALSE, TRUE);
+  caseless  = predefined_attribute ("caseless", &argc, argv, TRUE);
+  sortorder = predefined_attribute ("sortorder", &argc, argv, TRUE);
+  numeric   = predefined_attribute ("numeric", &argc, argv, TRUE);
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;

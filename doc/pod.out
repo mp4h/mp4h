@@ -16,10 +16,23 @@
 <define-tag m4><program m4></define-tag>
 <define-tag Meta-HTML><program Meta-HTML></define-tag>
 
+<define-tag var>I_LT_%attributes_GT_</define-tag>
+<define-tag value>C_LT_%attributes_GT_</define-tag>
+<define-tag left-angle>_LT_</define-tag>
+<define-tag right-angle>_GT_</define-tag>
+<define-tag true>C_LT_true_GT_</define-tag>
+
 ;;;
 ;;;    Alias for writing URLs
 ;;;
-<define-tag URL>C_LT_E_LT_lt_GT_URL:%attributesE_LT_gt_GT__GT_</define-tag>
+<define-tag URL whitespace=delete>
+<preserve name>
+<preserve src>
+<set-var %attributes>
+<get-var name> C_LT_E_LT_lt_GT_URL:<get-var src>E_LT_gt_GT__GT_
+<restore src>
+<restore name>
+</define-tag>
 
 ;;;
 ;;;    Header of the POD document
@@ -71,7 +84,21 @@
 <restore complex>;;;
 </define-tag>
 
-<define-tag var>I_LT_%attributes_GT_</define-tag>
+<define-tag attributes:description endtag=required>
+
+=over 4
+
+%body
+
+=back
+
+</define-tag>
+
+<define-tag attributes:item>
+=item <attribute %0>
+
+</define-tag>
+
 ;;;
 ;;;    Paragraphs
 ;;;
@@ -97,6 +124,18 @@ Output:
     %body
 
 </define-tag>
+
+;;;
+;;;    Verbatim code
+;;;
+<define-tag code endtag=required attributes=verbatim>
+%ubody
+</define-tag>
+
+;;;
+;;;    Attributes
+;;;
+<define-tag attribute>C_LT_%attributes_GT_</define-tag>
 
 ;;;
 ;;;    HTML Comments

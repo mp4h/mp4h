@@ -1166,6 +1166,22 @@ next_token (token_data *td, read_type expansion)
 
 
 
+/*-----------------------.
+| Read a file verbatim.  |
+`-----------------------*/
+
+void
+read_file_verbatim (struct obstack *obs)
+{
+  int ch;
+
+  while ((ch = file_read ()) != CHAR_RETRY)
+    shipout_text (0, (char *) &ch, 1);
+  pop_input ();
+}
+
+
+
 #ifdef DEBUG_INPUT
 
 static int

@@ -63,6 +63,7 @@
 #define MP4H_BUILTIN_ARGS struct obstack *obs, int argc, token_data **argv, \
                             read_type expansion
 #define MP4H_BUILTIN_PROTO struct obstack *, int, token_data **, read_type
+#define MP4H_BUILTIN_RECUR obs, argc, argv, expansion
 
 #define DECLARE(name) \
   static void name __P ((MP4H_BUILTIN_PROTO))

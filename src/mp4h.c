@@ -258,6 +258,7 @@ main (int argc, char *const *argv, char *const *envp)
   error_print_progname = print_program_name;
 
   setlocale (LC_ALL, "");
+  setlocale (LC_NUMERIC, "C");
 
   debug_init ();
   include_init ();
