@@ -1,0 +1,5 @@
+<if <get-var foo /> <set-var foo=a /> <get-var foo /> /><get-var foo />
+<if <not <get-var foo /> /> <set-var foo=b /> <get-var foo /> /><get-var foo />
+<set-var foo=z />
+<if <get-var foo /> <set-var foo=c /> <get-var foo /> /><get-var foo />
+<if <not <get-var foo /> /> <set-var foo=d /> <get-var foo /> /><get-var foo />

@@ -8,6 +8,13 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.1.1 and 1.1.2:
+
+    *) Fix bugs with conditionals (07-Nov-2000):
+       The <if>, <ifeq> and <ifneq> conditionals do not behave properly.
+       Under rare circumstances, both THEN and ELSE clauses may be run.
+       [Martin Schulze <joey@infodrom.north.de>]
+
   Changes between 1.1.0 and 1.1.1:
 
     *) Fix trailing slash in empty complex tags (31-Aug-2000):

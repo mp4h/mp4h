@@ -47,7 +47,6 @@ libltdl/ltdl.h
 libltdl/stamp-h.in
 ltconfig
 ltmain.sh
-modules/Makefile
 modules/Makefile.in
 modules/test.c
 modules/test.mp4h
@@ -177,6 +176,8 @@ tests/get-file-properties/01.in
 tests/get-file-properties/01.ok
 tests/if/01.in
 tests/if/01.ok
+tests/if/02.in
+tests/if/02.ok
 tests/ifeq/01.in
 tests/ifeq/01.ok
 tests/ifeq/02.in

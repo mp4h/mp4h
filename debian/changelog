@@ -1,8 +1,24 @@
+mp4h (1.1.2-1) unstable; urgency=low
+
+  * New upstream version.
+  * Fix bug with conditionals (Closes: #76049)
+
+ -- Denis Barbier <barbier@debian.org>  Wed,  8 Nov 2000 00:33:32 +0100
+
 mp4h (1.1.1-1) unstable; urgency=low
 
   * New upstream version.
+  * Sponsored upload.
 
- -- Denis Barbier <barbier@imacs.polytechnique.fr>  Wed, 30 Aug 2000 21:52:21 +0200
+ -- Josip Rodin <jrodin@jagor.srce.hr>  Thu, 31 Aug 2000 01:33:48 +0200
+
+mp4h (1.1.0-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Configure with --with-dmalloc to help solve the "disappearing 0xB3"
+    problem, as suggested by upstream author Denis Barbier.
+
+ -- Anthony Fok <foka@debian.org>  Tue, 29 Aug 2000 19:04:53 -0600
 
 mp4h (1.1.0-1) unstable; urgency=low
 
@@ -10,7 +26,7 @@ mp4h (1.1.0-1) unstable; urgency=low
   * Sponsored upload.
   * Updated to Standards-Version: 3.2.1.
 
- -- Josip Rodin <jrodin@jagor.srce.hr>  Sun, 27 Aug 2000 18:14:24 +0200
+ -- Josip Rodin <jrodin@jagor.srce.hr>  Mon, 28 Aug 2000 00:19:06 +0200
 
 mp4h (1.0.2-0.1) unstable; urgency=low
 
@@ -40,5 +56,5 @@ mp4h (0.8.0-1) unstable; urgency=low
 
 Local variables:
 mode: debian-changelog
-add-log-mailing-address: "barbier@imacs.polytechnique.fr"
+add-log-mailing-address: "barbier@debian.org"
 End:
