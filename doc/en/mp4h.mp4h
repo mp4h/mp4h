@@ -5,7 +5,7 @@
 
 <set-var package=mp4h>
 <set-var version=0.8.3>
-<set-var title="MP4H - A Macro Processeur for HTML">
+<set-var title="MP4H - A Macro Processeur for HTML Documents">
 
 <include <get-var format>.out
     alt=<exit status=1
