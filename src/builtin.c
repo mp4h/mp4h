@@ -75,6 +75,7 @@ DECLARE (mp4h_date);
   /*  flow functions  */
 DECLARE (mp4h_group);
 DECLARE (mp4h_compound);
+DECLARE (mp4h_disjoin);
 DECLARE (mp4h_noexpand);
 DECLARE (mp4h_expand);
 DECLARE (mp4h_if);
@@ -220,6 +221,7 @@ builtin_tab[] =
       /*  flow functions  */
   { "group",            FALSE,    TRUE,   mp4h_group },
   { "compound",          TRUE,    TRUE,   mp4h_compound },
+  { "disjoin",          FALSE,    TRUE,   mp4h_disjoin },
   { "noexpand",         FALSE,    FALSE,  mp4h_noexpand },
   { "expand",           FALSE,    TRUE,   mp4h_expand },
   { "if",               FALSE,    FALSE,  mp4h_if },
@@ -1414,6 +1416,9 @@ mp4h_group (MP4H_BUILTIN_ARGS)
   obstack_1grow (obs, CHAR_EGROUP);
 }
 
+/*------------------------------------------------.
+| Like <group>, but this one is a container tag.  |
+`------------------------------------------------*/
 static void
 mp4h_compound (MP4H_BUILTIN_ARGS)
 {
@@ -1426,6 +1431,17 @@ mp4h_compound (MP4H_BUILTIN_ARGS)
   dump_args (obs, argc, argv, separator);
   obstack_grow (obs, ARGBODY, strlen (ARGBODY));
   obstack_1grow (obs, CHAR_EGROUP);
+}
+
+/*------------------------------------------------.
+| Allow breaking an object into several pieces.   |
+`------------------------------------------------*/
+static void
+mp4h_disjoin (MP4H_BUILTIN_ARGS)
+{
+  obstack_1grow (obs, CHAR_EGROUP);
+  obstack_grow (obs, ARG(1), strlen (ARG(1)));
+  obstack_1grow (obs, CHAR_BGROUP);
 }
 
 /*-------------------------------------------.
