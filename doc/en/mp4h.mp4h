@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.8.1>
+<set-var version=0.8.2>
 <set-var title="MP4H - A Macro Processeur for HTML">
 
 <include <get-var format>.out
@@ -355,9 +355,12 @@ As above but attributes are not expanded.
 <undef foo>
 <example>
 <define-tag foo>0.10.1</define-tag>
-<set-var version="<foo>">Here is version <get-var version>
-<set-var-verbatim version="<foo>">Here is version <get-var version>
-<set-var-verbatim version="<foo>">Here is version <get-var-once version>
+<set-var version="<foo>">;;;
+Here is version <get-var version>
+<set-var-verbatim version="<foo>">;;;
+Here is version <get-var version>
+<set-var-verbatim version="<foo>">;;;
+Here is version <get-var-once version>
 </example>
 
 <tag:description preserve>
@@ -492,8 +495,7 @@ If it is a macro name, one of the following messages is printed:
 <example>
 <set-var x="0\n1\n2\n3\n4">
 <define-tag foo>bar</define-tag>
-<define-tag bar endtag=required>;;;
-quux</define-tag>
+<define-tag bar endtag=required>quux</define-tag>
 <symbol-info x>
 <symbol-info symbol-info>
 <symbol-info define-tag>
@@ -947,7 +949,8 @@ Sort lines numerically
 <attributes:item "sortorder=reverse">
 Reverse sort order
 <example>
-<sort digits numeric=true sortorder=reverse><get-var digits>
+<sort digits numeric=true sortorder=reverse>;;;
+<get-var digits>
 </example>
 </attributes:description>
 
@@ -1284,7 +1287,7 @@ This command performs multiple conditions with a single instruction.
 
 <example>
 <set-var i=0>
-<define-tag test whitespace=delete>
+<define-tag test>
 <var-case
   x=1   <group <increment i> x<get-var i>>
   x=2   <group <decrement i> x<get-var i>>
@@ -1571,12 +1574,12 @@ if you have any suggestion.
 <undef foo bar>
 Let us begin with some examples:
 <example>
-<define-tag foo>;;;
-This is a simple tag;;;
-</define-tag>;;;
-<define-tag bar endtag=required>;;;
-This is a complex tag;;;
-</define-tag>;;;
+<define-tag foo>
+This is a simple tag
+</define-tag>
+<define-tag bar endtag=required>
+This is a complex tag
+</define-tag>
 <foo>
 <bar>Body function</bar>
 </example>
@@ -1594,9 +1597,9 @@ As there is no limitation on the number of arguments,
 <value %20> is the 21st argument and not the third followed by the 0
 letter.
 <example>
-<define-tag href>;;;
-<a href="%0">%1</a>;;;
-</define-tag>;;;
+<define-tag href>
+<a href="%0">%1</a>
+</define-tag>
 <href http://www.gimp.org "The Gimp">
 </example>
 
@@ -1622,23 +1625,23 @@ inner2, # attributes: %%#;;;
 <item>Sequence <value %attributes> is replaced by the space separated
 list of attributes.
 <example>
-<define-tag mail1>;;;
-<set-var %attributes>;;;
+<define-tag mail1>
+<set-var %attributes>
 <get-var name>
 <get-var mail>
-</define-tag>;;;
+</define-tag>
 <set-var name="" mail="">
 <mail1 name="Dr. Foo" mail="hello@foo.com">
 </example>
 
 <item>Sequence <value %body> is replaced by the body of a complex macro.
 <example>
-<define-tag mail2 endtag=required>;;;
-<set-var %attributes>;;;
+<define-tag mail2 endtag=required whitespace=delete>
+<set-var %attributes>
 <a href="mailto:<get-var mail>">%body</a>
-</define-tag>;;;
-<mail2 mail="hello@foo.com">;;;
-<img src="photo.png" alt="Dr. Foo" border=0>;;;
+</define-tag>
+<mail2 mail="hello@foo.com">
+<img src="photo.png" alt="Dr. Foo" border=0>
 </mail2>
 </example>
 
@@ -1646,32 +1649,32 @@ list of attributes.
 or <value %Abody> is used, a newline separated list of attributes is
 printed.
 <example>
-<define-tag show-attributes>;;;
-<set-var list="%Aattributes" i=0>;;;
-<foreach attr list>;;;
-%<get-var i>: <get-var attr>
-<increment i>;;;
-</foreach>;;;
-</define-tag>;;;
+<define-tag show-attributes whitespace=delete>
+<set-var list="%Aattributes" i=0>
+<foreach attr list>
+<group "%<get-var i>: <get-var attr>">
+<increment i>
+</foreach>
+</define-tag>
 <show-attributes name="Dr. Foo" mail="hello@foo.com">
 </example>
 
-<item>Another alternate form is obtained by replacing <value
-A> by <value U>, in which case text is replaced but will not be
+<item>Another alternate form is obtained by replacing <value A>
+by <value U>, in which case text is replaced but will not be
 expanded.
 This does make sense only when macro has been defined with
 <attribute attributes=verbatim>, otherwise attributes are expanded
 before replacement.
 <example>
-<define-tag show1>;;;
+<define-tag show1>
 Before expansion: %Uattributes
 After expansion: %attributes
-</define-tag>;;;
-<define-tag show2 attributes=verbatim>;;;
+</define-tag>
+<define-tag show2 attributes=verbatim>
 Before expansion: %Uattributes
 After expansion: %attributes
-</define-tag>;;;
-<define-tag bar>and here %attributes</define-tag>;;;
+</define-tag>
+<define-tag bar>and here %attributes</define-tag>
 <show1 <bar we go>>
 <show2 <bar we go>>
 </example>
@@ -1723,7 +1726,7 @@ Unlike HTML single quotes can not replace doube quotes for this purpose.
 If double quotes appear in an argument, they must be escaped by a
 backslash <value "\\">.
 <example>
-  <set-var text="Text with double quotes \" inside">;;;
+  <set-var text="Text with double quotes \" inside">
   <get-var text>
 </example>
 </para>
@@ -1818,7 +1821,9 @@ put into replacement text.
 If we want to prevent this problem we have to forbid attributes
 expansion with
 <example>
-<define-tag opt attributes=verbatim><text-tt>%attributes</text-tt></define-tag>
+<define-tag opt attributes=verbatim>;;;
+<text-tt>%attributes</text-tt>;;;
+</define-tag>
 <opt "This is an <opt example>">
 </example>
 </para>

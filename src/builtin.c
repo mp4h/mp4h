@@ -1884,11 +1884,6 @@ mp4h_dnl (MP4H_BUILTIN_ARGS)
   skip_line ();
 }
 
-/*------------------------------------------------------------------------.
-| Delete all subsequent whitespace from input.  The function skip_line () |
-| lives in input.c.                                                       |
-`------------------------------------------------------------------------*/
-
 static void
 mp4h_frozen_dump (MP4H_BUILTIN_ARGS)
 {

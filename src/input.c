@@ -712,7 +712,8 @@ unget_input (int ch)
 
 /*------------------------------------------------------------------------.
 | skip_line () simply discards all immediately following characters, upto |
-| the first newline.                                                      |
+| the first newline.  All whitespaces following this newline are also     |
+| discarded.                                                              |
 `------------------------------------------------------------------------*/
 
 void
@@ -722,6 +723,9 @@ skip_line (void)
 
   while ((ch = next_char ()) != CHAR_EOF && ch != '\n')
     ;
+  while ((ch = next_char ()) != CHAR_EOF && (ch == '\t' || ch == ' '))
+    ;
+  unget_input (ch);
 }
 
 

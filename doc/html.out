@@ -161,8 +161,7 @@
 ;;;
 <set-eol-comment "###">
 <define-tag three-colon>;;;</define-tag>
-<define-tag example endtag=required
-            attributes=verbatim whitespace=delete>
+<define-tag example endtag=required attributes=verbatim>
 <set-var-verbatim verb-body=%ubody>
 <subst-in-var verb-body "&" "&amp;">
 <subst-in-var verb-body "<" "&lt;">
@@ -177,9 +176,13 @@
 <subst-in-var body "^\n+" "" singleline=true>
 <table border=2 cellpadding=0 cellspacing=0 width="80%" summary="">
     <tr><th bgcolor="#ccccff"><lang:example-source></th></tr>
-    <tr><td bgcolor="#ccff99" width="80%"><pre><get-var-once verb-body></pre></td></tr>
+    <tr><td bgcolor="#ccff99" width="80%"><dnl>
+      <pre><get-var-once verb-body></pre><dnl>
+    </td></tr>
     <tr><th bgcolor="#ccccff"><lang:example-output></th></tr>
-    <tr><td bgcolor="#ff99cc" width="80%"><pre><get-var-once body></pre></td></tr>
+    <tr><td bgcolor="#ff99cc" width="80%"><dnl>
+      <pre><get-var-once body></pre><dnl>
+    </td></tr>
 </table>
 </define-tag>
 <set-eol-comment ";;;">

@@ -8,6 +8,18 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.8.2 and 0.8.1:
+
+    *) Cosmetic changes in documentation (11-Mar-2000):
+       These changes are made to allow automatic generation of
+       http://www.engelschall.com/sw/mp4h/docs/index.html
+       [Denis Barbier]
+
+    *) Suppress whitespace after discarded newlines (11-Mar-2000):
+       When newlines are discarded via the <dnl> tag or eol-comments,
+       leading whitespaces on following line are removed.
+       [Denis Barbier]
+
   Changes between 0.8.1 and 0.8.0:
 
     *) Remove unused subroutines (02-Mar-2000):

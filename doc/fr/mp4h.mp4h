@@ -4,7 +4,7 @@
 ;;;
 
 <set-var package=mp4h>
-<set-var version=0.8.1>
+<set-var version=0.8.2>
 <set-var title="MP4H - Un macro processeur pour HTML">
 
 <include <get-var format>.out
@@ -376,9 +376,12 @@ Comme la commande précédente, mais les arguments ne sont pas développés.
 <undef foo>
 <example>
 <define-tag foo>0.10.1</define-tag>
-<set-var version="<foo>">Ici version <get-var version>
-<set-var-verbatim version="<foo>">Ici version <get-var version>
-<set-var-verbatim version="<foo>">Ici version <get-var-once version>
+<set-var version="<foo>">;;;
+Ici version <get-var version>
+<set-var-verbatim version="<foo>">;;;
+Ici version <get-var version>
+<set-var-verbatim version="<foo>">;;;
+Ici version <get-var-once version>
 </example>
 
 <tag:description preserve>
@@ -513,8 +516,7 @@ primitive, un message indique de quel type de symbole il s'agit :
 <example>
 <set-var x="0\n1\n2\n3\n4">
 <define-tag foo>bar</define-tag>
-<define-tag bar endtag=required>;;;
-quux</define-tag>
+<define-tag bar endtag=required>quux</define-tag>
 <symbol-info x>
 <symbol-info symbol-info>
 <symbol-info define-tag>
@@ -995,7 +997,8 @@ alphabétiquement.
 <attributes:item "sortorder=reverse">
 Effectue le tri en ordre inverse
 <example>
-<sort chiffres numeric=true sortorder=reverse><get-var chiffres>
+<sort chiffres numeric=true sortorder=reverse>;;;
+<get-var chiffres>
 </example>
 </attributes:description>
 
@@ -1345,7 +1348,7 @@ Cette commande permet de faire plusieurs tests en une seule instruction.
 
 <example>
 <set-var i=0>
-<define-tag test whitespace=delete>
+<define-tag test>
 <var-case
   x=1   <group <increment i> x<get-var i>>
   x=2   <group <decrement i> x<get-var i>>
@@ -1648,12 +1651,12 @@ toute erreur ou omission.
 <undef foo bar>
 Commençons par donner des exemples de définition de balises:
 <example>
-<define-tag foo>;;;
-Ceci est un exemple de balise simple;;;
-</define-tag>;;;
-<define-tag bar endtag=required>;;;
-Ceci est un exemple de balise complexe;;;
-</define-tag>;;;
+<define-tag foo>
+Ceci est un exemple de balise simple
+</define-tag>
+<define-tag bar endtag=required>
+Ceci est un exemple de balise complexe
+</define-tag>
 <foo>
 <bar>Corps de la fonction</bar>
 </example>
@@ -1670,9 +1673,9 @@ par le 2e attribut, etc. Comme le nombre d'attribut n'est pas limité,
 les lettres <value %20> seront remplacés par le vingt-et-unième
 argument, et pas par le 3e argument suivi d'un 0.
 <example>
-<define-tag href>;;;
-<a href="%0">%1</a>;;;
-</define-tag>;;;
+<define-tag href>
+<a href="%0">%1</a>
+</define-tag>
 <href http://www.gimp.org "The Gimp">
 </example>
 
@@ -1699,11 +1702,11 @@ Interne2, nombre d'attributs: %%#;;;
 <item>Les caractères <value %attributes> sont remplacés par la liste 
 des arguments, séparés par un espace.
 <example>
-<define-tag mail1>;;;
-<set-var %attributes>;;;
+<define-tag mail1>
+<set-var %attributes>
 <get-var name>
 <get-var mail>
-</define-tag>;;;
+</define-tag>
 <set-var name="" mail="">
 <mail1 name="Dr. Foo" mail="hello@foo.com">
 </example>
@@ -1711,12 +1714,12 @@ des arguments, séparés par un espace.
 <item>Les caractères <value %body> sont remplacés par le corps de la
 commande, dans le cas d'une balise complexe.
 <example>
-<define-tag mail2 endtag=required>;;;
-<set-var %attributes>;;;
+<define-tag mail2 endtag=required whitespace=delete>
+<set-var %attributes>
 <a href="mailto:<get-var mail>">%body</a>
-</define-tag>;;;
-<mail2 mail="hello@foo.com">;;;
-<img src="photo.png" alt="Dr. Foo" border=0>;;;
+</define-tag>
+<mail2 mail="hello@foo.com">
+<img src="photo.png" alt="Dr. Foo" border=0>
 </mail2>
 </example>
 
@@ -1725,13 +1728,13 @@ liste est séparée par des sauts de lignes au lieu d'espaces. Il s'agit
 des formes <value %Aattributes> et <value %Abody>, le <value A> voulant
 dire array (tableau en français).
 <example>
-<define-tag show-attributes>;;;
-<set-var list="%Aattributes" i=0>;;;
-<foreach attr list>;;;
+<define-tag show-attributes>
+<set-var list="%Aattributes" i=0>
+<foreach attr list>
 %<get-var i>: <get-var attr>
-<increment i>;;;
-</foreach>;;;
-</define-tag>;;;
+<increment i>
+</foreach>
+</define-tag>
 <show-attributes name="Dr. Foo" mail="hello@foo.com">
 </example>
 
@@ -1742,15 +1745,15 @@ l'attribut <attribute attributes=verbatim>, parce que dans le cas
 contraire les arguments sont développés avant que ces substitutions
 n'aient lieu.
 <example>
-<define-tag show1>;;;
+<define-tag show1>
 Avant développement: %Uattributes
 Après développement: %attributes
-</define-tag>;;;
-<define-tag show2 attributes=verbatim>;;;
+</define-tag>
+<define-tag show2 attributes=verbatim>
 Avant développement: %Uattributes
 Après développement: %attributes
-</define-tag>;;;
-<define-tag bar>et hop %attributes</define-tag>;;;
+</define-tag>
+<define-tag bar>et hop %attributes</define-tag>
 <show1 <bar la boum>>
 <show2 <bar la boum>>
 </example>
@@ -1809,7 +1812,7 @@ Si des guillements apparaissent dans un argument, ils doivent être
 précédés d'une barre oblique inverse (backslash) <value "\\"> afin de ne
 pas être interprétés comme le caractère de fin de chaîne de caractères.
 <example>
-  <set-var texte="Texte avec un guillemet \" dedans">;;;
+  <set-var texte="Texte avec un guillemet \" dedans">
   <get-var texte>
 </example>
 </para>
@@ -1906,7 +1909,9 @@ développés avant la commande elle-même:
 Pour remédier à ce problème, il convient donc d'empêcher que les
 attributs soient développés en premier. Il convient donc d'écrire:
 <example>
-<define-tag opt attributes=verbatim><text-tt>%attributes</text-tt></define-tag>
+<define-tag opt attributes=verbatim>;;;
+<text-tt>%attributes</text-tt>;;;
+</define-tag>
 <opt "Ceci est un <opt essai>">
 </example>
 </para>
