@@ -247,6 +247,7 @@ This documentation describes <get-var package /> version <get-var version />.
   <subst-in-string "=LT=let <get-var func />=void-func />" "=LT=" "<" />;;;
 </foreach>;;;
 </define-tag>
+
 ;;;
 ;;;    Verbatim code
 ;;;
