@@ -139,7 +139,7 @@ Preprocessor features:\n\
       fputs (_("\
 \n\
 Parser features:\n\
-  -c, --case=NUMBER            set tags (1), variables (2) or entities (4)\n\
+  -c, --caseless=NUMBER        set tags (1), variables (2) or entities (4)\n\
                                case insensitive.  Default value is 3, i.e.\n\
                                only entities are case sensitive\n\
   -e, --encoding=NAME          specify document encoding\n\
@@ -222,7 +222,7 @@ static const struct option long_options[] =
   {"synclines", no_argument, NULL, 's'},
   {"safety-level", required_argument, NULL, 'S'},
   {"encoding", required_argument, NULL, 'e'},
-  {"case", required_argument, NULL, 'c'},
+  {"caseless", required_argument, NULL, 'c'},
 
   {"help", no_argument, NULL, 'h'},
   {"version", no_argument, NULL, 'V'},
