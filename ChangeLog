@@ -10,6 +10,11 @@
 
   Changes between 0.9.5 and SNAP:
 
+    *) New tags added (04-Jun-2000):
+       Tags <lb/>, <rb/> and <dq/> allow protection of the following
+       special characters: `<', `>' and '"'.
+       [Denis Barbier]
+
     *) Add -X flag to test parser (03-Jun-2000):
        [Denis Barbier]
 

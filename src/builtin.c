@@ -41,6 +41,9 @@
 DECLARE (mp4h___file__);
 DECLARE (mp4h___line__);
 DECLARE (mp4h___version__);
+DECLARE (mp4h_lb);
+DECLARE (mp4h_rb);
+DECLARE (mp4h_dq);
 DECLARE (mp4h_timer);
 #ifdef HAVE_LOCALE_H
 DECLARE (mp4h_mp4h_l10n);
@@ -171,6 +174,9 @@ builtin_tab[] =
   { "__file__",         FALSE,    TRUE,   mp4h___file__ },
   { "__line__",         FALSE,    TRUE,   mp4h___line__ },
   { "__version__",      FALSE,    TRUE,   mp4h___version__ },
+  { "lb",               FALSE,    TRUE,   mp4h_lb },
+  { "rb",               FALSE,    TRUE,   mp4h_rb },
+  { "dq",               FALSE,    TRUE,   mp4h_dq },
   { "timer",            FALSE,    TRUE,   mp4h_timer },
 #ifdef HAVE_LOCALE_H
   { "mp4h-l10n",        FALSE,    TRUE,   mp4h_mp4h_l10n },
@@ -981,6 +987,32 @@ static void
 mp4h___version__ (MP4H_BUILTIN_ARGS)
 {
   obstack_grow (obs, mp4h_PlainID, strlen (mp4h_PlainID));
+}
+
+static void
+add_1char_protected (struct obstack *obs, char ch)
+{
+  obstack_1grow (obs, CHAR_LQUOTE);
+  obstack_1grow (obs, ch);
+  obstack_1grow (obs, CHAR_RQUOTE);
+}
+
+static void
+mp4h_lb (MP4H_BUILTIN_ARGS)
+{
+  add_1char_protected (obs, '<');
+}
+
+static void
+mp4h_rb (MP4H_BUILTIN_ARGS)
+{
+  add_1char_protected (obs, '>');
+}
+
+static void
+mp4h_dq (MP4H_BUILTIN_ARGS)
+{
+  add_1char_protected (obs, '"');
 }
 
 
