@@ -127,6 +127,7 @@ xfree (voidstar p)
 {
   if (p != NULL)
     free (p);
+  p = NULL;
 }
 
 

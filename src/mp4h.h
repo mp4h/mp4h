@@ -488,7 +488,6 @@ struct symbol
 #define SYMBOL_NAME(S)          ((S)->name)
 #define SYMBOL_HOOK_BEGIN(S)    ((S)->hook_begin)
 #define SYMBOL_HOOK_END(S)      ((S)->hook_end)
-#define SYMBOL_NAME(S)          ((S)->name)
 #define SYMBOL_TYPE(S)          (TOKEN_DATA_TYPE (&(S)->data))
 #define SYMBOL_TEXT(S)          (TOKEN_DATA_TEXT (&(S)->data))
 #define SYMBOL_FUNC(S)          (TOKEN_DATA_FUNC (&(S)->data))
