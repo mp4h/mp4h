@@ -252,9 +252,9 @@ trace_format (...)
   va_list args;
   char ch;
 
-  int d;
+  int d, i;
   char nbuf[32];
-  const char *s;
+  char *s;
   int slen;
   int maxlen;
 
@@ -281,7 +281,7 @@ trace_format (...)
           /* fall through */
 
         case 's':
-          s = va_arg (args, const char *);
+          s = va_arg (args, char *);
           break;
 
         case 'd':
@@ -295,6 +295,8 @@ trace_format (...)
           break;
         }
 
+      /*   Remove special chars from output */
+      remove_special_chars (s, TRUE);
       slen = strlen (s);
       if (maxlen == 0 || maxlen > slen)
         obstack_grow (&trace, s, slen);
