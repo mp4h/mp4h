@@ -289,7 +289,7 @@ remove_special_chars (char *s, boolean restore_quotes)
       After that, string is shifyed.  */
   if (restore_quotes)
     {
-      for (cp=s; *cp != '\0' && !(IS_GROUP (*cp)); cp++)
+      for (cp=s; *cp != '\0' && !(IS_GROUP ((unsigned char) *cp)); cp++)
         {
           if (*cp == CHAR_QUOTE)
             *cp = '"';
@@ -297,7 +297,7 @@ remove_special_chars (char *s, boolean restore_quotes)
     }
   else
     {
-      for (cp=s; *cp != '\0' && !(IS_GROUP (*cp)); cp++)
+      for (cp=s; *cp != '\0' && !(IS_GROUP ((unsigned char) *cp)); cp++)
         ;
     }
 
@@ -306,7 +306,7 @@ remove_special_chars (char *s, boolean restore_quotes)
 
   for ( ; *cp != '\0'; cp++)
     {
-      if (IS_GROUP (*cp))
+      if (IS_GROUP ((unsigned char) *cp))
         offset++;
       else if ((*cp == CHAR_QUOTE) && restore_quotes)
         *(cp-offset) = '"';
@@ -322,10 +322,10 @@ remove_special_chars (char *s, boolean restore_quotes)
 `----------------------------------------------------*/
 
 static void
-remove_stars_and_slash (char *s)
+remove_stars_and_slash (unsigned char *s)
 {
   int offset;
-  register char *cp;
+  register unsigned char *cp;
 
   offset = 0;
   cp = s;
@@ -480,7 +480,7 @@ shipout_text (struct obstack *obs, char *text)
      and trailing slash in attributes */
   if (!(exp_flags & (EXP_LEAVE_TRAILING_STAR | EXP_LEAVE_TRAILING_STAR))
       || (exp_flags & EXP_REMOVE_TRAILING_SLASH))
-    remove_stars_and_slash (text);
+    remove_stars_and_slash ((unsigned char *)text);
 
   if (*text == '\0')
     {
