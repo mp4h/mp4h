@@ -1,0 +1,9 @@
+<set-var-x name="foo">This is
+in the body
+of this variable
+bar="<get-var bar/>"
+</set-var-x>
+<set-var bar="whatever"/>
+<get-var foo/>
+<set-var bar="dummy"/>
+<get-var foo/>
