@@ -8,6 +8,14 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.9.5 and SNAP:
+
+    *) Provide a way to read tokens without parsing (01-Jun-2000):
+       All characters between <@[ and ]@> are read without parsing,
+       this is very useful to read malformed mp4h tags.  These
+       delimiters may be changed with the <set-quotes> tag.
+       [Tobias Oetiker <oetiker@ee.ethz.ch>]
+
   Changes between 0.9.4 and 0.9.5:
 
     *) Change evaluation of unknown tags (22-May-2000):

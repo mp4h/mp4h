@@ -348,6 +348,7 @@ token_type next_token __P ((token_data *, read_type));
 void skip_line __P ((void));
 void skip_buffer __P ((void));
 void input_close __P ((void));
+void read_chars_until __P ((const char *, struct obstack *));
 
 /* push back input */
 void push_file __P ((FILE *, const char *));
@@ -378,6 +379,8 @@ extern STRING eolcomm;
 #define CHAR_QUOTE  '\5'
 
 #define DEF_EOLCOMM  ";;;"
+#define DEF_LQUOTE  "<@["
+#define DEF_RQUOTE  "]@>"
 
 /* Syntax table definitions. */
 /* Please read the comment at the top of input.c for details */

@@ -108,6 +108,7 @@ DECLARE (mp4h_include);
 DECLARE (mp4h___include);
 DECLARE (mp4h_comment);
 DECLARE (mp4h_set_eol_comment);
+DECLARE (mp4h_set_quotes);
 DECLARE (mp4h_dnl);
 DECLARE (mp4h_frozen_dump);
 
@@ -242,6 +243,7 @@ builtin_tab[] =
   { "%%include",        TRUE,     TRUE,   mp4h___include },
   { "comment",          TRUE,     TRUE,   mp4h_comment },
   { "set-eol-comment",  FALSE,    TRUE,   mp4h_set_eol_comment },
+  { "set-quotes",       FALSE,    TRUE,   mp4h_set_quotes },
   { "dnl",              FALSE,    TRUE,   mp4h_dnl },
   { "frozen-dump",      FALSE,    TRUE,   mp4h_frozen_dump },
 
@@ -2333,6 +2335,44 @@ mp4h_set_eol_comment (MP4H_BUILTIN_ARGS)
   xfree (eolcomm.string);
   eolcomm.string = xstrdup (ARG (1));
   eolcomm.length = strlen (eolcomm.string);
+}
+
+/*--------------------------------.
+| Set quotes to disable parsing.  |
+`--------------------------------*/
+static void
+mp4h_set_quotes (MP4H_BUILTIN_ARGS)
+{
+  if (argc == 1)
+    {
+      xfree (lquote.string);
+      xfree (rquote.string);
+      lquote.string = NULL;
+      lquote.length = 0;
+      rquote.string = NULL;
+      rquote.length = 0;
+    }
+  else if (argc == 3)
+    {
+      if (*ARG (1) != '<' || *(ARG (2) + strlen (ARG (2)) - 1) != '>')
+        {
+          MP4HERROR ((warning_status, 0,
+            _("Warning:%s:%d: `<%s>' ignored, invalid arguments %s %s"),
+                 CURRENT_FILE_LINE, ARG (0), ARG (1), ARG (2)));
+          return;
+        }
+      xfree (lquote.string);
+      xfree (rquote.string);
+      lquote.string = xstrdup (ARG (1));
+      lquote.length = strlen (lquote.string);
+
+      rquote.string = xstrdup (ARG (2));
+      rquote.length = strlen (rquote.string);
+    }
+  else
+    MP4HERROR ((warning_status, 0,
+      _("Warning:%s:%d: `<%s>' must have 0 or 2 arguments, but got %d"),
+           CURRENT_FILE_LINE, ARG (0), argc-1));
 }
 
 /*------------------------------------------------------------------------.

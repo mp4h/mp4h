@@ -207,6 +207,7 @@ unsigned short syntax_table[256];
 
 /* Comment chars.  */
 STRING eolcomm;
+STRING lquote, rquote;
 
 
 
@@ -711,6 +712,24 @@ skip_line (void)
 }
 
 /*------------------------------------------------------------------------.
+| skip_line () simply discards all immediately following characters, upto |
+| the first newline.  All whitespaces following this newline are also     |
+| discarded.                                                              |
+`------------------------------------------------------------------------*/
+
+void
+read_chars_until (const char *tagname, struct obstack *obs)
+{
+  int ch;
+
+  while ((ch = next_char ()) != CHAR_EOF && ch != '\n')
+    ;
+  while ((ch = next_char ()) != CHAR_EOF && (ch == '\t' || ch == ' '))
+    ;
+  unget_input (ch);
+}
+
+/*------------------------------------------------------------------------.
 | skip_buffer () discards current buffer.  This function is called by     |
 | <return> to exit current function.                                      |
 `------------------------------------------------------------------------*/
@@ -811,6 +830,12 @@ input_init (void)
   eolcomm.string = xstrdup (DEF_EOLCOMM);
   eolcomm.length = strlen (eolcomm.string);
 
+  lquote.string = xstrdup (DEF_LQUOTE);
+  lquote.length = strlen (lquote.string);
+
+  rquote.string = xstrdup (DEF_RQUOTE);
+  rquote.length = strlen (rquote.string);
+
   for (ch = 256; --ch > 0; )
     {
       if (isspace(ch))
@@ -849,6 +874,8 @@ input_deallocate (void)
 {
   xfree (array_current_line);
   xfree (eolcomm.string);
+  xfree (lquote.string);
+  xfree (rquote.string);
 
   obstack_free (&token_stack, 0);
   obstack_free (&input_stack, 0);
@@ -966,41 +993,60 @@ next_token (token_data *td, read_type expansion)
       (void) next_char ();
       if (IS_ESCAPE(ch))             /* ESCAPED WORD */
         {
-          obstack_1grow (&token_stack, ch);
-          if ((ch = peek_input ()) != CHAR_EOF)
+          if (lquote.length > 0 && MATCH (ch, lquote.string))
             {
-              if (ch == '/')
+              if (expansion == READ_ATTR_VERB
+                  || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
+                obstack_grow (&token_stack, lquote.string, lquote.length);
+              while ((ch = next_char ()) != CHAR_EOF)
                 {
-                  obstack_1grow (&token_stack, '/');
-                  (void) next_char ();
-                  ch = peek_input ();
-                }
-              if (IS_ALPHA(ch))
-                {
-                  ch = next_char ();
+                  if (rquote.length > 0 && MATCH (ch, rquote.string))
+                    break;
                   obstack_1grow (&token_stack, ch);
-                  while ((ch = next_char ()) != CHAR_EOF && IS_ALNUM(ch))
+                }
+              if (expansion == READ_ATTR_VERB
+                  || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
+                obstack_grow (&token_stack, rquote.string, rquote.length);
+              type = TOKEN_STRING;
+            }
+          else
+            {
+              obstack_1grow (&token_stack, ch);
+              if ((ch = peek_input ()) != CHAR_EOF)
+                {
+                  if (ch == '/')
                     {
-                      if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
-                        {
-                          skip_line ();
-                          ch = CHAR_EOF;
-                          break;
-                        }
-                      obstack_1grow (&token_stack, ch);
+                      obstack_1grow (&token_stack, '/');
+                      (void) next_char ();
+                      ch = peek_input ();
                     }
-                  unget_input(ch);
+                  if (IS_ALPHA(ch))
+                    {
+                      ch = next_char ();
+                      obstack_1grow (&token_stack, ch);
+                      while ((ch = next_char ()) != CHAR_EOF && IS_ALNUM(ch))
+                        {
+                          if (eolcomm.length > 0 && MATCH (ch, eolcomm.string))
+                            {
+                              skip_line ();
+                              ch = CHAR_EOF;
+                              break;
+                            }
+                          obstack_1grow (&token_stack, ch);
+                        }
+                      unget_input(ch);
 
-                  if (IS_SPACE(ch) || IS_CLOSE(ch) || ch == '/')
-                    type = TOKEN_WORD;
+                      if (IS_SPACE(ch) || IS_CLOSE(ch) || ch == '/')
+                        type = TOKEN_WORD;
+                      else
+                        type = TOKEN_STRING;
+                    }
                   else
                     type = TOKEN_STRING;
                 }
               else
-                type = TOKEN_STRING;
+                type = TOKEN_SIMPLE;        /* escape before eof */
             }
-          else
-            type = TOKEN_SIMPLE;        /* escape before eof */
         }
       else if (IS_CLOSE(ch))
         {
