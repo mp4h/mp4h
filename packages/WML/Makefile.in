@@ -16,65 +16,62 @@ VPATH           = @srcdir@
 SHTOOL          = $(top_srcdir)/shtool
 INSTALL_DATA    = $(SHTOOL) install -c -m 644
 MKDIR           = $(SHTOOL) mkdir -f -p -m 755
+INSTPREFIX      =
 
-prefix          = @prefix@
-exec_prefix     = @exec_prefix@
-pkgdatadir      = @pkgdatadir@
-mandir          = @mandir@
+INITVARS = \
+   pkgdatadir=`$(top_srcdir)/mp4h-config --pkgdatadir` \
+   mandir=`$(top_srcdir)/mp4h-config --mandir`
+
 manext          = 3
+thisdir         = WML
+SOURCES         = href.src isolatin.src javascript.src \
+   preload.src rollover.src url.src
+PKGFILES        = $(SOURCES:.src=.mp4hp)
+
+.SUFFIXES:
+.SUFFIXES: .src .mp4hp
+.src.mp4hp:
+	sed -e '/^=head1/,/^=cut/d' -e '/^##EOF##/,$$d' $< > $@
+	cat $< > $(thisdir):$*.pod && pod2man --section=$(manext) \
+   --center="mp4h packages" \
+   --release="mp4h packages" \
+   $(thisdir):$*.pod > $*.$(manext) && rm -f $(thisdir):$*.pod
 
 # ------------------------------------------------
 #   TARGETS
 # ------------------------------------------------
 
-all:
-	@set -e; \
-	files=`echo *.src`; \
-	for file in $$files; do \
-	    base=`echo $$file | sed -e 's/\.src$$//g'`; \
-	    name="WML:$$base"; \
-	    if ls -1t $$base.mp4hp $$base.src 2>/dev/null \
-	       | sed 1q | grep "^$$base.mp4hp\$$" >/dev/null 2>&1; then \
-	        :; \
-	    else \
-	        echo "Creating $$name"; \
-	        sed -e '/^=head1/,/^=cut/d' -e '/^##EOF##/,$$d' \
-                   <$$base.src >$$base.mp4hp; \
-	        cp $$base.src $$name.pod; \
-	        pod2man --section=1 \
-	            --center="EN Tools" \
-	            --release="EN Tools" \
-	                $$name.pod >$$base.$(manext); \
-	        rm -f $$name.pod; \
-	    fi; \
-	done
+all: $(PKGFILES)
 
-install:
-	@if [ ! -d "$(mandir)/man$(manext)" ]; then \
-	        echo "$(MKDIR) $(mandir)/man$(manext)"; \
-	        $(MKDIR) $(mandir)/man$(manext); \
-	else :; \
-	fi
-	@set -e; \
-	files=`echo *.mp4hp`; \
+install: all install-dirs
+	@set -e; $(INITVARS); \
+	files='$(PKGFILES)'; \
 	for file in $$files; do \
 	    base=`echo $$file | sed -e 's/\.mp4hp$$//g'`; \
 	    dir=`echo $$file | sed -e 's/[a-zA-Z0-9_]*.mp4hp$$//g'`; \
-	    name="WML:$$base"; \
-	    if [ ! -d "$(pkgdatadir)/WML/$$dir" ]; then \
-	        echo "$(MKDIR) $(pkgdatadir)/WML/$$dir"; \
-	        $(MKDIR) $(pkgdatadir)/WML/$$dir; \
+	    name="$(thisdir):$$base"; \
+	    if [ ! -d "$(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir" ]; then \
+	        echo "$(MKDIR) $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir"; \
+	        $(MKDIR) $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir; \
 	    else :; \
 	    fi; \
-          echo "$(INSTALL_DATA) $$file $(pkgdatadir)/WML/$$file"; \
-          $(INSTALL_DATA) $$file $(pkgdatadir)/WML/$$file; \
-          echo "$(INSTALL_DATA) $$base.$(manext) $(mandir)/man$(manext)/$$name.$(manext)"; \
-          $(INSTALL_DATA) $$base.$(manext) $(mandir)/man$(manext)/$$name.$(manext); \
+            echo "$(INSTALL_DATA) $$file $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$file"; \
+            $(INSTALL_DATA) $$file $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$file; \
+            echo "$(INSTALL_DATA) $$base.$(manext) $(INSTPREFIX)$$mandir/man$(manext)/$$name.$(manext)"; \
+            $(INSTALL_DATA) $$base.$(manext) $(INSTPREFIX)$$mandir/man$(manext)/$$name.$(manext); \
 	done
+
+install-dirs:
+	@set -e; $(INITVARS); \
+	if [ ! -d "$(INSTPREFIX)$$mandir/man$(manext)" ]; then \
+	        echo "$(MKDIR) $(INSTPREFIX)$$mandir/man$(manext)"; \
+	        $(MKDIR) $(INSTPREFIX)$$mandir/man$(manext); \
+	else :; \
+	fi
 
 clean:
 	-rm -f *.mp4hp
-	-rm -f *.$(manext)
+	-rm -f *.pod *.$(manext)
 
 distclean: clean
 	-rm -f Makefile

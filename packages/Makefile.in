@@ -10,15 +10,132 @@
 SHELL           = /bin/sh
 
 top_srcdir      = @top_srcdir@
+top_builddir    = @top_srcdir@
 srcdir          = @srcdir@
 prefix          = @prefix@
 VPATH           = @srcdir@
 
 RM              = rm -f
 
-SDP     =
+SHTOOL          = $(top_srcdir)/shtool
+INSTALL_DATA    = $(SHTOOL) install -c -m 644
+#   libtool does not like this definition
+#INSTALL         = $(SHTOOL) install -c -m 644
+INSTALL         = @INSTALL@
+MKDIR           = $(SHTOOL) mkdir -f -p -m 755
+
+prefix          = @prefix@
+
+CC              = @CC@
+CFLAGS          = @CFLAGS@
+CPPFLAGS        = @CPPFLAGS@
+DEFS            = @DEFS@ -I. -I$(srcdir)
+INCLUDES        = -I$(top_srcdir) -I$(top_srcdir)/lib  -I$(top_srcdir)/src
+LDFLAGS         = @LDFLAGS@
+LIBS            = @LIBS@
+LIBTOOL         = @LIBTOOL@
+mp4h_config     = $(top_srcdir)/mp4h-config
+
+SDP     = packages
 SUBDIRS = \
-   WML
+   WML \
+   exec
+
+man3ext         = 3
+SOURCES         = exec.src
+PKGFILES        = $(SOURCES:.src=.mp4hp)
+MODSOURCES      = exec.c
+MODULE          = exec
+LOBJ            = $(MODSOURCES:.c=.lo)
+LARCHIVE        = $(MODSOURCES:.c=.la)
+
+INITVARS = \
+   pkgdatadir=`$(top_srcdir)/mp4h-config --pkgdatadir` \
+   mandir=`$(top_srcdir)/mp4h-config --mandir`
+
+.SUFFIXES:
+.SUFFIXES: .src .mp4hp .c .o .lo .la
+
+.src.mp4hp:
+	sed -e '/^=head1/,/^=cut/d' -e '/^##EOF##/,$$d' $< > $@
+	cat $< > $*.pod && pod2man --section=$(man3ext) \
+   --center="mp4h packages" \
+   --release="mp4h packages" \
+   $*.pod > $*.$(man3ext) && rm -f $*.pod
+
+.c.o:
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -c $<
+
+.c.lo:
+	$(LIBTOOL) --quiet --mode=compile `$(mp4h_config) --compile` -DHAVE_CONFIG_H $(INCLUDES) -c $<
+
+.lo.la:
+	$(LIBTOOL) --quiet --mode=link `$(mp4h_config) --cc` -o $@ $< \
+	    -module -rpath `$(mp4h_config) --pkglibdir` -avoid-version
+
+# ------------------------------------------------
+#   THE DEFAULT TARGET
+# ------------------------------------------------
+
+all: $(PKGFILES) $(LARCHIVE) all-recursive
+
+# ------------------------------------------------
+#   THE INSTALL TARGET
+# ------------------------------------------------
+
+INSTALL_LA_FILES = \
+   d=`$(mp4h_config) --pkglibdir`; \
+   echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
+   $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
+
+install: install-recursive
+	@list='$(LARCHIVE)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    $(INSTALL_LA_FILES); \
+	  else :; fi; \
+	done
+	@set -e; $(INITVARS); \
+	files='$(PKGFILES)'; \
+	for file in $$files; do \
+	    base=`echo $$file | sed -e 's/\.mp4hp$$//g'`; \
+	    dir=`echo $$file | sed -e 's/[a-zA-Z0-9_]*.mp4hp$$//g'`; \
+	    name="$(thisdir):$$base"; \
+	    if [ ! -d "$(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir" ]; then \
+	        echo "$(MKDIR) $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir"; \
+	        $(MKDIR) $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$dir; \
+	    else :; \
+	    fi; \
+            echo "$(INSTALL_DATA) $$file $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$file"; \
+            $(INSTALL_DATA) $$file $(INSTPREFIX)$$pkgdatadir/$(thisdir)/$$file; \
+            echo "$(INSTALL_DATA) $$base.$(man3ext) $(INSTPREFIX)$$mandir/man$(man3ext)/$$name.$(man3ext)"; \
+            $(INSTALL_DATA) $$base.$(man3ext) $(INSTPREFIX)$$mandir/man$(man3ext)/$$name.$(man3ext); \
+	done
+
+install-dirs:
+	@set -e; $(INITVARS); \
+	if [ ! -d "$(INSTPREFIX)$$mandir/man$(man3ext)" ]; then \
+	        echo "$(MKDIR) $(INSTPREFIX)$$mandir/man$(man3ext)"; \
+	        $(MKDIR) $(INSTPREFIX)$$mandir/man$(man3ext); \
+	else :; \
+	fi
+
+
+# ------------------------------------------------
+#   CLEANUP
+# ------------------------------------------------
+
+clean: clean-recursive
+	-rm -f *.o *.lo *.la core
+	-rm -rf .libs
+	-rm -f *.mp4hp
+	-rm -f *.pod *.$(man3ext)
+
+distclean: clean distclean-recursive
+	-$(RM) Makefile
+
+# ------------------------------------------------
+#   RECURSIVE CALLS
+# ------------------------------------------------
 
 RECURS_TARGET = \
    echo "===> $(SDP)$$dir ($$target)"; \
@@ -26,20 +143,28 @@ RECURS_TARGET = \
    || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
    echo "<=== $(SDP)$$dir"
 
-# ------------------------------------------------
-#   THE DEFAULT TARGET
-# ------------------------------------------------
-all install clean:
-	@set -e; \
-   set dummy $(MAKEFLAGS); amf=$$2; \
-   for dir in $(SUBDIRS); do \
-      target='$@'; $(RECURS_TARGET); \
-   done && test -z "$$fail"
+RECURS_TARGET_NOBREAK = \
+   echo "===> $(SDP)$$dir ($$target)"; \
+   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" prefix=$(prefix) $$target); \
+   echo "<=== $(SDP)$$dir"
 
-distclean:
-	@for dir in $(SUBDIRS); do \
-      target='$@'; $(RECURS_TARGET); \
-   done
-	$(RM) Makefile
+#   Some GNU components (especially libltdl) require mkinstalldirs
+#   to do nothing with it, so it is discarded
+all-recursive install-recursive:
+	-@set -e; \
+	set dummy $(MAKEFLAGS); amf=$$2; \
+	target=`echo $@ | sed s/-recursive//`; \
+	for dir in $(SUBDIRS); do \
+	    $(RECURS_TARGET); \
+	done && test -z "$$fail"
+
+clean-recursive distclean-recursive:
+	@target=`echo $@ | sed s/-recursive//`; \
+	for dir in $(SUBDIRS); do \
+	    if [ -f $$dir/Makefile ]; then \
+	        $(RECURS_TARGET_NOBREAK); \
+	    else :; \
+	    fi; \
+	done
 
 ##EOF##
