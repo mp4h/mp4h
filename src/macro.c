@@ -268,7 +268,7 @@ collect_arguments (char *symbol_name, read_type expansion,
   int ch;
   token_data td;
   token_data *tdp;
-  char *last_addr, *cp;
+  char *last_addr;
   boolean more_args;
   char last_char = ' ';
 

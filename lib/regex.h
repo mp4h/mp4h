@@ -449,9 +449,6 @@ extern reg_syntax_t re_set_syntax _RE_ARGS ((reg_syntax_t syntax));
 extern const char *re_compile_pattern
   _RE_ARGS ((const char *pattern, size_t length,
              struct re_pattern_buffer *buffer));
-extern const char *re_compile_pattern_nl
-  _RE_ARGS ((const char *pattern, size_t length,
-             struct re_pattern_buffer *buffer));
 
 
 /* Compile a fastmap for the compiled pattern in BUFFER; used to

@@ -756,6 +756,7 @@ first character has a null index.
 <var string />
 <var regexp />
 [<var replacement />]
+[caseless=true]
 [singleline=true]
 </tag:description>
 
@@ -770,6 +771,9 @@ Replace a regular expression in a string by a replacement text.
 </example>
 
 <attributes:description>
+<attributes:item "caseless=true" />
+Comparison is case insensitive.
+
 <attributes:item "singleline=true" />
 when this attribute is used, the <command ^ /> symbol represents the
 beginning of string and <command $ /> the end of string.
@@ -786,12 +790,23 @@ Otherwise they represent the beginning and end of lines.
 <var name />
 <var regexp />
 [<var replacement />]
+[caseless=true]
 [singleline=true]
 </tag:description>
 
 <para>
 Performs substitutions inside variable content.
 </para>
+
+<attributes:description>
+<attributes:item "caseless=true" />
+Comparison is case insensitive.
+
+<attributes:item "singleline=true" />
+when this attribute is used, the <command ^ /> symbol represents the
+beginning of string and <command $ /> the end of string.
+Otherwise they represent the beginning and end of lines.
+</attributes:description>
 
 <tag:description string-eq>
 <var string1 />

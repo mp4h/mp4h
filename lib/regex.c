@@ -1,12 +1,8 @@
-/*
-   This version implements a new routine re_compile_pattern_nl
-   Denis Barbier
-*/
 /* Extended regular expression matching and search library,
    version 0.12.
    (Implements POSIX draft P1003.2/D11.2, except for some of the
    internationalization features.)
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 99 Free Software Foundation, Inc.
+   Copyright (C) 1993-1999, 2000 Free Software Foundation, Inc.
 
    The GNU C Library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public License as
@@ -168,46 +164,6 @@ char *realloc ();
 #  define SWITCH_ENUM_CAST(x) (x)
 # endif
 
-/* How many characters in the character set.  */
-# define CHAR_SET_SIZE 256
-
-# ifdef SYNTAX_TABLE
-
-extern char *re_syntax_table;
-
-# else /* not SYNTAX_TABLE */
-
-static char re_syntax_table[CHAR_SET_SIZE];
-
-static void
-init_syntax_once ()
-{
-   register int c;
-   static int done;
-
-   if (done)
-     return;
-
-   bzero (re_syntax_table, sizeof re_syntax_table);
-
-   for (c = 'a'; c <= 'z'; c++)
-     re_syntax_table[c] = Sword;
-
-   for (c = 'A'; c <= 'Z'; c++)
-     re_syntax_table[c] = Sword;
-
-   for (c = '0'; c <= '9'; c++)
-     re_syntax_table[c] = Sword;
-
-   re_syntax_table['_'] = Sword;
-
-   done = 1;
-}
-
-# endif /* not SYNTAX_TABLE */
-
-# define SYNTAX(c) re_syntax_table[c]
-
 #endif /* not emacs */
 
 /* Get the interface, including the syntax bits.  */
@@ -279,6 +235,43 @@ init_syntax_once ()
 /* As in Harbison and Steele.  */
 # define SIGN_EXTEND_CHAR(c) ((((unsigned char) (c)) ^ 128) - 128)
 #endif
+
+#ifndef emacs
+/* How many characters in the character set.  */
+# define CHAR_SET_SIZE 256
+
+# ifdef SYNTAX_TABLE
+
+extern char *re_syntax_table;
+
+# else /* not SYNTAX_TABLE */
+
+static char re_syntax_table[CHAR_SET_SIZE];
+
+static void
+init_syntax_once ()
+{
+   register int c;
+   static int done = 0;
+
+   if (done)
+     return;
+   bzero (re_syntax_table, sizeof re_syntax_table);
+
+   for (c = 0; c < CHAR_SET_SIZE; ++c)
+     if (ISALNUM (c))
+	re_syntax_table[c] = Sword;
+
+   re_syntax_table['_'] = Sword;
+
+   done = 1;
+}
+
+# endif /* not SYNTAX_TABLE */
+
+# define SYNTAX(c) re_syntax_table[((c) & 0xFF)]
+
+#endif /* emacs */
 
 /* Should we use malloc or alloca?  If REGEX_MALLOC is not defined, we
    use `alloca' instead of `malloc'.  This is because using malloc in
@@ -1770,7 +1763,7 @@ typedef struct
   { if (p != pend)							\
      {									\
        PATFETCH (c); 							\
-       while (ISDIGIT (c)) 						\
+       while ('0' <= c && c <= '9')					\
          { 								\
            if (num < 0)							\
               num = 0;							\
@@ -2626,7 +2619,7 @@ regex_compile (pattern, size, syntax, bufp)
 
                 if (p == pend)
                   {
-                    if (syntax & RE_NO_BK_BRACES)
+                    if (!(syntax & RE_INTERVALS) && (syntax & RE_NO_BK_BRACES))
                       goto unfetch_interval;
                     else
                       FREE_STACK_RETURN (REG_EBRACE);
@@ -2637,7 +2630,12 @@ regex_compile (pattern, size, syntax, bufp)
                 if (c == ',')
                   {
                     GET_UNSIGNED_NUMBER (upper_bound);
-                    if (upper_bound < 0) upper_bound = RE_DUP_MAX;
+		    if ((!(syntax & RE_NO_BK_BRACES) && c != '\\')
+			|| ((syntax & RE_NO_BK_BRACES) && c != '}'))
+		      FREE_STACK_RETURN (REG_BADBR);
+
+		    if (upper_bound < 0)
+		      upper_bound = RE_DUP_MAX;
                   }
                 else
                   /* Interval such as `{1}' => match exactly once. */
@@ -2646,7 +2644,7 @@ regex_compile (pattern, size, syntax, bufp)
                 if (lower_bound < 0 || upper_bound > RE_DUP_MAX
                     || lower_bound > upper_bound)
                   {
-                    if (syntax & RE_NO_BK_BRACES)
+		    if (!(syntax & RE_INTERVALS) && (syntax & RE_NO_BK_BRACES))
                       goto unfetch_interval;
                     else
                       FREE_STACK_RETURN (REG_BADBR);
@@ -2661,7 +2659,7 @@ regex_compile (pattern, size, syntax, bufp)
 
                 if (c != '}')
                   {
-                    if (syntax & RE_NO_BK_BRACES)
+		    if (!(syntax & RE_INTERVALS) && (syntax & RE_NO_BK_BRACES))
                       goto unfetch_interval;
                     else
                       FREE_STACK_RETURN (REG_BADBR);
@@ -3143,40 +3141,43 @@ compile_range (p_ptr, pend, translate, syntax, b)
   unsigned this_char;
 
   const char *p = *p_ptr;
-  unsigned int range_start, range_end;
+  reg_errcode_t ret;
+  char range_start[2];
+  char range_end[2];
+  char ch[2];
 
   if (p == pend)
     return REG_ERANGE;
 
-  /* Even though the pattern is a signed `char *', we need to fetch
-     with unsigned char *'s; if the high bit of the pattern character
-     is set, the range endpoints will be negative if we fetch using a
-     signed char *.
-
-     We also want to fetch the endpoints without translating them; the
+  /* Fetch the endpoints without translating them; the
      appropriate translation is done in the bit-setting loop below.  */
-  /* The SVR4 compiler on the 3B2 had trouble with unsigned const char *.  */
-  range_start = ((const unsigned char *) p)[-2];
-  range_end   = ((const unsigned char *) p)[0];
+  range_start[0] = p[-2];
+  range_start[1] = '\0';
+  range_end[0] = p[0];
+  range_end[1] = '\0';
 
   /* Have to increment the pointer into the pattern string, so the
      caller isn't still at the ending character.  */
   (*p_ptr)++;
 
-  /* If the start is after the end, the range is empty.  */
-  if (range_start > range_end)
-    return syntax & RE_NO_EMPTY_RANGES ? REG_ERANGE : REG_NOERROR;
+  /* Report an error if the range is empty and the syntax prohibits this.  */
+  ret = syntax & RE_NO_EMPTY_RANGES ? REG_ERANGE : REG_NOERROR;
 
   /* Here we see why `this_char' has to be larger than an `unsigned
-     char' -- the range is inclusive, so if `range_end' == 0xff
-     (assuming 8-bit characters), we would otherwise go into an infinite
-     loop, since all characters <= 0xff.  */
-  for (this_char = range_start; this_char <= range_end; this_char++)
+     char' -- we would otherwise go into an infinite loop, since all
+     characters <= 0xff.  */
+  ch[1] = '\0';
+  for (this_char = 0; this_char <= (unsigned char) -1; ++this_char)
     {
-      SET_LIST_BIT (TRANSLATE (this_char));
+      ch[0] = this_char;
+      if (strcoll (range_start, ch) <= 0 && strcoll (ch, range_end) <= 0)
+	{
+	  SET_LIST_BIT (TRANSLATE (this_char));
+	  ret = REG_NOERROR;
+	}
     }
 
-  return REG_NOERROR;
+  return ret;
 }
 
 /* re_compile_fastmap computes a ``fastmap'' for the compiled pattern in
@@ -4192,11 +4193,6 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
                   if (regs->start == NULL || regs->end == NULL)
 		    {
 		      FREE_VARIABLES ();
-                      /*  Added by DB.  */
-                      if (regs->start)
-                        free (regs->start);
-                      else
-                        free (regs->end);
 		      return -2;
 		    }
                   bufp->regs_allocated = REGS_REALLOCATE;
@@ -4212,11 +4208,6 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
                       RETALLOC (regs->end, regs->num_regs, regoff_t);
                       if (regs->start == NULL || regs->end == NULL)
 			{
-                          /*  Added by DB.  */
-                          if (regs->start)
-                            free (regs->start);
-                          else
-                            free (regs->end);
 			  FREE_VARIABLES ();
 			  return -2;
 			}
@@ -4850,11 +4841,11 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
 		/* We win if the first character of the loop is not part
                    of the charset.  */
                 if ((re_opcode_t) p1[3] == exactn
-		    && ! ((int) p2[1] * BYTEWIDTH > (int) p1[5]
-			  && (p2[2 + p1[5] / BYTEWIDTH]
-			      & (1 << (p1[5] % BYTEWIDTH)))))
-                  {
-  		    p[-3] = (unsigned char) pop_failure_jump;
+ 		    && ! ((int) p2[1] * BYTEWIDTH > (int) p1[5]
+ 			  && (p2[2 + p1[5] / BYTEWIDTH]
+ 			      & (1 << (p1[5] % BYTEWIDTH)))))
+		  {
+		    p[-3] = (unsigned char) pop_failure_jump;
 		    DEBUG_PRINT1 ("  No match => pop_failure_jump.\n");
                   }
 
@@ -5529,7 +5520,6 @@ re_compile_pattern (pattern, length, bufp)
      struct re_pattern_buffer *bufp;
 {
   reg_errcode_t ret;
-  reg_syntax_t syntax = re_syntax_options;
 
   /* GNU code is written to assume at least RE_NREGS registers will be set
      (and at least one extra will be -1).  */
@@ -5542,38 +5532,6 @@ re_compile_pattern (pattern, length, bufp)
 
   /* Match anchors at newline.  */
   bufp->newline_anchor = 1;
-  syntax &= ~RE_DOT_NEWLINE;
-  syntax |= RE_HAT_LISTS_NOT_NEWLINE;
-
-  ret = regex_compile (pattern, length, syntax, bufp);
-
-  if (!ret)
-    return NULL;
-  return gettext (re_error_msgid + re_error_msgid_idx[(int) ret]);
-}
-#ifdef _LIBC
-weak_alias (__re_compile_pattern, re_compile_pattern)
-#endif
-
-const char *
-re_compile_pattern_nl (pattern, length, bufp)
-     const char *pattern;
-     size_t length;
-     struct re_pattern_buffer *bufp;
-{
-  reg_errcode_t ret;
-
-  /* GNU code is written to assume at least RE_NREGS registers will be set
-     (and at least one extra will be -1).  */
-  bufp->regs_allocated = REGS_UNALLOCATED;
-
-  /* And GNU code determines whether or not to get register information
-     by passing null for the REGS argument to re_match, etc., not by
-     setting no_sub.  */
-  bufp->no_sub = 0;
-
-  /* Match anchors at newline.  */
-  bufp->newline_anchor = 0;
 
   ret = regex_compile (pattern, length, re_syntax_options, bufp);
 
@@ -5582,7 +5540,7 @@ re_compile_pattern_nl (pattern, length, bufp)
   return gettext (re_error_msgid + re_error_msgid_idx[(int) ret]);
 }
 #ifdef _LIBC
-weak_alias (__re_compile_pattern_nl, re_compile_pattern_nl)
+weak_alias (__re_compile_pattern, re_compile_pattern)
 #endif
 
 /* Entry points compatible with 4.2 BSD regex library.  We don't define
@@ -5758,7 +5716,7 @@ regcomp (preg, pattern, cflags)
 	 buffer.  */
       if (re_compile_fastmap (preg) == -2)
 	{
-	  /* Some error occured while computing the fastmap, just forget
+	  /* Some error occurred while computing the fastmap, just forget
 	     about it.  */
 	  free (preg->fastmap);
 	  preg->fastmap = NULL;

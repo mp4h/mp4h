@@ -328,9 +328,9 @@ static void generic_set_hook __P ((MP4H_BUILTIN_PROTO, boolean, int));
 static void math_relation __P ((MP4H_BUILTIN_PROTO, mathrel_type));
 static void mathop_functions __P ((MP4H_BUILTIN_PROTO, mathop_type));
 static void updowncase __P ((struct obstack *, int, token_data **, boolean));
-static void substitute __P ((struct obstack *, const char *, const char *, struct re_registers *));
-static void string_regexp __P ((struct obstack *, int, token_data **, const char *));
-static void subst_in_string __P ((struct obstack *, int, token_data **, boolean));
+static void substitute __P ((struct obstack *, const char *, const char *, regmatch_t *));
+static void string_regexp __P ((struct obstack *, int, token_data **, int, const char *));
+static void subst_in_string __P ((struct obstack *, int, token_data **, int));
 static void generic_variable __P ((MP4H_BUILTIN_PROTO, symbol_lookup, boolean));
 static int array_size __P ((symbol *));
 static char *array_value __P ((symbol *, int, int *));
@@ -345,6 +345,9 @@ static var_stack *vs = NULL;
 
 /*  Stack for predefined attributes.  */
 static var_stack *tag_attr = NULL;
+
+/*  Flags used in regexps */
+static int regex_flags = 0;
 
 /*  Global variables needed by sort algorithms.  */
 static boolean sort_caseless;
@@ -612,9 +615,9 @@ void
 set_regexp_extended (boolean extended)
 {
   if (extended)
-      re_set_syntax (RE_SYNTAX_POSIX_EXTENDED);
+    regex_flags = REG_EXTENDED;
   else
-      re_set_syntax (RE_SYNTAX_POSIX_BASIC);
+    regex_flags = 0;
 }
 
 /*------------------------------------------------------------------------.
@@ -946,25 +949,30 @@ matching_attributes (struct obstack *obs, int argc, token_data **argv, char *lis
             }
 
           sp = strchr (ARG (i)+special_chars, '=');
-          if (sp == NULL && strcasecmp (ARG (i)+special_chars, cp) == 0)
+          if (sp == NULL)
             {
-              if (!first)
-                obstack_1grow (obs, ' ');
-              first = FALSE;
-              obstack_1grow (obs, CHAR_BGROUP);
-              obstack_grow (obs, ARG (i), strlen (ARG (i)));
-              obstack_1grow (obs, CHAR_EGROUP);
+              if (strcasecmp (ARG (i)+special_chars, cp) == 0)
+                {
+                  if (!first)
+                    obstack_1grow (obs, ' ');
+                  first = FALSE;
+                  obstack_1grow (obs, CHAR_BGROUP);
+                  obstack_grow (obs, ARG (i), strlen (ARG (i)));
+                  obstack_1grow (obs, CHAR_EGROUP);
+                }
             }
-          else if (sp != NULL
-                   && strncasecmp (ARG (i)+special_chars, cp, strlen (cp)) == 0
-                   && !IS_ALNUM(*(ARG (i)+special_chars + strlen (cp))))
+          else
             {
-              if (!first)
-                obstack_1grow (obs, ' ');
-              first = FALSE;
-              obstack_1grow (obs, CHAR_BGROUP);
-              obstack_grow (obs, ARG (i), strlen (ARG (i)));
-              obstack_1grow (obs, CHAR_EGROUP);
+              if (strncasecmp (ARG (i)+special_chars, cp, strlen (cp)) == 0
+                  && !IS_ALNUM(*(ARG (i)+special_chars + strlen (cp))))
+                {
+                  if (!first)
+                    obstack_1grow (obs, ' ');
+                  first = FALSE;
+                  obstack_1grow (obs, CHAR_BGROUP);
+                  obstack_grow (obs, ARG (i), strlen (ARG (i)));
+                  obstack_1grow (obs, CHAR_EGROUP);
+                }
             }
         }
       cp = next;
@@ -1401,10 +1409,10 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
 {
   DIR *dir;
   struct dirent *entry;
+  int length;
   const char *matching;
-
-  struct re_pattern_buffer buf; /* compiled regular expression */
-  const char *msg;              /* error message from re_compile_pattern */
+  regex_t re;
+  regmatch_t match_ptr[1];
 
   matching = predefined_attribute ("matching", &argc, argv, FALSE);
   if (bad_argc (argv[0], argc, 2, 2))
@@ -1418,41 +1426,30 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
 
   if (matching)
     {
-      buf.buffer = NULL;
-      buf.allocated = 0;
-      buf.fastmap = NULL;
-      buf.translate = NULL;
-      msg = re_compile_pattern (matching, strlen (matching), &buf);
-
-      if (msg != NULL)
+      if (regcomp (&re, matching, regex_flags) != 0)
         {
           MP4HERROR ((warning_status, 0,
-            _("Warning:%s:%d: Bad regular expression `%s': %s"),
-                 CURRENT_FILE_LINE, matching, msg));
+            _("Warning:%s:%d: Bad regular expression `%s'"),
+                 CURRENT_FILE_LINE, matching));
+          regfree (&re);
           return;
         }
     }
 
   while ((entry = readdir (dir)) != (struct dirent *)NULL)
     {
-      if (matching)
+      length = strlen (entry->d_name);
+      if (!matching ||
+          (regexec (&re, entry->d_name, 1, match_ptr, 0) == 0
+           && match_ptr[0].rm_eo - match_ptr[0].rm_so == length))
         {
-          if (re_match (&buf, entry->d_name, strlen (entry->d_name), 0, 0)
-                  == strlen (entry->d_name))
-            {
-              obstack_grow (obs, entry->d_name, strlen (entry->d_name));
-              obstack_1grow (obs, '\n');
-            }
-        }
-      else
-        {
-          obstack_grow (obs, entry->d_name, strlen (entry->d_name));
+          obstack_grow (obs, entry->d_name, length);
           obstack_1grow (obs, '\n');
         }
     }
 
   if (matching)
-    xfree (buf.buffer);
+    regfree (&re);
 
   closedir (dir);
 }
@@ -2896,7 +2893,7 @@ static int substitute_warned = 0;
 
 static void
 substitute (struct obstack *obs, const char *victim, const char *repl,
-            struct re_registers *regs)
+            regmatch_t *regs)
 {
   register unsigned int ch;
 
@@ -2922,16 +2919,16 @@ WARNING:%s:%d: \\0 will disappear, use \\& instead in replacements"),
           /* Fall through.  */
 
         case '&':
-          obstack_grow (obs, victim + regs->start[0],
-                        regs->end[0] - regs->start[0]);
+          obstack_grow (obs, victim + regs[0].rm_so,
+                        regs[0].rm_eo - regs[0].rm_so);
           break;
 
         case '1': case '2': case '3': case '4': case '5': case '6':
         case '7': case '8': case '9': 
           ch -= '0';
-          if (regs->end[ch] > 0)
-            obstack_grow (obs, victim + regs->start[ch],
-                          regs->end[ch] - regs->start[ch]);
+          if (regs[ch].rm_eo > 0)
+            obstack_grow (obs, victim + regs[ch].rm_so,
+                          regs[ch].rm_eo - regs[ch].rm_so);
           break;
 
         default:
@@ -2949,18 +2946,19 @@ WARNING:%s:%d: \\0 will disappear, use \\& instead in replacements"),
 
 static void
 string_regexp (struct obstack *obs, int argc, token_data **argv,
-               const char *action)
+               int extra_re_flags, const char *action)
 {
   char *victim;                 /* first argument */
   char *regexp;                 /* regular expression */
 
-  struct re_pattern_buffer buf; /* compiled regular expression */
-  struct re_registers regs;     /* for subexpression matches */
-  const char *msg;              /* error message from re_compile_pattern */
-  int startpos;                 /* start position of match */
   int length;                   /* length of first argument */
+  int startpos = -1;            /* start position of match */
   int match_length = 0;         /* length of pattern match */
-  int regexp_len;
+
+  regex_t re;
+  regmatch_t *match_ptr = NULL;
+  int max_subexps = 0;
+  int regex_rc;
 
   victim = ARG (1);
   remove_special_chars (victim, FALSE);
@@ -2968,35 +2966,31 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
 
   regexp = ARG (2);
   remove_special_chars (regexp, FALSE);
-  regexp_len = strlen (regexp);
 
-  buf.buffer = NULL;
-  buf.allocated = 0;
-  buf.fastmap = NULL;
-  buf.translate = NULL;
-  msg = re_compile_pattern (regexp, regexp_len, &buf);
-
-  if (msg != NULL)
+  if (regcomp (&re, regexp, regex_flags | extra_re_flags) != 0)
     {
       MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Bad regular expression `%s': %s"),
-             CURRENT_FILE_LINE, regexp, msg));
-      return;
-    }
-
-  startpos = re_search (&buf, victim, length, 0, length, &regs);
-
-  if (startpos  == -2)
-    {
-      MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Error matching regular expression `%s'"),
+        _("Warning:%s:%d: Bad regular expression `%s'"),
              CURRENT_FILE_LINE, regexp));
+      regfree (&re);
       return;
     }
 
-  if (startpos >= 0)
-    match_length = re_match (&buf, victim, length, startpos, &regs);
-  xfree (buf.buffer);
+  /* Accept any number of subexpressions */
+  do
+    {
+      max_subexps += 10;
+      match_ptr = (regmatch_t *)
+         xrealloc (match_ptr, sizeof (regmatch_t) * (max_subexps+1));
+      regex_rc  = regexec (&re, victim, max_subexps, match_ptr, 0);
+    }
+  while (regex_rc == REG_ESPACE);
+
+  if (regex_rc == 0)
+    {
+      match_length = match_ptr[0].rm_eo - match_ptr[0].rm_so;
+      startpos = match_ptr[0].rm_so;
+    }
 
   if (strcmp(action, "startpos") == 0)
     {
@@ -3035,7 +3029,8 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
         obstack_grow (obs, "true", 4);
     }
 
-  return;
+  regfree (&re);
+  xfree (match_ptr);
 }
 
 /*----------------------------------------------.
@@ -3044,19 +3039,19 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
 `----------------------------------------------*/
 static void
 subst_in_string (struct obstack *obs, int argc, token_data **argv,
-        boolean singleline)
+        int extra_re_flags)
 {
   char *victim;                 /* first argument */
   char *regexp;                 /* regular expression */
-  const char *replacement;      /* string replacement */
 
-  struct re_pattern_buffer buf; /* compiled regular expression */
-  struct re_registers regs;     /* for subexpression matches */
-  const char *msg;              /* error message from re_compile_pattern */
+  regex_t re;
+  regmatch_t *match_ptr = NULL;
+  int max_subexps = 0;
+  int regex_rc;
+
   int matchpos;                 /* start position of match */
   int offset;                   /* current match offset */
   int length;                   /* length of first argument */
-  int regexp_len;
 
   if (bad_argc (argv[0], argc, 2, 4))
     return;
@@ -3067,23 +3062,14 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
 
   regexp = ARG (2);
   remove_special_chars (regexp, FALSE);
-  regexp_len = strlen (regexp);
 
-  buf.buffer = NULL;
-  buf.allocated = 0;
-  buf.fastmap = NULL;
-  buf.translate = NULL;
-  if (singleline)
-    msg = re_compile_pattern_nl (regexp, regexp_len, &buf);
-  else
-    msg = re_compile_pattern (regexp, regexp_len, &buf);
-
-  if (msg != NULL)
+  regex_rc = regcomp (&re, regexp, regex_flags | extra_re_flags);
+  if (regex_rc != 0)
     {
       MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Bad regular expression `%s': %s"),
-             CURRENT_FILE_LINE, regexp, msg));
-      xfree (buf.buffer);
+        _("Warning:%s:%d: Bad regular expression `%s'"),
+             CURRENT_FILE_LINE, regexp));
+      regfree (&re);
       return;
     }
 
@@ -3091,56 +3077,69 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   matchpos = 0;
   while (offset < length)
     {
-      matchpos = re_search (&buf, victim, length,
-                            offset, length - offset, &regs);
-      if (matchpos < 0)
+      /* Accept any number of subexpressions */
+      do
+        {
+          max_subexps += 10;
+          match_ptr = (regmatch_t *)
+            xrealloc (match_ptr, sizeof (regmatch_t) * (max_subexps+1));
+          regex_rc  = regexec (&re, victim+offset, max_subexps, match_ptr, 0);
+        }
+      while (regex_rc == REG_ESPACE);
+      max_subexps -= 10;
+
+      if (regex_rc != 0)
         {
 
           /* Match failed -- either error or there is no match in the
              rest of the string, in which case the rest of the string is
              copied verbatim.  */
 
-          if (matchpos == -2)
+          if (regex_rc != REG_NOMATCH)
             MP4HERROR ((warning_status, 0,
               _("Warning:%s:%d: Error matching regular expression `%s'"),
-                   CURRENT_FILE_LINE, regexp, msg));
+                   CURRENT_FILE_LINE, regexp));
           else if (offset < length)
             obstack_grow (obs, victim + offset, length - offset);
           break;
         }
 
-      /* Copy the part of the string that was skipped by re_search ().  */
+      /* Copy the part of the string that was skipped by regex ().  */
+      matchpos = match_ptr[0].rm_so;
 
-      if (matchpos > offset)
-        obstack_grow (obs, victim + offset, matchpos - offset);
+      if (matchpos > 0)
+        obstack_grow (obs, victim + offset, matchpos);
 
       /* Handle the part of the string that was covered by the match.  */
-
-      replacement = ARG (3);
-      substitute (obs, victim, replacement, &regs);
+      substitute (obs, victim+offset, ARG (3), match_ptr);
 
       /* Update the offset to the end of the match.  If the regexp
          matched a null string, advance offset one more, to avoid
          infinite loops.  */
 
-      offset = regs.end[0];
-      if (regs.start[0] == regs.end[0])
+      offset += match_ptr[0].rm_eo;
+      if (match_ptr[0].rm_so == match_ptr[0].rm_eo)
         obstack_1grow (obs, victim[offset++]);
     }
 
-  xfree (buf.buffer);
-  return;
+  regfree (&re);
+  xfree (match_ptr);
 }
 
 static void
 mp4h_subst_in_string (MP4H_BUILTIN_ARGS)
 {
-  const char *singleline;
-  boolean s;
+  const char *singleline, *caseless;
+  int extra_re_flags = 0;
 
   singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
-  s = (singleline && strcmp (singleline, "true") == 0);
-  subst_in_string (obs, argc, argv, s);
+  if (!singleline || strcmp (singleline, "true") != 0)
+    extra_re_flags |= REG_NEWLINE;
+
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
+  if (caseless && strcmp (caseless, "true") == 0)
+    extra_re_flags |= REG_ICASE;
+  subst_in_string (obs, argc, argv, extra_re_flags);
 }
 
 /*------------------------------------------------.
@@ -3151,13 +3150,18 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
 {
   symbol *var;
   token_data td;
-  const char *singleline;
-  boolean s;
+  const char *singleline, *caseless;
+  int extra_re_flags = 0;
   char *text;
   struct obstack temp_obs;
 
   singleline = predefined_attribute ("singleline", &argc, argv, TRUE);
-  s = (singleline && strcmp (singleline, "true") == 0);
+  if (!singleline || strcmp (singleline, "true") != 0)
+    extra_re_flags |= REG_NEWLINE;
+
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
+  if (caseless && strcmp (caseless, "true") == 0)
+    extra_re_flags |= REG_ICASE;
 
   if (bad_argc (argv[0], argc, 3, 4))
     return;
@@ -3172,7 +3176,7 @@ mp4h_subst_in_var (MP4H_BUILTIN_ARGS)
   obstack_init (&temp_obs);
 
   argv[1] = &td;
-  subst_in_string (&temp_obs, argc, argv, s);
+  subst_in_string (&temp_obs, argc, argv, extra_re_flags);
   obstack_1grow (&temp_obs, '\0');
   text = obstack_finish (&temp_obs);
   xfree (SYMBOL_TEXT (var));
@@ -3228,16 +3232,20 @@ static void
 mp4h_match (MP4H_BUILTIN_ARGS)
 {
   const char *action;
+  const char *caseless;
+  int extra_re_flags = 0;
 
   action = predefined_attribute ("action", &argc, argv, TRUE);
+  caseless = predefined_attribute ("caseless", &argc, argv, TRUE);
   if (bad_argc (argv[0], argc, 3, 4))
     return;
 
   if (!action)
     action = "report";
 
-  string_regexp (obs, argc, argv, action);
-
+  if (caseless && strcmp (caseless, "true") == 0)
+    extra_re_flags = REG_ICASE;
+  string_regexp (obs, argc, argv, extra_re_flags, action);
 }
 
 /*----------------------------------------------------------------.
@@ -3378,13 +3386,13 @@ mp4h_set_regexp_syntax (MP4H_BUILTIN_ARGS)
 static void
 mp4h_get_regexp_syntax (MP4H_BUILTIN_ARGS)
 {
-  switch (re_syntax_options)
+  switch (regex_flags)
     {
-      case RE_SYNTAX_POSIX_EXTENDED:
+      case REG_EXTENDED:
         obstack_grow (obs, "extended", 8);
         break;
 
-      case RE_SYNTAX_POSIX_BASIC:
+      case 0:
         obstack_grow (obs, "basic", 5);
         break;
 

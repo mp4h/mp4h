@@ -10,6 +10,17 @@
 
   Changes between 1.0.3 and SNAP:
 
+    *) Internal changes about regular expressions (06-Jul-2000):
+       Mp4h now uses the POSIX functions of the GNU libc regex.c instead
+       of old GNU functions.  The most important reason for this change
+       is that previous functions are not documented, and so hard to
+       maintain.
+       Moreover i had to patch the regex functions to allow the
+       ``singleline=true'' attribute.
+       With this new version it works out of the box, and many memory
+       leaks are also fixed.
+       [Denis Barbier]
+
     *) Restore grouping around <attributes-quotes> (06-Jul-2000):
        Like other <attributes-*> tags, <attributes-quotes> did not group
        its expansion into a single token.
