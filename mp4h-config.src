@@ -34,6 +34,7 @@
 
 prefix="@prefix@"
 pkglibdir="@pkglibdir@"
+pkgdatadir="@pkgdatadir@"
 includedir="@prefix@/include"
 mandir="@mandir@"
 version="@VERSION@"
@@ -63,6 +64,7 @@ Options:
   --help                  print this message
   --version               print the version of mp4h and exit
   --pkglibdir             directory where to put modules
+  --pkgdatadir            directory where to put arch-independent packages
   --includedir            C header files location
   --mandir                man documentation
   --cc                    C compiler
@@ -76,6 +78,9 @@ EOF
 
   -pkglibdir | --pkglibdir | --pkglibdi | --pkglibd | --pkglib)
     output="$output $pkglibdir" ;;
+
+  -pkgdatadir | --pkgdatadir | --pkgdatadi | --pkgdatad | --pkgdata)
+    output="$output $pkgdatadir" ;;
 
   -includedir | --includedir | --includedi | --included | --include \
   | --includ | --inclu | --incl | --inc)
@@ -120,6 +125,7 @@ B<mp4h-config>
 [B<--version>]
 [B<--includedir>]
 [B<--pkglibdir>]
+[B<--pkgdatadir>]
 [B<--mandir>]
 [B<--cc>]
 [B<--cflags>]
@@ -142,6 +148,10 @@ Displays the installed version of F<mp4h>.
 =item B<--pkglibdir>
 
 Directory where compiled module has to be installed.
+
+=item B<--pkgdatadir>
+
+Directory where packages has to be installed.
 
 =item B<--mandir>
 
