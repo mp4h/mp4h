@@ -8,7 +8,11 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 1.0.6 and SNAP:
+  Changes between 1.0.6 and 1.1.0:
+
+    *) Rename option to disable support for loadable modules (24-Jul-2000):
+       This option is now `./configure --disable-modules'
+       [Denis Barbier]
 
     *) New -X option (21-Jul-2000):
        With -X=32, a trailing slash is appended to simple tag

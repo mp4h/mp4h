@@ -63,13 +63,11 @@
 ;;;    Alias for writing URLs
 ;;;
 <define-tag URL whitespace=delete>
-<preserve name />
-<preserve src />
+<preserve name src />
 <set-var %attributes />
 <defvar name <get-var src /> />
 <a href="<get-var src />"><texttt><get-var name /></texttt></a>
-<restore src />
-<restore name />
+<restore name src />
 </define-tag>
 
 ;;;
@@ -105,14 +103,12 @@ This documentation describes <get-var package /> version <get-var version />.
 ;;;    Description of mp4h tags
 ;;;
 <define-tag tag:description endtag=required whitespace=delete>
-<preserve complex />
-<preserve verbatim />
+<preserve complex verbatim />
 <set-var complex=* />
 <set-var verbatim=* />
 <set-var %attributes />
 <set-var list-attributes="%Ubody" />
-<subst-in-var list-attributes "^\n*" singleline=true />
-<subst-in-var list-attributes "\n*$" singleline=true />
+<subst-in-var list-attributes "^\n*(.*?)\n*$" "\\1" reflags=s />
 <para><a name="tag-%0">&nbsp;</a></para>
 <box bdwidth=3 bdcolor="#ff0000" bgcolor="#ffffff" summary="Syntax of the `%0' tag">
 <table border=0 summary="">
@@ -132,8 +128,7 @@ This documentation describes <get-var package /> version <get-var version />.
 </tr>
 </table>
 </box>
-<restore verbatim />
-<restore complex />
+<restore complex verbatim />
 </define-tag>
 
 <define-tag attributes:description endtag=required>
@@ -142,22 +137,16 @@ This documentation describes <get-var package /> version <get-var version />.
 </ul>
 </define-tag>
 
-<define-tag attributes:item>
-<li*><attribute %0 /><br />
+<define-tag attributes:item endtag=required>
+<li><attribute %0 /><br />
+%body</li>
 </define-tag>
 
 ;;;
 ;;;    Box
 ;;;
 <define-tag box endtag=required>;;;
-<preserve bgcolor />;;;
-<preserve fgcolor />;;;
-<preserve bdcolor />;;;
-<preserve bdwidth />;;;
-<preserve bdspace />;;;
-<preserve width />;;;
-<preserve summary />;;;
-<preserve header />;;;
+<preserve bgcolor fgcolor bdcolor bdwidth bdspace width summary header />;;;
 <set-var bdwidth=1 bdspace=4 />;;;
 <set-var %attributes />;;;
 <if <get-var bdcolor /> <group "
@@ -185,21 +174,14 @@ This documentation describes <get-var package /> version <get-var version />.
 </tr*>
 </table*>
 " /> />;;;
-<restore header />;;;
-<restore summary />;;;
-<restore width />;;;
-<restore bdspace />;;;
-<restore bdwidth />;;;
-<restore bdcolor />;;;
-<restore fgcolor />;;;
-<restore bgcolor />;;;
+<restore  bgcolor fgcolor bdcolor bdwidth bdspace width summary header />;;;
 </define-tag>
 
 ;;;
 ;;;    Paragraphs
 ;;;
 <define-tag para endtag=required>;;;
-<p*>%body
+<p>%body</p>
 
 </define-tag>
 
@@ -215,7 +197,7 @@ This documentation describes <get-var package /> version <get-var version />.
 <define-tag list endtag=required>;;;
 <ul>%body</ul>;;;
 </define-tag>
-<define-tag item><li*></define-tag>
+<define-tag item endtag=required><li>%body</li></define-tag>
 
 ;;;
 ;;;    Example of mp4h code
@@ -232,10 +214,9 @@ This documentation describes <get-var package /> version <get-var version />.
 <subst-in-var body "&" "&amp;" />
 <subst-in-var body "<" "&lt;" />
 <subst-in-var body ">" "&gt;" />
-<subst-in-var body "<three-colon/>\n[ \t]*" "" singleline=true />
-<subst-in-var body "<three-colon/>[^;][^\n]*\n[ \t]*" "" singleline=true />
-<subst-in-var body "<three-colon/>$" "" />
-<subst-in-var body "^\n*" "" singleline=true />
+<subst-in-var body "<three-colon/>[^;\n]*\n[ \t]*" "" />
+<subst-in-var body "<three-colon/>$" "" reflags=m />
+<subst-in-var body "^\n*(.*?)\n*$" "\\1" reflags=s />
 <table border=2 cellpadding=0 cellspacing=0 width="80%" summary="">
     <tr><th bgcolor="#ccccff" align=left>&nbsp;&nbsp;&nbsp;Source</th></tr>
     <tr><td bgcolor="#ccff99" width="80%"><dnl/>

@@ -50,7 +50,7 @@ mp4h.pod: mp4h.mp4h pod.out $(PROGRAM) $(DEPS)
 	$(PROGRAM) $(FLAGS) -D format=pod mp4h.mp4h \
         | sed -e 's/_LT_/</g' -e 's/_GT_/>/g' > $@
 
-mp4h.texi: mp4h.mp4h pod.out $(PROGRAM) $(DEPS)
+mp4h.texi: mp4h.mp4h texinfo.out $(PROGRAM) $(DEPS)
 	#   Generate table of contents for Info navigation
 	$(PROGRAM) $(FLAGS) -D format=texinfo -D info:gentoc=1 mp4h.mp4h |\
    grep '@remove@' | sed -e 's/@remove@//' -e 's/=LT=/</g' > mp4h.chp

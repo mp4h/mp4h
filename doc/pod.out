@@ -4,15 +4,13 @@
 ;;;
 <define-tag section endtag=required whitespace=delete>
 <set-var body=%body />
-<subst-in-var body "^\n*" "" singleline=true />
-<subst-in-var body "\n*$" "" singleline=true />
+<subst-in-var body "^\n*(.*?)\n*$" "\\1" reflags=s />
 =head1 <upcase <get-var body /> />
 </define-tag>
 
 <define-tag subsection endtag=required whitespace=delete>
 <set-var body=%body />
-<subst-in-var body "^\n*" "" singleline=true />
-<subst-in-var body "\n*$" "" singleline=true />
+<subst-in-var body "^\n*(.*?)\n*$" "\\1" reflags=s />
 =head2 <get-var body />
 </define-tag>
 
@@ -74,12 +72,10 @@
 ;;;    Alias for writing URLs
 ;;;
 <define-tag URL whitespace=delete>
-<preserve name />
-<preserve src />
+<preserve name src />
 <set-var %attributes />
 <get-var name /> C_LT_E_LT_lt_GT_URL:<get-var src />E_LT_gt_GT__GT_
-<restore src />
-<restore name />
+<restore name src />
 </define-tag>
 
 ;;;
@@ -111,14 +107,12 @@ This documentation describes <get-var package /> version <get-var version />.
 ;;;    Description of mp4h tags
 ;;;
 <define-tag tag:description endtag=required>;;;
-<preserve complex />;;;
-<preserve verbatim />;;;
+<preserve complex verbatim />;;;
 <set-var complex=* />;;;
 <set-var verbatim=* />;;;
 <set-var %attributes />;;;
 <set-var list-attributes="%body" />;;;
-<subst-in-var list-attributes "^\n*" singleline=true />
-<subst-in-var list-attributes "\n*$" singleline=true />
+<subst-in-var list-attributes "^\n*(.*?)\n*$" "\\1" reflags=s />
 
 =over 2
 
@@ -132,8 +126,7 @@ This documentation describes <get-var package /> version <get-var version />.
 
 =back
 
-<restore verbatim />;;;
-<restore complex />;;;
+<restore complex verbatim />;;;
 </define-tag>
 
 <define-tag attributes:description endtag=required>
@@ -146,8 +139,10 @@ This documentation describes <get-var package /> version <get-var version />.
 
 </define-tag>
 
-<define-tag attributes:item>
+<define-tag attributes:item endtag=required>
 =item <attribute %0 />
+
+%body
 
 </define-tag>
 
@@ -178,10 +173,11 @@ This documentation describes <get-var package /> version <get-var version />.
 =back
 
 </define-tag>
-<define-tag item>
+<define-tag item endtag=required>
 
 =item *
 
+%body
 </define-tag>
 
 ;;;
@@ -193,13 +189,13 @@ This documentation describes <get-var package /> version <get-var version />.
 <set-var-verbatim verb-body=%ubody />
 <subst-in-var verb-body "<" "_LT_" />
 <subst-in-var verb-body ">" "_GT_" />
-<subst-in-var verb-body "^\n*" "" singleline=true />
-<subst-in-var verb-body "^" "   " />
+<subst-in-var verb-body "^\n*" "" />
+<subst-in-var verb-body "^" "   " reflags=m />
 <set-var body=%body />
-<subst-in-var body "<three-colon/>[^\n]*\n[ \t]*" "" singleline=true />
-<subst-in-var body "<three-colon/>$" "" />
-<subst-in-var body "^\n*" "" singleline=true />
-<subst-in-var body "^" "   " />
+<subst-in-var body "<three-colon/>[^;\n]*\n[ \t]*" "" />
+<subst-in-var body "<three-colon/>$" "" reflags=m />
+<subst-in-var body "^\n*" "" />
+<subst-in-var body "^" "   " reflags=m />
 <group "Source:
 
 <get-var-once verb-body />

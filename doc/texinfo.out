@@ -237,8 +237,7 @@ by the Foundation.
 <set-var verbatim=* />
 <set-var %attributes />
 <set-var list-attributes="%body" />
-<subst-in-var list-attributes "^\n*" "" singleline=true/>
-<subst-in-var list-attributes "\n*$" "" singleline=true/>
+<subst-in-var list-attributes "^\n*(.*?)\n*$" "\\1" reflags=s />
 <group "
 @multitable @columnfractions .25 .6
 @item @tab
@@ -256,9 +255,11 @@ by the Foundation.
 %body@end itemize
 </define-tag>
 
-<define-tag attributes:item>
+<define-tag attributes:item endtag=required>
 @item
 <attribute %0 />
+
+%body
 
 </define-tag>
 
@@ -279,10 +280,17 @@ by the Foundation.
 ;;;
 ;;;    Lists
 ;;;
-<define-tag list endtag=required>;;;
-<ul>%body</ul>;;;
+<define-tag list endtag=required>
+@itemize @bullet
+%body@end itemize
 </define-tag>
-<define-tag item><li*></define-tag>
+
+<define-tag item endtag=required>
+@item
+
+%body
+
+</define-tag>
 
 ;;;
 ;;;    Example of mp4h code
@@ -294,17 +302,14 @@ by the Foundation.
 <subst-in-var verb-body "@" "@@" />
 <subst-in-var verb-body "\\{" "@{" />
 <subst-in-var verb-body "\\}" "@}" />
-<subst-in-var verb-body "^\n*" "" singleline=true />
-<subst-in-var verb-body "\n*$" "" singleline=true />
+<subst-in-var verb-body "^\n*(.*?)\n*$" "\\1" reflags=s />
 <set-var body=%body />
 <subst-in-var body "@" "@@" />
 <subst-in-var body "\\{" "@{" />
 <subst-in-var body "\\}" "@}" />
-<subst-in-var body "<three-colon/>\n[ \t]*" "" singleline=true />
-<subst-in-var body "<three-colon/>[^;][^\n]*\n[ \t]*" "" singleline=true />
-<subst-in-var body "<three-colon/>$" "" />
-<subst-in-var body "^\n*" "" singleline=true />
-<subst-in-var body "\n*$" "" singleline=true />
+<subst-in-var body "<three-colon/>[^;\n]*\n[ \t]*" "" />
+<subst-in-var body "<three-colon/>$" "" reflags=m />
+<subst-in-var body "^\n*(.*?)\n*$" "\\1" reflags=s />
 
 @noindent
 Source code:

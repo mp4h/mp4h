@@ -147,10 +147,10 @@ fi], [AC_MSG_RESULT(no)])
 # serial 1
 
 AC_DEFUN(AM_WITH_MODULES,
-  [AC_MSG_CHECKING(if support for dynamic modules is requested)
-  AC_ARG_WITH(modules,
-  [  --without-modules       disable support for dynamic modules],
-  [use_modules=$withval], [use_modules=yes])
+  [AC_MSG_CHECKING(if support for loadable modules is requested)
+  AC_ARG_ENABLE(modules,
+  [  --disable-modules       disable support for dynamic modules],
+  [use_modules=$enableval], [use_modules=yes])
   AC_MSG_RESULT($use_modules)
 
   if test "$use_modules" = yes; then
@@ -201,6 +201,9 @@ AC_DEFUN(AM_WITH_MODULES,
       AC_DEFINE(WITH_MODULES, 1)
     fi
 
+    if test "$with_modules" = no; then
+      AC_MSG_WARN([Loadable modules have not been found on your computer, this feature is disabled])
+    fi
     AC_SUBST(DLLDFLAGS)
   fi
   ])

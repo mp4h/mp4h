@@ -1,2 +1,2 @@
 Makefile
-*.html *.pod *.1 *.info *.texinfo
+*.html *.pod *.1 *.info *.texi *.chp

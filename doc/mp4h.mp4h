@@ -5,7 +5,7 @@
 
 <mp4h-l10n LC_ALL=C />
 <set-var package=mp4h />
-<set-var version=1.0a701 />
+<set-var version=1.1.0 />
 <set-var title="mp4h - A Macro Processor for HTML Documents" />
 
 <include <get-var format />.out
@@ -268,12 +268,13 @@ present in the former.
 
 <pseudo-func foo />
 <attributes:description>
-<attributes:item "whitespace=delete" />
+<attributes:item "whitespace=delete">
 Some spaces are suppressed in replacement text, in particular any
 leading or trailing spaces, and newlines not enclosed within angle
 brackets.
+</attributes:item>
 
-<attributes:item "endtag=required" />
+<attributes:item "endtag=required">
 Define a complex tag
 
 <pseudo-func foo />
@@ -288,8 +289,9 @@ Define a complex tag
 body is: %body</define-tag>
 <bar>Here it is</bar>
 </example>
+</attributes:item>
 
-<attributes:item "attributes=verbatim" />
+<attributes:item "attributes=verbatim">
 By default attributes are expanded before text is replaced. If this
 attribute is used, attributes are inserted into replacement text without
 expansion.
@@ -303,6 +305,7 @@ Attributes: %Uattributes
 </define-tag>
 <bar txt="<foo/>">Here we go</bar>
 </example>
+</attributes:item>
 </attributes:description>
 
 <tag:description provide-tag complex>
@@ -674,8 +677,9 @@ increment is one.
 </para>
 
 <attributes:description>
-<attributes:item "by=<var value />" />
+<attributes:item "by=<var value />">
 Change increment amount.
+</attributes:item>
 </attributes:description>
 
 <example>
@@ -696,8 +700,9 @@ decrement is one.
 </para>
 
 <attributes:description>
-<attributes:item "by=<var value />" />
+<attributes:item "by=<var value />">
 Change decrement amount.
+</attributes:item>
 </attributes:description>
 
 <example>
@@ -861,8 +866,9 @@ Returns <true/> if first two arguments are equal.
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true" />
+<attributes:item "caseless=true">
 Comparison is case insensitive.
+</attributes:item>
 </attributes:description>
 
 <example>
@@ -886,8 +892,9 @@ Returns <true/> if the first two arguments are not equal.
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true" />
+<attributes:item "caseless=true">
 Comparison is case insensitive.
+</attributes:item>
 </attributes:description>
 
 <example>
@@ -912,8 +919,9 @@ greater or equal depending on this comparison.
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true" />
+<attributes:item "caseless=true">
 Comparison is case insensitive.
+</attributes:item>
 </attributes:description>
 
 <example>
@@ -932,8 +940,9 @@ string.
 </para>
 
 <attributes:description>
-<attributes:item "caseless=true" />
+<attributes:item "caseless=true">
 Comparison is case insensitive.
+</attributes:item>
 </attributes:description>
 
 <example>
@@ -956,7 +965,7 @@ This is a very nice piece of software, latest versions are available at
 </para>
 
 <para>
-In previous releases, POSIX regular expressions were implemented.
+Before version 1.0.6, POSIX regular expressions were implemented.
 For this reason, the following macros recognize two attributes,
 <attribute caseless=true /> and <attribute singleline=true|false />.
 But Perl allows a much better control on regular expressions with so
@@ -1032,20 +1041,31 @@ Performs substitutions inside variable content.
 </tag:description>
 
 <attributes:description>
-<attributes:item "action=report" />
+<attributes:item "action=report">
 Prints <true/> if string contains regexp.
-<attributes:item "action=extract" />
+</attributes:item>
+
+<attributes:item "action=extract">
 Prints the expression matching regexp in string.
-<attributes:item "action=delete" />
+</attributes:item>
+
+<attributes:item "action=delete">
 Prints the string without the expression matching regexp in string.
-<attributes:item "action=startpos" />
+</attributes:item>
+
+<attributes:item "action=startpos">
 Prints the first char of the expression matching regexp in string.
 If there is no match, returns <value -1 />.
-<attributes:item "action=endpos" />
+</attributes:item>
+
+<attributes:item "action=endpos">
 Prints the last char of the expression matching regexp in string.
 If there is no match, returns <value -1 />.
-<attributes:item "action=length" />
+</attributes:item>
+
+<attributes:item "action=length">
 Prints the length of the expression matching regexp in string.
+</attributes:item>
 </attributes:description>
 
 <example>
@@ -1148,8 +1168,9 @@ in this variable.
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true" />
+<attributes:item "caseless=true">
 Comparison is case insensitive.
+</attributes:item>
 </attributes:description>
 
 <tag:description array-concat>
@@ -1182,8 +1203,9 @@ If value is contained in array, returns its index otherwise returns -1.
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true" />
+<attributes:item "caseless=true">
 Comparison is case insensitive.
+</attributes:item>
 </attributes:description>
 
 <tag:description array-shift>
@@ -1205,11 +1227,12 @@ And: <get-var digits />
 </example>
 
 <attributes:description>
-<attributes:item "start=<var start />" />
+<attributes:item "start=<var start />">
 Change origin of shifts (default is 0).
 <example>
 <array-shift digits -2 start=2 /><get-var digits />
 </example>
+</attributes:item>
 </attributes:description>
 
 <tag:description sort>
@@ -1229,21 +1252,24 @@ alphabetically.
 </example>
 
 <attributes:description>
-<attributes:item "caseless=true" />
+<attributes:item "caseless=true">
 Comparison is case insensitive.
+</attributes:item>
 
-<attributes:item "numeric=true" />
+<attributes:item "numeric=true">
 Sort lines numerically
 <example>
 <sort digits numeric=true /><get-var digits />
 </example>
+</attributes:item>
 
-<attributes:item "sortorder=reverse" />
+<attributes:item "sortorder=reverse">
 Reverse sort order
 <example>
 <sort digits numeric=true sortorder=reverse />;;;
 <get-var digits />
 </example>
+</attributes:item>
 </attributes:description>
 
 ###
@@ -1455,9 +1481,10 @@ Like <command group />,  but this tag is complex.
 </para>
 
 <attributes:description>
-<attributes:item "separator=<var string />" />
+<attributes:item "separator=<var string />">
 By default arguments are put aside.  This attribute define a separator
 inserted between arguments.
+</attributes:item>
 </attributes:description>
 
 <tag:description noexpand verbatim>
@@ -1538,7 +1565,7 @@ evaluated otherwise fourth argument is evaluated.
 </tag:description>
 
 <para>
-When argument is not empty, its body fuction is evaluated.
+When argument is not empty, its body is evaluated.
 </para>
 
 <tag:description while verbatim complex>
@@ -1579,21 +1606,23 @@ array.
 </example>
 
 <attributes:description>
-<attributes:item "start=<var start />" />
+<attributes:item "start=<var start />">
 Skips first indexes.
 <example>
 <set-var x="1\n2\n3\n4\n5\n6" />
 <foreach i x start=3><get-var i /> </foreach>
 </example>
+</attributes:item>
 
-<attributes:item "end=<var end />" />
+<attributes:item "end=<var end />">
 Stops after index has reached that value.
 <example>
 <set-var x="1\n2\n3\n4\n5\n6" />
 <foreach i x end=3><get-var i /> </foreach>
 </example>
+</attributes:item>
 
-<attributes:item "step=<var step />" />
+<attributes:item "step=<var step />">
 Change index increment (default is 1).
 If step is negative, array is treated in reverse order.
 <example>
@@ -1601,6 +1630,7 @@ If step is negative, array is treated in reverse order.
 <foreach i x step=2><get-var i /> </foreach>
 <foreach i x step=-2><get-var i /> </foreach>
 </example>
+</attributes:item>
 </attributes:description>
 
 <tag:description var-case verbatim>
@@ -1654,11 +1684,12 @@ so its use may become very hazardous in some situations.
 </para>
 
 <attributes:description>
-<attributes:item "up=<var number />" />
+<attributes:item "up=<var number />">
 This attribute determines how much levels have to be exited.  By default
 only one level is skipped.  With a null value, all current macros are
 exited from.  A negative value do the same, and stops processing current
 file.
+</attributes:item>
 </attributes:description>
 
 <tag:description warning>
@@ -1678,11 +1709,13 @@ Immediately exits program.
 </para>
 
 <attributes:description>
-<attributes:item "message=<var string />" />
+<attributes:item "message=<var string />">
 Prints a message to the standard error.
+</attributes:item>
 
-<attributes:item "status=<var rc />" />
+<attributes:item "status=<var rc />">
 Selects the code returned by the program (-1 by default).
+</attributes:item>
 </attributes:description>
 
 <tag:description at-end-of-file>
@@ -1744,12 +1777,14 @@ Read input from another file.
 </para>
 
 <attributes:description>
-<attributes:item "alt=<var action />" />
+<attributes:item "alt=<var action />">
 If file is not found, this alternate action is handled. If this atribute
 is not set and file is not found, then an error is raised.
+</attributes:item>
 
-<attributes:item "verbatim=true" />
+<attributes:item "verbatim=true">
 File content is included without expansion.
+</attributes:item>
 </attributes:description>
 
 <tag:description use>
@@ -1789,8 +1824,9 @@ end delimiter must end with a right-angle bracket.
 </para>
 
 <attributes:description>
-<attributes:item "display=visible" />
+<attributes:item "display=visible">
 Delimiters are also written into output.
+</attributes:item>
 </attributes:description>
 
 ###
@@ -2035,9 +2071,9 @@ User defined macros may have attributes like HTML tags. To handle these
 attributes in replacement text, following conventions have been adopted
 (mostly derived from <Meta-HTML/>):
 <list>
-<item/>Sequence <value %name /> is replaced by the command name.
+<item>Sequence <value %name /> is replaced by the command name.</item>
 
-<item/>Attributes are numbered from 0. In replacement text,
+<item>Attributes are numbered from 0. In replacement text,
 <value %0 /> is replaced by first argument, <value %1 />
 by the 2nd, etc.
 As there is no limitation on the number of arguments,
@@ -2049,10 +2085,11 @@ letter.
 </define-tag>
 <href http://www.gimp.org "The Gimp" />
 </example>
+</item>
 
-<item/>Sequence <value %# /> prints number of attributes.
+<item>Sequence <value %# /> prints number of attributes.</item>
 
-<item/>Sequence <value %% /> is replaced by <value % />, which is useful in
+<item>Sequence <value %% /> is replaced by <value % />, which is useful in
 nested definitions.
 <example>
 <define-tag outer>;;;
@@ -2068,8 +2105,9 @@ inner2, # attributes: %%#;;;
 </define-tag>
 <outer list attributes />
 </example>
+</item>
 
-<item/>Sequence <value %attributes /> is replaced by the space separated
+<item>Sequence <value %attributes /> is replaced by the space separated
 list of attributes.
 <example>
 <define-tag mail1>
@@ -2080,8 +2118,9 @@ list of attributes.
 <set-var name="" mail="" />
 <mail1 name="Dr. Foo" mail="hello@foo.com" />
 </example>
+</item>
 
-<item/>Sequence <value %body /> is replaced by the body of a complex macro.
+<item>Sequence <value %body /> is replaced by the body of a complex macro.
 <example>
 <define-tag mail2 endtag=required whitespace=delete>
 <set-var %attributes />
@@ -2091,8 +2130,9 @@ list of attributes.
 <img src="photo.png" alt="Dr. Foo" border=0 />
 </mail2>
 </example>
+</item>
 
-<item/>The two forms above accept modifiers. When <value %Aattributes />
+<item>The two forms above accept modifiers. When <value %Aattributes />
 or <value %Abody /> is used, a newline separated list of attributes is
 printed.
 <example>
@@ -2105,8 +2145,9 @@ printed.
 </define-tag>
 <show-attributes name="Dr. Foo" mail="hello@foo.com" />
 </example>
+</item>
 
-<item/>Another alternate form is obtained by replacing <value A />
+<item>Another alternate form is obtained by replacing <value A />
 by <value U />, in which case text is replaced but will not be
 expanded.
 This does make sense only when macro has been defined with
@@ -2125,8 +2166,9 @@ After expansion: %attributes
 <show1 <bar we go /> />
 <show2 <bar we go /> />
 </example>
+</item>
 
-<item/>Modifiers <value A /> and <value U /> can be combined.
+<item>Modifiers <value A /> and <value U /> can be combined.</item>
 </list>
 </para>
 
@@ -2189,12 +2231,12 @@ backslash <value "<bs/>" />.
 <para>
 Macros are characterized by
 <list>
-<item/>name
-<item/>container status (simple or complex)
-<item/>if attributes are expanded or not
-<item/>function type (primitive or user defined macro)
-<item/>for primitives, adress of corresponding code in memory and for
-user defined macros the replacement text
+<item>name</item>
+<item>container status (simple or complex)</item>
+<item>if attributes are expanded or not</item>
+<item>function type (primitive or user defined macro)</item>
+<item>for primitives, adress of corresponding code in memory and for
+user defined macros the replacement text</item>
 </list>
 </para>
 
