@@ -181,10 +181,12 @@ _GETDISTINFO = \
 
 _BUILDDIST = \
     _cwd=`pwd`; \
+    x=`echo $(EXCLUDE_FILES) | sed -e 's/[ 	][ 	]*/,^/g'`; \
+    y=`echo $(EXCLUDE_FILES) | sed -e 's;[ 	][ 	]*;,/;g'`; \
     echo "Creating tarball..."; \
     cd $(top_srcdir) && \
     $(TARBALL) -u $(NAME) -g mp4h -c '$(GZIP) --best' \
-        -e 'CVS,\.cvsignore,core,mp4h-.*\.tar\.gz,debian' \
+        -e ^$$x,/$$y \
         -o $${_tarball} .; \
     echo "Done"; \
     cd $$_cwd && ls -l $${_tarball}
