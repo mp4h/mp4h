@@ -218,8 +218,7 @@ deb: release
 	fakeroot ./debian/rules clean
 	set -e; $(_GETDISTINFO) \
     mv mp4h-$${_version}.tar.gz ../mp4h_$${_version}.orig.tar.gz
-	dpkg-buildpackage -i'.*CVS.*|.*\.cvsignore' -rfakeroot
-	fakeroot ./debian/rules clean
+	dpkg-buildpackage -i'/CVS|/\.cvsignore|/\.scvsrc|/tags' -rfakeroot
 
 new-version:
 	@V="$(VERSION)"; \
