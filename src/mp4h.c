@@ -58,6 +58,9 @@ int warning_status = 0;
 /* Artificial limit for expansion_level in macro.c.  */
 int nesting_limit = 250;
 
+/* Security level */
+int safety_level = 0;
+
 /* Flags to control how expansion is performed.  */
 #define DEFAULT_EXPANSION_FLAGS 3114
 
@@ -119,14 +122,16 @@ Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
   -E, --fatal-warnings         stop execution after first warning\n\
-  -Q, --quiet, --silent        suppress some warnings for builtins\n"),
+  -Q, --quiet, --silent        suppress some warnings for builtins\n\
+  -S, --safety-level=NUMBER    disable hazardous functions\n"),
              stdout);
       fputs (_("\
 \n\
 Preprocessor features:\n\
   -I, --include=DIRECTORY      search this directory second for includes\n\
   -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
-  -U, --undefine=NAME          delete builtin NAME\n"),
+  -U, --undefine=NAME          delete builtin NAME\n\
+  -s, --synclines              generate `#line NO \"FILE\"' lines\n"),
              stdout);
       fputs (_("\
 \n\
@@ -208,6 +213,7 @@ static const struct option long_options[] =
   {"reload-state", required_argument, NULL, 'R'},
   {"silent", no_argument, NULL, 'Q'},
   {"synclines", no_argument, NULL, 's'},
+  {"safety-level", required_argument, NULL, 'S'},
 
   {"help", no_argument, NULL, 'h'},
   {"version", no_argument, NULL, 'V'},
@@ -220,7 +226,7 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
-#define OPTSTRING "D:EF:H:I:L:QR:U:X:d:hl:o:st:V"
+#define OPTSTRING "D:EF:H:I:L:QR:U:X:d:hl:o:sS:t:V"
 
 int
 main (int argc, char *const *argv)
@@ -334,6 +340,10 @@ main (int argc, char *const *argv)
 
       case 's':
         sync_output = 1;
+        break;
+
+      case 'S':
+        safety_level = atoi (optarg);
         break;
 
       case 'V':

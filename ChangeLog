@@ -11,7 +11,9 @@
   Changes between 1.1.2 and 1.1.3:
 
     *) New <execute> tag (09-Mar-2001):
-       This tag reads output from arbitrary shell command.
+       This tag reads output from arbitrary shell command.  As this
+       might be considered as a security hole, a new -S flag allows
+       filtering potentially risky functions.
        [Anders Dinsen]
 
     *) Add diversions (09-Mar-2001):

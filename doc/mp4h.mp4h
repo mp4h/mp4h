@@ -89,6 +89,14 @@ name is <file - />, then characters are read on standard input.
 <option --version>output <mp4h/> version information and exit</option>
 <option -E --fatal-warnings>stop execution after first warning</option>
 <option -Q --quiet --silent>suppress some warnings for builtins</option>
+<option -S --safety-level=<optmand NUMBER />>disable risky functions;
+0 means no filtering, 1 disable <command execute /> and 2 disable this
+one too plus all filesystem related functions:
+<command file-exists />,
+<command get-file-properties />,
+<command directory-contents /> and
+<command include />.
+</option>
 </option-list>
 
 <subsection>Preprocessor features</subsection>
@@ -100,6 +108,7 @@ search this directory for includes and packages</option>
 set variable NAME to VALUE, or empty</option>
 <option -U --undefine=<optmand COMMAND />>###
 delete builtin COMMAND</option>
+<option -s --synclines>generate `#line NO "FILE"' lines</option>
 </option-list>
 
 <subsection>Parser features</subsection>

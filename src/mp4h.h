@@ -559,6 +559,9 @@ typedef struct builtin builtin;
 
 extern boolean visible_quotes;
 
+/* Used to disable risky functions. */
+extern int safety_level;
+
 void locale_init __P ((void));
 void initialize_builtin __P ((symbol *));
 void builtin_init __P ((void));
