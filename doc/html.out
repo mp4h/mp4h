@@ -110,8 +110,8 @@ This documentation describes <get-var package /> version <get-var version />.
 <set-var verbatim=* />
 <set-var %attributes />
 <set-var list-attributes="%Ubody" />
-<subst-in-var list-attributes "^\n+" singleline=true />
-<subst-in-var list-attributes "\n+$" singleline=true />
+<subst-in-var list-attributes "^\n*" singleline=true />
+<subst-in-var list-attributes "\n*$" singleline=true />
 <para><a name="tag-%0">&nbsp;</a></para>
 <box bdwidth=3 bdcolor="#ff0000" bgcolor="#ffffff" summary="Syntax of the `%0' tag">
 <table border=0 summary="">
@@ -234,7 +234,7 @@ This documentation describes <get-var package /> version <get-var version />.
 <subst-in-var body "<three-colon/>\n[ \t]*" "" singleline=true />
 <subst-in-var body "<three-colon/>[^;][^\n]*\n[ \t]*" "" singleline=true />
 <subst-in-var body "<three-colon/>$" "" />
-<subst-in-var body "^\n+" "" singleline=true />
+<subst-in-var body "^\n*" "" singleline=true />
 <table border=2 cellpadding=0 cellspacing=0 width="80%" summary="">
     <tr><th bgcolor="#ccccff" align=left>&nbsp;&nbsp;&nbsp;Source</th></tr>
     <tr><td bgcolor="#ccff99" width="80%"><dnl/>

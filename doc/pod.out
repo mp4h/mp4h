@@ -2,9 +2,18 @@
 ;;;
 ;;;    Sectioning
 ;;;
-<define-tag section endtag=required>=head1 <upcase %body />
+<define-tag section endtag=required whitespace=delete>
+<set-var body=%body />
+<subst-in-var body "^\n*" "" singleline=true />
+<subst-in-var body "\n*$" "" singleline=true />
+=head1 <upcase <get-var body /> />
 </define-tag>
-<define-tag subsection endtag=required>=head2 %body
+
+<define-tag subsection endtag=required whitespace=delete>
+<set-var body=%body />
+<subst-in-var body "^\n*" "" singleline=true />
+<subst-in-var body "\n*$" "" singleline=true />
+=head2 <get-var body />
 </define-tag>
 
 ;;;
@@ -108,8 +117,8 @@ This documentation describes <get-var package /> version <get-var version />.
 <set-var verbatim=* />;;;
 <set-var %attributes />;;;
 <set-var list-attributes="%body" />;;;
-<subst-in-var list-attributes "^\n+" singleline=true />
-<subst-in-var list-attributes "\n+$" singleline=true />
+<subst-in-var list-attributes "^\n*" singleline=true />
+<subst-in-var list-attributes "\n*$" singleline=true />
 
 =over 2
 
@@ -184,12 +193,12 @@ This documentation describes <get-var package /> version <get-var version />.
 <set-var-verbatim verb-body=%ubody />
 <subst-in-var verb-body "<" "_LT_" />
 <subst-in-var verb-body ">" "_GT_" />
-<subst-in-var verb-body "^\n+" "" singleline=true />
+<subst-in-var verb-body "^\n*" "" singleline=true />
 <subst-in-var verb-body "^" "   " />
 <set-var body=%body />
 <subst-in-var body "<three-colon/>[^\n]*\n[ \t]*" "" singleline=true />
 <subst-in-var body "<three-colon/>$" "" />
-<subst-in-var body "^\n+" "" singleline=true />
+<subst-in-var body "^\n*" "" singleline=true />
 <subst-in-var body "^" "   " />
 <group "Source:
 
