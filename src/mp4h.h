@@ -345,14 +345,18 @@ struct token_data
 #define EXP_STAR_COMPLEX (1 << 2)  /* HTML tags whose last char is an asterisk
                                       are by default simple tags, they become
                                       complex when this flag is set.  */
-#define EXP_REMOVE_TRAILING_SLASH \
-                         (1 << 3)  /* Remove trailing slash in simple tag attributes */
+#define EXP_UNM_BREAK    (1 << 3)  /* An unmatched end tag closes all previous
+                                      unmatched begin tags.  */
 #define EXP_STD_BSLASH   (1 << 4)  /* By default, only 'n', 'r', 't', '"' and
                                       '\\' are escaped.  When this flag is
 				      set, backslashes are interpreted as in
 				      printf.  */
-#define EXP_UNM_BREAK    (1 << 5)  /* An unmatched end tag closes all previous
-                                      unmatched begin tags.  */
+#define EXP_REMOVE_TRAILING_SLASH \
+                         (1 << 5)  /* Remove trailing slash in simple tag attributes */
+#define EXP_LEAVE_TRAILING_STAR \
+                         (1 << 6)  /* Do not remove trailing slash in simple tag attributes */
+#define EXP_LEAVE_LEADING_STAR \
+                         (1 << 7)  /* Do not remove trailing slash in simple tag attributes */
 #define EXP_NOWARN_NEST  (1 << 10) /* Suppress warning about bad nested tags */
 #define EXP_NOWARN_SLASH (1 << 11) /* Suppress warning about missing trailing slash */
 
@@ -398,6 +402,7 @@ extern STRING eolcomm;
 #define CHAR_BGROUP '\3'
 #define CHAR_EGROUP '\4'
 #define CHAR_QUOTE  '\5'
+#define CHAR_LANGLE '\6'
 
 #define DEF_EOLCOMM  ";;;"
 #define DEF_LQUOTE  "<@["
@@ -435,7 +440,7 @@ extern unsigned short syntax_table[256];
 #define IS_ALPHA(ch)  ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_ALPHA)
 #define IS_NUM(ch)    ((syntax_table[(int)(ch)]&SYNTAX_VALUE) == SYNTAX_NUM)
 #define IS_ALNUM(ch)  ((((syntax_table[(int)(ch)]) & SYNTAX_ALNUM) != 0) \
-                          || ch == ':' || ch == '*' || ch == '-')
+                          || ch == ':' || ch == '-')
 
 #define IS_LQUOTE(ch) (ch == CHAR_LQUOTE)
 #define IS_RQUOTE(ch) (ch == CHAR_RQUOTE)

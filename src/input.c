@@ -993,7 +993,13 @@ next_token (token_data *td, read_type expansion, boolean in_string)
       (void) next_char ();
       if (IS_ESCAPE(ch))             /* ESCAPED WORD */
         {
-          if (lquote.length > 0 && MATCH (ch, lquote.string))
+          if (peek_input () == '*' && !(exp_flags & EXP_LEAVE_LEADING_STAR))
+            {
+              next_char ();
+              obstack_1grow (&token_stack, CHAR_LANGLE);
+              type = TOKEN_SIMPLE;
+            }
+          else if (lquote.length > 0 && MATCH (ch, lquote.string))
             {
               if (visible_quotes || expansion == READ_ATTR_VERB
                   || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
@@ -1038,7 +1044,13 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                             }
                           obstack_1grow (&token_stack, ch);
                         }
-                      unget_input(ch);
+                      if (ch == '*')
+                        {
+                          obstack_1grow (&token_stack, ch);
+                          ch = peek_input ();
+                        }
+                      else
+                        unget_input(ch);
 
                       if (IS_SPACE(ch) || IS_CLOSE(ch) || ch == '/')
                         type = TOKEN_WORD;
@@ -1090,7 +1102,13 @@ next_token (token_data *td, read_type expansion, boolean in_string)
                 }
               obstack_1grow (&token_stack, ch);
             }
-          unget_input(ch);
+          if (ch == '*')
+            {
+              obstack_1grow (&token_stack, ch);
+              ch = peek_input ();
+            }
+          else
+            unget_input(ch);
 
           type = TOKEN_STRING;
         }

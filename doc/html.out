@@ -131,7 +131,7 @@
 </define-tag>
 
 <define-tag attributes:item>
-<li/><attribute %0 /><br/>
+<li*><attribute %0 /><br/>
 </define-tag>
 
 ;;;
@@ -203,7 +203,7 @@
 <define-tag list endtag=required>;;;
 <ul>%body</ul>;;;
 </define-tag>
-<define-tag item><li/></define-tag>
+<define-tag item><li*></define-tag>
 
 ;;;
 ;;;    Example of mp4h code

@@ -577,6 +577,14 @@ expand_macro (symbol *sym, read_type expansion)
             shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
           else
             {
+              /*  Attributes are put back on stack.
+                  The first idea is to write
+                    obstack_1grow (obs_expansion, CHAR_BGROUP);
+                    shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
+                    obstack_1grow (obs_expansion, CHAR_EGROUP);
+                  But this does not work because if string is `%attributes'
+                  then further expansion will be wrong.
+              */
               if (strlen (TOKEN_DATA_TEXT (argv[i])) == 0)
                 {
                   obstack_1grow (obs_expansion, CHAR_BGROUP);
@@ -684,11 +692,16 @@ expand_unknown_tag (char *name, read_type expansion)
         LAST_CHAR (cp) = '\0';
     }
 
-  if (*(symbol_name) == '/' || expansion == READ_ATTR_ASIS
+  if (expansion == READ_ATTR_ASIS
      || expansion == READ_ATTR_VERB || expansion == READ_BODY)
     expansion = READ_BODY;
 
   obs_expansion = push_string_init ();
+
+  /*  When this tag is no more processed, remove the trailing star.  */
+  if (!(exp_flags & EXP_LEAVE_TRAILING_STAR) && LAST_CHAR (symbol_name) == '*'
+      && (expansion_level == 1))
+    LAST_CHAR (symbol_name) = '\0';
 
   if (expansion != READ_BODY)
     obstack_1grow (obs_expansion, CHAR_LQUOTE);

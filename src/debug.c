@@ -382,7 +382,7 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
             case TOKEN_TEXT:
               text = xstrdup (TOKEN_DATA_TEXT (argv[i]));
               remove_special_chars (text);
-              trace_format ("%S", TOKEN_DATA_TEXT (argv[i]));
+              trace_format ("%S", text);
               xfree (text);
               break;
 

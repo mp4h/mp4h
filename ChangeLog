@@ -10,6 +10,11 @@
 
   Changes between 0.9.5 and 0.9.6:
 
+    *) Change expansion flags (18-Jun-2000):
+       Two flags have been switched, and two new options added to
+       remove leading and trailing star in tag names.
+       [Denis Barbier]
+
     *) Change valid tag names (17-Jun-2000):
        Valid tag names now match [a-zA-Z_][a-zA-Z_0-9:*-]*
        Previous versions also accept `%' sign, which is removed

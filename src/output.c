@@ -388,8 +388,12 @@ shipout_text (struct obstack *obs, char *text, int length)
   /* Restitute some special characters */
   remove_special_chars (text);
   for (cp=text, i=0; i<length; cp++, i++)
-    if (*cp == CHAR_QUOTE)
-      *cp = '"';
+    {
+      if (*cp == CHAR_QUOTE)
+        *cp = '"';
+      else if (*cp == CHAR_LANGLE && !(exp_flags & EXP_LEAVE_LEADING_STAR))
+        *cp = '<';
+    }
 
   /* Output TEXT to a file, or in-memory diversion buffer.  */
 
