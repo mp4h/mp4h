@@ -1,6 +1,6 @@
 ;;;
 ;;;  mp4h.mp4h -- Documentation for mp4h
-;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
+;;;  Copyright 2000-2001, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
 <set-var package=mp4h />
@@ -1500,6 +1500,15 @@ By default arguments are put aside.  This attribute define a separator
 inserted between arguments.
 </attributes:item>
 </attributes:description>
+
+<tag:description disjoin>
+<var expression />
+</tag:description>
+
+<para>
+Does the opposite job to <command group />, its argument is no more
+treated as a single object when processed by another command.
+</para>
 
 <tag:description noexpand verbatim>
 <var command />
