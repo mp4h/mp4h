@@ -3,7 +3,7 @@ mp4h (1.2.0-1) unstable; urgency=low
   * New upstream release
   * Remove copyright mention from the control file (Closes: #103497)
 
- -- Denis Barbier <barbier@debian.org>  Wed, 15 Aug 2001 00:30:47 +0200
+ -- Denis Barbier <barbier@debian.org>  Sun, 26 Aug 2001 01:25:55 +0200
 
 mp4h (1.1.2-5) unstable; urgency=low
 
