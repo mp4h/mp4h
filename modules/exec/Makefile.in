@@ -42,7 +42,7 @@ thisdir         = exec
 SOURCES         = sh.src
 PKGFILES        = $(SOURCES:.src=.mp4hp)
 
-MODSOURCES      = exec-sh.c
+MODSOURCES      = sh.c
 LOBJ            = $(MODSOURCES:.c=.lo)
 LARCHIVE        = $(MODSOURCES:.c=.la)
 
@@ -64,7 +64,7 @@ LARCHIVE        = $(MODSOURCES:.c=.la)
 
 .lo.la:
 	$(LIBTOOL) --quiet --mode=link `$(mp4h_config) --cc` -o $@ $< \
-	    -module -rpath `$(mp4h_config) --pkglibdir` -avoid-version
+	    -module -rpath `$(mp4h_config) --pkglibdir`/$(thisdir) -avoid-version
 
 # ------------------------------------------------
 #   TARGETS
@@ -72,11 +72,8 @@ LARCHIVE        = $(MODSOURCES:.c=.la)
 
 all: $(PKGFILES) $(LARCHIVE)
 
-exec-sh.c: sh.c
-	cp -f $? $@
-
 INSTALL_LA_FILES = \
-   d=`$(mp4h_config) --pkglibdir`; \
+   d=`$(mp4h_config) --pkglibdir`/$(thisdir); \
    echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
    $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
 
@@ -110,12 +107,17 @@ install-dirs:
 	        $(MKDIR) $(INSTPREFIX)$$mandir/man$(man3ext); \
 	else :; \
 	fi
+	@set -e; d=`$(mp4h_config) --pkglibdir`/$(thisdir); \
+	if [ ! -d "$$d" ]; then \
+	        echo "$(MKDIR) $$d"; \
+	        $(MKDIR) $$d; \
+	else :; \
+	fi
 
 clean:
 	-rm -f *.o *.lo *.la core
 	-rm -rf .libs
 	-rm -f *.mp4hp
-	-rm -f exec-*
 	-rm -f *.pod *.$(man3ext)
 
 distclean: clean

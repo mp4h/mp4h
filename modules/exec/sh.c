@@ -32,9 +32,9 @@
 #include <mp4h.h>
 #undef MP4H_MODULE
 
-#define mp4h_macro_table                exec_sh_LTX_mp4h_macro_table
-#define mp4h_init_module                exec_sh_LTX_mp4h_init_module
-#define mp4h_finish_module              exec_sh_LTX_mp4h_finish_module
+#define mp4h_macro_table                sh_LTX_mp4h_macro_table
+#define mp4h_init_module                sh_LTX_mp4h_init_module
+#define mp4h_finish_module              sh_LTX_mp4h_finish_module
 
 DECLARE(execute_shell);
 
