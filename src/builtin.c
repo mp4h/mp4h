@@ -1295,10 +1295,16 @@ mp4h_get_file_properties (MP4H_BUILTIN_ARGS)
   shipout_long (obs, (long) buf.st_atime);
   obstack_1grow (obs, '\n');
   user = getpwuid (buf.st_uid);
-  obstack_grow (obs, user->pw_name, strlen (user->pw_name));
+  if (user)
+    obstack_grow (obs, user->pw_name, strlen (user->pw_name));
+  else
+    obstack_grow (obs, "(UNKNOWN)", 9);
   obstack_1grow (obs, '\n');
   group = getgrgid (buf.st_gid);
-  obstack_grow (obs, group->gr_name, strlen (group->gr_name));
+  if (group)
+    obstack_grow (obs, group->gr_name, strlen (group->gr_name));
+  else
+    obstack_grow (obs, "(UNKNOWN)", 9);
   obstack_1grow (obs, '\n');
 }
 

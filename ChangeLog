@@ -10,6 +10,11 @@
 
   Changes between 1.1.2 and 1.1.3:
 
+    *) Fix <get-file-properties> (21-Apr-2001):
+       A segmentation fault occurred when uid or gid could not be
+       resolved.
+       [Denis Barbier]
+
     *) Change module invocation (07-Apr-2001):
        The <loadmodule> tag is replaced by a more generic <load> tag,
        which works with shared library and mp4h modules.
