@@ -255,6 +255,10 @@ tests/set-var/05.in
 tests/set-var/05.ok
 tests/set-var/06.in
 tests/set-var/06.ok
+tests/set-var/07.in
+tests/set-var/07.ok
+tests/set-var/08.in
+tests/set-var/08.ok
 tests/sort/01.in
 tests/sort/01.ok
 tests/sort/02.in
