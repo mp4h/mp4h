@@ -4,8 +4,8 @@
 ;;;
 
 <set-var package=mp4h />
-<set-var version=1.2.0 />
-<set-var title="mp4h - A Macro Processor for HTML Documents" />
+<set-var version=1.2.1 />
+<set-var title="mp4h - Macro Processor for HTML Documents" />
 
 <defvar srcdir "." />
 <include file=<get-var format />.out
@@ -116,6 +116,13 @@ delete builtin COMMAND</option>
 <subsection>Parser features</subsection>
 
 <option-list>
+<option -c --caseless=<optmand NUMBER />>###
+set case sensitiveness according to the bits of <optmand NUMBER />.
+A null bit means symbol is case sensitive, and bits are defined as
+followed: 0 for tags, 1 for variables and 2 for entities.
+Default value is 3, i.e. only entities are case sensitive.</option>
+<option -e --encoding=<optmand NAME />>###
+specify document encoding.  Valid options are `8bit' (default) or `utf8'.</option>
 <option -X --expansion=<optmand NUMBER />>###
 set parser behaviour according to the bits of <optmand NUMBER /></option>
 </option-list>
@@ -211,7 +218,8 @@ flags.
 
 <para>
 The definition of new tags is the most common task provided by &mp4h;.
-As with HTML, macro names are case insensitive.  In this documentation,
+As with HTML, macro names are case insensitive, unless <optflag c />
+option is used to change this default behaviour.  In this documentation,
 only lowercase letters are used.
 There are two kinds of tags: simple and complex. A simple tag has the
 following form:
@@ -565,7 +573,8 @@ before the prefix in order not to mix them with XML namespaces.
 <para>
 Entities are macros in the same way as tags, but they do not take
 any arguments. Whereas tags are normally used to mark up text,
-entities contain already marked up text.
+entities contain already marked up text.  Also note that unlike tags,
+entities are by default case sensitive.
 </para>
 
 <para>
