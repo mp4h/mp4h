@@ -3553,7 +3553,10 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
             if (ptr_index != NULL)
               {
                 if (*(ptr_index-1) == '[')
-                  *(ptr_index-1) = '\0';
+                  {
+                    *(ptr_index-1) = '\0';
+                    ptr_index = NULL;
+                  }
                 else
                   {
                     *ptr_index = '\0';
@@ -3599,7 +3602,8 @@ Warning:%s:%d: wrong index declaration in <%s>"),
             else if (array_index < 0)
               {
                 /*  Illegal value */
-                SYMBOL_TEXT (var) = NULL;
+                SYMBOL_TEXT (var) = (char *) xmalloc (1);
+                *(SYMBOL_TEXT (var)) = '\0';
               }
             else
               {
@@ -3668,7 +3672,10 @@ Warning:%s:%d: wrong index declaration in <%s>"),
             if (ptr_index != NULL)
               {
                 if (*(ptr_index-1) == '[')
-                  *(ptr_index-1) = '\0';
+                  {
+                    *(ptr_index-1) = '\0';
+                    ptr_index = NULL;
+                  }
                 else
                   {
                     *ptr_index = '\0';

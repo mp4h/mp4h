@@ -10,6 +10,11 @@
 
   Changes between 1.0.5 and SNAP:
 
+    *) Allow trailing slash in empty complex tags (12-Jul-2000):
+       It is now possible to write <foo/> even if `foo' has been
+       declared as being complex.
+       [Denis Barbier]
+
     *) Fix driver for Info documentation (11-Jul-2000):
        This driver is just an example to determine if it is worth trying
        to write Info files.

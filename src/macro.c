@@ -543,7 +543,7 @@ expand_macro (symbol *sym, read_type expansion)
                              &arguments);
   argc = obstack_object_size (&argptr) / sizeof (token_data *);
 
-  if (SYMBOL_CONTAINER (sym))
+  if (SYMBOL_CONTAINER (sym) && !slash)
     {
       collect_body (SYMBOL_NAME (sym), READ_BODY, &argptr, &body);
       argv = (token_data **) obstack_finish (&argptr);
@@ -555,7 +555,10 @@ expand_macro (symbol *sym, read_type expansion)
         {
           cp = TOKEN_DATA_TEXT (argv[argc-1]);
           if (IS_SLASH(*cp) && *(cp+1) == '\0')
-            argc--;
+            {
+              *cp = '\0';
+              argc--;
+            }
           else if (IS_SLASH (LAST_CHAR (cp)))
             {
               if (IS_SPACE (*(cp+strlen(cp)-2)))
@@ -592,13 +595,13 @@ expand_macro (symbol *sym, read_type expansion)
         {
           shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
         }
-      if (!SYMBOL_CONTAINER (sym) && slash)
+      if (slash)
         {
           obstack_1grow (obs_expansion, CHAR_SLASH);
         }
 
       obstack_1grow (obs_expansion, '>');
-      if (SYMBOL_CONTAINER (sym))
+      if (SYMBOL_CONTAINER (sym) && !slash)
         {
           shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[argc]), 0);
           obstack_grow (obs_expansion, "</", 2);
