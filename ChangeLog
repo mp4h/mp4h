@@ -8,7 +8,15 @@
   information about every single change.
   ___________________________________________________________________________
 
-  Changes between 1.1.2 and ???:
+  Changes between 1.1.2 and 1.1.3:
+
+    *) Remove special characters in debugging output (20-Feb-2001):
+       [Axel Beckert <rse-wml@deuxchevaux.org>]
+
+    *) New <disjoin> tag (20-Feb-2001):
+       This tag does the opposite job of <group>, it explodes its
+       attribute into several pieces.
+       [Denis Barbier]
 
     *) Fix bug with body tag surrounded by quotes (20-Feb-2001):
        When a body function was surrounded within double quotes (without
