@@ -3844,6 +3844,13 @@ mp4h_bp_set_var_x (MP4H_BUILTIN_ARGS)
   symbol *var;
 
   name = predefined_attribute ("name", &argc, argv, FALSE);
+  if (name == NULL)
+    {
+      MP4HERROR ((warning_status, 0,
+        _("Warning:%s:%d: Missing required attribute `name' to the <%s> tag"),
+                CURRENT_FILE_LINE, ARG (0)));
+      return;
+    }
 
   var = lookup_variable (name, SYMBOL_INSERT);
   if (SYMBOL_TYPE (var) == TOKEN_TEXT)
