@@ -2083,7 +2083,7 @@ mp4h___include (MP4H_BUILTIN_ARGS)
   fp = path_search (ARG (1), &filename);
   if (fp == NULL)
     {
-      if (strlen (TOKEN_DATA_TEXT (argv[argc])) > 0)
+      if (*(TOKEN_DATA_TEXT (argv[argc])) != '\0')
         shipout_string (obs, TOKEN_DATA_TEXT (argv[argc]), 0);
       else
         {
@@ -2153,7 +2153,7 @@ mp4h_frozen_dump (MP4H_BUILTIN_ARGS)
 static void
 mp4h_not (MP4H_BUILTIN_ARGS)
 {
-  if (argc <= 2 && strlen (ARG (1)) == 0)
+  if (argc <= 2 && *(ARG (1)) == '\0')
     obstack_grow (obs, "true", 4);
 }
 
@@ -2171,7 +2171,7 @@ mp4h_and (MP4H_BUILTIN_ARGS)
 
   j = 0;
   for (i=1; i<argc; i++)
-    if (strlen (ARG (i)) == 0)
+    if (*(ARG (i)) == '\0')
       j = i;
   
   if (j>0)
@@ -2707,7 +2707,7 @@ mp4h_string_eq (MP4H_BUILTIN_ARGS)
 
   if (argc < 3)
     {
-      if (strlen (ARG (1)) == 0)
+      if (*(ARG (1)) == '\0')
         obstack_grow (obs, "true", 4);
       return;
     }
@@ -2734,7 +2734,7 @@ mp4h_string_neq (MP4H_BUILTIN_ARGS)
 
   if (argc < 3)
     {
-      if (strlen (ARG (1)) > 0)
+      if (*(ARG (1)) != '\0')
         obstack_grow (obs, "true", 4);
       return;
     }
@@ -2862,7 +2862,7 @@ generic_variable (struct obstack *obs, int argc, token_data **argv,
                   read_type expansion, symbol_lookup mode, boolean verbatim)
 {
   char *value, *cp, *ptr_index, *old_value;
-  symbol *var;
+  symbol *var, *index_var;
   register int i;
   register int j;
   int length, istep;
@@ -2927,12 +2927,24 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                   }
                 *ptr_index = '\0';
                 ptr_index++;
-                if (!numeric_arg (argv[0], ptr_index, TRUE, &array_index))
+                if (!numeric_arg (argv[0], ptr_index, FALSE, &array_index))
                   {
-                    MP4HERROR ((warning_status, 0, _("\
+                    /*   Maybe there is an implicit index like in
+                           <set-var foo[i]=bar>.  */
+                    index_var = lookup_variable (ptr_index, SYMBOL_LOOKUP);
+                    if (index_var)
+                      {
+                        if (!numeric_arg (argv[0], SYMBOL_TEXT (index_var),
+                                    FALSE, &array_index))
+                            index_var = NULL;
+                      }
+                    if (!index_var)
+                      {
+                        MP4HERROR ((warning_status, 0, _("\
 Warning:%s:%d: wrong index declaration in <%s>"),
-                         CURRENT_FILE_LINE, ARG (0)));
-                    return;
+                             CURRENT_FILE_LINE, ARG (0)));
+                        return;
+                      }
                   }
               }
             var = lookup_variable (ARG (i), SYMBOL_INSERT);
@@ -3020,12 +3032,24 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                   }
                 *ptr_index = '\0';
                 ptr_index++;
-                if (!numeric_arg (argv[0], ptr_index, TRUE, &array_index))
+                if (!numeric_arg (argv[0], ptr_index, FALSE, &array_index))
                   {
-                    MP4HERROR ((warning_status, 0, _("\
+                    /*   Maybe there is an implicit index like in
+                           <get-var foo[i]>.  */
+                    index_var = lookup_variable (ptr_index, SYMBOL_LOOKUP);
+                    if (index_var)
+                      {
+                        if (!numeric_arg (argv[0], SYMBOL_TEXT (index_var),
+                                    FALSE, &array_index))
+                            index_var = NULL;
+                      }
+                    if (!index_var)
+                      {
+                        MP4HERROR ((warning_status, 0, _("\
 Warning:%s:%d: wrong index declaration in <%s>"),
-                         CURRENT_FILE_LINE, ARG (0)));
-                    return;
+                             CURRENT_FILE_LINE, ARG (0)));
+                        return;
+                      }
                   }
               }
 
@@ -3343,7 +3367,7 @@ mp4h_defvar (MP4H_BUILTIN_ARGS)
       SYMBOL_TYPE (var) = TOKEN_TEXT;
       SYMBOL_TEXT (var) = xstrdup(ARG (2));
     }
-  else if (strlen (SYMBOL_TEXT (var)) == 0)
+  else if (*(SYMBOL_TEXT (var)) == '\0')
     {
       SYMBOL_TEXT (var) = xstrdup(ARG (2));
     }
@@ -3365,7 +3389,7 @@ array_size (symbol *var)
   char *cp;
   int result = 0;
 
-  if (var != NULL && SYMBOL_TEXT (var) != NULL && strlen (SYMBOL_TEXT (var)) > 0)
+  if (var != NULL && SYMBOL_TEXT (var) != NULL && *(SYMBOL_TEXT (var)) != '\0')
     {
       result++;
       for (cp=SYMBOL_TEXT (var); *cp != '\0'; cp++)
@@ -3448,7 +3472,7 @@ mp4h_array_append (MP4H_BUILTIN_ARGS)
   if (var == NULL)
     var = lookup_variable (ARG (2), SYMBOL_INSERT);
 
-  if (SYMBOL_TYPE (var) != TOKEN_TEXT || strlen (SYMBOL_TEXT (var)) == 0)
+  if (SYMBOL_TYPE (var) != TOKEN_TEXT || *(SYMBOL_TEXT (var)) == '\0')
     {
       SYMBOL_TEXT (var) = xstrdup (ARG (1));
       SYMBOL_TYPE (var) = TOKEN_TEXT;
@@ -3541,7 +3565,7 @@ mp4h_array_add_unique (MP4H_BUILTIN_ARGS)
       SYMBOL_TEXT (var) = xstrdup (ARG (1));
       SYMBOL_TYPE (var) = TOKEN_TEXT;
     }
-  else if (SYMBOL_TYPE (var) != TOKEN_TEXT || strlen (SYMBOL_TEXT (var)) == 0)
+  else if (SYMBOL_TYPE (var) != TOKEN_TEXT || *(SYMBOL_TEXT (var)) == '\0')
     {
       SYMBOL_TEXT (var) = xstrdup (ARG (1));
       SYMBOL_TYPE (var) = TOKEN_TEXT;

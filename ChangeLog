@@ -8,6 +8,16 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.8.6 and SNAP:
+
+    *) Implicit array indexes (29-Mar-2000):
+       The expression <get-var foo[i]> is a shorthand for
+       <get-var foo[<get-var i>]>.
+       [Jan Holler <jh@inetcom.ch>]
+
+    *) Fix warning messages (29-Mar-2000):
+       [Denis Barbier]
+
   Changes between 0.8.5 and 0.8.4:
 
     *) Fix bug with some nested expressions (27-Mar-2000):

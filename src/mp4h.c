@@ -29,6 +29,7 @@
 */
 
 #include "mp4h.h"
+#include <error.h>
 
 #include <getopt.h>
 
@@ -82,24 +83,6 @@ struct macro_definition
 };
 typedef struct macro_definition macro_definition;
 
-/* Error handling functions.  */
-
-/*----------------------------------------------------------------------.
-| Print program name, source file and line reference on standard        |
-| error, as a prefix for error messages.  Flush standard output first.  |
-`----------------------------------------------------------------------*/
-
-#include <error.h>
-
-void
-print_program_name (void)
-{
-  fflush (stdout);
-  fprintf (stderr, "%s: ", program_name);
-  if (current_line != 0)
-    fprintf (stderr, "%s: %d: ", current_file, current_line);
-}
-
 
 #ifdef USE_STACKOVF
 
@@ -249,7 +232,6 @@ main (int argc, char *const *argv, char *const *envp)
   char *filename;
 
   program_name = argv[0];
-  error_print_progname = print_program_name;
 
 /*
   (void) setlocale (LC_ALL, "");
