@@ -18,6 +18,10 @@
        are attributes in order to decide to add a leading space or not.
        [Denis Barbier]
 
+    *) Change in handling invalid negative array indices (17-Oct-2001):
+       They have now no effect, they did formerly reset variable.
+       [Denis Barbier]
+
     *) Fix memory leaks (15-Oct-2001):
        [Denis Barbier]
 
