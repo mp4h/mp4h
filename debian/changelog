@@ -1,9 +1,29 @@
-mp4h (1.0.0-1) unstable; urgency=low
+mp4h (1.1.1-1) unstable; urgency=low
 
-  * New upstream release
-  * Added HTML documentation
+  * New upstream version.
 
- -- Denis Barbier <barbier@imacs.polytechnique.fr>  Tue, 20 Jun 2000 23:54:25 +0200
+ -- Denis Barbier <barbier@imacs.polytechnique.fr>  Wed, 30 Aug 2000 21:52:21 +0200
+
+mp4h (1.1.0-1) unstable; urgency=low
+
+  * New upstream version, closes: #69438.
+  * Sponsored upload.
+  * Updated to Standards-Version: 3.2.1.
+
+ -- Josip Rodin <jrodin@jagor.srce.hr>  Sun, 27 Aug 2000 18:14:24 +0200
+
+mp4h (1.0.2-0.1) unstable; urgency=low
+
+  * NMU of new upstream release to support WML 2.0.2
+
+ -- Brian Bassett <brianb@debian.org>  Fri, 23 Jun 2000 22:18:29 -0700
+
+mp4h (1.0.0-0.1) unstable; urgency=low
+
+  * New upstream release.
+  * NMU.
+
+ -- Brian Bassett <brianb@debian.org>  Tue, 20 Jun 2000 18:09:45 -0700
 
 mp4h (0.9.4-0.1) unstable; urgency=low
 
@@ -14,7 +34,6 @@ mp4h (0.9.4-0.1) unstable; urgency=low
 
 mp4h (0.8.0-1) unstable; urgency=low
 
-  * Sponsored by Raphael Hertzog <rhertzog@hrnet.fr>
   * Initial Release.
 
  -- Denis Barbier <barbier@imacs.polytechnique.fr>  Mon, 28 Feb 2000 21:46:36 +0100

@@ -1,39 +1,46 @@
 #!/usr/bin/make -f
 
-DEB_BUILD_ARCH = any
-
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
+export DH_COMPAT=2
+
+CFLAGS := -O2 -Wall
+ifneq "$(findstring debug,$(DEB_BUILD_OPTIONS))" ""
+CFLAGS += -g
+endif
 
 build: build-stamp
-build-stamp:
+build-stamp: config.status libltdl/config.status
 	dh_testdir
-	./configure --prefix=/usr --with-tidy=/usr/bin/tidy
 	$(MAKE)
 	touch build-stamp
 
+config.status libltdl/config.status: configure
+	CFLAGS="$(CFLAGS)" ./configure --prefix=/usr \
+          --mandir='$${prefix}/share/man' --with-tidy=/usr/bin/tidy
+
 clean:
 	dh_testdir
-	-rm -f build-stamp install-stamp
-	-[ ! -f Makefile ] || $(MAKE) clean
-	dh_clean
+	dh_testroot
+	[ ! -f Makefile ] || $(MAKE) distclean
+	dh_clean build-stamp
 
-install: install-stamp
-install-stamp: build-stamp
+install: build-stamp
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	dh_installdirs
-	$(MAKE) install prefix=`pwd`/debian/tmp/usr mandir=`pwd`/debian/tmp/usr/share/man
-	touch install-stamp
+	$(MAKE) install prefix=$(CURDIR)/debian/mp4h/usr
+
+binary: binary-arch binary-indep
 
 binary-arch: build install
 	dh_testdir
 	dh_testroot
 	dh_installdocs README CREDITS doc/mp4h.html
-	dh_installmanpages
 	dh_installchangelogs ChangeLog
+ifeq "$(findstring nostrip,$(DEB_BUILD_OPTIONS))" ""
 	dh_strip
+endif
 	dh_compress
 	dh_fixperms
 	dh_shlibdeps
@@ -42,7 +49,6 @@ binary-arch: build install
 	dh_md5sums
 	dh_builddeb
 
-binary-indep: build install
-binary: binary-indep binary-arch
+binary-indep:
 
 .PHONY: build clean binary-indep binary-arch binary

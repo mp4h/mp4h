@@ -2,8 +2,8 @@ Source: mp4h
 Section: web
 Priority: optional
 Maintainer: Denis Barbier <barbier@imacs.polytechnique.fr>
-Standards-Version: 3.1.1
-Build-Depends: tidy
+Standards-Version: 3.2.1
+Build-Depends: debhelper, tidy
 
 Package: mp4h
 Architecture: any

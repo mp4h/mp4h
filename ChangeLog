@@ -8,6 +8,13 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.1.0 and 1.1.1:
+
+    *) Upgraded to GNU shtool 1.5.1 (08-Aug-2000):
+       Upgraded to GNU shtool 1.5.1. This especially fixed problems 
+       with "shtool version" under Solaris.
+       [Ralf S. Engelschall]
+
   Changes between 1.0.6 and 1.1.0:
 
     *) Rename option to disable support for loadable modules (24-Jul-2000):

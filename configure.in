@@ -29,7 +29,7 @@ else
     PKGDATADIR="$datadir/mp4h"
 fi
 AC_DEFINE_UNQUOTED(PKGDATADIR, "$PKGDATADIR")
-pkgdatadir="$PKGDATADIR"
+pkgdatadir="$datadir/mp4h"
 AC_SUBST(pkgdatadir)
 
 if test x$libdir = 'x${exec_prefix}/lib'; then
@@ -42,7 +42,7 @@ else
     PKGLIBDIR="$libdir/mp4h"
 fi
 AC_DEFINE_UNQUOTED(PKGLIBDIR, "$PKGLIBDIR") 
-pkglibdir="$PKGLIBDIR"
+pkglibdir="$libdir/mp4h"
 AC_SUBST(pkglibdir)
 
 AC_ARG_PROGRAM
@@ -116,6 +116,9 @@ else
     #   Restore libraries
     LIBS="$mp4h_libs"
 fi
+
+dnl  This line is needed for Debian builds
+AC_SUBST(CFLAGS)
 
 AC_OUTPUT([
    Makefile

@@ -13,7 +13,7 @@ bindir          = @bindir@
 mandir          = @mandir@
 pkglibdir       = @pkglibdir@
 pkgdatadir      = @pkgdatadir@
-includedir      = @prefix@/include
+includedir      = ${prefix}/include
 
 VPATH           = @srcdir@
 
@@ -35,7 +35,7 @@ LIBTOOL         = @LIBTOOL@
 
 #   installation tools
 SHTOOL          = $(top_srcdir)/shtool
-INSTALL_PROGRAM = $(SHTOOL) install -c -s -m 755
+INSTALL_PROGRAM = $(SHTOOL) install -c -m 755
 INSTALL_SCRIPT  = $(SHTOOL) install -c -m 755
 INSTALL_DATA    = $(SHTOOL) install -c -m 644
 MKDIR           = $(SHTOOL) mkdir -p -f -m 755
@@ -48,7 +48,7 @@ RM              = rm -f
 #   THE DEFAULT TARGETS
 # ------------------------------------------------
 
-all: $(SHTOOL) mp4h-config all-recursive mp4h-config.1
+all: mp4h-config all-recursive mp4h-config.1
 
 # ------------------------------------------------
 #   TEST SUITE
@@ -76,7 +76,6 @@ mp4h-config: mp4h-config.src
         -e 's|\@VERSION\@|$(MP4H_VERSION)|g' \
         -e 's|\@prefix\@|$(prefix)|g' \
         -e 's|\@pkglibdir\@|$(pkglibdir)|g' \
-        -e 's|\@includedir\@|$(includedir)|g' \
         -e 's|\@mandir\@|$(mandir)|g' \
         -e 's|\@CC\@|$(CC)|g' \
         -e 's|\@CFLAGS\@|$(CFLAGS)|g' \
@@ -151,7 +150,7 @@ configure: configure.in
 	autoconf
 	chmod 770 configure
 
-$(SHTOOL):
+shtool:
 	shtoolize -o $@ install mkdir version echo fixperm tarball
 
 # ------------------------------------------------
