@@ -8,6 +8,22 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.8.4 and 0.8.3:
+
+    *) Add <return> tag (20-Mar-2000):
+       This tag exits from inner macro.
+       [Denis Barbier]
+
+    *) Add %name in replacement text (20-Mar-2000):
+       This special string expands to the macro name when found in
+       replacement text.
+       [Denis Barbier]
+
+    *) Fix a bug in wml_p2_mp4h (18-Mar-2000):
+       Letters `A' and `U' after a percent sign were gobbled by mp4h
+       in macro replacement text.
+       [Joerg Plate <Joerg@Plate.cx>]
+
   Changes between 0.8.3 and 0.8.2:
 
     *) Add macro hooks (15-Mar-2000):
