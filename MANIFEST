@@ -184,6 +184,14 @@ tests/downcase/01.in
 tests/downcase/01.ok
 tests/downcase/02.in
 tests/downcase/02.ok
+tests/entity/01.in
+tests/entity/01.ok
+tests/entity/02.in
+tests/entity/02.ok
+tests/entity/03.in
+tests/entity/03.ok
+tests/entity/04.in
+tests/entity/04.ok
 tests/file-exists/01.in
 tests/file-exists/01.ok
 tests/foreach/01.in
