@@ -535,13 +535,12 @@ define_user_macro (const char *name, char *text, symbol_lookup mode,
                 break;
 
               case '\\':
-                if (offset>0)
-                  *(cp-offset) = *cp;
-                cp++;
-                if (*cp == '\0')
-                  cp--;
-                else
-                  *(cp-offset) = *cp;
+                *(cp-offset) = *cp;
+                if (*(cp+1) != '\0')
+                  {
+                    cp++;
+                    *(cp-offset) = *cp;
+                  }
                 break;
 
               case '\n':
@@ -550,7 +549,7 @@ define_user_macro (const char *name, char *text, symbol_lookup mode,
                 else
                   {
                   offset++;
-                  while (*(cp+1) == ' ' || *(cp+1) == '\t')
+                  while (IS_SPACE(*(cp+1)))
                     {
                       cp++;
                       offset++;
@@ -4468,7 +4467,6 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                    token_data **argv, read_type expansion)
 {
   const char *text, *save;
-  char *temp, *cp;
   int i;
   boolean unexpanded;
   char sep[2];
@@ -4552,64 +4550,20 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
           else
             text += 11;
 
-          switch (*text)
-            {
-              case '=':
-                text++;
-                save = text;
-                for (; IS_ALNUM (*(text)) || *text == ','; text++)
-                  ;
-
-                temp  = (char *) xmalloc ((int) (text - save));
-                strncpy (temp, save, text-save);
-                *(temp+ (int) (text - save)) = '\0';
-                matching_attributes (obs, argc, argv, temp, FALSE, unexpanded);
-                xfree (temp);
-                break;
-
-              case '-':
-                text++;
-                save = text;
-                for (; IS_ALNUM (*(text)) || *text == ','; text++)
-                  ;
-
-                temp  = (char *) xmalloc ((int) (text - save));
-                strncpy (temp, save, text-save);
-                *(temp+ (int) (text - save)) = '\0';
-
-                save = temp;
-                for (; save != NULL; )
+            if (unexpanded)
+              {
+                for (i = 1; i < argc; i++)
                   {
-                    cp = strchr (save, ',');
-                    if (cp)
-                      {
-                        *cp = '\0';
-                        cp++;
-                      }
-                    predefined_attribute (save, &argc, argv, FALSE);
-                    save = cp;
+                    if (i > 1)
+                      obstack_grow (obs, sep, strlen (sep));
+
+                    obstack_1grow (obs, CHAR_LQUOTE);
+                    obstack_grow (obs, ARG (i), strlen (ARG (i)));
+                    obstack_1grow (obs, CHAR_RQUOTE);
                   }
-                xfree (temp);
-
-                /*  FALL THROUGH  */
-
-              default:
-                if (unexpanded)
-                  {
-                    for (i = 1; i < argc; i++)
-                      {
-                        if (i > 1)
-                          obstack_grow (obs, sep, strlen (sep));
-
-                        obstack_1grow (obs, CHAR_LQUOTE);
-                        obstack_grow (obs, ARG (i), strlen (ARG (i)));
-                        obstack_1grow (obs, CHAR_RQUOTE);
-                      }
-                  }
-                else
-                  dump_args (obs, argc, argv, sep);
-                break;
-            }
+              }
+            else
+              dump_args (obs, argc, argv, sep);
         }
       else if (strncmp (text, "name", 4) == 0)
         {

@@ -10,9 +10,6 @@
 
   Changes between 1.0.3 and SNAP:
 
-    *) More facilities added to modify list of attributes (02-Jul-2000):
-       [Denis Barbier]
-
     *) New <compound> tag for grouping (02-Jul-2000):
        It does exactly the same job as <group>, but this tag is
        complex.
