@@ -8,5 +8,12 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.7.1 and 0.7.0:
+
+    *) Allow spaces in variable assignments (13-Feb-2000):
+       Constructs like <set-var i = 0> are now parsed like <set-var i=0>.
+       [Denis Barbier]
+
+
   mp4h 0.7.0 (11-Feb-2000):
     First public release.

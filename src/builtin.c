@@ -71,6 +71,7 @@ DECLARE (mp4h_var_case);
 DECLARE (mp4h_break);
 DECLARE (mp4h_warning);
 DECLARE (mp4h_exit);
+DECLARE (mp4h_at_end_of_file);
 
   /*  macro functions  */
 DECLARE (mp4h_define_tag);
@@ -191,6 +192,7 @@ builtin_tab[] =
   { "break",            FALSE,    TRUE,   mp4h_break },
   { "warning",          FALSE,    TRUE,   mp4h_warning },
   { "exit",             FALSE,    TRUE,   mp4h_exit },
+  { "at-end-of-file",   TRUE,     TRUE,   mp4h_at_end_of_file },
 
       /*  macro functions  */
   { "define-tag",       TRUE,     TRUE,   mp4h_define_tag },
@@ -1381,6 +1383,20 @@ mp4h_exit (MP4H_BUILTIN_ARGS)
   exit (rc);
 }
 
+/*-------------------------------------------------------------------------.
+| Save the argument text until EOF has been seen, allowing for user        |
+| specified cleanup action.  GNU version saves all arguments, the standard |
+| version only the first.                                                  |
+`-------------------------------------------------------------------------*/
+
+static void
+mp4h_at_end_of_file (MP4H_BUILTIN_ARGS)
+{
+  dump_args (obs, 2, argv, " ");
+  obstack_1grow (obs, '\0');
+  push_wrapup (obstack_finish (obs));
+}
+
 
 
 /*  Macro functions: defining, undefining, examining or changing
@@ -2544,7 +2560,7 @@ generic_variable (struct obstack *obs, int argc, token_data **argv,
   symbol *var;
   register int i;
   register int j;
-  int length;
+  int length, istep;
   int array_index;
 
   if (argc < 2)
@@ -2560,43 +2576,59 @@ generic_variable (struct obstack *obs, int argc, token_data **argv,
         for (i = 1; i < argc; i++)
           {
             array_index = -1;
+            istep = 0;
             value = strchr (ARG (i), '=');
             if (value == NULL)
-              value = ARG (i) + strlen (ARG (i));
+              {
+                /*  Look for spaces like in <set-var i = 0> */
+                if (i+1 < argc && *(ARG (i+1)) == '=')
+                  {
+                    istep++;
+                    if (i+2 < argc && *(ARG (i+1) +1) == '\0')
+                      {
+                        istep++;
+                        value = ARG (i+2);
+                      }
+                    else
+                      value = ARG (i+1) + 1;
+                  }
+                else
+                  value = ARG (i) + strlen (ARG (i));
+              }
             else
               {
                 *value = '\0';
                 value++;
-                ptr_index = strchr (ARG (i), ']');
-                if (ptr_index != NULL && *(ptr_index-1) != '[')
+              }
+            ptr_index = strchr (ARG (i), ']');
+            if (ptr_index != NULL && *(ptr_index-1) != '[')
+              {
+                if (verbatim)
                   {
-                    if (verbatim)
-                      {
-                        obstack_grow (obs, "<set-var ", 9);
-                        obstack_grow (obs, ARG (i), strlen (ARG (i)));
-                        obstack_1grow (obs, '=');
-                        obstack_1grow (obs, CHAR_LQUOTE);
-                        obstack_grow (obs, value, strlen (value));
-                        obstack_1grow (obs, CHAR_RQUOTE);
-                        obstack_1grow (obs, '>');
-                        continue;
-                      }
-                    *ptr_index = '\0';
-                    ptr_index = strchr (ARG (i), '[');
-                    if (!ptr_index)
-                      {
-                        MP4HERROR ((warning_status, 0,
+                    obstack_grow (obs, "<set-var ", 9);
+                    obstack_grow (obs, ARG (i), strlen (ARG (i)));
+                    obstack_1grow (obs, '=');
+                    obstack_1grow (obs, CHAR_LQUOTE);
+                    obstack_grow (obs, value, strlen (value));
+                    obstack_1grow (obs, CHAR_RQUOTE);
+                    obstack_1grow (obs, '>');
+                    continue;
+                  }
+                *ptr_index = '\0';
+                ptr_index = strchr (ARG (i), '[');
+                if (!ptr_index)
+                  {
+                    MP4HERROR ((warning_status, 0,
+                       _("Warning: wrong index declaration in <%s>"), ARG (0)));
+                    return;
+                  }
+                *ptr_index = '\0';
+                ptr_index++;
+                if (!numeric_arg (argv[0], ptr_index, TRUE, &array_index))
+                  {
+                    MP4HERROR ((warning_status, 0,
                            _("Warning: wrong index declaration in <%s>"), ARG (0)));
-                        return;
-                      }
-                    *ptr_index = '\0';
-                    ptr_index++;
-                    if (!numeric_arg (argv[0], ptr_index, TRUE, &array_index))
-                      {
-                        MP4HERROR ((warning_status, 0,
-                           _("Warning: wrong index declaration in <%s>"), ARG (0)));
-                        return;
-                      }
+                    return;
                   }
               }
             var = lookup_variable (ARG (i), SYMBOL_INSERT);
@@ -2662,6 +2694,7 @@ generic_variable (struct obstack *obs, int argc, token_data **argv,
               }
 
             SYMBOL_TYPE (var) = TOKEN_TEXT;
+            i += istep;
           }
         break;
 
