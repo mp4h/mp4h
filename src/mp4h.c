@@ -322,7 +322,7 @@ main (int argc, char *const *argv)
 
   if (show_version)
     {
-      printf ("%s %s", program_name, MP4H_VersionStr);
+      printf ("%s %s", program_name, mp4h_VersionStr);
       fputs("\n", stdout);
       exit (EXIT_SUCCESS);
     }

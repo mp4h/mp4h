@@ -977,7 +977,7 @@ mp4h_unsupported (MP4H_BUILTIN_ARGS)
 static void
 mp4h___version__ (MP4H_BUILTIN_ARGS)
 {
-  obstack_grow (obs, MP4H_PlainID, strlen (MP4H_PlainID));
+  obstack_grow (obs, mp4h_PlainID, strlen (mp4h_PlainID));
 }
 
 
