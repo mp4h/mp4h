@@ -3861,7 +3861,6 @@ mp4h_bp_set_var (MP4H_BUILTIN_ARGS)
   register int j;
   int length, istep, size;
   int array_index;
-  boolean newline;
 
   if (argc < 2)
     return;
@@ -3956,7 +3955,7 @@ Warning:%s:%d: wrong index declaration in <%s>"),
           else
             old_value = "";
 
-          length = strlen (old_value) + strlen (value) + array_index;
+          length = strlen (old_value) + strlen (value) + array_index + 1;
           new_value = (char *) xmalloc (length + 1);
           *new_value = '\0';
 
@@ -3970,28 +3969,21 @@ Warning:%s:%d: wrong index declaration in <%s>"),
           else
             {
               size = array_size (var);
+              if (size == 0)
+                size = 1;
               if (size <= array_index)
                 {
                   strcat (new_value, old_value);
-                  for (j = size; j<=array_index; j++)
+                  for (j=size; j<=array_index; j++)
                     strcat (new_value, "\n");
                   strcat (new_value, value);
                 }
               else
                 {
                   cp = array_value (var, array_index, 0);
-                  newline = ('\n' == *cp);
                   strncat (new_value, old_value, cp - SYMBOL_TEXT (var));
                   strcat (new_value, value);
-                  if (newline)
-                    {
-                      strcat (new_value, "\n");
-                      cp++;
-                    }
-                  if (*cp == '\0')
-                    cp = NULL;
-                  else
-                    cp = strchr (cp + 1, '\n');
+                  cp = strchr (cp, '\n');
                   if (cp)
                     strcat (new_value, cp);
                 }
@@ -4213,9 +4205,9 @@ mp4h_bp_symbol_info (MP4H_BUILTIN_ARGS)
   if (var != NULL)
     {
       size = array_size (var);
-      obstack_grow (obs, "STRING\n", 7);
       if (size == 0)
         size = 1;
+      obstack_grow (obs, "STRING\n", 7);
       shipout_int (obs, size);
       return;
     }
