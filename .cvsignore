@@ -1,8 +1,7 @@
-config.log config.cache config.h config.h.in config.status
+config.log config.cache config.h config.status
 configure
 Makefile
 libtool
-libltdl
 mp4h-config
 *.1 *.pod
 mp4h-*.tar.gz
