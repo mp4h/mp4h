@@ -29,7 +29,9 @@ install: build-stamp
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	$(MAKE) install prefix=$(CURDIR)/debian/mp4h/usr
+	$(MAKE) install \
+            prefix=$(CURDIR)/debian/mp4h/usr \
+            INSTPREFIX=$(CURDIR)/debian/mp4h
 
 binary: binary-arch binary-indep
 

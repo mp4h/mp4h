@@ -8,7 +8,7 @@ SHELL = /bin/sh
 top_srcdir      = @top_srcdir@
 top_builddir    = ..
 srcdir          = @srcdir@
-prefix          = @prefix@
+INSTPREFIX      =
 
 VPATH           = @srcdir@
 
@@ -86,7 +86,7 @@ all: $(PKGFILES) $(LARCHIVE) all-recursive
 # ------------------------------------------------
 
 INSTALL_LA_FILES = \
-   d=`$(mp4h_config) --pkglibdir`; \
+   d=$(INSTPREFIX)`$(mp4h_config) --pkglibdir`; \
    echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
    $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
 
@@ -141,13 +141,13 @@ distclean: clean distclean-recursive
 
 RECURS_TARGET = \
    echo "===> $(SDP)$$dir ($$target)"; \
-   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" prefix=$(prefix) $$target) \
+   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" INSTPREFIX=$(INSTPREFIX) $$target) \
    || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
    echo "<=== $(SDP)$$dir"
 
 RECURS_TARGET_NOBREAK = \
    echo "===> $(SDP)$$dir ($$target)"; \
-   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" prefix=$(prefix) $$target); \
+   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" $$target); \
    echo "<=== $(SDP)$$dir"
 
 #   Some GNU components (especially libltdl) require mkinstalldirs

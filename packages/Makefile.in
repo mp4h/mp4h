@@ -23,7 +23,7 @@ INSTALL_DATA    = $(SHTOOL) install -c -m 644
 INSTALL         = @INSTALL@
 MKDIR           = $(SHTOOL) mkdir -f -p -m 755
 
-prefix          = @prefix@
+INSTPREFIX      =
 
 SDP     = packages/
 SUBDIRS = \
@@ -65,13 +65,13 @@ distclean: clean distclean-recursive
 
 RECURS_TARGET = \
    echo "===> $(SDP)$$dir ($$target)"; \
-   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" prefix=$(prefix) $$target) \
+   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" INSTPREFIX=$(INSTPREFIX) $$target) \
    || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
    echo "<=== $(SDP)$$dir"
 
 RECURS_TARGET_NOBREAK = \
    echo "===> $(SDP)$$dir ($$target)"; \
-   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" prefix=$(prefix) $$target); \
+   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" $$target); \
    echo "<=== $(SDP)$$dir"
 
 #   Some GNU components (especially libltdl) require mkinstalldirs

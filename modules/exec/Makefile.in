@@ -21,7 +21,6 @@ INSTALL_DATA    = $(SHTOOL) install -c -m 644
 #INSTALL         = $(SHTOOL) install -c -m 644
 INSTALL         = @INSTALL@
 MKDIR           = $(SHTOOL) mkdir -f -p -m 755
-INSTPREFIX      =
 
 INITVARS = \
    pkgdatadir=`$(mp4h_config) --pkgdatadir` \
@@ -73,7 +72,7 @@ LARCHIVE        = $(MODSOURCES:.c=.la)
 all: $(PKGFILES) $(LARCHIVE)
 
 INSTALL_LA_FILES = \
-   d=`$(mp4h_config) --pkglibdir`/$(thisdir); \
+   d=$(INSTPREFIX)`$(mp4h_config) --pkglibdir`/$(thisdir); \
    echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
    $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
 
@@ -107,7 +106,7 @@ install-dirs:
 	        $(MKDIR) $(INSTPREFIX)$$mandir/man$(man3ext); \
 	else :; \
 	fi
-	@set -e; d=`$(mp4h_config) --pkglibdir`/$(thisdir); \
+	@set -e; d=$(INSTPREFIX)`$(mp4h_config) --pkglibdir`/$(thisdir); \
 	if [ ! -d "$$d" ]; then \
 	        echo "$(MKDIR) $$d"; \
 	        $(MKDIR) $$d; \

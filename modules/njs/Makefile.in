@@ -65,7 +65,7 @@ $(LARCHIVE): $(LOBJ)
 test check install:
 
 INSTALL_LA_FILES = \
-   d=`$(mp4h_config) --pkglibdir`; \
+   d=$(INSTPREFIX)`$(mp4h_config) --pkglibdir`; \
    echo "$(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p"; \
    $(LIBTOOL) --mode=install $(INSTALL) $$p $$d/$$p
 

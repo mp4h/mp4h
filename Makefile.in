@@ -62,7 +62,7 @@ RECURS_TARGET = \
 
 RECURS_TARGET_NOBREAK = \
    echo "===> $(SDP)$$dir ($$target)"; \
-   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" prefix=$(prefix) $$target); \
+   (cd $$dir && $(MAKE) SDP="$(SDP)$$dir/" $$target); \
    echo "<=== $(SDP)$$dir"
 
 test: all
@@ -162,7 +162,7 @@ FIND = find      # name of a GNU find
 GZIP = gzip      # where to find GNU Zip
 NAME = barbier   # name of maintainer who rolls the tarball
 
-EXCLUDE_FILES = CVS .cvsignore core tags mp4h-*.tar.gz debian
+EXCLUDE_FILES = CVS .cvsignore core tags mp4h-*.tar.gz debian build-
 
 NEWVERS = \
     $(VERSION_TOOL) -l c -n mp4h -p mp4h_ $$OPT src/version.c; \
