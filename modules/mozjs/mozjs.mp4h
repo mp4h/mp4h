@@ -1,8 +1,7 @@
 
 <load library="/usr/local/lib/mozilla/libjs" module="mozjs">
 
-;;;  The <test> tag prints its attributes in reverse order
 <javascript>
-for (i=10; i>0; i--) print(i);
 print("ok");
+for (i=10; i>0; i--) print(i);
 </javascript>

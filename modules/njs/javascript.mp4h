@@ -1,7 +1,6 @@
 
-<load library="/usr/local/lib/libnjs" module="javascript">
+<load library="libnjs" module="javascript">
 
-;;;  The <test> tag prints its attributes in reverse order
 <javascript>
 print("ok");
 for (i=10; i>0; i--) print(i);
