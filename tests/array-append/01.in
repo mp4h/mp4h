@@ -1,5 +1,0 @@
-<set-var a[]="zero
-one
-two">
-<array-append three a>
-<get-var a[]>

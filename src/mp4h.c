@@ -233,13 +233,12 @@ main (int argc, char *const *argv, char *const *envp)
 
   program_name = argv[0];
 
-/*
-  (void) setlocale (LC_ALL, "");
-  (void) setlocale (LC_NUMERIC, "C");
-*/
-
   debug_init ();
   include_init ();
+#ifdef HAVE_LOCALE_H
+  setlocale (LC_ALL, "C");
+  locale_init ();
+#endif
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);

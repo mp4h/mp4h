@@ -10,6 +10,11 @@
 
   Changes between 0.8.6 and SNAP:
 
+    *) Change some array functions (31-Mar-2000):
+       The <array-append> tag is replaced by <array-push> and
+       <array-pop> is added.
+       [Denis Barbier]
+
     *) Implicit array indexes (29-Mar-2000):
        The expression <get-var foo[i]> is a shorthand for
        <get-var foo[<get-var i>]>.

@@ -36,7 +36,7 @@ SUBDIRS = \
    array-size \
    array-member \
    array-add-unique \
-   array-append \
+   array-push \
    array-concat \
    foreach \
    sort \

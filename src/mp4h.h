@@ -528,6 +528,7 @@ struct builtin
 
 typedef struct builtin builtin;
 
+void locale_init __P ((void));
 void initialize_builtin __P ((symbol *));
 void builtin_init __P ((void));
 void builtin_deallocate __P ((void));

@@ -42,6 +42,8 @@ DECLARE (mp4h___file__);
 DECLARE (mp4h___line__);
 DECLARE (mp4h___version__);
 DECLARE (mp4h_timer);
+DECLARE (mp4h_mp4h_l10n);
+DECLARE (mp4h_mp4h_output_radix);
 #ifndef HAVE_FILE_FUNCS
 DECLARE (mp4h_unsupported);
 #endif
@@ -145,9 +147,10 @@ DECLARE (mp4h_defvar);
 
   /*  array functions  */
 DECLARE (mp4h_array_size);
-DECLARE (mp4h_array_append);
 DECLARE (mp4h_array_add_unique);
 DECLARE (mp4h_array_member);
+DECLARE (mp4h_array_push);
+DECLARE (mp4h_array_pop);
 DECLARE (mp4h_array_shift);
 DECLARE (mp4h_array_concat);
 DECLARE (mp4h_sort);
@@ -165,6 +168,8 @@ builtin_tab[] =
   { "__line__",         FALSE,    TRUE,   mp4h___line__ },
   { "__version__",      FALSE,    TRUE,   mp4h___version__ },
   { "timer",            FALSE,    TRUE,   mp4h_timer },
+  { "mp4h-l10n",        FALSE,    TRUE,   mp4h_mp4h_l10n },
+  { "mp4h-output-radix",FALSE,    TRUE,   mp4h_mp4h_output_radix },
   { "date",             FALSE,    TRUE,   mp4h_date },
 
       /*  debug functions  */
@@ -271,9 +276,10 @@ builtin_tab[] =
 
       /*  array functions  */
   { "array-size",       FALSE,    TRUE,   mp4h_array_size },
-  { "array-append",     FALSE,    TRUE,   mp4h_array_append },
   { "array-add-unique", FALSE,    TRUE,   mp4h_array_add_unique },
   { "array-member",     FALSE,    TRUE,   mp4h_array_member },
+  { "array-push",       FALSE,    TRUE,   mp4h_array_push },
+  { "array-pop",        FALSE,    TRUE,   mp4h_array_pop },
   { "array-shift",      FALSE,    TRUE,   mp4h_array_shift },
   { "array-concat",     FALSE,    TRUE,   mp4h_array_concat },
   { "sort",             FALSE,    TRUE,   mp4h_sort },
@@ -286,6 +292,8 @@ static void push_builtin_table __P ((builtin *));
 static void install_builtin_table __P ((builtin *));
 static boolean bad_argc __P ((token_data *, int, int, int));
 static void dump_args __P ((struct obstack *, int, token_data **, const char *));
+static boolean safe_strtod __P ((const char *, const char *, double *));
+static boolean safe_strtol __P ((const char *, const char *, long int *));
 static const char *predefined_attribute __P ((const char *, int *, token_data **, boolean));
 static void set_trace __P ((symbol *, const char *));
 static void generic_set_hook __P ((MP4H_BUILTIN_PROTO, boolean, int));
@@ -315,7 +323,22 @@ static boolean sort_caseless;
 static boolean sort_sortorder;
 static boolean sort_numeric;
 
+/*  Localization  */
+struct lconv *my_locale;
+
+/*  Timer  */
 static struct tms elapsed_time;
+
+/*  Pointer to a string containig the decimal point used
+    with locales.  */
+#ifdef HAVE_LOCALE_H
+static const char *decimal_point;
+#else
+#define decimal_point "."
+#endif
+
+/*  Output radix  */
+static int output_radix = 6;
 
 
 /*------------------------------------------------------------------.
@@ -631,6 +654,46 @@ numeric_arg (token_data *macro, const char *arg, boolean warn, int *valuep)
   return TRUE;
 }
 
+static boolean
+safe_strtod (const char *name, const char *nptr, double *value)
+{
+  char *endp;
+  double result;
+
+  result = strtod (nptr, &endp);
+  if (nptr == NULL || *endp != '\0')
+    {
+      if (nptr == NULL)
+        nptr = endp;
+      MP4HERROR ((warning_status, 0,
+        _("Warning:%s:%d: Argument `%s' non-numeric in built-in `%s'"),
+             CURRENT_FILE_LINE, nptr, name));
+      return FALSE;
+    }
+  *value = result;
+  return TRUE;
+}
+
+static boolean
+safe_strtol (const char *name, const char *nptr, long int *value)
+{
+  char *endp;
+  long int result;
+
+  result = strtol (nptr, &endp, 10);
+  if (nptr == NULL || *endp != '\0')
+    {
+      if (nptr == NULL)
+        nptr = endp;
+      MP4HERROR ((warning_status, 0,
+        _("Warning:%s:%d: Argument `%s' non-numeric in built-in `%s'"),
+             CURRENT_FILE_LINE, nptr, name));
+      return FALSE;
+    }
+  *value = result;
+  return TRUE;
+}
+
 /*----------------------------------------------------------------------.
 | Format an int VAL, and stuff it into an obstack OBS.  Used for macros |
 | expanding to numbers.                                                 |
@@ -809,6 +872,72 @@ mp4h___line__ (MP4H_BUILTIN_ARGS)
     shipout_int (obs, current_line);
   else
     numeric_arg (argv[0], ARG (1), FALSE, &current_line);
+}
+
+/*---------------------.
+| Initialize locales.  |
+`---------------------*/
+
+void
+locale_init (void)
+{
+#ifdef HAVE_LOCALE_H
+  setlocale (LC_ALL, "C");
+  my_locale = localeconv ();
+  decimal_point = my_locale->decimal_point;
+#endif
+}
+
+/*---------------------------.
+| Change locale attributes.  |
+`---------------------------*/
+
+static void
+mp4h_mp4h_l10n (MP4H_BUILTIN_ARGS)
+{
+  int category = -1;
+
+#ifdef HAVE_LOCALE_H
+  if (strcmp (ARG (1), "LC_ALL") == 0)
+    category = LC_ALL;
+  else if (strcmp (ARG (1), "LC_COLLATE") == 0)
+    category = LC_COLLATE;
+  else if (strcmp (ARG (1), "LC_CTYPE") == 0)
+    category = LC_CTYPE;
+  else if (strcmp (ARG (1), "LC_MONETARY") == 0)
+    category = LC_MONETARY;
+  else if (strcmp (ARG (1), "LC_NUMERIC") == 0)
+    category = LC_NUMERIC;
+  else if (strcmp (ARG (1), "LC_TIME") == 0)
+    category = LC_TIME;
+  
+  if (category == -1)
+    MP4HERROR ((warning_status, 0,
+    _("Warning:%s:%d: unknown locale `%s'"), CURRENT_FILE_LINE, ARG (1)));
+  else
+    {
+      setlocale (category, ARG (2));
+      my_locale = localeconv ();
+      decimal_point = my_locale->decimal_point;
+    }
+#else
+  MP4HERROR ((warning_status, 0,
+    _("Warning:%s:%d: locales are not supported on your system"),
+              CURRENT_FILE_LINE));
+#endif
+}
+
+/*----------------------------------------------.
+| Set output radix used when printing numbers.  |
+`----------------------------------------------*/
+
+static void
+mp4h_mp4h_output_radix (MP4H_BUILTIN_ARGS)
+{
+  if (bad_argc (argv[0], argc, 0, 2))
+    return;
+
+  safe_strtol (ARG (0), ARG (1), (long int *) &output_radix);
 }
 
 static void
@@ -1162,11 +1291,21 @@ mp4h_date (MP4H_BUILTIN_ARGS)
   time_t epoch_time;
   char *ascii_time;
   struct tm *timeptr;
+  char *endp = NULL;
 
   if (argc == 1)
     epoch_time = time ((time_t *)NULL);
   else
-    epoch_time = strtol (ARG (1), (char **)NULL, 10);
+    {
+      epoch_time = strtol (ARG (1), &endp, 10);
+      if (!endp)
+        {
+          MP4HERROR ((warning_status, 0,
+            _("Warning:%s:%d: Invalid value in date: %s"),
+                 CURRENT_FILE_LINE, ARG (1)));
+          return;
+        }
+    }
 
   timeptr = (struct tm *) localtime (&epoch_time);
   ascii_time = (char *) asctime (timeptr);
@@ -1848,26 +1987,47 @@ math_relation (MP4H_BUILTIN_ARGS, mathrel_type mathrel)
   if (bad_argc (argv[0], argc, 2, 3))
     return;
   
-  if (isdigit ((int) ARG (1)[0]) || ARG (1)[0] == '-' || ARG (1)[0] == '.')
-    val1 = strtod (ARG (1), 0);
+  if (isdigit ((int) ARG (1)[0]) || *(ARG (1)) == '-' || *(ARG (1)) == '+' ||
+          strncmp (ARG (1), decimal_point, strlen (decimal_point)))
+    {
+      if (!safe_strtod (ARG (0), ARG (1), &val1))
+        return;
+    }
   else
     {
       var = lookup_variable (ARG (1), SYMBOL_LOOKUP);
       if (var == NULL)
+        {
+          MP4HERROR ((warning_status, 0,
+            _("Warning:%s:%d: Argument `%s' non-numeric in built-in `%s'"),
+                 CURRENT_FILE_LINE, ARG (1), ARG (0)));
+          return;
+        }
+      if (!safe_strtod (ARG (0), SYMBOL_TEXT (var), &val1))
         return;
-      val1 = strtod (SYMBOL_TEXT (var), 0);
     }
   
   if (argc == 2)
     val2 = 0.;
-  else if (isdigit ((int) ARG (2)[0]) || ARG (2)[0] == '-' || ARG (2)[0] == '.')
-    val2 = strtod (ARG (2), 0);
+  else if (isdigit ((int) ARG (2)[0]) ||
+          *(ARG (2)) == '-' || *(ARG (2)) == '+' ||
+          strncmp (ARG (2), decimal_point, strlen (decimal_point)))
+    {
+      if (!safe_strtod (ARG (0), ARG (2), &val2))
+        return;
+    }
   else
     {
       var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
       if (var == NULL)
+        {
+          MP4HERROR ((warning_status, 0,
+            _("Warning:%s:%d: Argument `%s' non-numeric in built-in `%s'"),
+                 CURRENT_FILE_LINE, ARG (2), ARG (0)));
+          return;
+        }
+      if (!safe_strtod (ARG (0), SYMBOL_TEXT (var), &val2))
         return;
-      val2 = strtod (SYMBOL_TEXT (var), 0);
     }
 
   switch (mathrel)
@@ -1930,7 +2090,7 @@ mp4h_neq (MP4H_BUILTIN_ARGS)
 | be performed at each step.                            |
 `------------------------------------------------------*/
 #define MATH_ARG_LOOP(ops) for (i=2; i<argc; i++) \
-    {val = strtod (ARG (i), 0); ops;\
+    {if (safe_strtod (ARG (0), ARG (i), &val)) ops;\
      if (result_int) result = floor (result);}
 
 static void
@@ -1939,8 +2099,8 @@ mathop_functions (MP4H_BUILTIN_ARGS, mathop_type mathop)
   double val, result;
   int i;
   char svalue[128];
-  char *pos_decimal_point;
-#define decimal_point "."
+  char *pos_radix;
+  char sformat[32];
   boolean result_int = TRUE;
 
   if (bad_argc (argv[0], argc, 3, 0))
@@ -1977,7 +2137,8 @@ mathop_functions (MP4H_BUILTIN_ARGS, mathop_type mathop)
     }
 
   /*  Initialization.  */
-  result = strtod (ARG (1), 0);
+  if (!safe_strtod (ARG (0), ARG (1), &result))
+    result = 0.;
 
   /*  Loop on operands.  */
   switch (mathop)
@@ -2005,12 +2166,13 @@ mathop_functions (MP4H_BUILTIN_ARGS, mathop_type mathop)
           _("INTERNAL ERROR: Illegal mathop in mp4h_mathop ()")));
     }
 
-  sprintf (svalue, "%f", result);
+  sprintf (sformat, "%%.%df", output_radix);
+  sprintf (svalue, sformat, result);
   if (result_int)
     {
-      pos_decimal_point = strstr (svalue, decimal_point);
-      if (pos_decimal_point)
-        *pos_decimal_point = '\0';
+      pos_radix = strstr (svalue, decimal_point);
+      if (pos_radix)
+        *pos_radix = '\0';
     }
 
   shipout_text (obs, svalue, strlen (svalue));
@@ -3471,38 +3633,6 @@ mp4h_array_size (MP4H_BUILTIN_ARGS)
   shipout_int (obs, result);
 }
 
-/*------------------------------.
-| Adds an element to an array.  |
-`------------------------------*/
-static void
-mp4h_array_append (MP4H_BUILTIN_ARGS)
-{
-  symbol *var;
-  char *old_value;
-
-  if (bad_argc (argv[0], argc, 3, 3))
-    return;
-
-  var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
-  if (var == NULL)
-    var = lookup_variable (ARG (2), SYMBOL_INSERT);
-
-  if (SYMBOL_TYPE (var) != TOKEN_TEXT || *(SYMBOL_TEXT (var)) == '\0')
-    {
-      SYMBOL_TEXT (var) = xstrdup (ARG (1));
-      SYMBOL_TYPE (var) = TOKEN_TEXT;
-    }
-  else
-    {
-      old_value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (1)) + 2);
-      strcpy (old_value, SYMBOL_TEXT (var));
-      strcat (old_value, "\n");
-      strcat (old_value, ARG (1));
-      xfree (SYMBOL_TEXT (var));
-      SYMBOL_TEXT (var) = xstrdup (old_value);
-    }
-}
-
 /*-------------------------------------------------------------.
 | Search an element in an array.  If it is found, returns its  |
 | index, otherwise returns -1.                                 |
@@ -3599,6 +3729,71 @@ mp4h_array_add_unique (MP4H_BUILTIN_ARGS)
           xfree (value);
         }
     }
+}
+
+/*------------------------------.
+| Adds an element to an array.  |
+`------------------------------*/
+static void
+mp4h_array_push (MP4H_BUILTIN_ARGS)
+{
+  symbol *var;
+  char *old_value;
+
+  if (bad_argc (argv[0], argc, 3, 3))
+    return;
+
+  var = lookup_variable (ARG (2), SYMBOL_LOOKUP);
+  if (var == NULL)
+    var = lookup_variable (ARG (2), SYMBOL_INSERT);
+
+  if (SYMBOL_TYPE (var) != TOKEN_TEXT || *(SYMBOL_TEXT (var)) == '\0')
+    {
+      SYMBOL_TEXT (var) = xstrdup (ARG (1));
+      SYMBOL_TYPE (var) = TOKEN_TEXT;
+    }
+  else
+    {
+      old_value = (char *) xmalloc (strlen (SYMBOL_TEXT (var)) + strlen (ARG (1)) + 2);
+      strcpy (old_value, SYMBOL_TEXT (var));
+      strcat (old_value, "\n");
+      strcat (old_value, ARG (1));
+      xfree (SYMBOL_TEXT (var));
+      SYMBOL_TEXT (var) = xstrdup (old_value);
+    }
+}
+
+/*---------------------------------------------------------.
+| Remove the top level value from an array and return it.  |
+`---------------------------------------------------------*/
+static void
+mp4h_array_pop (MP4H_BUILTIN_ARGS)
+{
+  symbol *var, *stack;
+  char *cp;
+
+  if (bad_argc (argv[0], argc, 3, 3))
+    return;
+
+  stack = lookup_variable (ARG (2), SYMBOL_LOOKUP);
+  if (stack == NULL)
+    return;
+
+  var = lookup_variable (ARG (1), SYMBOL_INSERT);
+  cp = strrchr (SYMBOL_TEXT (stack), '\n');
+  if (cp)
+    {
+      *cp = '\0';
+      SYMBOL_TEXT (var) = xstrdup (cp + 1);
+    }
+  else
+    {
+      if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+        xfree (SYMBOL_TEXT (var));
+      SYMBOL_TEXT (var) = xstrdup (SYMBOL_TEXT (stack));
+      *(SYMBOL_TEXT (stack)) = '\0';
+    }
+  SYMBOL_TYPE (var) = TOKEN_TEXT;
 }
 
 /*-----------------------------------------------------------------.
