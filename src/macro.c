@@ -203,11 +203,11 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
 
         case TOKEN_QUOTED:
         case TOKEN_STRING:
-          if (t == TOKEN_QUOTED)
+          if (expansion_level > 0 && t == TOKEN_QUOTED)
             obstack_1grow (obs, CHAR_LQUOTE);
           obstack_grow (obs, TOKEN_DATA_TEXT (&td),
                   strlen (TOKEN_DATA_TEXT (&td)));
-          if (t == TOKEN_QUOTED)
+          if (expansion_level > 0 && t == TOKEN_QUOTED)
             obstack_1grow (obs, CHAR_RQUOTE);
           break;
 
