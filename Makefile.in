@@ -24,7 +24,7 @@ VPATH           = @srcdir@
 @WITH_MODULES_TRUE@MODULES_DIRS    = libltdl modules
 SUBDIRS         = lib $(MODULES_DIRS) src doc packages tests
 SDP             =
-VERSION         = @VERSION@
+MP4H_VERSION    = @VERSION@
 
 SHELL           = /bin/sh
 CC              = @CC@
@@ -73,7 +73,7 @@ check: test
 mp4h-config: mp4h-config.src
 	sed -e '/^=head1/,/^=cut/d' \
         -e '/^__END__/,$$d' \
-        -e 's|\@VERSION\@|$(VERSION)|g' \
+        -e 's|\@VERSION\@|$(MP4H_VERSION)|g' \
         -e 's|\@prefix\@|$(prefix)|g' \
         -e 's|\@pkglibdir\@|$(pkglibdir)|g' \
         -e 's|\@includedir\@|$(includedir)|g' \
@@ -86,7 +86,7 @@ mp4h-config.1: mp4h-config.src
 	cp mp4h-config.src mp4h-config.pod
 	pod2man --section=1 --center="Web Tools" --release="Web Tools" \
             mp4h-config.pod |\
-            sed -e 's|\@VERSION\@|$(VERSION)|g' > $@
+            sed -e 's|\@VERSION\@|$(MP4H_VERSION)|g' > $@
 	rm -f mp4h-config.pod
 
 # ------------------------------------------------
