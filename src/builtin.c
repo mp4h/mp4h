@@ -2608,7 +2608,7 @@ mp4h_use (MP4H_BUILTIN_ARGS)
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  real_filename = xmalloc (strlen (ARG (1)) + 6);
+  real_filename = xmalloc (strlen (ARG (1)) + 7);
   strcpy (real_filename, ARG (1));
   strcat (real_filename, ".mp4hp");
 
