@@ -10,6 +10,12 @@
 
   Changes between 0.9.5 and 0.9.6:
 
+    *) Change valid tag names (17-Jun-2000):
+       Valid tag names now match [a-zA-Z_][a-zA-Z_0-9:*-]*
+       Previous versions also accept `%' sign, which is removed
+       not to conflict with ASP notation.
+       [Denis Barbier]
+
     *) Remove control characters from debug output (16-Jun-2000):
        There were some garbage in debug output caused by control
        characters, which are now filtered.

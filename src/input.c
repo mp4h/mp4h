@@ -840,7 +840,7 @@ input_init (void)
     {
       if (isspace(ch))
         set_syntax_internal(SYNTAX_SPACE, ch);
-      else if (isalpha(ch) || ch == '_' || ch == '%')
+      else if (isalpha(ch) || ch == '_')
         set_syntax_internal(SYNTAX_ALPHA, ch);
       else if (isdigit(ch))
         set_syntax_internal(SYNTAX_NUM, ch);
