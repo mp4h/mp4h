@@ -189,6 +189,8 @@ void setup_stackovf_trap __P ((char *const *, char *const *,
 /* File: debug.c  --- debugging and tracing function.  */
 
 extern FILE *debug;
+extern char *debug_lquote;
+extern char *debug_rquote;
 
 /* The value of debug_level is a bitmask of the following.  */
 
@@ -196,8 +198,6 @@ extern FILE *debug;
 #define DEBUG_TRACE_ARGS 1
 /* e: show expansion in trace output */
 #define DEBUG_TRACE_EXPANSION 2
-/* q: quote args and expansion in trace output */
-#define DEBUG_TRACE_QUOTE 4
 /* t: trace all macros -- overrides trace{on,off} */
 #define DEBUG_TRACE_ALL 8
 /* l: add line numbers to trace output */
@@ -215,8 +215,8 @@ extern FILE *debug;
 
 /* V: very verbose --  print everything */
 #define DEBUG_TRACE_VERBOSE 1023
-/* default flags -- equiv: aeq */
-#define DEBUG_TRACE_DEFAULT 7
+/* default flags -- equiv: ae */
+#define DEBUG_TRACE_DEFAULT 3
 
 #define DEBUG_PRINT1(Fmt, Arg1) \
   do                                                            \

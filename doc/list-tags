@@ -27,6 +27,7 @@
 <check-tag right-angle>
 <check-tag true>
 <check-tag option>
+<check-tag file>
 
 <check-tag tag:description>
 <check-tag attributes:description>

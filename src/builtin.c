@@ -46,6 +46,8 @@ DECLARE (mp4h_version);
 
   /*  debug functions  */
 DECLARE (mp4h_debugmode);
+DECLARE (mp4h_debugquote);
+DECLARE (mp4h_debugfile);
 DECLARE (mp4h_function_def);
 DECLARE (mp4h_debugging_off);
 DECLARE (mp4h_debugging_on);
@@ -161,6 +163,8 @@ builtin_tab[] =
 
       /*  debug functions  */
   { "debugmode",        FALSE,    TRUE,   mp4h_debugmode },
+  { "debugquote",       FALSE,    TRUE,   mp4h_debugquote },
+  { "debugfile",        FALSE,    TRUE,   mp4h_debugfile },
   { "function-def",     FALSE,    TRUE,   mp4h_function_def },
   { "debugging-off",    FALSE,    TRUE,   mp4h_debugging_off },
   { "debugging-on",     FALSE,    TRUE,   mp4h_debugging_on },
@@ -800,7 +804,6 @@ mp4h_debugging_off (MP4H_BUILTIN_ARGS)
 | argument, which is a character string like given to the -d option, or |
 | none in which case the debug_level is zeroed.                         |
 `----------------------------------------------------------------------*/
-
 static void
 mp4h_debugmode (MP4H_BUILTIN_ARGS)
 {
@@ -846,6 +849,54 @@ mp4h_debugmode (MP4H_BUILTIN_ARGS)
             }
         }
     }
+}
+
+/*----------------------------------------------------------------------.
+| On-the-fly control of the format of the tracing output.  It takes one |
+| argument, which is a character string like given to the -d option, or |
+| none in which case the debug_level is zeroed.                         |
+`----------------------------------------------------------------------*/
+static void
+mp4h_debugquote (MP4H_BUILTIN_ARGS)
+{
+  if (bad_argc (argv[0], argc, 0, 3))
+    return;
+
+  xfree (debug_lquote);
+  xfree (debug_rquote);
+  if (argc == 1)
+    {
+      debug_lquote = xstrdup ("<");
+      debug_rquote = xstrdup (">");
+    }
+  else if (argc == 2)
+    {
+      debug_lquote = xstrdup (ARG (1));
+      debug_rquote = xstrdup (">");
+    }
+  else
+    {
+      debug_lquote = xstrdup (ARG (1));
+      debug_rquote = xstrdup (ARG (2));
+    }
+}
+
+/*-------------------------------------------------------------------------.
+| Specify the destination of the debugging output.  With one argument, the |
+| argument is taken as a file name, with no arguments, revert to stderr.   |
+`-------------------------------------------------------------------------*/
+
+static void
+mp4h_debugfile (MP4H_BUILTIN_ARGS)
+{
+  if (bad_argc (argv[0], argc, 1, 2))
+    return;
+
+  if (argc == 1)
+    debug_set_output (NULL);
+  else if (!debug_set_output (ARG (1)))
+    MP4HERROR ((warning_status, errno,
+        _("Cannot set error file: %s"), ARG (1)));
 }
 
 /*---------------------------------------------------------.
@@ -1783,8 +1834,6 @@ static void
 mp4h_include (MP4H_BUILTIN_ARGS)
 {
   const char *alt, *verbatim;
-  FILE *fp;
-  char *filename = NULL;
 
   alt = predefined_attribute ("alt", &argc, argv, FALSE);
   verbatim = predefined_attribute ("verbatim", &argc, argv, TRUE);
@@ -3419,14 +3468,24 @@ expand_user_macro (struct obstack *obs, symbol *sym, int argc,
                || strncmp (text, "xbody", 5) == 0
                || strncmp (text, "qbody", 5) == 0)
         {
-          if (unexpanded && obs)
-            obstack_1grow (obs, CHAR_LQUOTE);
+          if (obs)
+            {
+              if (unexpanded)
+                obstack_1grow (obs, CHAR_LQUOTE);
+              else
+                obstack_1grow (obs, CHAR_BGROUP);
+            }
           if (SYMBOL_CONTAINER (sym))
             dump_args (obs, 2, (argv+argc-1), sep);
           else
             dump_args (obs, argc, argv, sep);
-          if (unexpanded && obs)
-            obstack_1grow (obs, CHAR_RQUOTE);
+          if (obs)
+            {
+              if (unexpanded)
+                obstack_1grow (obs, CHAR_RQUOTE);
+              else
+                obstack_1grow (obs, CHAR_EGROUP);
+            }
 
           if (*text == 'b')
             text += 4;

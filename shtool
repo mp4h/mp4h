@@ -6,8 +6,8 @@
 ##  See http://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
-##  Version 1.4.6 (05-Sep-1999)
-##  Ingredients: 7/17 available modules
+##  Version 1.4.7 (24-Dec-1999)
+##  Ingredients: 6/17 available modules
 ##
 
 ##
@@ -43,7 +43,6 @@
 ##    mkdir      Make one or more directories
 ##    fixperm    Fix file permissions inside a source tree
 ##    tarball    Roll distribution tarballs
-##    guessos    Simple OS/platform guesser
 ##    version    Generate and maintain a version information file
 ##
 ##  Not available commands (because module was not built-in):
@@ -53,6 +52,7 @@
 ##    move       Move files with simultan substitution
 ##    mkln       Make link with calculation of relative paths
 ##    mkshadow   Make a shadow tree
+##    guessos    Simple OS/platform guesser
 ##    arx        Extended archive command
 ##    slo        Separate linker options by library class
 ##    scpp       Sharing C Pre-Processor
@@ -65,7 +65,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
-    echo "This is GNU shtool, version 1.4.6 (05-Sep-1999)"
+    echo "This is GNU shtool, version 1.4.7 (24-Dec-1999)"
     echo "Copyright (c) 1994-1999 Ralf S. Engelschall <rse@engelschall.com>"
     echo "Report bugs to <bug-shtool@gnu.org>"
     echo ''
@@ -84,7 +84,6 @@ if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
     echo '  fixperm  [-v] [-t] <path> [<path> ...]'
     echo '  tarball  [-t] [-v] [-o <tarball>] [-c <prog>] [-d <dir>] [-u'
     echo '           <user>] [-g <group>] [-e <pattern>] <path> [<path> ...]'
-    echo '  guessos  '
     echo '  version  [-l<lang>] [-n<name>] [-p<prefix>] [-s<version>] [-i<knob>]'
     echo '           [-d<type>] <file>'
     echo ''
@@ -95,6 +94,7 @@ if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
     echo '  move     [-v] [-t] [-e] [-p] <src-file> <dst-file>'
     echo '  mkln     [-t] [-f] [-s] <src-path> [<src-path> ...] <dst-path>'
     echo '  mkshadow [-v] [-t] [-a] <src-dir> <dst-dir>'
+    echo '  guessos  '
     echo '  arx      [-t] [-C<cmd>] <op> <archive> [<file> ...]'
     echo '  slo      -- -L<dir> -l<lib> [ -L<dir> -l<lib> ... ]'
     echo '  scpp     [-v] [-p] [-o<ofile>] [-t<tfile>] [-M<mark>] [-D<dname>]'
@@ -104,7 +104,7 @@ if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
     exit 0
 fi
 if [ ".$1" = ".-v" -o ".$1" = ."--version" ]; then
-    echo "GNU shtool 1.4.6 (05-Sep-1999)"
+    echo "GNU shtool 1.4.7 (24-Dec-1999)"
     exit 0
 fi
 if [ ".$1" = ".-d" -o ".$1" = ."--debug" ]; then
@@ -113,7 +113,7 @@ if [ ".$1" = ".-d" -o ".$1" = ."--debug" ]; then
 fi
 name=`echo "$0" | sed -e 's;.*/\([^/]*\)$;\1;' -e 's;-sh$;;' -e 's;\.sh$;;'`
 case "$name" in
-    echo|install|mkdir|fixperm|tarball|guessos|version )
+    echo|install|mkdir|fixperm|tarball|version )
         #   implicit tool command selection
         tool="$name"
         ;;
@@ -143,12 +143,17 @@ case $tool in
         str_usage="[-v] [-t] [-c] [-C] [-s] [-m<mode>] [-o<owner>] [-g<group>] [-e<ext>] <file> <path>"
         arg_spec="2"
         opt_spec="vtcCsm:o:g:e:"
+        opt_m=""
+        opt_o=""
+        opt_g=""
+        opt_e=""
         ;;
     mkdir )
         str_tool="mkdir"
         str_usage="[-t] [-f] [-p] [-m<mode>] <dir> [<dir> ...]"
         arg_spec="1+"
         opt_spec="tfpm:"
+        opt_m=""
         ;;
     fixperm )
         str_tool="fixperm"
@@ -162,20 +167,19 @@ case $tool in
         str_usage="[-t] [-v] [-o <tarball>] [-c <prog>] [-d <dir>] [-u <user>] [-g <group>] [-e <pattern>] <path> [<path> ...]"
         gen_tmpfile=yes
         arg_spec="1+"
-        opt_spec="tvo:c:d:u:g:e:!"
+        opt_spec="tvo:c:d:u:g:e:"
+        opt_o=""
+        opt_c=""
+        opt_d=""
+        opt_u=""
+        opt_g=""
         opt_e="CVS,\\.cvsignore,\\.[oa]\$"
-        ;;
-    guessos )
-        str_tool="guessos"
-        str_usage=""
-        arg_spec="0"
-        opt_spec=""
         ;;
     version )
         str_tool="version"
         str_usage="[-l<lang>] [-n<name>] [-p<prefix>] [-s<version>] [-i<knob>] [-d<type>] <file>"
         arg_spec="1+"
-        opt_spec="l:!n:!p:!s:!i:!d:!"
+        opt_spec="l:n:p:s:i:d:"
         opt_l="txt"
         opt_n="unknown"
         opt_p="unknown"
@@ -213,19 +217,13 @@ eval `echo $arg_spec | sed -e 's/^\([0-9]*\)\(.*\)/arg_NUMS="\1"; arg_MODE="\2"/
 test ".$arg_MODE" = . && arg_MODE="="
 
 #   parse option specification string
-for opt in `echo "h$opt_spec" | sed -e 's/\([a-zA-Z0-9][!:+]*\)/\1 /g'`; do
-    opt_MODE="."; opt_INIT="."
+for opt in `echo "h$opt_spec" | sed -e 's/\([a-zA-Z0-9][:+]*\)/\1 /g'`; do
+    opt_MODE="."
     eval `echo $opt |\
           sed -e 's/^\([a-zA-Z0-9]\)/opt_THIS="\1";/' \
-              -e 's/";\([:+]\)/"; opt_MODE="\1";/' \
-              -e 's/";\(!\)/"; opt_INIT="\1"/'`
+              -e 's/";\([:+]\)/"; opt_MODE="\1";/'`
     eval "opt_MODE_${opt_THIS}=${opt_MODE}"
-    if [ ".$opt_INIT" != ".!" ]; then
-        case "$opt_MODE" in
-            "." )     eval "opt_${opt_THIS}=no"   ;;
-            ":"|"+" ) eval "opt_${opt_THIS}=\"\"" ;;
-        esac
-    fi
+    test "$opt_MODE" = . && eval "opt_${opt_THIS}=no"
 done
 
 #   interate over argument line
@@ -968,252 +966,6 @@ EOT
     rm -f $tmpfile.lst $tmpfile.out
     ;;
 
-guessos )
-    ##
-    ##  guessos -- Simple OS/platform guesser
-    ##  Copyright (c) 1996-1999 The Apache Group, http://www.apache.org/
-    ##  The Apache license applies (see http://www.apache.org/docs/LICENSE)
-    ##  Originally written for Apache
-    ##
-    
-    MACHINE=`(uname -m) 2>/dev/null` || MACHINE="unknown"
-    RELEASE=`(uname -r) 2>/dev/null` || RELEASE="unknown"
-     SYSTEM=`(uname -s) 2>/dev/null` ||  SYSTEM="unknown"
-    VERSION=`(uname -v) 2>/dev/null` || VERSION="unknown"
-    
-    XREL=`(uname -X) 2>/dev/null | grep "^Release" | awk '{print $3}'`
-    if [ "x$XREL" != "x" ]; then
-        if [ -f /etc/kconfig ]; then
-            case "$XREL" in
-                4.0|4.1) echo "${MACHINE}-whatever-isc4"; exit 0 ;;
-            esac
-        else
-        case "$XREL" in
-            3.2v4.2)
-                echo "whatever-whatever-sco3"; exit 0
-                ;;
-            3.2v5.0*)
-                echo "whatever-whatever-sco5"; exit 0
-                ;;
-            4.2MP)
-                if [ "x$VERSION" = "x2.1.1" ]; then
-                    echo "${MACHINE}-whatever-unixware211"; exit 0
-                elif [ "x$VERSION" = "x2.1.2" ]; then
-                    echo "${MACHINE}-whatever-unixware212"; exit 0
-                else
-                    echo "${MACHINE}-whatever-unixware2"; exit 0
-                fi
-                ;;
-            4.2)
-                echo "whatever-whatever-unixware1"; exit 0
-                ;;
-            5)
-                case "$VERSION" in
-                    7*) echo "${MACHINE}-whatever-unixware7"; exit 0 ;;
-                esac
-                ;;
-        esac
-        fi
-    fi
-    case "${SYSTEM}:${RELEASE}:${VERSION}:${MACHINE}" in
-        MiNT:*)
-            echo "m68k-atari-mint"; exit 0
-            ;;
-        A/UX:*)
-            echo "m68k-apple-aux3"; exit 0
-            ;;
-        AIX:*)
-            MACH=`echo $MACHINE | sed -e 's;[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F];;'`
-            echo "${MACH}-ibm-aix${VERSION}.${RELEASE}"; exit 0
-            ;;
-        dgux:*)
-            echo "${MACHINE}-dg-dgux"; exit 0
-            ;;
-        HI-UX:*)
-            echo "${MACHINE}-hi-hiux"; exit 0
-            ;;
-        HP-UX:*)
-            HPUXVER=`echo ${RELEASE}|sed -e 's/[^.]*.[0B]*//'`
-            echo "${MACHINE}-hp-hpux${HPUXVER}"; exit 0
-            ;;
-        IRIX:*)
-            if [ -f /usr/lib32/mips4/libm.so ]; then
-                echo "${MACHINE}/32-sgi-irix${RELEASE}"; exit 0
-            else
-                echo "${MACHINE}-sgi-irix${RELEASE}"; exit 0
-            fi
-            ;;
-        IRIX64:*)
-            echo "${MACHINE}/64-sgi-irix${RELEASE}"; exit 0
-            ;;
-        Linux:*)
-            V='whatever'
-            case "$MACHINE" in
-                i?86) V='pc' ;;
-            esac
-            R=''
-            case "$RELEASE" in
-                [1-9].*) R=`echo $RELEASE | cut -c1` ;;
-            esac
-            echo "${MACHINE}-${V}-linux-gnu${R}"; exit 0
-            ;;
-        LynxOS:*)
-            echo "${MACHINE}-lynx-lynxos"; exit 0
-            ;;
-        BSD/386|BSD/OS:3.*)
-            echo "${MACHINE}-whatever-bsdi3"; exit 0
-            ;;
-        BSD/386:*:*:*486*|BSD/OS:*:*:*:*486*)
-            echo "i486-whatever-bsdi"; exit 0
-            ;;
-        BSD/386:*|BSD/OS:*)
-            echo "${MACHINE}-whatever-bsdi"; exit 0
-            ;;
-        FreeBSD:*)
-            VERS=`echo ${RELEASE} | sed -e 's/[-(].*//'`
-            MACH=`/sbin/sysctl -n hw.model`
-            ARCH='whatever'
-            case ${MACH} in
-               *386*       ) MACH="i386"     ;;
-               *486*       ) MACH="i486"     ;;
-               Pentium\ II*) MACH="i686"     ;;
-               Pentium*    ) MACH="i586"     ;;
-               Alpha*      ) MACH="alpha"    ;;
-               *           ) MACH="$MACHINE" ;;
-            esac
-            case ${MACH} in
-               i[0-9]86 ) ARCH="pc" ;;
-            esac
-            echo "${MACH}-${ARCH}-freebsd${VERS}"; exit 0
-            ;;
-        NetBSD:*:*:*486*)
-            echo "i486-whatever-netbsd${RELEASE}"; exit 0
-            ;;
-        NetBSD:*)
-            echo "${MACHINE}-whatever-netbsd${RELEASE}"; exit 0
-            ;;
-        OpenBSD:*)
-            echo "${MACHINE}-whatever-openbsd"; exit 0
-            ;;
-        OSF1:*:*:*alpha*)
-            VERS=`echo $RELEASE | sed -e 's;^V;;'`
-            echo "${MACHINE}-dec-osf${VERS}"; exit 0
-            ;;
-        QNX:*)
-            if [ "$VERSION" -gt 422 ]; then
-                echo "${MACHINE}-qssl-qnx32"
-            else
-                echo "${MACHINE}-qssl-qnx"
-            fi
-            exit 0
-            ;;
-        Paragon*:*:*:*)
-            echo "i860-intel-osf1"; exit 0
-            ;;
-        SunOS:5.*)
-            VERSION=`echo $RELEASE | sed -e 's;^5\.;;'`
-            echo "${MACHINE}-sun-solaris2.${VERSION}"; exit 0
-            ;;
-        SunOS:*)
-            echo "${MACHINE}-sun-sunos4"; exit 0
-            ;;
-        UNIX_System_V:4.*:*)
-            echo "${MACHINE}-whatever-sysv4"; exit 0
-            ;;
-        unix:3.0.9*:*:88k)
-            echo "${MACHINE}-encore-sysv4"; exit 0
-            ;;
-        *:4*:R4*:m88k)
-            echo "${MACHINE}-whatever-sysv4"; exit 0
-            ;;
-        UnixWare:5:99*:*)
-            # Gemini, beta release of next rev of unixware
-            echo "${MACHINE}-whatever-unixware212"; exit 0
-            ;;
-        DYNIX/ptx:4*:*)
-            echo "${MACHINE}-whatever-sysv4"; exit 0
-            ;;
-        *:4.0:3.0:[345][0-9]?? | *:4.0:3.0:3[34]??[/,]* | library:*)
-            echo "x86-ncr-sysv4"; exit 0
-            ;;
-        ULTRIX:*)
-            echo "${MACHINE}-unknown-ultrix"; exit 0
-            ;;
-        SINIX-?:* | ReliantUNIX-?:*)
-            echo "${MACHINE}-siemens-sysv4"; exit 0
-            ;;
-        POSIX*BS2000)
-            echo "${MACHINE}-siemens-sysv4"; exit 0
-            ;;
-        machten:*)
-           echo "${MACHINE}-tenon-${SYSTEM}"; exit 0;
-           ;;
-        ConvexOS:*:11.*:*)
-           echo "${MACHINE}-v11-${SYSTEM}"; exit 0;
-           ;;
-        UNIX_SV:*:*:maxion)
-           echo "${MACHINE}-ccur-sysv4"; exit 0;
-           ;;
-        PowerMAX_OS:*:*:Night_Hawk)
-           MACHINE=`uname -p`
-           echo "${MACHINE}-concurrent-powermax"; exit 0;
-           ;;
-        UNIX_SV:*)
-           if [ -d /usr/nec ];then
-               echo "mips-nec-sysv4"; exit 0;
-           fi
-           ;;
-        NonStop-UX:4.[02]*:[BC]*:*)
-           echo "${MACHINE}-tandem-sysv4"; exit 0;
-           ;;
-        Rhapsody:*:*:*)
-           case "${MACHINE}" in
-               "Power Macintosh") MACHINE=powerpc ;;
-           esac
-           echo "${MACHINE}-apple-rhapsody${RELEASE}"; exit 0
-           ;;
-        "Mac OS":*:*:*)
-           MACHINE=`uname -p`
-           echo "${MACHINE}-apple-macos${RELEASE}"; exit 0
-           ;;
-        "RISC iX":*)
-           echo "arm-whatever-riscix"; exit 0;
-           ;;
-        *:4.0:2:*)
-           echo "whatever-unisys-sysv4"; exit 0;
-           ;;
-        *:*:dcosx:NILE*)
-           echo "pyramid-pyramid-svr4"; exit 0;
-           ;;
-        *:*:*:"DRS 6000")
-           echo "drs6000-whatever-whatever"; exit 0;
-           ;;
-        AmigaOS:*:*:* )
-           echo "${MACHINE}-whatever-${SYSTEM}${RELEASE}"; exit 0
-           ;;
-    esac
-    
-    # Now NeXT
-    ISNEXT=`(hostinfo) 2>/dev/null`
-    case "$ISNEXT" in
-        *NeXT*)
-             # Swiped from a friendly uname clone for NEXT/OPEN Step.
-             NEXTOSVER="`hostinfo | sed -n 's/.*NeXT Mach \([0-9\.]*\).*/\1/p'`"
-             if [ "$NEXTOSVER" -gt 3.3 ]; then
-                 NEXTOS="openstep"
-             else
-                 NEXTOS="nextstep"
-             fi
-             NEXTREL="`hostinfo | sed -n 's/.*NeXT Mach \([0-9\.]*\).*/\1/p'`"
-             NEXTARCH=`arch`
-             echo "${NEXTARCH}-next-${NEXTOS}${NEXTREL}" ; exit 0
-             ;;
-    esac
-    
-    # Fallback
-    echo "${MACHINE}-whatever-${SYSTEM}/${RELEASE}/${VERSION}"
-    ;;
-
 version )
     ##
     ##  version -- Generate and maintain a version information file
@@ -1435,7 +1187,7 @@ const char @PREFIX@_VersionStr[] = "@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@
 const char @PREFIX@_Hello[]      = "This is @NAME@, Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@-@MONTH@-@YEAR@)";
 const char @PREFIX@_GNUVersion[] = "@NAME@ Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 const char @PREFIX@_WhatID[]     = "@(#)@NAME@ Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@-@MONTH@-@YEAR@)";
-const char @PREFIX@_RCSIdentID[] = "$Id: shtool,v 1.1 1999/11/07 23:45:50 barbier Exp $";
+const char @PREFIX@_RCSIdentID[] = "$Id: @NAME@ @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ @DAY@-@MONTH@-@YEAR@ $";
 const char @PREFIX@_WebID[]      = "@NAME@/@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 const char @PREFIX@_PlainID[]    = "@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 
@@ -1454,7 +1206,7 @@ $@PREFIX@_VersionStr = "@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@-@MONTH@-@YE
 $@PREFIX@_Hello      = "This is @NAME@, Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@-@MONTH@-@YEAR@)";
 $@PREFIX@_GNUVersion = "@NAME@ Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 $@PREFIX@_WhatID     = "@(#)@NAME@ Version @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ (@DAY@-@MONTH@-@YEAR@)";
-$@PREFIX@_RCSIdentID = "\$Id: shtool,v 1.1 1999/11/07 23:45:50 barbier Exp $/";
+$@PREFIX@_RCSIdentID = "\$Id: @NAME@ @VERSION@.@REVISION@@BPTYPE@@BPLEVEL@ @DAY@-@MONTH@-@YEAR@ $/";
 $@PREFIX@_WebID      = "@NAME@/@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 $@PREFIX@_PlainID    = "@VERSION@.@REVISION@@BPTYPE@@BPLEVEL@";
 

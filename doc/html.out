@@ -21,6 +21,7 @@
 <define-tag right-angle>&gt;</define-tag>
 <define-tag true><tt>true</tt></define-tag>
 <define-tag option><tt>-%attributes</tt></define-tag>
+<define-tag file><tt>%attributes</tt></define-tag>
 
 ;;;
 ;;;    Alias for writing URLs
@@ -121,7 +122,7 @@
     <tr><th bgcolor="#ccccff">Source</th></tr>
     <tr><td bgcolor="#ccff99"><pre><get-var-once verb-body></pre></td></tr>
     <tr><th bgcolor="#ccccff">Output</th></tr>
-    <tr><td bgcolor="#ff99cc"><pre><get-var body></pre></td></tr>
+    <tr><td bgcolor="#ff99cc"><pre><get-var-once body></pre></td></tr>
 </table>
 </define-tag>
 

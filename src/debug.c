@@ -41,6 +41,10 @@
 /* File for debugging output.  */
 FILE *debug = NULL;
 
+/* Quotes used in debugging output.  */
+char *debug_lquote = NULL;
+char *debug_rquote = NULL;
+
 /* Obstack for trace messages.  */
 static struct obstack trace;
 
@@ -177,9 +181,9 @@ debug_flush_files (void)
 }
 
 /*-------------------------------------------------------------------------.
-| Change the debug output to file NAME.  If NAME is NULL, debug output is  |
-| reverted to stderr, and if empty debug output is discarded.  Return TRUE |
-| iff the output stream was changed.                                       |
+| Change the debug output to file NAME.  If NAME is "-", debug output is   |
+| sent to stdout, and if it is NULL, debug output is reverted to stderr.   |
+| Return TRUE iff the output stream was changed.                          |
 `-------------------------------------------------------------------------*/
 
 boolean
@@ -187,10 +191,11 @@ debug_set_output (const char *name)
 {
   FILE *fp;
 
+  debug_flush_files ();
   if (name == NULL)
     debug_set_file (stderr);
-  else if (*name == '\0')
-    debug_set_file (NULL);
+  else if (*name == '-' && *(name+1) == '\0')
+    debug_set_file (stdout);
   else
     {
       fp = fopen (name, "a");
@@ -354,7 +359,7 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
   const builtin *bp;
 
   trace_header (id);
-  trace_format ("<%s", name);
+  trace_format ("%s%s", debug_lquote, name);
 
   if (argc > 1 && (debug_level & DEBUG_TRACE_ARGS))
     {
@@ -390,11 +395,11 @@ INTERNAL ERROR: Bad token data type (trace_pre ())")));
 
         }
     }
-  trace_format (">");
+  trace_format (debug_rquote);
 
   if (debug_level & DEBUG_TRACE_CALL)
     {
-      trace_format (" -> ???");
+      trace_format (" -%s ???", debug_rquote);
       trace_flush ();
     }
 }
@@ -415,6 +420,6 @@ trace_post (const char *name, int id, int argc, token_data **argv,
     }
 
   if (expanded && (debug_level & DEBUG_TRACE_EXPANSION))
-    trace_format (" -> %S", expanded);
+    trace_format (" -%s %S", debug_rquote, expanded);
   trace_flush ();
 }

@@ -785,6 +785,9 @@ input_init (void)
   /* This routine tells whether we want extended regexp or not. */
   set_regexp_extended (TRUE);
   
+  /* Default quotes in debugging output.  */
+	debug_lquote = xstrdup ("<");
+	debug_rquote = xstrdup (">");
 }
 
 

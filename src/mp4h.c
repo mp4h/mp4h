@@ -181,7 +181,7 @@ Frozen state files:\n\
       fputs (_("\
 \n\
 Debugging:\n\
-  -d, --debug=[FLAGS]          set debug level (no FLAGS implies `aeq')\n\
+  -d, --debug=[FLAGS]          set debug level (no FLAGS implies `ae')\n\
   -t, --trace=NAME             trace NAME when it will be defined\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
   -o, --error-output=FILE      redirect debug and trace output\n"),
@@ -257,7 +257,7 @@ main (int argc, char *const *argv, char *const *envp)
   program_name = argv[0];
   error_print_progname = print_program_name;
 
-  setlocale (LC_ALL, "");
+  /* setlocale (LC_ALL, ""); */
   setlocale (LC_NUMERIC, "C");
 
   debug_init ();

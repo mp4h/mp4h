@@ -8,6 +8,11 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 0.5.7 and SNAP:
+
+    *) Fix debugging (08-Feb-2000):
+       [Denis Barbier]
+
   Changes between 0.5.6 and 0.5.7:
 
     *) Fix inclusion of files (07-Feb-2000):

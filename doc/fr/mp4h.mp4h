@@ -3,6 +3,7 @@
 ;;;  Copyright 2000, Denis Barbier   <barbier@imacs.polytechnique.fr>
 ;;;
 
+<timer>
 <set-var package=mp4h>
 <set-var version=0.5.6>
 <set-var title="MP4H - Un macro processeur pour HTML">
@@ -1322,6 +1323,16 @@ affiche les exemples à été définie ainsi:
 Cette commande prend le même argument que l'option <option d>.
 </para>
 
+<tag:description debugfile>
+<var fichier>
+</tag:description>
+
+<para>
+Indique dans quel fichier les instructions de déboguage doivent être
+écrites. Si le nom de fichier est <file ->, ces instructions sont
+écrites dans le texte.
+</para>
+
 <tag:description debugging-on>
 <var nom>
 [<var nom>] ...
@@ -1343,44 +1354,79 @@ la fonction.
 Fonction inverse de la précédente.
 </para>
 
-<undef test>
-<example>
-<define-tag test whitespace=delete>
-<set-var i=1>
-<set-var j=<multiply 4 <get-var i>>>
-<get-var j>
-</define-tag>
-<test>
-<debugging-on test>
-<test>
-<debugging-off test>
-<test>
-</example>
-
 ;;;
 ;;;    Misc
 ;;;
 
-<subsection "Miscellaneous">
+<subsection "Divers">
 
 <tag:description __file__>
 </tag:description>
 
+<para>
+Fonction qui retourne le nom du fichier en train d'être traité.
+</para>
+
 <tag:description __line__>
 </tag:description>
+<para>
+Fonction qui retourne le numéro de la ligne dans le fichier en train
+d'être traité.
+</para>
+
+<example>
+Ceci est le fichier <__file__>, ligne <__line__>.
+</example>
+
+<para>
+En fait, si vous regardez le fichier source, vous vous apercevrez que le
+numéro de la ligne n'est pas correct.
+d'être traité.
+</para>
 
 <tag:description version>
 </tag:description>
+
+<para>
+Affiche le numéro de version de <mp4h>.
+</para>
 
 <tag:description date>
 [epoch]
 </tag:description>
 
+<para>
+Affiche l'heure locale correspondant au temps epoch donné en argument.
+Lorsqu'il n'y a pas d'argument, l'heure actuelle est affichée.
+</para>
+
+<example>
+<date>
+<set-var info=<get-file-properties <__file__>>>
+<date <get-var info[2]>>
+</example>
+
 <tag:description timer>
 </tag:description>
 
+<para>
+Affiche le temps écoulé depuis le précédent appel à cette fonction.
+Le temps affiché est le nombre de cycles d'horloge, et est donc
+dépendant de la vitesse du processeur.
+</para>
+
+<example>
+Depuis le début de la compilation de ce document, le temps suivant s'est
+écoulé:
+<timer>
+</example>
+
 <tag:description comment complex>
 </tag:description>
+
+<para>
+Le contenu de cette balise est supprimé.
+</para>
 
 <section "Problèmes connus">
 
