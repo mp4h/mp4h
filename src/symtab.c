@@ -176,9 +176,6 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
       if (cmp == 0 && sym != NULL)
         break;
-      /* Fall through.  */
-
-    case SYMBOL_PUSHDEF:
 
       /* Insert a name in the symbol table.  If there is already a symbol
          with the name, insert this in front of it, and mark the old
@@ -187,14 +184,10 @@ lookup_symbol (const char *name, symbol_lookup mode)
       sym = (symbol *) xmalloc (sizeof (symbol));
       initialize_builtin (sym);
       SYMBOL_NAME (sym) = xstrdup (lcname);
+
       SYMBOL_NEXT (sym) = *spp;
       (*spp) = sym;
 
-      if (mode == SYMBOL_PUSHDEF && cmp == 0)
-        {
-          SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = TRUE;
-          SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_NEXT (sym));
-        }
       break;
 
     case SYMBOL_DELETE:
@@ -205,7 +198,6 @@ lookup_symbol (const char *name, symbol_lookup mode)
         sym = NULL;
       if (sym == NULL)
         break;
-
       do
         {
           *spp = SYMBOL_NEXT (sym);
@@ -224,7 +216,6 @@ lookup_symbol (const char *name, symbol_lookup mode)
         sym = NULL;
       if (sym == NULL)
         break;
-
       if (SYMBOL_NEXT (sym) != NULL && cmp == 0)
         SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = FALSE;
       *spp = SYMBOL_NEXT (sym);
@@ -237,13 +228,12 @@ lookup_symbol (const char *name, symbol_lookup mode)
         _("INTERNAL ERROR: Illegal mode to symbol_lookup ()")));
       abort ();
     }
-
   xfree (lcname);
   return sym;
 }
 
 /*----------------------------------------------------------------------.
-| The variables are stored in the same tables than symbols, but a '>'   |
+| The variables are stored in the same tables than symbols, but a '<'   |
 | is prepended to prevent conflicts between variables and symbols.      |
 `----------------------------------------------------------------------*/
 
@@ -254,7 +244,7 @@ lookup_variable (const char *name, symbol_lookup mode)
   symbol *var;
 
   internal_name = xmalloc (strlen (name) + 2);
-  *internal_name = '>';
+  *internal_name = '<';
   strcpy (internal_name+1, name);
   if (strncmp (internal_name+strlen (name)-1, "[]", 2) == 0)
       *(internal_name+strlen (name)-1) = '\0';
