@@ -50,6 +50,9 @@
 /* Pointer to symbol table.  */
 symbol **sym_tab;
 
+/* Pointer to entity table.  */
+symbol **entity_tab;
+
 /* Pointer to variable table.  */
 symbol **var_tab;
 
@@ -72,9 +75,11 @@ symtab_init (void)
 {
   var_tab = (symbol **) xmalloc (hash_table_size * sizeof (symbol *));
   file_tab = (symbol **) xmalloc (hash_table_size * sizeof (symbol *));
+  entity_tab = (symbol **) xmalloc (hash_table_size * sizeof (symbol *));
   sym_tab = (symbol **) xmalloc (hash_table_size * sizeof (symbol *));
   hash_table_init (var_tab);
   hash_table_init (file_tab);
+  hash_table_init (entity_tab);
   hash_table_init (sym_tab);
   symtab = sym_tab;
 }
@@ -118,6 +123,7 @@ symtab_deallocate (void)
 {
   hash_table_free (var_tab);
   hash_table_free (file_tab);
+  hash_table_free (entity_tab);
   hash_table_free (sym_tab);
 }
 
@@ -243,6 +249,13 @@ symbol *
 lookup_symbol (const char *name, symbol_lookup mode)
 {
   symtab = sym_tab;
+  return generic_lookup (name, mode);
+}
+
+symbol *
+lookup_entity (const char *name, symbol_lookup mode)
+{
+  symtab = entity_tab;
   return generic_lookup (name, mode);
 }
 

@@ -111,6 +111,7 @@ DECLARE (mp4h_bp_get_hook);
 DECLARE (mp4h_bp_attributes_quote);
 DECLARE (mp4h_bp_attributes_remove);
 DECLARE (mp4h_bp_attributes_extract);
+DECLARE (mp4h_bp_define_entity);
 
   /*  math functions  */
 DECLARE (mp4h_bp_add);
@@ -259,11 +260,12 @@ builtin_tab[] =
   { "provide-tag",      TRUE,     TRUE,   mp4h_bp_provide_tag },
   { "let",              FALSE,    TRUE,   mp4h_bp_let },
   { "undef",            FALSE,    TRUE,   mp4h_bp_undef },
-  { "set-hook",          TRUE,    TRUE,   mp4h_bp_set_hook },
+  { "set-hook",         TRUE,     TRUE,   mp4h_bp_set_hook },
   { "get-hook",         FALSE,    TRUE,   mp4h_bp_get_hook },
   { "attributes-quote",    FALSE, TRUE,   mp4h_bp_attributes_quote },
   { "attributes-remove",   FALSE, TRUE,   mp4h_bp_attributes_remove },
   { "attributes-extract",  FALSE, TRUE,   mp4h_bp_attributes_extract },
+  { "define-entity",    TRUE,     TRUE,   mp4h_bp_define_entity },
 
       /*  numerical relational operators  */
   { "gt",               FALSE,    TRUE,   mp4h_bp_gt },
@@ -613,6 +615,35 @@ define_user_macro (const char *name, char *text, symbol_lookup mode,
     SYMBOL_NAME (s), SYMBOL_TEXT (s), SYMBOL_CONTAINER (s));
 #endif
 }
+
+/*--------------------------------------------------------------------------.
+| Define a predefined or user-defined entity, with name NAME, and expansion |
+| TEXT.  MODE destinguishes between the "define" and the "pushdef" case.    |
+| It is also used from main ().                                             |
+`--------------------------------------------------------------------------*/
+
+void
+define_user_entity (const char *name, char *text, symbol_lookup mode)
+{
+  symbol *s;
+
+  s = lookup_entity (name, mode);
+  if (SYMBOL_TYPE (s) == TOKEN_TEXT)
+    {
+      xfree ((voidstar) SYMBOL_HOOK_BEGIN (s));
+      xfree ((voidstar) SYMBOL_HOOK_END (s));
+      xfree ((voidstar) SYMBOL_TEXT (s));
+    }
+  initialize_builtin (s);
+
+  SYMBOL_TYPE (s) = TOKEN_TEXT;
+  SYMBOL_TEXT (s) = xstrdup (text);
+#ifdef DEBUG_INPUT
+  fprintf (stderr, "Define: %s\nText: %s\n",
+    SYMBOL_NAME (s), SYMBOL_TEXT (s));
+#endif
+}
+
 
 /*-----------------------------------------------.
 | Initialise all builtin and predefined macros.  |
@@ -2301,6 +2332,37 @@ mp4h_bp_attributes_extract (MP4H_BUILTIN_ARGS)
         || expansion == READ_ATTR_QUOT))
       obstack_1grow (obs, CHAR_BGROUP);
 }
+
+/*----------------------.
+| Define new entities.  |
+`----------------------*/
+
+static void
+mp4h_bp_define_entity (MP4H_BUILTIN_ARGS)
+{
+  const builtin *bp;
+  symbol *sym;
+
+  if (bad_argc (argv[0], argc, 2, 2))
+    return;
+
+  if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
+    return;
+
+  if (argc == 1)
+    define_user_entity (ARG (1), "", SYMBOL_INSERT);
+  else
+    define_user_entity (ARG (1), ARGBODY, SYMBOL_INSERT);
+
+  /*  Clear hooks  */
+  sym = lookup_entity (ARG (1), SYMBOL_LOOKUP);
+  if (!sym)
+    return;
+
+  xfree ((voidstar) SYMBOL_HOOK_BEGIN (sym));
+  xfree ((voidstar) SYMBOL_HOOK_END (sym));
+}
+
 
 
 /*  Math functions  */

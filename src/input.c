@@ -873,6 +873,8 @@ syntax_init (void)
 
   set_syntax_internal(SYNTAX_ESCAPE, '<');
   set_syntax_internal(SYNTAX_CLOSE,  '>');
+  set_syntax_internal(SYNTAX_ESCAPE, '&');
+  set_syntax_internal(SYNTAX_CLOSE,  ';');
   set_syntax_internal(SYNTAX_ACTIVE, '\\');
   set_syntax_internal(SYNTAX_ACTIVE, '"');
   set_syntax_internal(SYNTAX_GROUP, CHAR_LQUOTE);

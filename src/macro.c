@@ -34,6 +34,7 @@
 #include "mp4h.h"
 
 static void expand_macro __P ((symbol *, read_type));
+static void expand_entity __P ((symbol *, read_type));
 static void expand_unknown_tag __P ((char *, read_type));
 static void expand_token __P ((struct obstack *, read_type, token_type, token_data *));
 
@@ -75,6 +76,8 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
   symbol *sym;
   char *text = TOKEN_DATA_TEXT (td);
 
+  char escape_char, ch;
+
   switch (t)
     {                           /* TOKSW */
     case TOKEN_EOF:
@@ -96,38 +99,71 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
 
     case TOKEN_WORD:
       if (IS_ESCAPE(*text))
-        text++;
-
-      /* macro names must begin with a letter, an underscore or a %.
-         If another character is found, this string is not a
-         macro.   */
-
-      if (IS_ALPHA (*text))
         {
-          sym = lookup_symbol (text, SYMBOL_LOOKUP);
-          if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID)
-            {
-              if (exp_flags & EXP_NO_HTMLTAG)
-                shipout_text (obs, TOKEN_DATA_TEXT (td));
-              else
-                expand_unknown_tag (text, expansion);
-            }
-          else
-            expand_macro (sym, expansion);
-        }
-      else if (*text == '/' && IS_ALPHA (*(text+1)))
-        {
-          sym = lookup_symbol (text+1, SYMBOL_LOOKUP);
-          if (sym != NULL)
-            {
-              MP4HERROR ((warning_status, 0,
-                _("Warning:%s:%d: `<%s>' found without begin tag"),
-                    CURRENT_FILE_LINE, text));
-            }
-          expand_unknown_tag (text, expansion);
-        }
+	  escape_char = *text;
+	  text++;
+	}
       else
-        shipout_text (obs, TOKEN_DATA_TEXT (td));
+        escape_char = '<';
+
+      if (escape_char == '<')
+        {
+	  /* tag reference */
+
+	  /* macro names must begin with a letter, an underscore or a %.
+	     If another character is found, this string is not a
+	     macro.   */
+
+	  if (IS_ALPHA (*text))
+	    {
+	      sym = lookup_symbol (text, SYMBOL_LOOKUP);
+	      if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID)
+		{
+		  if (exp_flags & EXP_NO_HTMLTAG)
+		    shipout_text (obs, TOKEN_DATA_TEXT (td));
+		  else
+		    expand_unknown_tag (text, expansion);
+		}
+	      else
+		expand_macro (sym, expansion);
+	    }
+	  else if (*text == '/' && IS_ALPHA (*(text+1)))
+	    {
+	      sym = lookup_symbol (text+1, SYMBOL_LOOKUP);
+	      if (sym != NULL)
+		{
+		  MP4HERROR ((warning_status, 0,
+		    _("Warning:%s:%d: `<%s>' found without begin tag"),
+			CURRENT_FILE_LINE, text));
+		}
+	      expand_unknown_tag (text, expansion);
+	    }
+	  else
+	    shipout_text (obs, TOKEN_DATA_TEXT (td));
+	}
+      else
+        {
+	  /* entity reference &name; */
+	  /* XXX this code is almost copied below */
+
+	  sym = lookup_entity (text, SYMBOL_LOOKUP);
+	  if (sym == NULL || SYMBOL_TYPE (sym) != TOKEN_TEXT )
+	    shipout_text (obs, TOKEN_DATA_TEXT (td));
+	  else
+	    {
+	      /* this is a known entity, output it (but only if it's
+	         terminated by a semicolon -- the input syntax parser
+		 does'nt require the semicolon */
+	      ch = peek_input ();
+	      if (ch == ';')
+	        {
+		  next_token (td, READ_NORMAL, FALSE); /* get the ; */
+		  expand_entity (sym, expansion);
+		}
+	      else
+		shipout_text (obs, TOKEN_DATA_TEXT (td));
+	    }
+	}
       break;
 
     default:
@@ -347,6 +383,7 @@ collect_body (char *symbol_name, read_type expansion,
   token_data td;
   token_data *tdp;
   char *text;
+  char escape_char, ch;
   symbol *newsym;
 
   while (1)
@@ -383,82 +420,113 @@ collect_body (char *symbol_name, read_type expansion,
 
         case TOKEN_WORD:
           if (IS_ESCAPE(*text))
-            text++;
+	    {
+	      escape_char = *text;
+	      text++;
+	    }
+	  else
+	    escape_char = '<';
 
-          if (*text == '/')
-            {
-              text++;
-              if (strcasecmp (text, symbol_name) == 0)
-                {
-                  /*  gobble closing bracket */
-                  do
-                    {
-                      t = next_token (&td, expansion, FALSE);
-                    }
-                  while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)))
-                    ;
+	  if (escape_char == '&')
+	    {
+	      /* macro seems to be an entity, can we expand it? */
+	      /* XXX this code is almost duplicated from above! */
+	      newsym = lookup_entity (text, SYMBOL_LOOKUP);
+	      if (newsym == NULL || SYMBOL_TYPE (newsym) != TOKEN_TEXT )
+		shipout_text (bodyptr, TOKEN_DATA_TEXT (&td));
+	      else
+		{
+		  /* this is a known entity, output it (but only if it's
+		     terminated by a semicolon -- the input syntax parser
+		     does'nt require the semicolon */
+		  ch = peek_input ();
+		  if (ch == ';')
+		    {
+		      next_token (&td, READ_NORMAL, FALSE); /* get the ; */
+		      expand_entity (newsym, expansion);
+		    }
+		  else
+		    shipout_text (bodyptr, TOKEN_DATA_TEXT (&td));
+		}
+	    }
+	  else
+	    {
+	      /* macro is a regular tag */
+	      if (*text == '/')
+		{
+		  text++;
+		  if (strcasecmp (text, symbol_name) == 0)
+		    {
+		      /*  gobble closing bracket */
+		      do
+			{
+			  t = next_token (&td, expansion, FALSE);
+			}
+		      while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)))
+			;
 
-                  obstack_1grow (bodyptr, '\0');
+		      obstack_1grow (bodyptr, '\0');
 
-                  /* Add body to argptr */
-                  TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-                  TOKEN_DATA_TEXT (&td) = obstack_finish (bodyptr);
-                  tdp = (token_data *) obstack_copy (bodyptr,
-                      (voidstar) &td, sizeof (td));
-                  obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
+		      /* Add body to argptr */
+		      TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
+		      TOKEN_DATA_TEXT (&td) = obstack_finish (bodyptr);
+		      tdp = (token_data *) obstack_copy (bodyptr,
+			  (voidstar) &td, sizeof (td));
+		      obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
 
-                  return;
-                }
-              else
-                {
-                  newsym = lookup_symbol (text, SYMBOL_LOOKUP);
-                  if (newsym)
-                    {
-                      if (!(exp_flags & EXP_NOWARN_NEST))
-                        MP4HERROR ((warning_status, 0,
-                          _("Warning:%s:%d: `</%s>' found when `</%s>' expected"),
-                               CURRENT_FILE_LINE, text, symbol_name));
-                      if (exp_flags & EXP_UNM_BREAK)
-                        {
-                          /*  Premature end of body parsing.  */
-                          obstack_1grow (bodyptr, '\0');
-                          TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-                          TOKEN_DATA_TEXT (&td) = obstack_finish (bodyptr);
-                          tdp = (token_data *) obstack_copy (bodyptr,
-                              (voidstar) &td, sizeof (td));
-                          obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
+		      return;
+		    }
+		  else
+		    {
+		      newsym = lookup_symbol (text, SYMBOL_LOOKUP);
+		      if (newsym)
+			{
+			  if (!(exp_flags & EXP_NOWARN_NEST))
+			    MP4HERROR ((warning_status, 0,
+			      _("Warning:%s:%d: `</%s>' found when `</%s>' expected"),
+				   CURRENT_FILE_LINE, text, symbol_name));
+			  if (exp_flags & EXP_UNM_BREAK)
+			    {
+			      /*  Premature end of body parsing.  */
+			      obstack_1grow (bodyptr, '\0');
+			      TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
+			      TOKEN_DATA_TEXT (&td) = obstack_finish (bodyptr);
+			      tdp = (token_data *) obstack_copy (bodyptr,
+				  (voidstar) &td, sizeof (td));
+			      obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
 
-                          /*  Push read input back on the stack  */
-                          unget_string (text-2);
+			      /*  Push read input back on the stack  */
+			      unget_string (text-2);
 
-                          return;
-                        }
-                    }
-                  obstack_grow (bodyptr, TOKEN_DATA_TEXT (&td),
-                          strlen(TOKEN_DATA_TEXT (&td)) );
-                  /*  gobble closing bracket */
-                  do
-                    {
-                      t = next_token (&td, expansion, FALSE);
-                      obstack_grow (bodyptr, TOKEN_DATA_TEXT (&td),
-                              strlen(TOKEN_DATA_TEXT (&td)) );
-                    }
-                  while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)))
-                    ;
-                }
-            }
-          else
-            {
-              newsym = lookup_symbol (text, SYMBOL_LOOKUP);
-              if (newsym == NULL || SYMBOL_TYPE (newsym) == TOKEN_VOID)
-                {
-                  if (exp_flags & EXP_NO_HTMLTAG)
-                    shipout_text (bodyptr, TOKEN_DATA_TEXT (&td));
-                  else
-                    expand_unknown_tag (text, expansion);
-                }
-              else
-                expand_macro (newsym, expansion);
+			      return;
+			    }
+			}
+		      obstack_grow (bodyptr, TOKEN_DATA_TEXT (&td),
+			      strlen(TOKEN_DATA_TEXT (&td)) );
+		      /*  gobble closing bracket */
+		      do
+			{
+			  t = next_token (&td, expansion, FALSE);
+			  obstack_grow (bodyptr, TOKEN_DATA_TEXT (&td),
+				  strlen(TOKEN_DATA_TEXT (&td)) );
+			}
+		      while (! IS_CLOSE(*TOKEN_DATA_TEXT (&td)))
+			;
+		    }
+		}
+	      else
+		{
+		  newsym = lookup_symbol (text, SYMBOL_LOOKUP);
+		  if (newsym == NULL || SYMBOL_TYPE (newsym) == TOKEN_VOID)
+		    {
+		      if (exp_flags & EXP_NO_HTMLTAG)
+			shipout_text (bodyptr, TOKEN_DATA_TEXT (&td));
+		      else
+			expand_unknown_tag (text, expansion);
+		    }
+		  else
+		    expand_macro (newsym, expansion);
+		}
             }
           break;
 
@@ -652,6 +720,62 @@ expand_macro (symbol *sym, read_type expansion)
   if (expansion_level == 0)
     clear_tag_attr ();
 }
+
+/*-------------------------------------------------------------------------.
+| The entity expansion is handled by expand_entity ().  Entities are       |
+| treated similarly to macros, they just do not have arguments and the     |
+| symbol text is output directly.					   |
+|                                                                          |
+| Expand_entity () is not recursive.				 	   |
+`-------------------------------------------------------------------------*/
+
+static void
+expand_entity (symbol *sym, read_type expansion)
+{
+  struct obstack *obs_expansion;
+  const char *expanded;
+  boolean traced;
+  int my_call_id;
+
+  expansion_level++;
+  array_current_line[expansion_level] = current_line;
+  if (expansion_level > nesting_limit)
+    MP4HERROR ((EXIT_FAILURE, 0,
+      _("ERROR: Recursion limit of %d exceeded, use -L<N> to change it"),
+           nesting_limit));
+
+  macro_call_id++;
+  my_call_id = macro_call_id;
+
+  traced = (boolean) ((debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym));
+
+  if (traced && (debug_level & DEBUG_TRACE_CALL))
+    trace_prepre (SYMBOL_NAME (sym), my_call_id);
+
+  obs_expansion = push_string_init ();
+  if (expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
+          || expansion == READ_ATTR_QUOT)
+    {
+      if (expansion_level > 1)
+        obstack_1grow (obs_expansion, CHAR_BGROUP);
+      shipout_string (obs_expansion, SYMBOL_TEXT (sym), 0);
+      if (expansion_level > 1)
+        obstack_1grow (obs_expansion, CHAR_EGROUP);
+    }
+  else
+    {
+      obstack_1grow (obs_expansion, '&');
+      shipout_string (obs_expansion, SYMBOL_NAME (sym), 0);
+      obstack_1grow (obs_expansion, ';');
+    }
+  expanded = push_string_finish (expansion);
+
+  if (traced)
+    trace_post (SYMBOL_NAME (sym), my_call_id, 0, NULL, expanded);
+
+  --expansion_level;
+}
+
 
 /*-------------------------------------------------------------------------.
 | This macro reads attributes without expanding macro.  It is useful to    |
