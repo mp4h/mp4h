@@ -502,12 +502,15 @@ define_builtin (const char *name, const builtin *bp, boolean traced)
   symbol *sym;
 
   sym = lookup_symbol (name, SYMBOL_INSERT);
-  initialize_builtin (sym);
+  if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
+    xfree ((voidstar) SYMBOL_TEXT (sym));
   SYMBOL_TYPE (sym)        = TOKEN_FUNC;
   SYMBOL_FUNC (sym)        = bp->func;
   SYMBOL_TRACED (sym)      = traced;
   SYMBOL_CONTAINER (sym)   = bp->container;
   SYMBOL_EXPAND_ARGS (sym) = bp->expand_args;
+  SYMBOL_HOOK_BEGIN (sym)  = NULL;
+  SYMBOL_HOOK_END (sym)    = NULL;
 }
 
 
@@ -3736,11 +3739,10 @@ mp4h_bp_match (MP4H_BUILTIN_ARGS)
 /* Operation on variables: define, undefine, search, insert,...
    Variables are either strings or array of strings.  */
 
-/*----------------------------------------------------------------.
-| The function generic_variable is the generic function used by   |
-| mp4h_bp_set_var, mp4h_bp_set_var, mp4h_bp_get_var and           |
-| mp4h_bp_get_var_once.                                           |
-`----------------------------------------------------------------*/
+/*--------------------------------------------------------------.
+| The function generic_variable_lookup is the generic function  |
+| used by mp4h_bp_get_var and mp4h_bp_get_var_once.             |
+`--------------------------------------------------------------*/
 
 static void
 generic_variable_lookup (MP4H_BUILTIN_ARGS, boolean verbatim)
@@ -3950,9 +3952,9 @@ Warning:%s:%d: wrong index declaration in <%s>"),
         {
           /*  an index has been specified.  */
           if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-            old_value = xstrdup(SYMBOL_TEXT (var));
+            old_value = SYMBOL_TEXT (var);
           else
-            old_value = xstrdup("");
+            old_value = "";
 
           length = strlen (old_value) + strlen (value) + array_index;
           new_value = (char *) xmalloc (length + 1);
@@ -3968,7 +3970,7 @@ Warning:%s:%d: wrong index declaration in <%s>"),
           else
             {
               size = array_size (var);
-              if (size < array_index)
+              if (size <= array_index)
                 {
                   strcat (new_value, old_value);
                   for (j = size; j<=array_index; j++)
@@ -3977,16 +3979,16 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                 }
               else
                 {
-                  cp = array_value (var, array_index, 0) + 1;
+                  cp = array_value (var, array_index, 0);
                   newline = ('\n' == *cp);
-                  strncat (new_value, old_value, cp - 1 - SYMBOL_TEXT (var));
+                  strncat (new_value, old_value, cp - SYMBOL_TEXT (var));
                   strcat (new_value, value);
                   if (newline)
                     {
                       strcat (new_value, "\n");
                       cp++;
                     }
-                  else if (*cp == '\0')
+                  if (*cp == '\0')
                     cp = NULL;
                   else
                     cp = strchr (cp + 1, '\n');
@@ -3995,8 +3997,8 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                 }
             }
 
-          xfree ((voidstar) old_value);
-          xfree ((voidstar) SYMBOL_TEXT (var));
+          if (SYMBOL_TYPE (var) == TOKEN_TEXT)
+            xfree ((voidstar) SYMBOL_TEXT (var));
           SYMBOL_TEXT (var) = new_value;
         }
 
@@ -4284,8 +4286,9 @@ mp4h_bp_defvar (MP4H_BUILTIN_ARGS)
       SYMBOL_TYPE (var) = TOKEN_TEXT;
       SYMBOL_TEXT (var) = xstrdup(ARG (2));
     }
-  else if (*(SYMBOL_TEXT (var)) == '\0')
+  else if (SYMBOL_TYPE (var) == TOKEN_TEXT && *(SYMBOL_TEXT (var)) == '\0')
     {
+      xfree ((voidstar) SYMBOL_TEXT (var));
       SYMBOL_TEXT (var) = xstrdup(ARG (2));
     }
 }
@@ -4306,7 +4309,8 @@ array_size (symbol *var)
   char *cp;
   int result = 0;
 
-  if (var != NULL && SYMBOL_TEXT (var) != NULL && *(SYMBOL_TEXT (var)) != '\0')
+  if (var != NULL && SYMBOL_TYPE (var) == TOKEN_TEXT
+      && SYMBOL_TEXT (var) != NULL && *(SYMBOL_TEXT (var)) != '\0')
     {
       result++;
       for (cp=SYMBOL_TEXT (var); *cp != '\0'; cp++)
