@@ -40,15 +40,12 @@ libltdl/README
 libltdl/acconfig.h
 libltdl/acinclude.m4
 libltdl/aclocal.m4
-libltdl/config-h.in
 libltdl/config.h.in
 libltdl/configure
-libltdl/configure.ac
 libltdl/configure.in
 libltdl/ltdl.c
 libltdl/ltdl.h
 libltdl/stamp-h.in
-ltconfig
 ltmain.sh
 modules/Makefile.in
 modules/example/.libs/test.lai
