@@ -57,6 +57,9 @@ int warning_status = 0;
 /* Artificial limit for expansion_level in macro.c.  */
 int nesting_limit = 250;
 
+/* Flags to control how expansion is performed.  */
+int exp_flags = 6;
+
 /* Name of frozen file to digest after initialization.  */
 const char *frozen_file_to_read = NULL;
 
@@ -132,6 +135,15 @@ Preprocessor features:\n\
              stdout);
       fputs (_("\
 \n\
+Parser features:\n\
+  -X, --expansion=NUMBER       set parser behaviour according to the bits\n\
+                               of NUMBER (default is NUMBER=6), with\n\
+  1  do not parse unknown tags\n\
+  2  unknown tags are assumed being complex\n\
+  4  an unknown tag whose name ends with a star is assumed simple\n"),
+             stdout);
+      fputs (_("\
+\n\
 Limits control:\n\
   -H, --hashsize=PRIME         set symbol lookup hash table size\n\
   -L, --nesting-limit=NUMBER   change artificial nesting limit\n"),
@@ -203,7 +215,7 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
-#define OPTSTRING "D:EF:H:I:L:QR:U:d:hl:o:st:V"
+#define OPTSTRING "D:EF:H:I:L:QR:U:X:d:hl:o:st:V"
 
 int
 main (int argc, char *const *argv)
@@ -292,6 +304,15 @@ main (int argc, char *const *argv)
           {
             error (0, 0, _("Bad debug flags: `%s'"), optarg);
             debug_level = 0;
+          }
+        break;
+
+      case 'X':
+        exp_flags = atoi (optarg);
+        if (exp_flags < 0)
+          {
+            error (0, 0, _("Bad expansion flags: `%s'"), optarg);
+            exp_flags = 6;
           }
         break;
 

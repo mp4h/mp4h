@@ -136,6 +136,8 @@ char *mktemp ();
 #define _(Text) (Text)
 #endif
 
+#define LAST_CHAR(Text) *(Text + strlen (Text) - 1)
+
 
 /* Various declarations.  */
 
@@ -336,6 +338,15 @@ struct token_data
            modification, main difference with READ_ATTR_VERB is that quotes
            and backslashes are not removed and are part of this attribute  */
 #define READ_BODY      (1 << 5)  /* when reading body function */
+
+/* Flags which determine how expansion is done  */
+#define EXP_NO_HTMLTAG  (1 << 0)  /* do not parse unknown tags */
+#define EXP_COMPLEX     (1 << 1)  /* HTML tags are assumed being complex */
+#define EXP_INV_COMPLEX (1 << 2)  /* HTML tags whose last char is an asterisk
+                                     are complex HTML tags which are parsed
+                                     like single ones  */
+
+extern int exp_flags;
 
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;

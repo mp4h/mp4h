@@ -1326,7 +1326,7 @@ mp4h_date (MP4H_BUILTIN_ARGS)
   ascii_time = (char *) asctime (timeptr);
   
   /*  Remove newline.  */
-  *(ascii_time+strlen (ascii_time) -1) = '\0';
+  LAST_CHAR (ascii_time) = '\0';
   obstack_grow (obs, ascii_time, strlen (ascii_time));
 }
 
@@ -2351,7 +2351,7 @@ mp4h_set_quotes (MP4H_BUILTIN_ARGS)
     }
   else if (argc == 3)
     {
-      if (*ARG (1) != '<' || *(ARG (2) + strlen (ARG (2)) - 1) != '>')
+      if (*ARG (1) != '<' || LAST_CHAR (ARG (2)) != '>')
         {
           MP4HERROR ((warning_status, 0,
             _("Warning:%s:%d: `<%s>' ignored, invalid arguments %s %s"),
@@ -2660,8 +2660,7 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
     regexp++;
 
   regexp_len = strlen (regexp);
-  if (*(regexp+regexp_len-1) == CHAR_EGROUP
-     || *(regexp+regexp_len-1) == CHAR_RQUOTE)
+  if (LAST_CHAR (regexp) == CHAR_EGROUP || LAST_CHAR (regexp) == CHAR_RQUOTE)
     regexp_len--;
 
   buf.buffer = NULL;
@@ -2763,8 +2762,7 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
     regexp++;
 
   regexp_len = strlen (regexp);
-  if (*(regexp+regexp_len-1) == CHAR_EGROUP
-     || *(regexp+regexp_len-1) == CHAR_RQUOTE)
+  if (LAST_CHAR (regexp) == CHAR_EGROUP || LAST_CHAR (regexp) == CHAR_RQUOTE)
     regexp_len--;
 
   buf.buffer = NULL;
@@ -3154,10 +3152,10 @@ generic_variable (MP4H_BUILTIN_ARGS, symbol_lookup mode, boolean verbatim)
               }
             
             /*  Remove special quote characters. */
-            if ((*value == CHAR_LQUOTE && *(value+strlen(value)-1) == CHAR_RQUOTE)
-             || (*value == CHAR_QUOTE  && *(value+strlen(value)-1) == CHAR_QUOTE))
+            if ((*value == CHAR_LQUOTE && LAST_CHAR (value) == CHAR_RQUOTE)
+             || (*value == CHAR_QUOTE  && LAST_CHAR (value) == CHAR_QUOTE))
               {
-                *(value+strlen(value)-1) = '\0';
+                LAST_CHAR (value) = '\0';
                 value++;
               }
 

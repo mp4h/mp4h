@@ -106,7 +106,13 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
         {
           sym = lookup_symbol (text, SYMBOL_LOOKUP);
           if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID)
-            expand_unknown_tag (text, expansion);
+            {
+              if (exp_flags & EXP_NO_HTMLTAG)
+                shipout_text (obs, TOKEN_DATA_TEXT (td),
+                        strlen (TOKEN_DATA_TEXT (td)));
+              else
+                expand_unknown_tag (text, expansion);
+            }
           else
             expand_macro (sym, expansion);
         }
@@ -230,7 +236,7 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
           abort ();
         }
 
-      *last_char_ptr = *(TOKEN_DATA_TEXT (&td) + strlen (TOKEN_DATA_TEXT (&td)) - 1);
+      *last_char_ptr = LAST_CHAR (TOKEN_DATA_TEXT (&td));
       t = next_token (&td, expansion);
     }
 }
@@ -303,7 +309,7 @@ collect_arguments (char *symbol_name, read_type expansion,
 | necessary to deal with nested expressions.                       |
 `-----------------------------------------------------------------*/
 static void
-collect_body (symbol *sym, struct obstack *argptr, struct obstack *bodyptr)
+collect_body (char *symbol_name, struct obstack *argptr, struct obstack *bodyptr)
 {
   token_type t;
   token_data td;
@@ -321,7 +327,7 @@ collect_body (symbol *sym, struct obstack *argptr, struct obstack *bodyptr)
         case TOKEN_MACDEF:
           MP4HERROR ((EXIT_FAILURE, 0,
             _("ERROR:%s:%d: EOF when reading body of the `%s' tag"),
-                 CURRENT_FILE_LINE, SYMBOL_NAME(sym)));
+                 CURRENT_FILE_LINE, symbol_name));
           break;
 
         case TOKEN_BGROUP:
@@ -346,7 +352,7 @@ collect_body (symbol *sym, struct obstack *argptr, struct obstack *bodyptr)
           if (*text == '/')
             {
               text++;
-              if (strcasecmp (text, SYMBOL_NAME(sym)) == 0)
+              if (strcasecmp (text, symbol_name) == 0)
                 {
                   /*  gobble closing bracket */
                   do
@@ -386,7 +392,13 @@ collect_body (symbol *sym, struct obstack *argptr, struct obstack *bodyptr)
             {
               newsym = lookup_symbol (text, SYMBOL_LOOKUP);
               if (newsym == NULL || SYMBOL_TYPE (newsym) == TOKEN_VOID)
-                expand_unknown_tag (text, READ_ATTR_ASIS);
+                {
+                  if (exp_flags & EXP_NO_HTMLTAG)
+                    shipout_text (bodyptr, TOKEN_DATA_TEXT (&td),
+                            strlen (TOKEN_DATA_TEXT (&td)));
+                  else
+                    expand_unknown_tag (text, READ_ATTR_ASIS);
+                }
               else
                 expand_macro (newsym, READ_ATTR_ASIS);
             }
@@ -493,7 +505,7 @@ expand_macro (symbol *sym, read_type expansion)
 
   if (SYMBOL_CONTAINER (sym))
     {
-      collect_body (sym, &argptr, &body);
+      collect_body (SYMBOL_NAME (sym), &argptr, &body);
       argv = (token_data **) obstack_finish (&argptr);
     }
   else
@@ -504,8 +516,8 @@ expand_macro (symbol *sym, read_type expansion)
           cp = TOKEN_DATA_TEXT (argv[argc-1]);
           if (*cp == '/' && *(cp+1) == '\0')
             argc--;
-          else if (*(cp + strlen (cp) - 1) == '/')
-            *(cp + strlen (cp) - 1) = '\0';
+          else if (LAST_CHAR (cp) == '/')
+            LAST_CHAR (cp) = '\0';
         }
     }
 
@@ -581,26 +593,35 @@ expand_macro (symbol *sym, read_type expansion)
 static void
 expand_unknown_tag (char *name, read_type expansion)
 {
-  struct obstack arguments, argptr;
+  struct obstack arguments, argptr, body;
   token_data **argv;
   int argc, i;
   struct obstack *obs_expansion;
   const char *expanded;
   char *symbol_name;
   read_type attr_expansion;
+  boolean slash;
 
   symbol_name = xstrdup (name);
 
   obstack_init (&arguments);
   obstack_init (&argptr);
+  obstack_init (&body);
 
   if (expansion == READ_NORMAL || expansion == READ_ATTRIBUTE)
     attr_expansion = READ_ATTR_QUOT;
   else
     attr_expansion = READ_ATTR_ASIS;
 
-  (void) collect_arguments (symbol_name, attr_expansion, &argptr, &arguments);
-  argc = obstack_object_size (&argptr) / sizeof (token_data *);
+  slash = collect_arguments (symbol_name, attr_expansion, &argptr, &arguments);
+  argc  = obstack_object_size (&argptr) / sizeof (token_data *);
+
+  if ((!slash) && (exp_flags & EXP_INV_COMPLEX))
+    slash = (LAST_CHAR (symbol_name) == '*');
+
+  if ((!slash) && (exp_flags & EXP_COMPLEX))
+    collect_body (symbol_name, &argptr, &body);
+
   argv = (token_data **) obstack_finish (&argptr);
 
   obs_expansion = push_string_init ();
@@ -613,12 +634,20 @@ expand_unknown_tag (char *name, read_type expansion)
       shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[i]), 0);
     }
   obstack_1grow (obs_expansion, '>');
+  if ((!slash) && (exp_flags & EXP_COMPLEX))
+    {
+      shipout_string (obs_expansion, TOKEN_DATA_TEXT (argv[argc]), 0);
+      obstack_grow (obs_expansion, "</", 2);
+      shipout_string (obs_expansion, symbol_name, 0);
+      obstack_1grow (obs_expansion, '>');
+    }
 
   /*  Input must not be rescanned, so expansion is set to READ_ATTR_ASIS.  */
   expanded = push_string_finish (READ_ATTR_ASIS);
 
   obstack_free (&arguments, NULL);
   obstack_free (&argptr, NULL);
+  obstack_free (&body, NULL);
 
   xfree (symbol_name);
 }
