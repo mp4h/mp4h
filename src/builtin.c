@@ -3839,16 +3839,11 @@ Warning:%s:%d: wrong index declaration in <%s>"),
               {
                 /*  an index has been specified.  */
                 if (SYMBOL_TYPE (var) == TOKEN_TEXT)
-                  {
-                    old_value = xstrdup (SYMBOL_TEXT (var));
-                    length = strlen (old_value) + strlen (value) + array_index;
-                    xfree ((voidstar) SYMBOL_TEXT (var));
-                  }
+                  old_value = SYMBOL_TEXT (var);
                 else
-                  {
-                    old_value = xstrdup ("");
-                    length = strlen (value) + array_index;       
-                  }
+                  old_value = xstrdup ("");
+
+                length = strlen (old_value) + strlen (value) + array_index;
                 SYMBOL_TEXT (var) = (char *) xmalloc (length + 1);
                 *(SYMBOL_TEXT (var)) = '\0';
 
@@ -3887,6 +3882,8 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                             strcat (SYMBOL_TEXT (var), "\n");
                             cp++;
                           }
+                        else if (*cp == '\0')
+                          cp = NULL;
                         else
                           cp = strchr (cp + 1, '\n');
                         if (cp)

@@ -10,7 +10,7 @@
 
   Changes between 1.2.1 and ???:
 
-    *) Fix arrays (05-Oct-2001):
+    *) Fix arrays (15-Oct-2001):
        Insertion of values inside arrays did fail under some
        circumstance.
        [Ghislaine Labouret <Ghislaine.Labouret@hsc.fr>]
