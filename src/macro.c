@@ -590,7 +590,6 @@ expand_unknown_tag (char *name, read_type expansion)
   read_type attr_expansion;
 
   symbol_name = xstrdup (name);
-  expansion_level++;
 
   obstack_init (&arguments);
   obstack_init (&argptr);
@@ -622,5 +621,4 @@ expand_unknown_tag (char *name, read_type expansion)
   obstack_free (&argptr, NULL);
 
   xfree (symbol_name);
-  expansion_level--;
 }
