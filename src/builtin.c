@@ -2727,38 +2727,22 @@ static void
 mp4h_and (MP4H_BUILTIN_ARGS)
 {
   int i;
-  char *quote;
+  char *cp;
 
   if (argc == 1)
     return;
 
-  quote = NULL;
-  for (i=argc-1; i>0; i--)
+  for (i=1; i<argc; i++)
     {
-      quote = strchr (ARG (i), CHAR_LQUOTE);
-      remove_special_chars (ARG (i), FALSE);
-      if (*(ARG (i)) != '\0')
+      for (cp=ARG (i); IS_GROUP (*cp); cp++ )
+        ;
+
+      if (*cp == '\0')
         break;
     }
   
-  if (i>0)
-    {
-      if (obs)
-        {
-          if (quote)
-            obstack_1grow (obs, CHAR_LQUOTE);
-          else
-            obstack_1grow (obs, CHAR_BGROUP);
-        }
-      obstack_grow (obs, ARG (i), strlen (ARG (i)));
-      if (obs)
-        {
-          if (quote)
-            obstack_1grow (obs, CHAR_RQUOTE);
-          else
-            obstack_1grow (obs, CHAR_EGROUP);
-        }
-    }
+  if (i == argc)
+    obstack_grow (obs, ARG (argc-1), strlen (ARG (argc-1)));
 }
 
 /*--------------------------------------------.
@@ -2768,29 +2752,16 @@ static void
 mp4h_or (MP4H_BUILTIN_ARGS)
 {
   int i;
-  char *quote;
+  char *cp;
 
   for (i=1; i<argc; i++)
     {
-      quote = strchr (ARG (i), CHAR_LQUOTE);
-      remove_special_chars (ARG (i), FALSE);
-      if (*ARG (i) != '\0')
+      for (cp=ARG (i); IS_GROUP (*cp); cp++ )
+        ;
+
+      if (*cp != '\0')
         {
-          if (obs)
-            {
-              if (quote)
-                obstack_1grow (obs, CHAR_LQUOTE);
-              else
-                obstack_1grow (obs, CHAR_BGROUP);
-            }
           obstack_grow (obs, ARG (i), strlen (ARG (i)));
-          if (obs)
-            {
-              if (quote)
-                obstack_1grow (obs, CHAR_RQUOTE);
-              else
-                obstack_1grow (obs, CHAR_EGROUP);
-            }
           return;
         }
     }
