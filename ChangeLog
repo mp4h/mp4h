@@ -10,6 +10,12 @@
 
   Changes between 1.0.5 and SNAP:
 
+    *) Improve <attributes-extract> and <attributes-remove> (10-Jul-2000):
+       These functions now accept matches against regular expressions,
+       and new examples in documentation explain how to define a macro
+       which may pass its attributes to HTML tags.
+       [Denis Barbier]
+
     *) Fix `beginning of line' bug in regular expressions (09-Jul-2000):
        The `^' special character was not interpreted.
        [Denis Barbier]

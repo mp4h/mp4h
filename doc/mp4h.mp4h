@@ -5,7 +5,7 @@
 
 <mp4h-l10n LC_ALL=C />
 <set-var package=mp4h />
-<set-var version=1.0.5 />
+<set-var version=1.0a601 />
 <set-var title="mp4h - A Macro Processor for HTML Documents" />
 
 <include <get-var format />.out
@@ -442,6 +442,90 @@ The two previous functions are special, because unlike all other macros,
 their expansion do not form a group.  This is necessary to parse the
 resulting list of attributes.
 </note>
+
+<para>
+In those two functions, names of attributes may be regular expressions.
+Main goal of these primitives is to help writing macros accepting any
+kind of attributes without having to declare them. A canonical example
+is
+<example>
+<define-tag href whitespace=delete>
+<preserve url name />
+<set-var <attributes-extract url,name %attributes />/>
+<a <attributes-quote <attributes-remove url,name %attributes />/>
+   href="<get-var url />"><get-var name /></a>
+<restore  url name />
+</define-tag>
+<href class=web url="http://www.foo.com" name="Welcome" />
+</example>
+</para>
+
+<para>
+But we want now to add an image attribute.  So we may write
+<example>
+<define-tag href whitespace=delete>
+<preserve url name image />
+<set-var <attributes-extract url,name,image %attributes />/>
+<a <attributes-quote <attributes-remove url,name,image %attributes />/>
+   href="<get-var url />">
+<if <get-var image />
+   <img <attributes-quote <attributes-remove url,name,image %attributes />/>
+      src="<get-var image />" alt="<get-var name />" border=0 />
+  <get-var name />
+/>
+</a>
+<restore  url name image />
+</define-tag>
+<href class=web url="http://www.foo.com" name="Welcome" image="foo.png"/>
+</example>
+</para>
+
+<para>
+We need a mechanism to tell <mp4h/> that some attributes refer to
+specific HTML tags.  A solution is to prepend attribute with tag name,
+e.g.
+<example>
+<define-tag href whitespace=delete>
+<preserve url name image />
+<set-var <attributes-extract url,name,image %attributes />/>
+<a <attributes-quote <attributes-extract a:.* %attributes />/>
+   href="<get-var url />">
+<if <get-var image />
+   <img <attributes-quote <attributes-extract img:.* %attributes />/>
+      src="<get-var image />" alt="<get-var name />" />
+  <get-var name />
+/>
+</a>
+<restore  url name image />
+</define-tag>
+<href a:class=web img:id=logo img:border=1
+      url="http://www.foo.com" name="Welcome" image="foo.png" />
+</example>
+This example shows that regular expressions may be used within
+attributes names, but it is still incomplete, because we want to remove
+prefix from attributes.  One solution is with <command subst-in-string />,
+but there is a more elegant one:
+<example>
+<define-tag href whitespace=delete>
+<preserve url name image />
+<set-var <attributes-extract url,name,image %attributes />/>
+<a <attributes-quote <attributes-extract :a:(.*) %attributes />/>
+   href="<get-var url />">
+<if <get-var image />
+   <img <attributes-quote <attributes-extract :img:(.*) %attributes />/>
+      src="<get-var image />" alt="<get-var name />" />
+  <get-var name />
+/>
+</a>
+<restore  url name image />
+</define-tag>
+<href :a:class=web :img:id=logo :img:border=1
+      url="http://www.foo.com" name="Welcome" image="foo.png" />
+</example>
+When there are subexpressions within regular expressions, they are
+printed instead of the whole expression.  Note also that i put a colon
+before the prefix in order not to mix them with XML namespaces.
+</para>
 
 ###
 ###    Variable functions

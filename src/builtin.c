@@ -324,7 +324,7 @@ static boolean safe_strtod __P ((const char *, const char *, double *));
 static boolean safe_strtol __P ((const char *, const char *, long int *));
 static const char *predefined_attribute __P ((const char *, int *, token_data **, boolean));
 static void quote_name_value __P ((struct obstack *, char *));
-static void matching_attributes __P ((struct obstack *, int, token_data **, char *));
+static void matching_attributes __P ((struct obstack *, int, token_data **, boolean, char *));
 static void set_trace __P ((symbol *, const char *));
 static void generic_set_hook __P ((MP4H_BUILTIN_PROTO, boolean, int));
 static void math_relation __P ((MP4H_BUILTIN_PROTO, mathrel_type));
@@ -620,6 +620,28 @@ set_regexp_extended (boolean extended)
     regex_flags = REG_EXTENDED;
   else
     regex_flags = 0;
+}
+
+static boolean
+xregcomp (regex_t *preg, const char *pattern, int cflags)
+{
+  int rc, lenbuf;
+  char *errbuf;
+
+  rc = regcomp (preg, pattern, cflags);
+  if (rc != 0)
+    {
+      lenbuf = regerror (rc, preg, NULL, 0);
+      errbuf = (char *) xmalloc (lenbuf+1);
+      regerror (rc, preg, errbuf, lenbuf);
+      MP4HERROR ((warning_status, 0,
+        _("Warning:%s:%d: Bad regular expression `%s': %s"),
+             CURRENT_FILE_LINE, pattern, errbuf));
+      regfree (preg);
+      xfree (errbuf);
+      return FALSE;
+    }
+  return TRUE;
 }
 
 /*------------------------------------------------------------------------.
@@ -933,65 +955,105 @@ quote_name_value (struct obstack *obs, char *pair)
             special_chars);
 }
 
-/*---------------------------------------------------------.
-| Extract from ARGV the attributes whose names are listed  |
-| in ARG (1).                                              |
-`---------------------------------------------------------*/
+/*---------------------------------------------------------------.
+| Extract from ARGV attributes from a list of attributes names.  |
+| When MATCH is true, matching attributes are printed, otherwise |
+| non matching attributes are printed.                           |
+| First argument is a comma-separated list of attributes names,  |
+| which may contain regular expressions.                         |
+`---------------------------------------------------------------*/
 
 static void
-matching_attributes (struct obstack *obs, int argc, token_data **argv, char *list)
+matching_attributes (struct obstack *obs, int argc, token_data **argv,
+        boolean match, char *list)
 {
-  char *cp, *next, *sp;
-  int i, special_chars;
+  register char *cp;
+  char *name;
+  int i, j, special_chars, rc, max_subexps;
+  regex_t re;
+  regmatch_t *match_ptr = NULL;
   boolean first = TRUE;
 
-  for (cp=list; cp != NULL; )
+  /*  Replace comma-separated list by a regular expression  */
+  for (cp=list; *cp != '\0'; cp++)
     {
-      next = strchr (cp, ',');
-      if (next)
-        {
-          *next = '\0';
-          next++;
-        }
-      for (i=1; i<argc; i++)
-        {
-          special_chars = 0;
-          sp = ARG (i);
-          while (IS_GROUP (*sp))
-            {
-              sp++;
-              special_chars++;
-            }
-
-          sp = strchr (ARG (i)+special_chars, '=');
-          if (sp == NULL)
-            {
-              if (strcasecmp (ARG (i)+special_chars, cp) == 0)
-                {
-                  if (!first)
-                    obstack_1grow (obs, ' ');
-                  first = FALSE;
-                  obstack_1grow (obs, CHAR_BGROUP);
-                  obstack_grow (obs, ARG (i), strlen (ARG (i)));
-                  obstack_1grow (obs, CHAR_EGROUP);
-                }
-            }
-          else
-            {
-              if (strncasecmp (ARG (i)+special_chars, cp, strlen (cp)) == 0
-                  && !IS_ALNUM(*(ARG (i)+special_chars + strlen (cp))))
-                {
-                  if (!first)
-                    obstack_1grow (obs, ' ');
-                  first = FALSE;
-                  obstack_1grow (obs, CHAR_BGROUP);
-                  obstack_grow (obs, ARG (i), strlen (ARG (i)));
-                  obstack_1grow (obs, CHAR_EGROUP);
-                }
-            }
-        }
-      cp = next;
+      if (*cp == ',')
+        *cp = '|';
     }
+  name = (char *) xmalloc (strlen (list) + 3);
+  sprintf (name, "^%s$", list);
+
+  /*  Compile this expression once  */
+  if (!xregcomp (&re, name, regex_flags | REG_ICASE))
+    {
+      regfree (&re);
+      xfree (name);
+      return;
+    }
+  xfree (name);
+
+  for (i=1; i<argc; i++)
+    {
+      special_chars = 0;
+      cp = ARG (i);
+      while (IS_GROUP (*cp))
+        {
+          cp++;
+          special_chars++;
+        }
+
+      cp = strchr (ARG (i)+special_chars, '=');
+      if (cp)
+        *cp  = '\0';
+
+      /*  Ensure that all subexpressions are stored  */
+      max_subexps = -7;
+      do
+        {
+          max_subexps += 10;
+          match_ptr = (regmatch_t *)
+             xrealloc (match_ptr, sizeof (regmatch_t) * max_subexps);
+          rc = regexec (&re, ARG (i)+special_chars, max_subexps, match_ptr, 0);
+        }
+      while (rc == REG_ESPACE);
+
+      if (rc == 0 && match)
+        {
+          if (!first)
+            obstack_1grow (obs, ' ');
+          first = FALSE;
+          obstack_1grow (obs, CHAR_BGROUP);
+          if (special_chars)
+            obstack_grow (obs, ARG (i), special_chars);
+          for (j=1; j<max_subexps; j++)
+            {
+              if (match_ptr[j].rm_so != -1)
+                {
+                  obstack_grow (obs, ARG (i)+special_chars+match_ptr[j].rm_so,
+                        match_ptr[j].rm_eo - match_ptr[j].rm_so);
+                  break;
+                }
+            }
+          if (j == max_subexps)
+            obstack_grow (obs, ARG (i)+special_chars,
+                       strlen (ARG (i)+special_chars));
+          obstack_1grow (obs, '=');
+          obstack_grow (obs, cp+1, strlen (cp+1));
+          obstack_1grow (obs, CHAR_EGROUP);
+        }
+      else if (rc != 0 && !match)
+        {
+          if (cp)
+            *cp  = '=';
+          if (!first)
+            obstack_1grow (obs, ' ');
+          first = FALSE;
+          obstack_1grow (obs, CHAR_BGROUP);
+          obstack_grow (obs, ARG (i), strlen (ARG (i)));
+          obstack_1grow (obs, CHAR_EGROUP);
+        }
+    }
+  regfree (&re);
 }
 
 
@@ -1441,14 +1503,8 @@ mp4h_directory_contents (MP4H_BUILTIN_ARGS)
 
   if (matching)
     {
-      if (regcomp (&re, matching, regex_flags) != 0)
-        {
-          MP4HERROR ((warning_status, 0,
-            _("Warning:%s:%d: Bad regular expression `%s'"),
-                 CURRENT_FILE_LINE, matching));
-          regfree (&re);
-          return;
-        }
+      if (!xregcomp (&re, matching, regex_flags))
+        return;
     }
 
   while ((entry = readdir (dir)) != (struct dirent *)NULL)
@@ -2219,6 +2275,9 @@ mp4h_attributes_quote (MP4H_BUILTIN_ARGS)
 {
   int i;
 
+  if (argc < 2)
+    return;
+
   for (i = 1; i < argc; i++)
     {
       if (i > 1)
@@ -2231,31 +2290,8 @@ mp4h_attributes_quote (MP4H_BUILTIN_ARGS)
 static void
 mp4h_attributes_remove (MP4H_BUILTIN_ARGS)
 {
-  char *cp, *next, *to_remove;
-  int i;
-
   if (bad_argc (argv[0], argc, 2, 0))
     return;
-
-  to_remove = xstrdup (ARG (1));
-
-  /*  Shift attributes to remove the first one .  */
-  for (i=2; i<argc; i++)
-    argv[i-1]=argv[i];
-  argc--;
-
-  for (cp=to_remove; cp != NULL; )
-    {
-      next = strchr (cp, ',');
-      if (next)
-        {
-          *next = '\0';
-          next++;
-        }
-      predefined_attribute (cp, &argc, argv, FALSE);
-      cp = next;
-    }
-  xfree (to_remove);
 
   /*  Dirty hack to prevent aggregation of attributes into
       a single argument.  When a group is begun in expand_macro (),
@@ -2264,7 +2300,9 @@ mp4h_attributes_remove (MP4H_BUILTIN_ARGS)
         expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
         || expansion == READ_ATTR_QUOT))
       obstack_1grow (obs, CHAR_EGROUP);
-  dump_args (obs, argc, argv, " ");
+
+  matching_attributes (obs, argc-1, argv+1, FALSE, ARG (1));
+
   if (expansion_level > 1 && (
         expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
         || expansion == READ_ATTR_QUOT))
@@ -2285,7 +2323,7 @@ mp4h_attributes_extract (MP4H_BUILTIN_ARGS)
         || expansion == READ_ATTR_QUOT))
       obstack_1grow (obs, CHAR_EGROUP);
 
-  matching_attributes (obs, argc-1, argv+1, ARG (1));
+  matching_attributes (obs, argc-1, argv+1, TRUE, ARG (1));
 
   if (expansion_level > 1 && (
         expansion == READ_NORMAL || expansion == READ_ATTRIBUTE
@@ -3028,14 +3066,8 @@ string_regexp (struct obstack *obs, int argc, token_data **argv,
   regexp = ARG (2);
   remove_special_chars (regexp, FALSE);
 
-  if (regcomp (&re, regexp, regex_flags | extra_re_flags) != 0)
-    {
-      MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Bad regular expression `%s'"),
-             CURRENT_FILE_LINE, regexp));
-      regfree (&re);
-      return;
-    }
+  if (!xregcomp (&re, regexp, regex_flags | extra_re_flags))
+    return;
 
   /* Accept any number of subexpressions */
   do
@@ -3124,15 +3156,8 @@ subst_in_string (struct obstack *obs, int argc, token_data **argv,
   regexp = ARG (2);
   remove_special_chars (regexp, FALSE);
 
-  regex_rc = regcomp (&re, regexp, regex_flags | extra_re_flags);
-  if (regex_rc != 0)
-    {
-      MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Bad regular expression `%s'"),
-             CURRENT_FILE_LINE, regexp));
-      regfree (&re);
-      return;
-    }
+  if (!xregcomp (&re, regexp, regex_flags | extra_re_flags))
+    return;
 
   offset = 0;
   matchpos = 0;
