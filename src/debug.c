@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -121,6 +121,10 @@ debug_decode (const char *opts)
 
             case 'x':
               level |= DEBUG_TRACE_CALLID;
+              break;
+
+            case 'm':
+              level |= DEBUG_TRACE_MODULES;
               break;
 
             case 'V':
@@ -392,17 +396,17 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
               bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv[i]));
               if (bp == NULL)
                 {
-                  MP4HERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())")));
-                  abort ();
+                  MP4HERROR ((warning_status, 0, "\
+INTERNAL ERROR: Builtin not found in builtin table! (trace_pre ())"));
+                  exit (1);
                 }
               trace_format ("%s(prim)", bp->name);
               break;
 
             default:
-              MP4HERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Bad token data type (trace_pre ())")));
-              abort ();
+              MP4HERROR ((warning_status, 0, "\
+INTERNAL ERROR: Bad token data type (trace_pre ())"));
+              exit (1);
             }
 
         }

@@ -1,0 +1,6 @@
+foo bar
+foo baz bar
+foo bar baz
+foo baz bar quux
+baz foo quux bar 
+%s foo baz bar quux

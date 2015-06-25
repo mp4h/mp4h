@@ -1,6 +1,0 @@
-config.log config.cache config.h config.status
-Makefile
-libtool
-stamp-h
-*.lo *.la
-.libs

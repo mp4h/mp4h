@@ -1,4 +1,0 @@
-
-<use name="exec:sh">
-
-<exec type="sh">uname -a</exec>

@@ -2,8 +2,8 @@
 
 #   Run this script when reconfiguring
 
-aclocal
-libtoolize --copy --force --ltdl
+aclocal-1.6
+automake-1.6 -a
 autoheader
 autoconf
 

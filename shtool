@@ -1,13 +1,13 @@
 #!/bin/sh
 ##
 ##  GNU shtool -- The GNU Portable Shell Tool
-##  Copyright (c) 1994-2000 Ralf S. Engelschall <rse@engelschall.com>
+##  Copyright (c) 1994-2002 Ralf S. Engelschall <rse@engelschall.com>
 ##
 ##  See http://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
-##  Version:  1.5.1 (29-Jul-2000)
-##  Contents: 6/17 available modules
+##  Version:  1.6.0 (01-Feb-2002)
+##  Contents: 2/19 available modules
 ##
 
 ##
@@ -26,7 +26,7 @@
 ##  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ##  USA, or contact Ralf S. Engelschall <rse@engelschall.com>.
 ##
-##  Notice: Given that you include this file verbatim into your own
+##  NOTICE: Given that you include this file verbatim into your own
 ##  source tree, you are justified in saying that it remains separate
 ##  from your package, and that this way you are simply just using GNU
 ##  shtool. So, in this situation, there is no requirement that your
@@ -39,10 +39,6 @@
 ##
 ##  Available commands:
 ##    echo       Print string with optional construct expansion
-##    install    Install a program, script or datafile
-##    mkdir      Make one or more directories
-##    fixperm    Fix file permissions inside a source tree
-##    tarball    Roll distribution tarballs
 ##    version    Maintain a version information file
 ##
 ##  Not available commands (because module was not built-in):
@@ -50,8 +46,14 @@
 ##    table      Pretty-print a field-separated list as a table
 ##    prop       Display progress with a running propeller
 ##    move       Move files with simultaneous substitution
+##    install    Install a program, script or datafile
+##    mkdir      Make one or more directories
 ##    mkln       Make link with calculation of relative paths
 ##    mkshadow   Make a shadow tree through symbolic links
+##    fixperm    Fix file permissions inside a source tree
+##    rotate     Logfile rotation
+##    tarball    Roll distribution tarballs
+##    subst      Apply sed(1) substitution operations
 ##    guessos    Simple operating system guesser
 ##    arx        Extended archive command
 ##    slo        Separate linker options by library class
@@ -65,11 +67,11 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
-    echo "This is GNU shtool, version 1.5.1 (29-Jul-2000)"
-    echo "Copyright (c) 1994-2000 Ralf S. Engelschall <rse@engelschall.com>"
+    echo "This is GNU shtool, version 1.6.0 (01-Feb-2002)"
+    echo "Copyright (c) 1994-2002 Ralf S. Engelschall <rse@engelschall.com>"
     echo "Report bugs to <bug-shtool@gnu.org>"
     echo ''
-    echo "Usage: shtool [<options>] [<cmd-name> [<cmd-options>] [<cmd-args>]]" 
+    echo "Usage: shtool [<options>] [<cmd-name> [<cmd-options>] [<cmd-args>]]"
     echo ''
     echo 'Available global <options>:'
     echo '  -v, --version   display shtool version information'
@@ -78,38 +80,62 @@ if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
     echo '  -r, --recreate  recreate this shtool script via shtoolize'
     echo ''
     echo 'Available <cmd-name> [<cmd-options>] [<cmd-args>]:'
-    echo '  echo     [-n] [-e] [<str> ...]'
-    echo '  install  [-v] [-t] [-c] [-C] [-s] [-m<mode>] [-o<owner>] [-g<group>]'
-    echo '           [-e<ext>] <file> [<file> ...] <path>'
-    echo '  mkdir    [-t] [-f] [-p] [-m<mode>] <dir> [<dir> ...]'
-    echo '  fixperm  [-v] [-t] <path> [<path> ...]'
-    echo '  tarball  [-t] [-v] [-o <tarball>] [-c <prog>] [-d <dir>] [-u'
-    echo '           <user>] [-g <group>] [-e <pattern>] <path> [<path> ...]'
-    echo '  version  [-l<lang>] [-n<name>] [-p<prefix>] [-s<version>] [-e]'
-    echo '           [-i<knob>] [-d<type>] <file>'
+    echo '  echo     [-n|--newline] [-e|--expand] [<str> ...]'
+    echo '  version  [-l|--language <lang>] [-n|--name <name>] [-p|--prefix'
+    echo '           <prefix>] [-s|--set <version>] [-e|--edit] [-i|--increase'
+    echo '           <knob>] [-d|--display <type>] <file>'
     echo ''
     echo 'Not available <cmd-name> (because module was not built-in):'
-    echo '  mdate    [-n] [-z] [-s] [-d] [-f<str>] [-o<spec>] <path>'
-    echo '  table    [-F<sep>] [-w<width>] [-c<cols>] [-s<strip>] <str><sep><str>...'
-    echo '  prop     [-p<str>]'
-    echo '  move     [-v] [-t] [-e] [-p] <src-file> <dst-file>'
-    echo '  mkln     [-t] [-f] [-s] <src-path> [<src-path> ...] <dst-path>'
-    echo '  mkshadow [-v] [-t] [-a] <src-dir> <dst-dir>'
+    echo '  mdate    [-n|--newline] [-z|--zero] [-s|--shorten] [-d|--digits]'
+    echo '           [-f|--field-sep <str>] [-o|--order <spec>] <path>'
+    echo '  table    [-F|--field-sep <sep>] [-w|--width <width>] [-c|--columns'
+    echo '           <cols>] [-s|--strip <strip>] <str><sep><str>...'
+    echo '  prop     [-p|--prefix <str>]'
+    echo '  move     [-v|--verbose] [-t|--trace] [-e|--expand] [-p|--preserve]'
+    echo '           <src-file> <dst-file>'
+    echo '  install  [-v|--verbose] [-t|--trace] [-c|--copy] [-C|--compare-copy]'
+    echo '           [-s|--strip] [-m|--mode <mode>] [-o|--owner <owner>]'
+    echo '           [-g|--group <group>] [-e|--exec <sed-cmd>] <file> [<file>'
+    echo '           ...] <path>'
+    echo '  mkdir    [-t|--trace] [-f|--force] [-p|--parents] [-m|--mode'
+    echo '           <mode>] <dir> [<dir> ...]'
+    echo '  mkln     [-t|--trace] [-f|--force] [-s|--symbolic] <src-path>'
+    echo '           [<src-path> ...] <dst-path>'
+    echo '  mkshadow [-v|--verbose] [-t|--trace] [-a|--all] <src-dir> <dst-dir>'
+    echo '  fixperm  [-v|--verbose] [-t|--trace] <path> [<path> ...]'
+    echo '  rotate   [-v|--verbose] [-t|--trace] [-f|--force] [-n|--num-files'
+    echo '           <count>] [-s|--min-size <size>] [-c|--copy] [-r|--remove]'
+    echo '           [-a|--archive-dir <dir>] [-z|--compress [<tool>:]<level>]'
+    echo '           [-b|--background] [-d|--delay] [-p|--pad <len>] [-o|--owner'
+    echo '           <owner>] [-g|--group <group>] [-m|--mode <mode>] [-M|--migrate'
+    echo '           <cmd>] [-P|--prolog <cmd>] [-E|--epilog <cmd>] <file> [...]'
+    echo '  tarball  [-t|--trace] [-v|--verbose] [-o|--output <tarball>]'
+    echo '           [-c|--compress <prog>] [-d|--directory <dir>] [-u|--user'
+    echo '           <user>] [-g|--group <group>] [-e|--exclude <pattern>]'
+    echo '           <path> [<path> ...]'
+    echo '  subst    [-v|--verbose] [-t|--trace] [-n|--nop] [-s|--stealth]'
+    echo '           [-i|--interactive] [-b|--backup <ext>] [-e|--exec <cmd>]'
+    echo '           [-f|--file <cmd-file>] [<file>] [...]'
     echo '  guessos  '
-    echo '  arx      [-t] [-C<cmd>] <op> <archive> [<file> ...]'
-    echo '  slo      [-p<str>] -- -L<dir> -l<lib> [-L<dir> -l<lib> ...]'
-    echo '  scpp     [-v] [-p] [-f<filter>] [-o<ofile>] [-t<tfile>] [-M<mark>]'
-    echo '           [-D<dname>] [-C<cname>] <file> [<file> ...]'
-    echo '  path     [-s] [-r] [-d] [-b] [-m] [-p<path>] <str> [<str> ...]'
+    echo '  arx      [-t|--trace] [-C|--command <cmd>] <op> <archive> [<file>'
+    echo '           ...]'
+    echo '  slo      [-p|--prefix <str>] -- -L<dir> -l<lib> [-L<dir> -l<lib>'
+    echo '           ...]'
+    echo '  scpp     [-v|--verbose] [-p|--preserve] [-f|--filter <filter>]'
+    echo '           [-o|--output <ofile>] [-t|--template <tfile>] [-M|--mark'
+    echo '           <mark>] [-D|--define <dname>] [-C|--class <cname>]'
+    echo '           <file> [<file> ...]'
+    echo '  path     [-s|--suppress] [-r|--reverse] [-d|--dirname] [-b|--basename]'
+    echo '           [-m|--magic] [-p|--path <path>] <str> [<str> ...]'
     echo ''
     exit 0
 fi
 if [ ".$1" = ".-v" -o ".$1" = ."--version" ]; then
-    echo "GNU shtool 1.5.1 (29-Jul-2000)"
+    echo "GNU shtool 1.6.0 (01-Feb-2002)"
     exit 0
 fi
 if [ ".$1" = ".-r" -o ".$1" = ."--recreate" ]; then
-    shtoolize -oshtool echo install mkdir fixperm tarball version
+    shtoolize -oshtool echo version
     exit 0
 fi
 if [ ".$1" = ".-d" -o ".$1" = ."--debug" ]; then
@@ -118,7 +144,7 @@ if [ ".$1" = ".-d" -o ".$1" = ."--debug" ]; then
 fi
 name=`echo "$0" | sed -e 's;.*/\([^/]*\)$;\1;' -e 's;-sh$;;' -e 's;\.sh$;;'`
 case "$name" in
-    echo|install|mkdir|fixperm|tarball|version )
+    echo|version )
         #   implicit tool command selection
         tool="$name"
         ;;
@@ -139,65 +165,19 @@ gen_tmpfile=no
 case $tool in
     echo )
         str_tool="echo"
-        str_usage="[-n] [-e] [<str> ...]"
+        str_usage="[-n|--newline] [-e|--expand] [<str> ...]"
         arg_spec="0+"
         opt_spec="n.e."
+        opt_alias="n:newline,e:expand"
         opt_n=no
         opt_e=no
         ;;
-    install )
-        str_tool="install"
-        str_usage="[-v] [-t] [-c] [-C] [-s] [-m<mode>] [-o<owner>] [-g<group>] [-e<ext>] <file> [<file> ...] <path>"
-        arg_spec="2+"
-        opt_spec="v.t.c.C.s.m:o:g:e:"
-        opt_v=no
-        opt_t=no
-        opt_c=no
-        opt_C=no
-        opt_s=no
-        opt_m=""
-        opt_o=""
-        opt_g=""
-        opt_e=""
-        ;;
-    mkdir )
-        str_tool="mkdir"
-        str_usage="[-t] [-f] [-p] [-m<mode>] <dir> [<dir> ...]"
-        arg_spec="1+"
-        opt_spec="t.f.p.m:"
-        opt_t=no
-        opt_f=no
-        opt_p=no
-        opt_m=""
-        ;;
-    fixperm )
-        str_tool="fixperm"
-        str_usage="[-v] [-t] <path> [<path> ...]"
-        arg_spec="1+"
-        opt_spec="v.t."
-        opt_v=no
-        opt_t=no
-        ;;
-    tarball )
-        str_tool="tarball"
-        str_usage="[-t] [-v] [-o <tarball>] [-c <prog>] [-d <dir>] [-u <user>] [-g <group>] [-e <pattern>] <path> [<path> ...]"
-        gen_tmpfile=yes
-        arg_spec="1+"
-        opt_spec="t.v.o:c:d:u:g:e:"
-        opt_t=no
-        opt_v=no
-        opt_o=""
-        opt_c=""
-        opt_d=""
-        opt_u=""
-        opt_g=""
-        opt_e="CVS,\\.cvsignore,\\.[oa]\$"
-        ;;
     version )
         str_tool="version"
-        str_usage="[-l<lang>] [-n<name>] [-p<prefix>] [-s<version>] [-e] [-i<knob>] [-d<type>] <file>"
+        str_usage="[-l|--language <lang>] [-n|--name <name>] [-p|--prefix <prefix>] [-s|--set <version>] [-e|--edit] [-i|--increase <knob>] [-d|--display <type>] <file>"
         arg_spec="1="
         opt_spec="l:n:p:s:i:e.d:"
+        opt_alias="l:language,n:name,p:prefix,s:set,e:edit,i:increase,d:display"
         opt_l="txt"
         opt_n="unknown"
         opt_p=""
@@ -222,6 +202,11 @@ esac
 ##  COMMON UTILITY CODE
 ##
 
+#   commonly used ASCII values
+ASC_TAB="	"
+ASC_NL="
+"
+
 #   determine name of tool
 if [ ".$tool" != . ]; then
     #   used inside shtool script
@@ -243,6 +228,10 @@ eval `echo $arg_spec |\
 eval `echo h.$opt_spec |\
       sed -e 's/\([a-zA-Z0-9]\)\([.:+]\)/opt_MODE_\1=\2;/g'`
 
+#   parse option alias string
+eval `echo h:help,$opt_alias |\
+      tr 'x-' 'x_' | sed -e 's/\([a-zA-Z0-9]\):\([^,]*\),*/opt_ALIAS_\2=\1;/g'`
+
 #   interate over argument line
 opt_PREV=''
 while [ $# -gt 0 ]; do
@@ -263,6 +252,18 @@ while [ $# -gt 0 ]; do
     else
         #   split argument into option and argument
         case "$1" in
+            --[a-zA-Z0-9]*=*)
+                eval `echo "x$1" |\
+                      sed -e 's/^x--\([a-zA-Z0-9-]*\)=\(.*\)$/opt_OPT="\1";opt_ARG="\2"/'`
+                opt_STR=`echo $opt_OPT | tr 'x-' 'x_'`
+                eval "opt_OPT=\${opt_ALIAS_${opt_STR}-${opt_OPT}}"
+                ;;
+            --[a-zA-Z0-9]*)
+                opt_OPT=`echo "x$1" | cut -c4-`
+                opt_STR=`echo $opt_OPT | tr 'x-' 'x_'`
+                eval "opt_OPT=\${opt_ALIAS_${opt_STR}-${opt_OPT}}"
+                opt_ARG=''
+                ;;
             -[a-zA-Z0-9]*)
                 eval `echo "x$1" |\
                       sed -e 's/^x-\([a-zA-Z0-9]\)/opt_OPT="\1";/' \
@@ -302,17 +303,17 @@ while [ $# -gt 0 ]; do
             ;;
         '+' )
             #   option with argument (multiple occurances append)
-            eval "opt_${opt_OPT}=\"\$opt_${opt_OPT} \$opt_ARG\""
+            eval "opt_${opt_OPT}=\"\$opt_${opt_OPT}\${ASC_NL}\$opt_ARG\""
             ;;
         * )
-            echo "$msgprefix:Error: unknown option: \`-$opt_OPT'" 1>&2
+            echo "$msgprefix:Error: unknown option: \`$opt_OPT'" 1>&2
             echo "$msgprefix:Hint:  run \`$toolcmdhelp -h' or \`man shtool' for details" 1>&2
             exit 1
             ;;
     esac
 done
 if [ ".$opt_PREV" != . ]; then
-    echo "$msgprefix:Error: missing argument to option \`-$opt_PREV'" 1>&2
+    echo "$msgprefix:Error: missing argument to option \`$opt_PREV'" 1>&2
     echo "$msgprefix:Hint:  run \`$toolcmdhelp -h' or \`man shtool' for details" 1>&2
     exit 1
 fi
@@ -353,6 +354,7 @@ if [ ".$gen_tmpfile" = .yes ]; then
     tmpfile="$tmpdir/.shtool.$$"
     rm -f $tmpfile >/dev/null 2>&1
     touch $tmpfile
+    chmod 600 $tmpfile
 fi
 
 ##
@@ -364,7 +366,7 @@ case $tool in
 echo )
     ##
     ##  echo -- Print string with optional construct expansion
-    ##  Copyright (c) 1998-2000 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1998-2002 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for WML as buildinfo
     ##
     
@@ -388,7 +390,7 @@ echo )
     fi
     
     #   determine terminal bold sequence
-    term_bold='' 
+    term_bold=''
     term_norm=''
     if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%[Bb]'`" != . ]; then
         case $TERM in
@@ -439,7 +441,7 @@ echo )
     
     #   determine user name
     username=''
-    if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%[uU]'`" != . ]; then
+    if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%[uUgG]'`" != . ]; then
         username="$LOGNAME"
         if [ ".$username" = . ]; then
             username="$USER"
@@ -481,8 +483,38 @@ echo )
         fi
     fi
     
-    #   determine host name
+    #   determine (primary) group id
+    groupid=''
+    if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%[gG]'`" != . ]; then
+        groupid=`egrep "^${username}:" /etc/passwd 2>/dev/null | \
+                 sed -e 's/[^:]*:[^:]*:[^:]*://' -e 's/:.*$//'`
+        if [ ".$groupid" = . ]; then
+            groupid=`(ypcat passwd) 2>/dev/null | egrep "^${username}:" | \
+                     sed -e 's/[^:]*:[^:]*:[^:]*://' -e 's/:.*$//'`
+            if [ ".$groupid" = . ]; then
+                groupid='?'
+            fi
+        fi
+    fi
+    
+    #   determine (primary) group name
+    groupname=''
+    if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%g'`" != . ]; then
+        groupname=`egrep "^[^:]*:[^:]*:${groupid}:" /etc/group 2>/dev/null | \
+                   sed -e 's/:.*$//'`
+        if [ ".$groupname" = . ]; then
+            groupname=`(ypcat group) 2>/dev/null | \
+                       egrep "^[^:]*:[^:]*:${groupid}:" | \
+                       sed -e 's/:.*$//'`
+            if [ ".$groupname" = . ]; then
+                groupname='?'
+            fi
+        fi
+    fi
+    
+    #   determine host and domain name
     hostname=''
+    domainname=''
     if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%h'`" != . ]; then
         hostname="`(uname -n) 2>/dev/null |\
                    awk '{ printf("%s", $1); }'`"
@@ -500,9 +532,6 @@ echo )
                 ;;
         esac
     fi
-    
-    #   determine domain name
-    domainname=''
     if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%d'`" != . ]; then
         if [ ".$domainname" = . ]; then
             if [ -f /etc/resolv.conf ]; then
@@ -562,6 +591,8 @@ echo )
                   -e "s/%b/${term_norm}/g" \
                   -e "s/%u/${username}/g" \
                   -e "s/%U/${userid}/g" \
+                  -e "s/%g/${groupname}/g" \
+                  -e "s/%G/${groupid}/g" \
                   -e "s/%h/${hostname}/g" \
                   -e "s/%d/${domainname}/g" \
                   -e "s/%D/${time_day}/g" \
@@ -584,423 +615,10 @@ echo )
     fi
     ;;
 
-install )
-    ##
-    ##  install -- Install a program, script or datafile
-    ##  Copyright (c) 1997-2000 Ralf S. Engelschall <rse@engelschall.com>
-    ##  Originally written for shtool
-    ##
-    
-    #   determine source(s) and destination 
-    argc=$#
-    srcs=""
-    while [ $# -gt 1 ]; do
-        srcs="$srcs $1"
-        shift
-    done
-    dstpath="$1"
-    
-    #   type check for destination
-    dstisdir=0
-    if [ -d $dstpath ]; then
-        dstpath=`echo "$dstpath" | sed -e 's:/$::'`
-        dstisdir=1
-    fi
-    
-    #   consistency check for destination
-    if [ $argc -gt 2 -a $dstisdir = 0 ]; then
-        echo "$msgprefix:Error: multiple sources require destination to be directory" 1>&2
-        exit 1
-    fi
-    
-    #   iterate over all source(s)
-    for src in $srcs; do
-        dst=$dstpath
-    
-        #  If destination is a directory, append the input filename
-        if [ $dstisdir = 1 ]; then
-            dstfile=`echo "$src" | sed -e 's;.*/\([^/]*\)$;\1;'`
-            dst="$dst/$dstfile"
-        fi
-    
-        #  Add a possible extension to src and dst
-        if [ ".$opt_e" != . ]; then
-            src="$src$opt_e"
-            dst="$dst$opt_e"
-        fi
-    
-        #  Check for correct arguments
-        if [ ".$src" = ".$dst" ]; then
-            echo "$msgprefix:Warning: source and destination are the same - skipped" 1>&2
-            continue
-        fi
-        if [ -d "$src" ]; then
-            echo "$msgprefix:Warning: source \`$src' is a directory - skipped" 1>&2
-            continue
-        fi
-    
-        #  Make a temp file name in the destination directory
-        dsttmp=`echo $dst |\
-                sed -e 's;[^/]*$;;' -e 's;\(.\)/$;\1;' -e 's;^$;.;' \
-                    -e "s;\$;/#INST@$$#;"`
-    
-        #  Verbosity
-        if [ ".$opt_v" = .yes ]; then
-            echo "$src -> $dst" 1>&2
-        fi
-    
-        #  Copy or move the file name to the temp name
-        #  (because we might be not allowed to change the source)
-        if [ ".$opt_C" = .yes ]; then
-            opt_c=yes
-        fi
-        if [ ".$opt_c" = .yes ]; then
-            if [ ".$opt_t" = .yes ]; then
-                echo "cp $src $dsttmp" 1>&2
-            fi
-            cp $src $dsttmp || exit $?
-        else
-            if [ ".$opt_t" = .yes ]; then
-                echo "mv $src $dsttmp" 1>&2
-            fi
-            mv $src $dsttmp || exit $?
-        fi
-    
-        #  Adjust the target file
-        #  (we do chmod last to preserve setuid bits)
-        if [ ".$opt_s" = .yes ]; then
-            if [ ".$opt_t" = .yes ]; then
-                echo "strip $dsttmp" 1>&2
-            fi
-            strip $dsttmp || exit $?
-        fi
-        if [ ".$opt_o" != . ]; then
-            if [ ".$opt_t" = .yes ]; then
-                echo "chown $opt_o $dsttmp" 1>&2
-            fi
-            chown $opt_o $dsttmp || exit $?
-        fi
-        if [ ".$opt_g" != . ]; then
-            if [ ".$opt_t" = .yes ]; then
-                echo "chgrp $opt_g $dsttmp" 1>&2
-            fi
-            chgrp $opt_g $dsttmp || exit $?
-        fi
-        if [ ".$opt_m" != . ]; then
-            if [ ".$opt_t" = .yes ]; then
-                echo "chmod $opt_m $dsttmp" 1>&2
-            fi
-            chmod $opt_m $dsttmp || exit $?
-        fi
-    
-        #   Determine whether to do a quick install
-        #   (has to be done _after_ the strip was already done)
-        quick=no
-        if [ ".$opt_C" = .yes ]; then
-            if [ -r $dst ]; then
-                if cmp -s $src $dst; then
-                    quick=yes
-                fi
-            fi
-        fi
-    
-        #   Finally install the file to the real destination
-        if [ $quick = yes ]; then
-            if [ ".$opt_t" = .yes ]; then
-                echo "rm -f $dsttmp" 1>&2
-            fi
-            rm -f $dsttmp
-        else
-            if [ ".$opt_t" = .yes ]; then
-                echo "rm -f $dst && mv $dsttmp $dst" 1>&2
-            fi
-            rm -f $dst && mv $dsttmp $dst
-        fi
-    done
-    ;;
-
-mkdir )
-    ##
-    ##  mkdir -- Make one or more directories
-    ##  Copyright (c) 1996-2000 Ralf S. Engelschall <rse@engelschall.com>
-    ##  Originally written for public domain by Noah Friedman <friedman@prep.ai.mit.edu>
-    ##  Cleaned up and enhanced for shtool
-    ##
-    
-    errstatus=0
-    for p in ${1+"$@"}; do
-        #   if the directory already exists...
-        if [ -d "$p" ]; then
-            if [ ".$opt_f" = .no ] && [ ".$opt_p" = .no ]; then
-                echo "$msgprefix:Error: directory already exists: $p" 1>&2
-                errstatus=1
-                break
-            else
-                continue
-            fi
-        fi
-        #   if the directory has to be created...
-        if [ ".$opt_p" = .no ]; then
-            if [ ".$opt_t" = .yes ]; then
-                echo "mkdir $p" 1>&2
-            fi
-            mkdir $p || errstatus=$?
-        else
-            #   the smart situation
-            set fnord `echo ":$p" |\
-                       sed -e 's/^:\//%/' \
-                           -e 's/^://' \
-                           -e 's/\// /g' \
-                           -e 's/^%/\//'`
-            shift
-            pathcomp=''
-            for d in ${1+"$@"}; do
-                pathcomp="$pathcomp$d"
-                case "$pathcomp" in
-                    -* ) pathcomp="./$pathcomp" ;;
-                esac
-                if [ ! -d "$pathcomp" ]; then
-                    if [ ".$opt_t" = .yes ]; then
-                        echo "mkdir $pathcomp" 1>&2
-                    fi
-                    mkdir $pathcomp || errstatus=$?
-                    if [ ".$opt_m" != . ]; then
-                        if [ ".$opt_t" = .yes ]; then
-                            echo "chmod $opt_m $pathcomp" 1>&2
-                        fi
-                        chmod $opt_m $pathcomp || errstatus=$?
-                    fi
-                fi
-                pathcomp="$pathcomp/"
-            done
-        fi
-    done
-    exit $errstatus
-    ;;
-
-fixperm )
-    ##
-    ##  fixperm -- Fix file permissions inside a source tree
-    ##  Copyright (c) 1996-2000 Ralf S. Engelschall <rse@engelschall.com>
-    ##  Originally written for ePerl
-    ##
-    
-    paths="$*"
-    
-    #   check whether the test command supports the -x option
-    if [ -x /bin/sh ] 2>/dev/null; then
-        minusx="-x"
-    else
-        minusx="-r"
-    fi
-    
-    #   iterate over paths
-    for p in $paths; do
-        for file in `find $p -depth -print`; do
-            if [ -f $file ]; then
-                if [ $minusx $file ]; then
-                    if [ ".$opt_v" = .yes ]; then
-                        echo "-rwxrwxr-x $file" 2>&1
-                    fi
-                    if [ ".$opt_t" = .yes ]; then
-                        echo "chmod 775 $file" 2>&1
-                    fi
-                    chmod 775 $file
-                else
-                    if [ ".$opt_v" = .yes ]; then
-                        echo "-rw-rw-r-- $file" 2>&1
-                    fi
-                    if [ ".$opt_t" = .yes ]; then
-                        echo "chmod 664 $file" 2>&1
-                    fi
-                    chmod 664 $file
-                fi
-                continue
-            fi
-            if [ -d $file ]; then
-                if [ ".$opt_v" = .yes ]; then
-                    echo "drwxrwxr-x $file" 2>&1
-                fi
-                if [ ".$opt_t" = .yes ]; then
-                    echo "chmod 775 $file" 2>&1
-                fi
-                chmod 775 $file
-                continue
-            fi
-            if [ ".$opt_v" = .yes ]; then
-                echo "?????????? $file" 2>&1
-            fi
-        done
-    done
-    ;;
-
-tarball )
-    ##
-    ##  tarball -- Roll distribution tarballs
-    ##  Copyright (c) 1999-2000 Ralf S. Engelschall <rse@engelschall.com>
-    ##  Originally written for shtool
-    ##
-    
-    srcs="$*"
-    
-    #   check whether the test command supports the -x option
-    if [ -x /bin/sh ] 2>/dev/null; then
-        minusx="-x"
-    else
-        minusx="-r"
-    fi
-    
-    #   find the tools
-    paths="`echo $PATH |\
-            sed -e 's%/*:%:%g' -e 's%/*$%%' \
-                -e 's/^:/.:/' -e 's/::/:.:/g' -e 's/:$/:./' \
-                -e 's/:/ /g'`"
-    for spec in find:gfind,find tar:gtar,tar tardy:tardy,tarcust; do
-        prg=`echo $spec | sed -e 's/:.*$//'`
-        tools=`echo $spec | sed -e 's/^.*://'`
-        eval "prg_${prg}=''"
-        #   iterate over tools
-        for tool in `echo $tools | sed -e 's/,/ /g'`; do
-            #   iterate over paths
-            for path in $paths; do
-                if [ $minusx "$path/$tool" ] && [ ! -d "$path/$tool" ]; then
-                    eval "prg_${prg}=\"$path/$tool\""
-                    break
-                fi
-            done
-            eval "val=\$prg_${prg}"
-            if [ ".$val" != . ]; then
-                break
-            fi
-        done
-    done
-    
-    #   expand source paths
-    exclude=''
-    for pat in `echo $opt_e | sed 's/,/ /g'`; do
-        exclude="$exclude | grep -v '$pat'"
-    done
-    if [ ".$opt_t" = .yes ]; then
-        echo "cp /dev/null $tmpfile.lst" 1>&2
-    fi
-    cp /dev/null $tmpfile.lst
-    for src in $srcs; do
-        if [ -d $src ]; then
-            if [ ".$opt_t" = .yes ]; then
-                echo "(cd $src && $prg_find . -type f -depth -print) | sed -e 's:^\\.\$::' -e 's:^\\./::' | cat $exclude >>$tmpfile.lst" 1>&2
-            fi
-            (cd $src && find . -type f -depth -print) |\
-            sed -e 's:^\.$::' -e 's:^\./::' | eval cat $exclude >>$tmpfile.lst
-        else
-            if [ ".$opt_t" = .yes ]; then
-                echo "echo $src >>$tmpfile.lst" 1>&2
-            fi
-            echo $src >>$tmpfile.lst
-        fi
-    done
-    sort <$tmpfile.lst >$tmpfile.lst.n
-    mv $tmpfile.lst.n $tmpfile.lst
-    if [ ".$opt_v" = .yes ]; then
-        cat $tmpfile.lst | sed -e 's/^/  /' 1>&2
-    fi
-    
-    #   determine tarball file and directory name
-    if [ ".$opt_o" != . ]; then
-        tarfile="$opt_o"
-        if [ ".$opt_d" != . ]; then
-            tarname="$opt_d"
-        else
-            tarname=`echo $tarfile | sed -e 's/\.tar.*$//' -e 's;.*/\([^/]*\)$;\1;'`
-        fi
-    else
-        if [ ".$opt_d" != . ]; then
-            tarname="$opt_d"
-        elif [ -d "$from" ]; then
-            tarname=`echo $from | sed -e 's;.*/\([^/]*\)$;\1;'`
-        else
-            tarname="out"
-        fi
-        tarfile="$tarname.tar"
-    fi
-    
-    #   roll the tarball
-    compress=''
-    if [ ".$opt_c" != . ]; then
-        compress="| $opt_c"
-    fi
-    if [ ".$prg_tardy" != . ]; then
-        #   the elegant hackers way
-        tardy_opt="--prefix=$tarname"
-        tardy_opt="$tardy_opt --user_number=0 --group_number=0" # security!
-        if [ ".$opt_u" != . ]; then
-            tardy_opt="$tardy_opt --user_name=$opt_u"
-        fi
-        if [ ".$opt_g" != . ]; then
-            tardy_opt="$tardy_opt --group_name=$opt_g"
-        fi
-        if [ ".$opt_t" = .yes ]; then
-            echo "cat $tmpfile.lst | xargs $prg_tar cf - | $prg_tardy $tardy_opt | cat $compress >$tmpfile.out" 1>&2
-        fi
-        cat $tmpfile.lst |\
-        xargs $prg_tar cf - |\
-        $prg_tardy $tardy_opt |\
-        eval cat $compress >$tmpfile.out
-        if [ ".$opt_t" = .yes ]; then
-            echo "cp $tmpfile.out $tarfile" 1>&2
-        fi
-        cp $tmpfile.out $tarfile
-    else
-        #  the portable standard way
-        if [ ".$opt_t" = .yes ]; then
-            echo "mkdir $tmpdir/$tarname" 1>&2
-        fi
-        mkdir $tmpdir/$tarname || exit 1
-        if [ ".$opt_t" = .yes ]; then
-            echo "cat $tmpfile.lst | xargs $prg_tar cf - | (cd $tmpdir/$tarname && $prg_tar xf -)" 1>&2
-        fi
-        cat $tmpfile.lst |\
-        xargs $prg_tar cf - |\
-        (cd $tmpdir/$tarname && $prg_tar xf -)
-        if [ ".$opt_u" != . ]; then
-            if [ ".$opt_t" = .yes ]; then
-                echo "chown -R $opt_u $tmpdir/$tarname >/dev/null 2>&1" 2>&1
-            fi
-            chown -R $opt_u $tmpdir/$tarname >/dev/null 2>&1 ||\
-            echo "$msgprefix:Warning: cannot set user name \`$opt_u' (would require root priviledges)"
-        fi
-        if [ ".$opt_g" != . ]; then
-            if [ ".$opt_t" = .yes ]; then
-                echo "chgrp -R $opt_g $tmpdir/$tarname >/dev/null 2>&1" 2>&1
-            fi
-            chgrp -R $opt_g $tmpdir/$tarname >/dev/null 2>&1 ||\
-            echo "$msgprefix:Warning: cannot set group name \`$opt_g' (would require root priviledges)"
-        fi
-        if [ ".$opt_t" = .yes ]; then
-            echo "(cd $tmpdir && $prg_find $tarname -type f -depth -print | sort | xargs $prg_tar cf -) | cat $compress >$tmpfile.out" 1>&2
-        fi
-        (cd $tmpdir && $prg_find $tarname -type f -depth -print | sort | xargs $prg_tar cf -) |\
-        eval cat $compress >$tmpfile.out
-        if [ ".$opt_t" = .yes ]; then
-            echo "cp $tmpfile.out $tarfile" 1>&2
-        fi
-        cp $tmpfile.out $tarfile
-        if [ ".$opt_t" = .yes ]; then
-            echo "rm -rf $tmpdir/$tarname" 1>&2
-        fi
-        rm -rf $tmpdir/$tarname
-    fi
-    
-    #   cleanup
-    if [ ".$opt_t" = .yes ]; then
-        echo "rm -f $tmpfile.lst $tmpfile.out" 1>&2
-    fi
-    rm -f $tmpfile.lst $tmpfile.out
-    ;;
-
 version )
     ##
     ##  version -- Maintain a version information file
-    ##  Copyright (c) 1994-2000 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1994-2002 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for ePerl, rewritten from scratch for shtool
     ##
     
@@ -1062,7 +680,7 @@ version )
             echo dummy | awk '{ printf("new version: "); }'
             read triple
             case $triple in
-                [0-9]*.[0-9]*[sabp.][0-9]* ) 
+                [0-9]*.[0-9]*[sabp.][0-9]* )
                     ;;
                 * ) echo "$msgprefix:Error: invalid version string entered: \`$triple'" 1>&2
                     continue
@@ -1146,7 +764,7 @@ version )
                 exit 1
                 ;;
         esac
-    else 
+    else
         #   update the version file
     
         #   pre-generate various strings
@@ -1169,7 +787,7 @@ version )
         #   generate uppercase prefix
         prefixupper=`echo $prefix |\
                      tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
-        
+    
         #   create the version file according the the selected language
         echo "new version: ${vLong}"
     

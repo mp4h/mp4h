@@ -1,0 +1,99 @@
+;;;
+;;;  WML:href - Enhanced Hyperlink
+;;; 
+;;;  Package from WML <URL:http://www.engelschall.com/sw/wml/>
+;;;  wml::std::href - Enhanced Hyperlink
+;;;  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
+;;;
+;;;
+
+<define-tag href whitespace=delete>
+<preserve url name image hint target alternative />
+<set-var <attributes-extract url,name,image,hint,target %attributes /> />
+<if <get-var name />
+    <set-var alternative="<get-var name />" />
+    <group
+        <set-var name="<tt><get-var url /></tt>" />
+        <if <get-var hint />
+            <set-var alternative="<get-var hint />" />
+            <set-var alternative="<get-var url />" />
+         />
+    />
+/>
+<when <get-var hint />>
+    <set-var hint=" onMouseOver=\"self.status='<get-var hint />';return true\"" />
+</when>
+<when <get-var target />>
+    <set-var target=" target=\"<get-var target />\"" />
+</when>
+<when <not <match "<downcase <get-var url /> />"
+              "^(http|ftp|telnet|gopher|news|mailto):" /> />>
+  <when <match "<get-var url />" ".+@.*[^.]+\\.[^.]+" />>
+    <set-var url="mailto:<get-var url />" />
+  </when>
+  <when <match "<get-var url />" "^www\\.[^.]+\\..+" />>
+    <set-var url="http://<get-var url />" />
+  </when>
+  <when <match "<get-var url />" "^ftp\\.[^.]+\\..+" />>
+    <set-var url="ftp://<get-var url />" />
+  </when>
+</when>
+<a <attributes-quote <attributes-extract :a:(.*) %attributes />/> ;;;
+   href="<get-var url />"<get-var hint /><get-var target />>
+<if <get-var image />
+   <img <attributes-quote <attributes-extract :img:(.*) %attributes />/> ;;;
+        src="<get-var image />" alt="<get-var alternative />" border=0 />
+   <get-var name /> />
+</a>
+<restore  url name image hint target alternative />
+</define-tag>
+
+##EOF##
+__END__
+
+=head1 NAME
+
+WML:href - Enhanced Hyperlink
+
+=head1 SYNOPSIS
+
+ <use name="WML:href" />
+
+ <href url="..." [name="..."] [image="..."] [hint="..."] [target="..."] />
+
+=head1 DESCRIPTION
+
+This is an interface to the standard HTML anchor tag (C<E<lt>a
+href="..."E<gt>...E<lt>/aE<gt>>).  The intended use of C<E<lt>hrefE<gt>> is to
+simplify the creation of hyperlinks. The following
+
+  <href url="THE://URL" />
+  
+  <href url="THE://URL" name="THE_NAME" />
+  <href url="THE://URL" image="THE_IMG.EXT" />
+  
+  <href url="THE://URL" name="THE_NAME" image="THE_IMG.EXT" />
+  
+  <href url="THE://URL" hint="THE_HINT" />
+  <href url="THE://URL" name="THE_NAME" image="THE_IMG.EXT" hint="THE_HINT" />
+
+gets expanded to
+
+  <a href="THE://URL"><tt>THE://URL<tt></a>
+  
+  <a href="THE://URL">THE_NAME</a>
+  <a href="THE://URL"><img src="THE_IMG.EXT" alt="" border=0></a>
+  
+  <a href="THE://URL"><img src="THE_IMG.EXT" alt="THE_NAME" border=0></a>
+  
+  <a href="THE://URL" onMouseOver="self.status='THE_HINT';return true"><tt>THE://URL<tt></a>
+  <a href="THE://URL" onMouseOver="self.status='THE_HINT';return true"><img src="THE_IMG.EXT" alt="THE_NAME" border=0></a>
+
+=head1 AUTHOR
+
+ Ralf S. Engelschall
+ rse@engelschall.com
+ www.engelschall.com
+
+=cut
+

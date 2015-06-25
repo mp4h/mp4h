@@ -1,7 +1,0 @@
-
-<load library="/usr/local/lib/mozilla/libjs" module="mozjs">
-
-<javascript>
-print("ok");
-for (i=10; i>0; i--) print(i);
-</javascript>

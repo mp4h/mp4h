@@ -1,0 +1,146 @@
+;;;
+;;;  WML:isolatin - ISO-Latin-1 to HTML Entity Conversion
+;;;
+;;;  Package from WML <URL:http://www.engelschall.com/sw/wml/>
+;;;  wml::fmt::isolatin - ISO-Latin-1 to HTML Entity Conversion
+;;;  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
+;;;
+
+;;; the container tag itself
+<define-tag isolatin endtag=required whitespace=delete>
+<preserve body />
+<set-var body=%body />
+<subst-in-var body " " "&nbsp;" />
+<subst-in-var body "¡" "&iexcl;" />
+<subst-in-var body "¢" "&cent;" />
+<subst-in-var body "£" "&pound;" />
+<subst-in-var body "¤" "&curren;" />
+<subst-in-var body "¥" "&yen;" />
+<subst-in-var body "¦" "&brvbar;" />
+<subst-in-var body "§" "&sect;" />
+<subst-in-var body "¨" "&uml;" />
+<subst-in-var body "©" "&copy;" />
+<subst-in-var body "ª" "&ordf;" />
+<subst-in-var body "«" "&laquo;" />
+<subst-in-var body "¬" "&not;" />
+<subst-in-var body "­" "&shy;" />
+<subst-in-var body "®" "&reg;" />
+<subst-in-var body "¯" "&macr;" />
+<subst-in-var body "°" "&deg;" />
+<subst-in-var body "±" "&plusmn;" />
+<subst-in-var body "²" "&sup2;" />
+<subst-in-var body "³" "&sup3;" />
+<subst-in-var body "´" "&acute;" />
+<subst-in-var body "µ" "&micro;" />
+<subst-in-var body "¶" "&para;" />
+<subst-in-var body "·" "&middot;" />
+<subst-in-var body "¸" "&cedil;" />
+<subst-in-var body "¹" "&sup1;" />
+<subst-in-var body "º" "&ordm;" />
+<subst-in-var body "»" "&raquo;" />
+<subst-in-var body "¼" "&frac14;" />
+<subst-in-var body "½" "&frac12;" />
+<subst-in-var body "¾" "&frac34;" />
+<subst-in-var body "¿" "&iquest;" />
+<subst-in-var body "À" "&Agrave;" />
+<subst-in-var body "Á" "&Aacute;" />
+<subst-in-var body "Â" "&Acirc;" />
+<subst-in-var body "Ã" "&Atilde;" />
+<subst-in-var body "Ä" "&Auml;" />
+<subst-in-var body "Å" "&Aring;" />
+<subst-in-var body "Æ" "&AElig;" />
+<subst-in-var body "Ç" "&Ccedil;" />
+<subst-in-var body "È" "&Egrave;" />
+<subst-in-var body "É" "&Eacute;" />
+<subst-in-var body "Ê" "&Ecirc;" />
+<subst-in-var body "Ë" "&Euml;" />
+<subst-in-var body "Ì" "&Igrave;" />
+<subst-in-var body "Í" "&Iacute;" />
+<subst-in-var body "Î" "&Icirc;" />
+<subst-in-var body "Ï" "&Iuml;" />
+<subst-in-var body "Ð" "&ETH;" />
+<subst-in-var body "Ñ" "&Ntilde;" />
+<subst-in-var body "Ò" "&Ograve;" />
+<subst-in-var body "Ó" "&Oacute;" />
+<subst-in-var body "Ô" "&Ocirc;" />
+<subst-in-var body "Õ" "&Otilde;" />
+<subst-in-var body "Ö" "&Ouml;" />
+<subst-in-var body "×" "&times;" />
+<subst-in-var body "Ø" "&Oslash;" />
+<subst-in-var body "Ù" "&Ugrave;" />
+<subst-in-var body "Ú" "&Uacute;" />
+<subst-in-var body "Û" "&Ucirc;" />
+<subst-in-var body "Ü" "&Uuml;" />
+<subst-in-var body "Ý" "&Yacute;" />
+<subst-in-var body "Þ" "&THORN;" />
+<subst-in-var body "ß" "&szlig;" />
+<subst-in-var body "à" "&agrave;" />
+<subst-in-var body "á" "&aacute;" />
+<subst-in-var body "â" "&acirc;" />
+<subst-in-var body "ã" "&atilde;" />
+<subst-in-var body "ä" "&auml;" />
+<subst-in-var body "å" "&aring;" />
+<subst-in-var body "æ" "&aelig;" />
+<subst-in-var body "ç" "&ccedil;" />
+<subst-in-var body "è" "&egrave;" />
+<subst-in-var body "é" "&eacute;" />
+<subst-in-var body "ê" "&ecirc;" />
+<subst-in-var body "ë" "&euml;" />
+<subst-in-var body "ì" "&igrave;" />
+<subst-in-var body "í" "&iacute;" />
+<subst-in-var body "î" "&icirc;" />
+<subst-in-var body "ï" "&iuml;" />
+<subst-in-var body "ð" "&eth;" />
+<subst-in-var body "ñ" "&ntilde;" />
+<subst-in-var body "ò" "&ograve;" />
+<subst-in-var body "ó" "&oacute;" />
+<subst-in-var body "ô" "&ocirc;" />
+<subst-in-var body "õ" "&otilde;" />
+<subst-in-var body "ö" "&ouml;" />
+<subst-in-var body "÷" "&divide;" />
+<subst-in-var body "ø" "&oslash;" />
+<subst-in-var body "ù" "&ugrave;" />
+<subst-in-var body "ú" "&uacute;" />
+<subst-in-var body "û" "&ucirc;" />
+<subst-in-var body "ü" "&uuml;" />
+<subst-in-var body "ý" "&yacute;" />
+<subst-in-var body "þ" "&thorn;" />
+<subst-in-var body "ÿ" "&yuml;" />
+<get-var body />
+<restore body />
+</define-tag>
+
+##EOF##
+__END__
+
+=head1 NAME
+
+WML:isolatin - ISO-Latin-1 to HTML Entity Conversion
+
+=head1 SYNOPSIS
+
+  <use name="WML:isolatin" />
+
+  <isolatin>
+  Text with ISO latin 1 characters
+  for instance german umlauts: ``öäüÖÄÜß''
+  </isolatin>
+
+=head1 DESCRIPTION
+
+This creates an area substitution with Pass 6 (asubst) for all ISO-Latin-1
+characters to their corresponding HTML entities. Note that this is not really
+necessary because HTML 3.2 states that every browser has to understand
+ISO-Latin-1 characters. So there is no real need to encode them with this
+container tag. But it is safe, because the result is 7Bit which can be
+transfered over more mediums then the 8 Bit version with ISO-Latin-1
+characters.
+
+=head1 AUTHOR
+
+ Ralf S. Engelschall
+ rse@engelschall.com
+ www.engelschall.com
+
+=cut
+

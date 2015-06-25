@@ -1,0 +1,6 @@
+<printf "foo bar" baz quux />
+<printf "foo %s bar" baz quux />
+<printf "foo bar %s" baz quux />
+<printf "foo %s bar %s" baz quux />
+<printf "%s foo %s bar %s" baz quux />
+<printf "%%s foo %s bar %s" baz quux />

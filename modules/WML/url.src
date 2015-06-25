@@ -1,0 +1,50 @@
+;;;
+;;;  WML::url - Recognize Uniform Resource Locator
+;;;
+;;;  Package from WML <URL:http://www.engelschall.com/sw/wml/>
+;;;  wml::fmt::url - Recognize Uniform Resource Locator
+;;;  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
+;;;
+
+<define-tag url endtag=required whitespace=delete>
+<preserve body />
+<set-var body=%body />
+<subst-in-var body "(http://[^  ]*)" "<a href=\"\\1\">\\1</a>" />
+<subst-in-var body "(ftp://[^  ]*)" "<a href=\"\\1\">\\1</a>" />
+<subst-in-var body "(gopher://[^  ]*)" "<a href=\"\\1\">\\1</a>" />
+<subst-in-var body "(telnet://[^  ]*)" "<a href=\"\\1\">\\1</a>" />
+<subst-in-var body "(news://[^  ]*)" "<a href=\"\\1\">\\1</a>" />
+<subst-in-var body "(mailto:([^  ]*))" "<a href=\"\\1\">\\2</a>" />
+<get-var body />
+<restore body />
+</define-tag>
+
+##EOF##
+__END__
+
+=head1 NAME
+
+WML:url - Recognize Uniform Resource Locator
+
+=head1 SYNOPSIS
+
+ <use name="WML:url" />
+
+ <url>
+ ....http://....
+ </url>
+
+=head1 DESCRIPTION
+
+The usage is simple: Just surround the text with the C<E<lt>urlE<gt>>
+container tag and all contained URLs are recognized and made interactive by
+adding HTML C<E<lt>aE<gt>> (anchor) tags.
+
+=head1 AUTHOR
+
+ Ralf S. Engelschall
+ rse@engelschall.com
+ www.engelschall.com
+
+=cut
+

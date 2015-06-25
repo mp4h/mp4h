@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -154,6 +154,7 @@ DECLARE (mp4h_bp_string_eq);
 DECLARE (mp4h_bp_string_neq);
 DECLARE (mp4h_bp_string_compare);
 DECLARE (mp4h_bp_char_offsets);
+DECLARE (mp4h_bp_printf);
 
   /*  regexp functions  */
 DECLARE (mp4h_bp_subst_in_string);
@@ -312,6 +313,7 @@ builtin_tab[] =
   { "string-neq",       FALSE,    TRUE,   mp4h_bp_string_neq },
   { "string-compare",   FALSE,    TRUE,   mp4h_bp_string_compare },
   { "char-offsets",     FALSE,    TRUE,   mp4h_bp_char_offsets },
+  { "printf",           FALSE,    TRUE,   mp4h_bp_printf },
   
       /*  regexp functions  */
   { "subst-in-string",  FALSE,    TRUE,   mp4h_bp_subst_in_string },
@@ -715,7 +717,7 @@ safe_strtod (const char *name, const char *nptr, double *value)
       if (nptr == NULL)
         nptr = endp;
       MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Argument `%s' non-numeric in built-in `%s'"),
+        _("Warning:%s:%d: Argument `%s' non-numeric in <%s>"),
              CURRENT_FILE_LINE, nptr, name));
       return FALSE;
     }
@@ -735,7 +737,7 @@ safe_strtol (const char *name, const char *nptr, long int *value)
       if (nptr == NULL)
         nptr = endp;
       MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Argument `%s' non-numeric in built-in `%s'"),
+        _("Warning:%s:%d: Argument `%s' non-numeric in <%s>"),
              CURRENT_FILE_LINE, nptr, name));
       return FALSE;
     }
@@ -1033,6 +1035,8 @@ mp4h_bp_mp4h_l10n (MP4H_BUILTIN_ARGS)
             category = LC_COLLATE;
           else if (strcmp (ARG (i), "LC_CTYPE") == 0)
             category = LC_CTYPE;
+          else if (strcmp (ARG (i), "LC_MESSAGES") == 0)
+            category = LC_MESSAGES;
           else if (strcmp (ARG (i), "LC_MONETARY") == 0)
             category = LC_MONETARY;
           else if (strcmp (ARG (i), "LC_NUMERIC") == 0)
@@ -1043,7 +1047,7 @@ mp4h_bp_mp4h_l10n (MP4H_BUILTIN_ARGS)
 
       if (category == -1)
         MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: unknown locale `%s'"), CURRENT_FILE_LINE, ARG (i)));
+        _("Warning:%s:%d: Unknown locale `%s'"), CURRENT_FILE_LINE, ARG (i)));
       else
         {
           locale_init (category, cp+1);
@@ -1087,7 +1091,7 @@ static void
 mp4h_bp_unsupported (MP4H_BUILTIN_ARGS)
 {
   MP4HERROR ((warning_status, 0,
-    _("Error:%s:%d: The <%s> tag is not implemented on your OS\n"),
+    _("Warning:%s:%d: The <%s> tag is not implemented on your OS\n"),
          CURRENT_FILE_LINE, ARG (0)));
 }
 #endif
@@ -1095,7 +1099,7 @@ mp4h_bp_unsupported (MP4H_BUILTIN_ARGS)
 static void
 mp4h_bp___version__ (MP4H_BUILTIN_ARGS)
 {
-  obstack_grow (obs, mp4h_version.v_short, strlen (mp4h_version.v_short));
+  obstack_grow (obs, PACKAGE_VERSION, strlen (PACKAGE_VERSION));
 }
 
 static void
@@ -1224,7 +1228,7 @@ mp4h_bp_debugmode (MP4H_BUILTIN_ARGS)
 
       if (new_debug_level < 0)
         MP4HERROR ((warning_status, 0,
-          _("Debugmode:%s:%d: bad debug flags: `%s'"),
+          _("Warning:%s:%d: Bad debug flags: `%s'"),
                CURRENT_FILE_LINE, ARG (1)));
       else
         {
@@ -1297,8 +1301,8 @@ mp4h_bp_function_def (MP4H_BUILTIN_ARGS)
 
     default:
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Bad symbol type in mp4h_bp_function_def ()")));
-      abort ();
+        "INTERNAL ERROR: Bad symbol type in mp4h_bp_function_def ()"));
+      exit (1);
     }
 }
 
@@ -1385,6 +1389,7 @@ mp4h_bp_directory_contents (MP4H_BUILTIN_ARGS)
   pcre_extra *re_extra = NULL;
   const char *errptr = NULL;
   int *match_ptr = NULL;
+  boolean first = TRUE;
 
   CHECK_SAFETY_LEVEL(1);
 
@@ -1423,8 +1428,10 @@ mp4h_bp_directory_contents (MP4H_BUILTIN_ARGS)
                     0, match_ptr, 3) > 0
            && match_ptr[1] - match_ptr[0] == length))
         {
+          if (!first)
+            obstack_1grow (obs, '\n');
           obstack_grow (obs, entry->d_name, length);
-          obstack_1grow (obs, '\n');
+          first = FALSE;
         }
     }
 
@@ -1468,11 +1475,11 @@ mp4h_bp_real_path (MP4H_BUILTIN_ARGS)
   pathname = predefined_attribute ("pathname", &argc, argv, FALSE);
   if (!pathname)
     MP4HERROR ((warning_status, 0,
-      _("Error:%s:%d: Required attribute `pathname' is not specified"),
-           CURRENT_FILE_LINE));
+      _("Warning:%s:%d: In <%s>, required attribute `%s' is not specified"),
+           CURRENT_FILE_LINE, ARG (0), "pathname"));
   else
     if (!realpath(pathname, resolvedname))
-      MP4HERROR ((warning_status, 0,
+      MP4HERROR ((warning_status, errno,
         _("Error:%s:%d: Cannot form real path for `%s'"),
           CURRENT_FILE_LINE, pathname));
     else
@@ -1882,11 +1889,10 @@ mp4h_bp_foreach (MP4H_BUILTIN_ARGS)
   else
     {
       MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Null step is ignored in <foreach> loop"),
-             CURRENT_FILE_LINE));
+        _("Warning:%s:%d: Null step is ignored in <%s> loop"),
+             CURRENT_FILE_LINE, ARG (0)));
       return;
     }
- 
 }
 
 /*---------------------------------------------------------------.
@@ -1995,8 +2001,7 @@ mp4h_bp_exit (MP4H_BUILTIN_ARGS)
     numeric_arg (argv[0], status, FALSE, &rc);
   message = predefined_attribute ("message", &argc, argv, FALSE);
   if (message)
-    MP4HERROR ((warning_status, 0,
-      _("%s"), message));
+    MP4HERROR ((warning_status, 0, "%s", message));
   exit (rc);
 }
 
@@ -2073,8 +2078,8 @@ mp4h_bp_define_tag (MP4H_BUILTIN_ARGS)
 
     default:
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Bad token data type in mp4h_bp_define_tag ()")));
-      abort ();
+        "INTERNAL ERROR: Bad token data type in mp4h_bp_define_tag ()"));
+      exit (1);
     }
 
   /*  Clear hooks  */
@@ -2122,8 +2127,8 @@ mp4h_bp_let (MP4H_BUILTIN_ARGS)
           if (s == NULL)
             {
               MP4HERROR ((warning_status, 0,
-                _("Warning:%s:%d: Macro `%s' not defined in <let>"),
-                     CURRENT_FILE_LINE, cp));
+                _("Warning:%s:%d: Macro `%s' not defined in <%s>"),
+                     CURRENT_FILE_LINE, cp, ARG (0)));
               continue;
             }
 
@@ -2141,15 +2146,15 @@ mp4h_bp_let (MP4H_BUILTIN_ARGS)
 
             default:
               MP4HERROR ((warning_status, 0,
-                _("INTERNAL ERROR: Bad token data type in mp4h_bp_let ()")));
-              abort ();
+                "INTERNAL ERROR: Bad token data type in mp4h_bp_let ()"));
+              exit (1);
             }
         }
       else
         {
           MP4HERROR ((warning_status, 0,
-            _("Warning:%s:%d: unknown syntax `%s' in <let>"),
-                 CURRENT_FILE_LINE, ARG (i)));
+            _("Warning:%s:%d: Unknown syntax `%s' in <%s>"),
+                 CURRENT_FILE_LINE, ARG (i), ARG (0)));
         }
     }
 }
@@ -2213,8 +2218,8 @@ generic_set_hook (MP4H_BUILTIN_ARGS, boolean before, int action)
 
       default:
         MP4HERROR ((warning_status, 0,
-          _("INTERNAL ERROR: Illegal value in generic_set_hook ()")));
-        abort ();
+          "INTERNAL ERROR: Illegal value in generic_set_hook ()"));
+        exit (1);
     }
 
   xfree ((voidstar) hook);
@@ -2410,7 +2415,7 @@ math_relation (MP4H_BUILTIN_ARGS, mathrel_type mathrel)
       if (var == NULL)
         {
           MP4HERROR ((warning_status, 0,
-            _("Warning:%s:%d: Argument `%s' non-numeric in built-in `%s'"),
+            _("Warning:%s:%d: Argument `%s' non-numeric in <%s>"),
                  CURRENT_FILE_LINE, ARG (1), ARG (0)));
           return;
         }
@@ -2433,7 +2438,7 @@ math_relation (MP4H_BUILTIN_ARGS, mathrel_type mathrel)
       if (var == NULL)
         {
           MP4HERROR ((warning_status, 0,
-            _("Warning:%s:%d: Argument `%s' non-numeric in built-in `%s'"),
+            _("Warning:%s:%d: Argument `%s' non-numeric in <%s>"),
                  CURRENT_FILE_LINE, ARG (2), ARG (0)));
           return;
         }
@@ -2461,8 +2466,8 @@ math_relation (MP4H_BUILTIN_ARGS, mathrel_type mathrel)
         
       default:
         MP4HERROR ((warning_status, 0,
-          _("INTERNAL ERROR: Illegal operator in math_relation ()")));
-      abort ();
+          "INTERNAL ERROR: Illegal operator in math_relation ()"));
+        exit (1);
     }
 
   if (result)
@@ -2574,7 +2579,7 @@ mathop_functions (MP4H_BUILTIN_ARGS, mathop_type mathop)
       break;
     default:
         MP4HERROR ((warning_status, 0,
-          _("INTERNAL ERROR: Illegal mathop in mp4h_bp_mathop ()")));
+          "INTERNAL ERROR: Illegal mathop in mp4h_bp_mathop ()"));
     }
 
   sprintf (sformat, "%%.%df", output_radix);
@@ -2679,7 +2684,7 @@ mp4h_bp___include (MP4H_BUILTIN_ARGS)
     {
       command = NULL;
       MP4HERROR ((warning_status, 0, _("\
-WARNING:%s:%d: `file' and `command' attributes in <include> tag are mutually exclusive, using `file'"),
+Warning:%s:%d: `file' and `command' attributes in <include> tag are mutually exclusive, using `file'"),
                 CURRENT_FILE_LINE));
     }
 
@@ -2718,7 +2723,7 @@ WARNING:%s:%d: `file' and `command' attributes in <include> tag are mutually exc
       if (!file)
         {
           MP4HERROR ((warning_status, 0, _("\
-    Error:%s:%d: <include> must be invoked with one of the `file' and `command' attributes; skipped"),
+Error:%s:%d: <include> must be invoked with one of the `file' and `command' attributes; skipped"),
                     CURRENT_FILE_LINE));
           return;
         }
@@ -2754,6 +2759,7 @@ static void
 logical_to_physical_paths (char **name)
 {
   register char *cp;
+
   for (cp=*name; *cp != '\0'; cp++)
     {
       if (*cp == ':')
@@ -2778,17 +2784,17 @@ mp4h_bp_use (MP4H_BUILTIN_ARGS)
   name = predefined_attribute ("name", &argc, argv, FALSE);
   if (name == NULL)
     {
-      MP4HERROR ((warning_status, errno,
-        _("Warning:%s:%d: `name' attribute must be set in <use> tag"),
-             CURRENT_FILE_LINE));
+      MP4HERROR ((warning_status, 0,
+        _("Error:%s:%d: In <%s>, required attribute `%s' is not specified"),
+             CURRENT_FILE_LINE, ARG (0), "name"));
       return;
     }
 
   sym = lookup_file (name, SYMBOL_LOOKUP);
   if (sym)
     {
-      if (debug_level & DEBUG_TRACE_PATH)
-        DEBUG_MESSAGE1 (_("Module `%s' already loaded -- Skipped"), name);
+      if (debug_level & DEBUG_TRACE_MODULES)
+	DEBUG_MESSAGE1("module `%s' handle already seen", name);
       return;
     }
 
@@ -2805,6 +2811,9 @@ mp4h_bp_use (MP4H_BUILTIN_ARGS)
       xfree ((voidstar) real_filename);
       return;
     }
+  else
+    if (debug_level & DEBUG_TRACE_MODULES)
+      DEBUG_MESSAGE2("module `%s': loaded ok (=%s)", name, filename);
 
   lookup_file (name, SYMBOL_INSERT);
 
@@ -2828,8 +2837,8 @@ mp4h_bp_load (MP4H_BUILTIN_ARGS)
   if (!library && !module)
     {
       MP4HERROR ((warning_status, 0,
-        _("Error:%s:%d: Required attribute `pathname' is not specified"),
-           CURRENT_FILE_LINE));
+        _("Error:%s:%d: In <%s>, at least one of '%s' and '%s' attributes must be specified"),
+           CURRENT_FILE_LINE, ARG (0), "module", "library"));
       return;
     }
   if (library)
@@ -2892,10 +2901,10 @@ mp4h_bp_set_quotes (MP4H_BUILTIN_ARGS)
     }
   else if (argc == 3)
     {
-      if (*ARG (1) != '<' || LAST_CHAR (ARG (2)) != '>')
+      if (*ARG (1) != '<' || ARG (2) == '\0' || LAST_CHAR (ARG (2)) != '>')
         {
           MP4HERROR ((warning_status, 0,
-            _("Warning:%s:%d: `<%s>' ignored, invalid arguments %s %s"),
+            _("Warning:%s:%d: <%s> ignored, invalid arguments: %s %s"),
                  CURRENT_FILE_LINE, ARG (0), ARG (1), ARG (2)));
           return;
         }
@@ -3260,8 +3269,8 @@ mp4h_bp_char_offsets (MP4H_BUILTIN_ARGS)
   if (strlen (ARG (2)) > 1)
     {
       MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Second argument of <char-offsets> is not a char"),
-             CURRENT_FILE_LINE));
+        _("Warning:%s:%d: Second argument of <%s> is not a char"),
+             CURRENT_FILE_LINE, ARG (0)));
       return;
     }
   c = ARG (2)[0];
@@ -3292,6 +3301,76 @@ mp4h_bp_char_offsets (MP4H_BUILTIN_ARGS)
               shipout_int (obs, (int) (cp-ARG (1)));
             }
         }
+    }
+}
+
+/*----------------------------.
+| Implement printf function.  |
+`----------------------------*/
+static void
+mp4h_bp_printf (MP4H_BUILTIN_ARGS)
+{
+  const char *text, *save;
+  int i, len, count_arg;
+
+  if (bad_argc (argv[0], argc, 2, 0))
+    return;
+
+  count_arg = 1;
+  for (text = ARG(1); *text != '\0';)
+    {
+      if (*text != '%')
+        {
+          save = text;
+          len = 1;
+          for (text++ ; *text != '%' && *text != '\0'; text++)
+            len++;
+          obstack_grow (obs, save, len);
+          if (*text == '\0')
+            break;
+        }
+      text++;
+      if (*text == 's')
+        {
+          count_arg++;
+          obstack_grow (obs, ARG(count_arg), strlen(ARG(count_arg)));
+          text++;
+        }
+      else if (*text == '%')
+        {
+          obstack_1grow (obs, '%');
+          text++;
+        }
+      else if (isdigit ((int) *text))
+        {
+          char *endp;
+          i = (int)strtol (text, &endp, 10) + 1;
+          text = endp;
+          if (NULL == text || *text != '$')
+            {
+              obstack_1grow (obs, '%');
+              shipout_int (obs, i - 1);
+              continue;
+            }
+          text++;
+          if (*text == 's')
+            {
+              obstack_grow (obs, ARG(i), strlen(ARG(i)));
+              text ++;
+            }
+          else if (*text == '%')
+            {
+              obstack_1grow (obs, '%');
+              text++;
+            }
+          else
+            {
+              obstack_1grow (obs, '%');
+              shipout_int (obs, i - 1);
+            }
+        }
+      else
+        obstack_1grow (obs, '%');
     }
 }
 
@@ -3392,7 +3471,7 @@ substitute (struct obstack *obs, const char *victim, const char *repl,
           if (!substitute_warned)
             {
               MP4HERROR ((warning_status, 0, _("\
-WARNING:%s:%d: \\0 will disappear, use \\& instead in replacements"),
+Warning:%s:%d: \\0 will disappear, use \\& instead in replacements"),
                     CURRENT_FILE_LINE));
               substitute_warned = 1;
             }
@@ -3653,7 +3732,7 @@ regex_attributes (int *ptr_argc, token_data **argv)
               case 'x': re_flags |= PCRE_EXTENDED; break;
               default:
                         MP4HERROR ((warning_status, 0, _("\
-Warning:%s:%d: unknown modifier `%c' in reflags"),
+Warning:%s:%d: Unknown modifier `%c' in reflags"),
                              CURRENT_FILE_LINE, *cp));
                         break;
             }
@@ -3778,7 +3857,7 @@ generic_variable_lookup (MP4H_BUILTIN_ARGS, boolean verbatim)
               if (!ptr_index)
                 {
                   MP4HERROR ((warning_status, 0, _("\
-Warning:%s:%d: wrong index declaration in <%s>"),
+Warning:%s:%d: Wrong index declaration in <%s>"),
                        CURRENT_FILE_LINE, ARG (0)));
                   return;
                 }
@@ -3798,7 +3877,7 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                   if (!index_var)
                     {
                       MP4HERROR ((warning_status, 0, _("\
-Warning:%s:%d: wrong index declaration in <%s>"),
+Warning:%s:%d: Wrong index declaration in <%s>"),
                            CURRENT_FILE_LINE, ARG (0)));
                       return;
                     }
@@ -3847,8 +3926,8 @@ mp4h_bp_set_var_x (MP4H_BUILTIN_ARGS)
   if (name == NULL)
     {
       MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: Missing required attribute `name' to the <%s> tag"),
-                CURRENT_FILE_LINE, ARG (0)));
+        _("Error:%s:%d: In <%s>, required attribute `%s' is not specified"),
+                CURRENT_FILE_LINE, ARG (0), "name"));
       return;
     }
 
@@ -3922,7 +4001,7 @@ mp4h_bp_set_var (MP4H_BUILTIN_ARGS)
               if (!ptr_index)
                 {
                   MP4HERROR ((warning_status, 0, _("\
-Warning:%s:%d: wrong index declaration in <%s>"),
+Warning:%s:%d: Wrong index declaration in <%s>"),
                        CURRENT_FILE_LINE, ARG (0)));
                   return;
                 }
@@ -3942,7 +4021,7 @@ Warning:%s:%d: wrong index declaration in <%s>"),
                   if (!index_var)
                     {
                       MP4HERROR ((warning_status, 0, _("\
-Warning:%s:%d: wrong index declaration in <%s>"),
+Warning:%s:%d: Wrong index declaration in <%s>"),
                            CURRENT_FILE_LINE, ARG (0)));
                       return;
                     }
@@ -4090,8 +4169,8 @@ mp4h_bp_restore (MP4H_BUILTIN_ARGS)
       if (!vs)
         {
           MP4HERROR ((warning_status, 0, _("\
-WARNING:%s:%d: variable stack empty, it means <%s> already gobbled all data"),
-                    CURRENT_FILE_LINE, argv[0]));
+Warning:%s:%d: Variable stack empty, it means <%s> already gobbled all data"),
+                    CURRENT_FILE_LINE, ARG (0)));
           return;
         }
       if (SYMBOL_TYPE (var) == TOKEN_TEXT)
@@ -4112,7 +4191,7 @@ varstack_check (void)
   if (vs)
     {
       MP4HERROR ((warning_status, 0, _("\
-WARNING:%s:%d: variable stack not empty, it means <preserve> pushed more items than <restore> popped"),
+Warning:%s:%d: Variable stack not empty, it means <preserve> pushed more items than <restore> popped"),
                     CURRENT_FILE_LINE));
     }
 }
@@ -4258,8 +4337,8 @@ mp4h_bp_copy_var (MP4H_BUILTIN_ARGS)
   if (var1 == NULL)
     {
       MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: variable `%s' not defined in <copy-var>"),
-             CURRENT_FILE_LINE, ARG (1)));
+        _("Warning:%s:%d: Variable `%s' not defined in <%s>"),
+             CURRENT_FILE_LINE, ARG (1), ARG (0)));
       return;
     }
   var2 = lookup_variable (ARG (2), SYMBOL_INSERT);
@@ -4589,7 +4668,7 @@ mp4h_bp_array_shift (MP4H_BUILTIN_ARGS)
   if (var == NULL)
     {
       MP4HERROR ((warning_status, 0,
-        _("Warning:%s:%d: the variable `%s' is not defined in <%s>"),
+        _("Warning:%s:%d: Variable `%s' not defined in <%s>"),
              CURRENT_FILE_LINE, ARG (1), ARG (0)));
     }
 
@@ -4617,6 +4696,8 @@ mp4h_bp_array_shift (MP4H_BUILTIN_ARGS)
   if (ind_start > 0)
     {
       old_value = array_value (var, ind_start, 0);
+      if (!old_value)
+        return;
       *(old_value-1) = '\0';
       strcpy ((char *) value, SYMBOL_TEXT (var));
       cp = value + strlen (SYMBOL_TEXT (var)) + 1;
@@ -4640,7 +4721,10 @@ mp4h_bp_array_shift (MP4H_BUILTIN_ARGS)
     }
   else
     {
-      strcpy ((char *) cp, array_value (var, ind_start-offset, 0));
+      old_value = array_value (var, ind_start-offset, 0);
+      if (!old_value)
+        return;
+      strcpy ((char *) cp, old_value);
     }
   xfree ((voidstar) SYMBOL_TEXT (var));
   SYMBOL_TEXT (var) = value;

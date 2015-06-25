@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -58,10 +58,6 @@
 #include <locale.h>
 #endif
 #include <time.h>
-
-#define _SRC_VERSION_C_AS_HEADER_
-#include "version.c"
-#undef _SRC_VERSION_C_AS_HEADER_
 
 /*  From Perl 5.6  */
 #ifndef MAXPATHLEN

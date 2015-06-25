@@ -1,62 +1,48 @@
-# Configure template for GNU m4.
-# Copyright (C) 1991-1998 Free Software Foundation, Inc.
-# Process this file with autoconf to produce a configure script.
+dnl  As this file is called configure.ac, Autoconf 2.50 is required
+AC_PREREQ([2.50])
 
-#
-#    Is there a better way to insert some code before AC_INIT?
-#
-m4_divert_text([BODY], [shtool=$srcdir/shtool
-PACKAGE=mp4h
-VERSION="`$shtool version -l c -d short $srcdir/src/version.c`"
-])
+AC_INIT([mp4h], [1.3.1])
+PACKAGE_DATE="11-Jan-2003"
 
-AC_INIT([$PACKAGE], [$VERSION])
 AC_CONFIG_SRCDIR([src/mp4h.c])
-AC_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER([config.h])
 
-LONG_VERSION="`$shtool version -l c -d long $srcdir/src/version.c`"
-$shtool echo -e "Configuring for %B$PACKAGE $LONG_VERSION %b"
+dnl   Now $srcdir is defined and can be used
+shtool=$srcdir/shtool
 
-AC_SUBST([PACKAGE])
-AC_SUBST([VERSION])
-AC_DEFINE_UNQUOTED([PACKAGE], "$PACKAGE")
-AC_DEFINE_UNQUOTED([VERSION], "$VERSION")
+AC_SUBST([PACKAGE_DATE])
+AC_DEFINE_UNQUOTED([PACKAGE_DATE], ["$PACKAGE_DATE"], [Release date])
+$shtool echo -e "Configuring for %B$PACKAGE_NAME $PACKAGE_VERSION ($PACKAGE_DATE)%b"
 
-MAINTAINER_MODE_TRUE='#'
-AC_SUBST(MAINTAINER_MODE_TRUE)
+AM_INIT_AUTOMAKE([$PACKAGE_NAME], [$PACKAGE_VERSION])
+AM_MAINTAINER_MODE
 
 if test x$datadir = 'x${prefix}/share'; then
     if test x$prefix = xNONE; then
-        PKGDATADIR="$ac_default_prefix/share/mp4h"
+        MP4HDATADIR="$ac_default_prefix/share/mp4h"
     else
-        PKGDATADIR="$prefix/share/mp4h"
+        MP4HDATADIR="$prefix/share/mp4h"
     fi
 else
-    PKGDATADIR="$datadir/mp4h"
+    MP4HDATADIR="$datadir/mp4h"
 fi
-AC_DEFINE_UNQUOTED([PKGDATADIR], "$PKGDATADIR")
-pkgdatadir="$datadir/mp4h"
-AC_SUBST(pkgdatadir)
-
 if test x$libdir = 'x${exec_prefix}/lib'; then
     if test x$prefix = xNONE; then
-        PKGLIBDIR="$ac_default_prefix/lib/mp4h"
+        MP4HLIBDIR="$ac_default_prefix/lib/mp4h"
     else
-        PKGLIBDIR="$prefix/lib/mp4h"
+        MP4HLIBDIR="$prefix/lib/mp4h"
     fi
 else
-    PKGLIBDIR="$libdir/mp4h"
+    MP4HLIBDIR="$libdir/mp4h"
 fi
-AC_DEFINE_UNQUOTED([PKGLIBDIR], "$PKGLIBDIR") 
-pkglibdir="$libdir/mp4h"
-AC_SUBST([pkglibdir])
-
-AC_ARG_PROGRAM
+AC_DEFINE_UNQUOTED([MP4HLIBDIR], ["$MP4HLIBDIR/$PACKAGE_VERSION:$MP4HDATADIR"],
+        [Default location for mp4h modules]) 
 
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_RANLIB
 AC_PROG_MAKE_SET
+AC_PROG_INSTALL 
 
 echo ''
 $shtool echo -e "Checking for %Bheaders and libraries%b"
@@ -70,15 +56,17 @@ AC_HEADER_STDC
 AC_TYPE_SIZE_T
 AC_C_CONST
 
-AC_CHECK_HEADERS(limits.h locale.h memory.h stdarg.h string.h unistd.h time.h)
-AC_CHECK_HEADERS(pwd.h grp.h dirent.h sys/param.h sys/stat.h sys/types.h sys/times.h)
+AC_CHECK_HEADERS([limits.h locale.h memory.h stdarg.h string.h unistd.h time.h])
+AC_CHECK_HEADERS([pwd.h grp.h dirent.h sys/param.h sys/stat.h sys/types.h sys/times.h])
 
-AC_CHECK_FUNCS(mkstemp strerror tmpfile getpwuid getgrgid bcopy memmove)
+AC_CHECK_FUNCS([mkstemp strchr strerror tmpfile getpwuid getgrgid bcopy memmove])
 AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
 AC_REPLACE_FUNCS(strtol obstack xmalloc xstrdup)
-AC_CHECK_FUNC(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
-
+AC_CHECK_FUNC(getopt_long, , [
+   AC_LIBOBJ([getopt1])
+   AC_LIBOBJ([getopt])
+])
 AC_MSG_CHECKING([for HTML postprocessing])
 AC_ARG_WITH(tidy,dnl
 [  --with-tidy=PATH        post-process HTML documentation with tidy],[dnl
@@ -89,64 +77,118 @@ AC_MSG_RESULT([$TIDY])
 TIDY="@:"
 AC_MSG_RESULT([no])
 ])
-AC_SUBST(TIDY)
+AC_SUBST([TIDY])
 
-AM_WITH_MODULES
-if test ".$with_modules" = .yes; then
-    WITH_MODULES_TRUE= WITH_MODULES_FALSE='#'
-else
-    WITH_MODULES_TRUE='#' WITH_MODULES_FALSE=
+ALL_LINGUAS=
+AM_GNU_GETTEXT
+
+
+if test ".$USE_INCLUDED_LIBINTL" = .yes; then
+    INTLINCL='-I$(top_srcdir)/intl'
+    AC_SUBST([INTLINCL])
 fi
-AC_SUBST(WITH_MODULES_TRUE)
-AC_SUBST(WITH_MODULES_FALSE)
 
-dnl    Must be called after AM_WITH_MODULES
+MP4H_LOADABLE_MODULES
+
+dnl    Must be called after MP4H_LOADABLE_MODULES
 AM_WITH_DMALLOC
 
-mp4h_libs="$LIBS"
+module_list='intl:gettext javascript:mozjs javascript:njs system test wml'
 
-do_module_njs=0
-do_module_mozjs=0
-if test ".$with_modules" = .yes; then
+for m in $module_list
+do
+    eval "_do_module_`echo $m | sed -e 's/[[^a-z]]/_/g'`=0"
+done
+
+test ".$with_modules" = .yes && with_modules=`echo $module_list | sed -e 's/  */,/g'`
+
+if test ".$with_modules" != .no; then
     echo ''
     $shtool echo -e "Checking for %Bloadable modules%b support"
-    AC_PROG_INSTALL
+    AC_LIBTOOL_WIN32_DLL
     AC_LIBLTDL_CONVENIENCE
     AC_ENABLE_SHARED
     AC_DISABLE_STATIC
     AC_LIBTOOL_DLOPEN
+    AC_LIBTOOL_SETUP
     AC_PROG_LIBTOOL
-    AC_SUBST(INCLTDL)
-    AC_SUBST(LIBLTDL)
-    AC_CONFIG_SUBDIRS(libltdl)
-    AC_CHECK_HEADER(njs/jig.h,
-        [AC_CHECK_LIB(njs, js_free, do_module_njs=1)])
-    AC_CHECK_HEADER(mozilla/jsapi.h,
-        [AC_CHECK_LIB(js, JS_NewRuntime, do_module_mozjs=1)])
+
+    case ,$with_modules, in
+      *,intl:gettext,* )
+        if test ".$nls_cv_use_gnu_gettext" = .yes; then
+            _do_module_intl_gettext=1
+        else
+            AC_CHECK_HEADER([libintl.h], [_do_module_intl_gettext=1])
+        fi
+        ;;
+    esac
+    case ,$with_modules, in
+      *,javascript:mozjs,* )
+        AC_CHECK_HEADER([js/jsapi.h],
+            [AC_CHECK_LIB([js], [JS_NewRuntime],
+                          [_do_module_javascript_mozjs=1])])
+        ;;
+    esac
+    case ,$with_modules, in
+      *,javascript:njs,* )
+        AC_CHECK_HEADER([js.h],
+            [AC_CHECK_LIB([js], [js_free],
+                          [_do_module_javascript_njs=1])])
+        ;;
+    esac
+    case ,$with_modules, in
+      *,system,* ) _do_module_system=1 ;;
+    esac
+    case ,$with_modules, in
+      *,test,* ) _do_module_test=1 ;;
+    esac
+    case ,$with_modules, in
+      *,wml,* ) _do_module_wml=1 ;;
+    esac
+
+    for m in $module_list
+    do
+        eval "test .\$_do_module_`echo $m | sed -e 's/[[^a-z]]/_/g'` = .1" || with_modules=`echo ,$with_modules, | sed -e "s/,$m,/,/" -e 's/^,//' -e 's/,$//'`
+    done
+    with_modules=`echo $with_modules | sed -e 's/,/ /g'`
 else
-    #   Remove recursive call to configure in libltdl
-    no_recursion=yes
-    #   Restore libraries
-    LIBS="$mp4h_libs"
+    with_modules=
 fi
-AC_SUBST(do_module_njs)
-AC_SUBST(do_module_mozjs)
+
+test ".$with_modules" = . && with_modules=none
+
+AC_LIB_LTDL
+AC_SUBST(INCLTDL)
+AC_SUBST(LIBLTDL)
+
+AC_MSG_CHECKING([which modules to compile])
+AC_MSG_RESULT([$with_modules])
+
+AM_CONDITIONAL([LOADABLE_MODULES], [test ".$with_modules" != .none])
+
+AM_CONDITIONAL([DO_MODULE_INTL_GETTEXT], [test ".$_do_module_intl_gettext" = .1])
+AM_CONDITIONAL([DO_MODULE_JAVASCRIPT_MOZJS], [test ".$_do_module_javascript_mozjs" = .1])
+AM_CONDITIONAL([DO_MODULE_JAVASCRIPT_NJS], [test ".$_do_module_javascript_njs" = .1])
+AM_CONDITIONAL([DO_MODULE_SYSTEM], [test ".$_do_module_system" = .1])
+AM_CONDITIONAL([DO_MODULE_TEST], [test ".$_do_module_test" = .1])
+AM_CONDITIONAL([DO_MODULE_WML], [test ".$_do_module_wml" = .1])
 
 dnl  This line is needed for Debian builds
 AC_SUBST(CFLAGS)
 
 AC_CONFIG_FILES([
    Makefile
+   intl/Makefile
    pcre/Makefile
    lib/Makefile
    src/Makefile
-   packages/Makefile
-   packages/WML/Makefile
+   po/Makefile.in
    modules/Makefile
+   modules/WML/Makefile
    modules/example/Makefile
-   modules/exec/Makefile
-   modules/mozjs/Makefile
-   modules/njs/Makefile
+   modules/system/Makefile
+   modules/intl/Makefile
+   modules/javascript/Makefile
    doc/Makefile
    tests/Makefile
 ])

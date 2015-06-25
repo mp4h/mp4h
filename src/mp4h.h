@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -132,6 +132,7 @@ char *mktemp ();
 #endif
 
 /*  Last character of a string.  */
+/*  WARNING:  do not apply this macro to a null string!   */
 #define LAST_CHAR(Text) *(Text + strlen (Text) - 1)
 
 
@@ -198,6 +199,7 @@ typedef struct _token_data token_data;
 
 /* Memory allocation.  */
 voidstar xmalloc __P ((size_t));
+voidstar xcalloc __P ((size_t, size_t));
 voidstar xrealloc __P ((voidstar , size_t));
 void xfree __P ((voidstar));
 char *xstrdup __P ((const char *));
@@ -250,6 +252,8 @@ extern FILE *debug;
 #define DEBUG_TRACE_INPUT 256
 /* x: add call id to trace output */
 #define DEBUG_TRACE_CALLID 512
+/* m: trace module loading */
+#define DEBUG_TRACE_MODULES 1024
 
 /* V: very verbose --  print everything */
 #define DEBUG_TRACE_VERBOSE 1023
@@ -629,10 +633,10 @@ struct search_path_info
 {
   search_path *list;            /* the list of path directories */
   search_path *list_end;        /* the end of same */
+  search_path *sys;             /* system path directories */
+  search_path *sys_end;         /* the end of same */
   int max_length;               /* length of longest directory name */
 };
-
-void search_path_add __P ((struct search_path_info *, const char *));
 
 
 
@@ -668,6 +672,7 @@ typedef void module_finish_t __P ((void));
 
 typedef voidstar module_func __P ((const char *));
 
+void module_init __P ((void));
 void library_load __P ((const char *, struct obstack *));
 void module_load __P ((const char *, struct obstack *));
 void module_unload_all __P ((void));

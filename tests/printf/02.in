@@ -1,0 +1,5 @@
+<printf "foo bar" baz quux />
+<printf "foo %2$s bar" baz quux />
+<printf "foo bar %2$s" baz quux />
+<printf "foo %2$s bar %1$s" baz quux />
+<printf "%3$s foo %2$s bar %1$s" baz quux />

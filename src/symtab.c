@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -258,8 +258,8 @@ generic_lookup (const char *name, symbol_lookup mode, boolean caseless)
 
     default:
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Illegal mode to symbol_lookup ()")));
-      abort ();
+        "INTERNAL ERROR: Illegal mode to symbol_lookup ()"));
+      exit (1);
     }
   xfree ((voidstar) lcname);
   return sym;
@@ -350,7 +350,10 @@ symtab_debug (void)
       s = lookup_symbol (text, SYMBOL_LOOKUP);
 
       if (s == NULL)
-        printf (_("Name `%s' is unknown\n"), text);
+        {
+          printf (_("Name `%s' is unknown"), text);
+          printf ("\n");
+        }
 
       if (delete)
         (void) lookup_symbol (text, SYMBOL_DELETE);

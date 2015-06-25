@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -286,7 +286,7 @@ remove_special_chars (char *s, boolean restore_quotes)
 
   /*  For efficiency reason, this loop is divided into 2 parts.
       Until a special character is removed, there is nothing to do.
-      After that, string is shifyed.  */
+      After that, string is shifted.  */
   if (restore_quotes)
     {
       for ( ; *cp != '\0' && !(IS_GROUP (*cp)); cp++)

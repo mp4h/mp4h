@@ -90,7 +90,7 @@
 
 =head1 VERSION
 
-This documentation describes <get-var package /> version <get-var version />.
+This documentation describes <get-var package /> version <__version__ />.
 
 </define-tag>
 

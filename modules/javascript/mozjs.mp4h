@@ -1,0 +1,7 @@
+
+<load library="libmozjs" module="javascript:mozjs">
+
+<javascript>
+print("ok");
+for (i=10; i>0; i--) print(i);
+</javascript>

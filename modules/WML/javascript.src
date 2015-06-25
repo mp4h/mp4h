@@ -1,0 +1,54 @@
+;;;
+;;;  WML:javascript - Standard Tags for Javascript Support
+;;;
+;;;  Package from WML <URL:http://www.engelschall.com/sw/wml/>
+;;;  Derived from wml::std::tags - Standard Tags
+;;;  Copyright (c) 1997 Ralf S. Engelschall, All Rights Reserved. 
+;;;
+
+;;;
+;;;   Support-Tag for protected Client-Side JavaScript
+;;;
+<define-tag javascript endtag=required whitespace=delete>
+<preserve defer src version language type />
+<set-var defer=* />
+<set-var %attributes />
+<defvar language "JavaScript<get-var version />" />
+<defvar type "text/javascript" />
+<script type="<get-var type />" language="<get-var language />"<dnl />
+   <ifeq "<get-var src />" "" "" " src=\"<get-var src />\"" /><dnl />
+   <ifeq "<get-var defer />" "*" "" " defer" />>
+<group "
+<!-- Hiding the code
+<subst-in-string "%Ubody" "^\n*(.*[^\n])\n*$" "\\1" singleline=true />
+// done hiding -->
+" />
+</script>
+<restore  defer src version language type />
+</define-tag>
+
+##EOF##
+__END__
+
+=head1 NAME
+
+WML:javascript - Standard Tags for Javascript Support
+
+=head1 SYNOPSIS
+
+ <use name="WML:javascript" />
+
+ <javascript [defer]> ... </javascript>
+
+=head1 DESCRIPTION
+
+This include file defines some standard support tags one needs all the time.
+
+=head1 AUTHOR
+
+ Ralf S. Engelschall
+ rse@engelschall.com
+ www.engelschall.com
+
+=cut
+

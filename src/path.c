@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -32,46 +32,88 @@
 
 #include "mp4h.h"
 
+#define DEBUG_INCL
+#undef DEBUG_INCL
+
 static struct search_path_info dirpath; /* the list of path directories */
 
 
-void
-search_path_add (struct search_path_info *info, const char *dir)
+static void
+search_path_add (struct search_path_info *info, const char *dir,
+                const int dirlen, const int userdef)
 {
   search_path *path;
 
-  if (*dir == '\0')
-    dir = ".";
-
   path = (struct search_path *) xmalloc (sizeof (struct search_path));
   path->next = NULL;
-  path->len = strlen (dir);
-  path->dir = xstrdup (dir);
+  if (*dir == '\0')
+    {
+      path->len = 1;
+      path->dir = xstrdup (".");
+    }
+  else
+    {
+      if (-1 == dirlen)
+        {
+          path->len = strlen (dir);
+          path->dir = xstrdup (dir);
+        }
+      else
+        {
+          path->len = dirlen;
+          path->dir = (char *) xcalloc (dirlen + 1, 1);
+          strncpy ((char *) path->dir, dir, dirlen);
+        }
+    }
 
   if (path->len > info->max_length) /* remember len of longest directory */
     info->max_length = path->len;
 
-  if (info->list_end == NULL)
-    info->list = path;
+  if (userdef)
+    {
+#ifdef DEBUG_INCL
+      fprintf (stderr, "search_path_add user (%s);\n", path->dir);
+#endif
+      path->next = info->sys;
+      if (info->list_end == NULL)
+        info->list = path;
+      else
+        info->list_end->next = path;
+      info->list_end = path;
+    }
   else
-    info->list_end->next = path;
-  info->list_end = path;
+    {
+#ifdef DEBUG_INCL
+      fprintf (stderr, "search_path_add sys (%s);\n", path->dir);
+#endif
+      if (info->sys_end == NULL)
+        info->sys = path;
+      else
+        info->sys_end->next = path;
+      info->sys_end = path;
+    }
 }
 
 static void
-search_path_env_init (struct search_path_info *info, const char *path)
+search_path_env_init (struct search_path_info *info, const char *path,
+                const int userdef)
 {
   char *path_end;
 
   if (info == NULL || path == NULL)
     return;
 
+#ifdef DEBUG_INCL
+  fprintf (stderr, "search_path_env_init (%s);\n", path);
+#endif
+
   do
     {
       path_end = strchr (path, ':');
       if (path_end)
-        *path_end = '\0';
-      search_path_add (info, path);
+        search_path_add (info, path, (int) (path_end - path), userdef);
+      else
+        search_path_add (info, path, -1, userdef);
       path = path_end + 1;
     }
   while (path_end);
@@ -83,17 +125,19 @@ include_init (void)
 {
   dirpath.list = NULL;
   dirpath.list_end = NULL;
-  /* This directory is always searched for packages */
-  dirpath.max_length = strlen (PKGDATADIR);
+  dirpath.sys = NULL;
+  dirpath.sys_end = NULL;
+  dirpath.max_length = strlen (MP4HLIBDIR);
+  /*   dirpath.sys must be initialized first.  */
+  search_path_env_init (&dirpath, MP4HLIBDIR, 0);
+  /*   set dirpath.list to "."  */
+  search_path_add (&dirpath, "", -1, 1);
 }
 
 void
 include_deallocate (void)
 {
   search_path *path, *path_next;
-
-  if (!dirpath.list)
-    return;
 
   path = dirpath.list;
   while (path)
@@ -111,18 +155,14 @@ include_deallocate (void)
 void
 include_env_init (void)
 {
-  search_path_env_init (&dirpath, getenv ("MP4HPATH"));
+  search_path_env_init (&dirpath, getenv ("MP4HLIB"), 1);
 }
 
 
 void
 add_include_directory (const char *dir)
 {
-  search_path_add (&dirpath, dir);
-
-#ifdef DEBUG_INCL
-  fprintf (stderr, "add_include_directory (%s);\n", dir);
-#endif
+  search_path_add (&dirpath, dir, -1, 1);
 }
 
 FILE *
@@ -145,6 +185,7 @@ path_search (const char *dir, char **expanded_name)
   if (*dir == '/')
     return NULL;
 
+  /* Look into user-defined path directories.  */
   name = (char *) xmalloc (dirpath.max_length + 1 + strlen (dir) + 1);
   for (incl = dirpath.list; incl != NULL; incl = incl->next)
     {
@@ -160,30 +201,11 @@ path_search (const char *dir, char **expanded_name)
       if (fp != NULL)
         {
           if (debug_level & DEBUG_TRACE_PATH)
-            DEBUG_MESSAGE2 (_("Path search for `%s' found `%s'"), dir, name);
+            DEBUG_MESSAGE2 ("Path search for `%s' found `%s'", dir, name);
 
           if (expanded_name != NULL)
             *expanded_name = xstrdup (name);
           break;
-        }
-    }
-
-  if (fp == NULL)
-    {
-      sprintf (name, "%s/%s", PKGDATADIR, dir);
-
-#ifdef DEBUG_INCL
-      fprintf (stderr, "path_search (%s) -- trying %s\n", dir, name);
-#endif
-
-      fp = fopen (name, "r");
-      if (fp != NULL)
-        {
-          if (debug_level & DEBUG_TRACE_PATH)
-            DEBUG_MESSAGE2 (_("Path search for `%s' found `%s'"), dir, name);
-
-          if (expanded_name != NULL)
-            *expanded_name = xstrdup (name);
         }
     }
 

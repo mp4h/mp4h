@@ -8,12 +8,85 @@
   information about every single change.
   ___________________________________________________________________________
 
+  Changes between 1.3.0 and 1.3.1:
+
+    *) Fix uninitialized variables in source code (10-Jan-2003):
+       The LAST_CHAR macro must not be applied to a null string.
+       Fortunately there does not seem to cause trouble here.
+       [Denis Barbier]
+
+    *) Fix <directory-contents> (18-Oct-2002):
+       Remove trailing newline.
+       [Ralf Vissers <ravis@web.de>]
+
+    *) Fix memory error in <array-shift> (27-Sep-2002):
+       Some argument checks were missing in <array-shift> and could
+       cause memory fault.
+       [Jean-Michel Sauvage <jms.debian@club-internet.fr>]
+
+  Changes between 1.2.4 and 1.3.0:
+
+    *) Replace configure flag about modules (06-Jul-2002):
+       The --enable-modules flag is replaced by --with-modules, ans it
+       now takes an optional argument which is the list of modules to
+       install.
+       [Denis Barbier]
+
+    *) New <printf> tag (04-Jul-2002):
+       It currently supports %s flag character, with $ extension.
+       [Denis Barbier]
+
+    *) Improve debugging for module loading (01-Jul-2002):
+       The new -dm debugging flag gives information when loading modules.
+       [Denis Barbier]
+
+    *) Revamp module management (19-Jun-2002):
+       Modules and packages are extensions for mp4h.  The former refered
+       to shared libraries whereas the latter contain macros.
+       Modules are loaded with <load> tag, and packages via the <use> tag.
+       But this is confusing, because user had to know module internals
+       to determine how to call it.
+       These notions are now merged: every module must also have an
+       associated package file, whose only task is to load shared library.
+       Thus end-user only calls <use> macro, and <load> is hidden.
+       the MP4HLIB environment variable may be used to set run-time
+       search paths.
+       [Denis Barbier]
+
+    *) Use Automake (16-Jun-2002):
+       Eventually Automake is back.
+       [Denis Barbier]
+
+    *) Add support for i18n (16-Jun-2002):
+       Add gettext support.
+       [Denis Barbier]
+
+    *) Upgrade to PCRE 3.9 (15-Jun-2002):
+       [Denis Barbier]
+
+    *) Add intl:gettext module (13-Jun-2002):
+       This module is an interface for gettext functions.
+       [Denis Barbier]
+
+    *) Fix module detection (18-Mar-2002):
+       There were several bugs which caused failure when multiple paths
+       were defined in MP4HMODPATH.
+       [Denis Barbier]
+
+    *) Upgraded to GNU shtool 1.6.0 (06-Mar-2002):
+       [Denis Barbier]
+
+    *) Fix literals (06-Mar-2002):
+       mp4h 1.2.4 does not handle <@[ ]@> quotes as expected, they
+       were simply discarded.
+       [Denis Barbier]
+
   Changes between 1.2.3 and 1.2.4:
 
     *) Run autoconf in libltdl/ subdirectory (02-Mar-2002):
        The toplevel configure script could fail due to autoconf
        version mismatch.
-       [Guido Draheim <<guidod-2002-@gmx.de>]
+       [Guido Draheim <guidod-2002-@gmx.de>]
 
     *) Fix <attributes-extract> and <attributes-remove> tags (11-Jan-2002):
        Valueless attributes in these tags crashed mp4h.

@@ -1,0 +1,223 @@
+public {
+#include "mp4h.h"
+};
+
+native {
+/* 
+ * mp4h extension for NJS
+ * Copyright (c) 2001 Anders Dinsen
+ *
+ * Author: Anders Dinsen <anders@dinsen.net>
+ */
+
+/*
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+ * MA 02111-1307, USA
+ */
+
+/*
+ * $Source: /cvsroot/mp4h/mp4h/modules/javascript/mp4h-njs.jsi,v $
+ * $Id: mp4h-njs.jsi,v 1.1 2002/07/01 22:12:26 barbier Exp $
+ */
+};
+
+#package(mp4h)
+#entrypoint(mp4h_MP4H)
+
+/** 
+ * Static object providing access to mp4h features and internals. It is
+ * available from JavaScript code that executes within mp4h. It provides
+ * access to the features that are specific for code executing within
+ * mp4h such as variables, features etc.
+ */
+class MP4H {
+
+  /**
+   * The character value of a left quote internally in mp4h.
+   * If output is surrounded by left and right quotes, it will
+   * not be interpreted by mp4h.
+   */
+  static string property LQUOTE {
+    [[get]] {
+      /* TODO */
+    };
+    readonly;
+    dontdelete;
+  };
+
+  /**
+   * The character value of a right quote internally in mp4h.
+   * If output is surrounded by left and right quotes, it will
+   * not be interpreted by mp4h.
+   */
+  static string property RQUOTE {
+  [[get]] {
+      /* TODO */
+    };
+    readonly;
+    dontdelete;
+  };
+
+  /**
+   * Class constructor 
+   */ 
+  static new () {
+    /* TODO */
+  };
+
+
+  /**
+   * Read and parse an mp4h package if not already loaded.
+   *
+   * @param package     The name of the package to read.
+   */ 
+  static undefined function use(string package) {
+    /* TODO */
+  };
+
+  /**
+   * Load an external module at runtime.
+   *
+   * @param module      The name of the module to load.
+   */ 
+  static undefined function loadModule(string module) {
+    /* TODO */
+  };
+
+  /**
+   * Set the quotes that can be used to wrap in contents that
+   * should not be parsed.
+   *
+   * @param left        The left quote.
+   * @param right       The right quote.
+   * @param visible     True if the quotes must be visible.
+   */ 
+  static undefined function setQuotes(string left, string right, boolean visible) {
+    /* TODO */
+  };
+
+
+  /**
+   * Write an error message in the style of mp4h error messages.
+   *
+   * @param message       The message to output.
+   */ 
+  static undefined function warning(string message) {
+    /* TODO */
+  };
+
+  /**
+   * Exit the interpreter and mp4h with an error code.
+   *
+   * @param status        The status code to exit with.
+   * @param message       A status message to output.
+   */ 
+  static undefined function exit(int status, string message) {
+    /* TODO */
+  };
+
+  /**
+   * Save the argument text until EOF has been seen.
+   *
+   * @param text        The text to save until EOF.
+   */ 
+  static undefined function atEndOfFile(string text) {
+    /* TODO */
+  };
+
+
+  /**
+   * Returns the value of an MP4H variable.
+   *
+   * @param name        The name of the variable.
+   */ 
+  static string function getVar(string name) {
+    /* TODO */
+  };
+
+  /**
+   * Assigns a value to an MP4H variable.
+   *
+   * @param name        The name of the variable.
+   * @param value       The string to be assigned to the variable.
+   */ 
+  static undefined function setVar(string name, string value) {
+    /* TODO */
+  };
+
+  /**
+   * Returns true if a variable with the given name exists.
+   *
+   * @param name        The name of the variable.
+   */ 
+  static boolean function varExists(string name) {
+    /* TODO */
+  };
+
+
+  /**
+   * Define a user tag to mp4h. The tag is expressed as mp4h macros.
+   * Tags can be defined entirely in JavaScript with defineJSTag.
+   *
+   * @param name        The name of the new tag. If the name of an existing
+   *                    tag is given, its definition is silently overwritten.
+   * @param definition  The definition of the tag.
+   * @param verbatimAttributes
+   *                    The attributes to the tag are not expanded on
+   *                    invocation.
+   * @param container   The tag is a container
+   *                    (requires &lt;tag&gt;...&lt;/tag&gt;)
+   * @param deleteWhitespace
+   *                    Whitespace in the tag definition is deleted
+   * 
+   */ 
+  static undefined function defineUserTag(
+    string name, 
+    string definition,
+    boolean verbatimAttributes,
+    boolean container,
+    boolean deleteWhitespace
+  ) {
+    /* TODO */
+  };
+
+
+  /**
+   * Send the following output to a specific diversion.
+   *
+   * @param divnum      The diversion number.
+   */ 
+  static undefined function divert(int divnum) {
+    /* TODO */
+  };
+
+  /**
+   * Expand the contents of the numbered diversion in the output
+   * stream.
+   *
+   * @param divnum      The diversion number.
+   */ 
+  static undefined function undivert(int divnum) {
+    /* TODO */
+  };
+
+  /**
+   * Returns the number of the current diversion.
+   */ 
+  static int function divnum() {
+    /* TODO */
+  };
+};
+

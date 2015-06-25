@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -101,7 +101,7 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
         text++;
       else
         MP4HERROR ((warning_status, 0,
-          _("INTERNAL ERROR: macro has no leading '<' in expand_token ()")));
+          "INTERNAL ERROR: macro has no leading '<' in expand_token ()"));
 
       /* macro names must begin with a letter or an underscore.
          If another character is found, this string is not a
@@ -144,7 +144,7 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
         text++;
       else
         MP4HERROR ((warning_status, 0,
-          _("INTERNAL ERROR: entity has no leading '&' in expand_token ()")));
+          "INTERNAL ERROR: entity has no leading '&' in expand_token ()"));
 
       if (IS_ALPHA (*text))
         {
@@ -171,8 +171,8 @@ expand_token (struct obstack *obs, read_type expansion, token_type t,
 
     default:
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Bad token type in expand_token ()")));
-      abort ();
+        "INTERNAL ERROR: Bad token type in expand_token ()"));
+      exit (1);
     }
 }
 
@@ -302,11 +302,15 @@ expand_argument (struct obstack *obs, read_type expansion, token_data *argp,
 
         default:
           MP4HERROR ((warning_status, 0,
-            _("INTERNAL ERROR: Bad token type in expand_argument ()")));
-          abort ();
+            "INTERNAL ERROR: Bad token type in expand_argument ()"));
+          exit (1);
         }
 
-      *last_char_ptr = LAST_CHAR (TOKEN_DATA_TEXT (&td));
+      text = TOKEN_DATA_TEXT (&td);
+      if (*text == '\0')
+        *last_char_ptr = '\0';
+      else
+        *last_char_ptr = LAST_CHAR (text);
       t = next_token (&td, expansion, in_string);
       rc = 1;
     }
@@ -351,7 +355,7 @@ collect_arguments (char *symbol_name, read_type expansion,
           if (internal_abort)
             {
               MP4HERROR ((EXIT_FAILURE, 0,
-                _("ERROR:%s:%d: EOF when reading argument of the `%s' tag"),
+                _("ERROR:%s:%d: EOF when reading argument of the <%s> tag"),
                      CURRENT_FILE_LINE, symbol_name));
             }
 
@@ -369,8 +373,7 @@ collect_arguments (char *symbol_name, read_type expansion,
   else
     {
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Bad tag expression in `%s'"),
-             CURRENT_FILE_LINE, symbol_name));
+        "INTERNAL ERROR: Bad tag expression in `%s'", symbol_name));
     }
   return (IS_SLASH(last_char));
 }
@@ -399,7 +402,7 @@ collect_body (char *symbol_name, read_type expansion,
         case TOKEN_EOF:
         case TOKEN_MACDEF:
           MP4HERROR ((EXIT_FAILURE, 0,
-            _("ERROR:%s:%d: EOF when reading body of the `%s' tag"),
+            _("ERROR:%s:%d: EOF when reading body of the <%s> tag"),
                  CURRENT_FILE_LINE, symbol_name));
           break;
 
@@ -506,8 +509,8 @@ collect_body (char *symbol_name, read_type expansion,
 
         default:
           MP4HERROR ((warning_status, 0,
-            _("INTERNAL ERROR:%d: Bad token type in collect_body ()"), t));
-          abort ();
+            "INTERNAL ERROR:%d: Bad token type in collect_body ()", t));
+          exit (1);
         }
     }
 }
@@ -541,8 +544,8 @@ call_macro (symbol *sym, struct obstack *obs, int argc, token_data **argv,
 
     default:
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Bad symbol type in call_macro ()")));
-      abort ();
+        "INTERNAL ERROR: Bad symbol type in call_macro ()"));
+      exit (1);
     }
   if (SYMBOL_HOOK_END (sym))
     obstack_grow (obs, SYMBOL_HOOK_END (sym),

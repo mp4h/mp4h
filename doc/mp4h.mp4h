@@ -1,10 +1,9 @@
 ;;;
 ;;;  mp4h.mp4h -- Documentation for mp4h
-;;;  Copyright 2000-2002, Denis Barbier   <barbier@imacs.polytechnique.fr>
+;;;  Copyright 2000-2003, Denis Barbier   <barbier@linuxfr.org>
 ;;;
 
 <set-var package=mp4h />
-<set-var version=1.2.4 />
 <set-var title="mp4h - Macro Processor for HTML Documents" />
 
 <defvar srcdir "." />
@@ -40,8 +39,8 @@ written by Brian J. Fox,  Even if both syntaxes look similar, source
 code is completely different.  Indeed, a subset of &Meta-HTML; was used
 as a part of a more complex program, &WML;
 (<URL src="http://www.engelschall.com/sw/wml/" name="Website Meta Language" />)
-written by Ralf S. Engelschall and which i maintain since January 1999.
-For licensing reasons, it was hard to hack &Meta-HTML; and so i decided
+written by Ralf S. Engelschall and which I maintain since January 1999.
+For licensing reasons, it was hard to hack &Meta-HTML; and so I decided
 to write my own macro-processor.
 </para>
 
@@ -146,7 +145,7 @@ NUMBER is a combination of
 </option-list>
 
 <para>
-In version <get-var version />, default value is 3114=2+8+32+1024+2048.
+In version <__version__ />, default value is 3114=2+8+32+1024+2048.
 </para>
 
 <subsection>Limits control</subsection>
@@ -184,6 +183,7 @@ Flags are any of:
 <option f>say current input file name</option>
 <option l>say current input line number</option>
 <option p>show results of path searches</option>
+<option m>show results of module operations</option>
 <option i>show changes in input files</option>
 <option V>shorthand for all of the above flags</option>
 </option-list>
@@ -563,7 +563,7 @@ but there is a more elegant one:
 
 <para>
 When there are subexpressions within regular expressions, they are
-printed instead of the whole expression.  Note also that i put a colon
+printed instead of the whole expression.  Note also that I put a colon
 before the prefix in order not to mix them with XML namespaces.
 </para>
 
@@ -1036,6 +1036,23 @@ Comparison is case insensitive.
 <example>
 1:<char-offsets "abcdAbCdaBcD" a />
 2:<char-offsets "abcdAbCdaBcD" a caseless=true />
+</example>
+
+<tag:description printf>
+<var format />
+<var string />
+[<var string /> ...]
+</tag:description>
+
+<para>
+Prints according to a given format. Currently only the
+<command %s /> flag character is recognized, and  <command $ /> extension
+is supported to change order of arguments.
+</para>
+
+<example>
+1:<printf "foo %s bar %s" baz 10 />
+2:<printf "foo %2$s bar %1$s" baz 10 />
 </example>
 
 ###
@@ -1907,8 +1924,10 @@ This attribute cannot be combined with the command attribute.
 <para>
 Files are first searched in current directory, then in
 directories specified on command-line with the <optflag I /> option, next
-in directories listed in the MP4HPATH environment variable, and last
-under the compile-time location (<texttt>/usr/local/share/mp4h</texttt>
+in directories listed in the <texttt>MP4HLIB</texttt> environment
+variable (it used to be <texttt>MP4HPATH</texttt> for versions prior to
+1.3), and last under the compile-time location
+(<texttt>/usr/local/lib/mp4h/<__version__ />:/usr/local/share/mp4h</texttt>
 by default).
 </para>
 </attributes:item>
@@ -2280,8 +2299,10 @@ the decimal point. Default is to print numbers in the "%6.f" format.
 It is possible to include external files with the <command include />
 command.  Files are first searched in current directory, then in
 directories specified on command-line with the <optflag I /> option, next
-in directories listed in the MP4HPATH environment variable, and last
-under the compile-time location (<texttt>/usr/local/share/mp4h</texttt>
+in directories listed in the <texttt>MP4HLIB</texttt> environment
+variable (it used to be <texttt>MP4HPATH</texttt> for versions prior to
+1.3), and last under the compile-time location
+(<texttt>/usr/local/lib/mp4h/<__version__ />:/usr/local/share/mp4h</texttt>
 by default).
 </para>
 
@@ -2292,19 +2313,12 @@ first, package name has no suffix; and more important, a package cannot
 be loaded more than once.
 </para>
 
-<para>
-Last but not least, it will be possible in near future to add compiled
-modules.  Like almost everything, this feature comes with &m4; and
-looks very nice.  This is a work in progress, there is an exemple of
-such a module in &mp4h; sources.
-</para>
-
 <section alt="Details about macro expansion">Macro expansion</section>
 
 <para>
 This part describes internal mechanism of macro expansion.
 It must be as precise and exhaustive as possible so
-<URL src="mailto:barbier@imacs.polytechnique.fr" name="contact me" />
+<URL src="mailto:barbier@linuxfr.org" name="contact me" />
 if you have any suggestion.
 </para>
 
@@ -2766,7 +2780,7 @@ tend to zero when XHTML syntax becomes more familiar.
 <section>Author</section>
 
 <para>
-<URL src="mailto:barbier@imacs.polytechnique.fr"
+<URL src="mailto:barbier@linuxfr.org"
      name="Denis Barbier" />
 </para>
 

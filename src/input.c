@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -266,7 +266,7 @@ static void
 file_clean(void)
 {
   if (debug_level & DEBUG_TRACE_INPUT)
-    DEBUG_MESSAGE2 (_("Input reverted to %s, line %d"),
+    DEBUG_MESSAGE2 ("Input reverted to %s, line %d",
                     isp->u.u_f.name, isp->u.u_f.lineno);
 
   fclose (isp->u.u_f.file);
@@ -303,7 +303,7 @@ push_file (FILE *fp, const char *title)
     }
 
   if (debug_level & DEBUG_TRACE_INPUT)
-    DEBUG_MESSAGE1 (_("Input read from %s"), title);
+    DEBUG_MESSAGE1 ("Input read from %s", title);
 
   i = (input_block *) obstack_alloc (current_input,
                                      sizeof (struct input_block));
@@ -462,8 +462,8 @@ push_string_init (void)
   if (next != NULL)
     {
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Recursive push_string!")));
-      abort ();
+        "INTERNAL ERROR: Recursive push_string!"));
+      exit (1);
     }
 
   next = (input_block *) obstack_alloc (current_input,
@@ -598,8 +598,8 @@ init_macro_token (token_data *td)
   if (isp->funcs->read_func != macro_read)
     {
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Bad call to init_macro_token ()")));
-      abort ();
+        "INTERNAL ERROR: Bad call to init_macro_token ()"));
+      exit (1);
     }
 
   TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
@@ -638,8 +638,8 @@ next_char (void)
       else
         {
           MP4HERROR ((warning_status, 0,
-            _("INTERNAL ERROR: Input stack botch in next_char ()")));
-          abort ();
+            "INTERNAL ERROR: Input stack botch in next_char ()"));
+          exit (1);
         }
 
       /* End of input source --- pop one level.  */
@@ -675,8 +675,8 @@ peek_input (void)
       else
         {
           MP4HERROR ((warning_status, 0,
-            _("INTERNAL ERROR: Input stack botch in peek_input ()")));
-          abort ();
+            "INTERNAL ERROR: Input stack botch in peek_input ()"));
+          exit (1);
         }
 
       /* End of input source --- pop one level.  */
@@ -1009,42 +1009,64 @@ next_token (token_data *td, read_type expansion, boolean in_string)
       (void) next_char ();
       if (IS_TAG(ch))             /* ESCAPED WORD */
         {
-          obstack_1grow (&token_stack, ch);
-          ch = peek_input ();
-          if (ch != CHAR_EOF)
+          if (lquote.length > 0 && MATCH (ch, lquote.string))
             {
-              if (ch == '/')
+              if (visible_quotes || expansion == READ_ATTR_VERB
+                  || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
+                obstack_grow (&token_stack, lquote.string, lquote.length);
+              while ((ch = next_char ()) != CHAR_EOF)
                 {
-                  obstack_1grow (&token_stack, '/');
-                  (void) next_char ();
-                  ch = peek_input ();
-                }
-              if (IS_ALPHA(ch))
-                {
-                  ch = next_char ();
+                  if (rquote.length > 0 && MATCH (ch, rquote.string))
+                    break;
                   obstack_1grow (&token_stack, ch);
-                  while ((ch = next_char ()) != CHAR_EOF && IS_ALNUM(ch))
+                }
+              if (visible_quotes || expansion == READ_ATTR_VERB
+                  || expansion == READ_ATTR_ASIS || expansion == READ_BODY)
+                {
+                  obstack_grow (&token_stack, rquote.string, rquote.length);
+                  type = TOKEN_STRING;
+                }
+              else
+                type = TOKEN_QUOTED;
+            }
+          else
+            {
+              obstack_1grow (&token_stack, ch);
+              if ((ch = peek_input ()) != CHAR_EOF)
+                {
+                  if (ch == '/')
                     {
-                      obstack_1grow (&token_stack, ch);
-                    }
-                  if (ch == '*')
-                    {
-                      obstack_1grow (&token_stack, ch);
+                      obstack_1grow (&token_stack, '/');
+                      (void) next_char ();
                       ch = peek_input ();
                     }
-                  else
-                    unget_input(ch);
+                  if (IS_ALPHA(ch))
+                    {
+                      ch = next_char ();
+                      obstack_1grow (&token_stack, ch);
+                      while ((ch = next_char ()) != CHAR_EOF && IS_ALNUM(ch))
+                        {
+                          obstack_1grow (&token_stack, ch);
+                        }
+                      if (ch == '*')
+                        {
+                          obstack_1grow (&token_stack, ch);
+                          ch = peek_input ();
+                        }
+                      else
+                        unget_input(ch);
 
-                  if (IS_SPACE(ch) || IS_CLOSE(ch) || IS_SLASH (ch))
-                    type = TOKEN_WORD;
+                      if (IS_SPACE(ch) || IS_CLOSE(ch) || IS_SLASH (ch))
+                        type = TOKEN_WORD;
+                      else
+                        type = TOKEN_STRING;
+                    }
                   else
                     type = TOKEN_STRING;
                 }
               else
-                type = TOKEN_STRING;
+                type = TOKEN_SIMPLE;        /* escape before eof */
             }
-          else
-            type = TOKEN_SIMPLE;        /* '<' before eof */
         }
       else if (IS_CLOSE(ch))
         {
@@ -1129,7 +1151,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
       else if (IS_RQUOTE(ch))
         {
           MP4HERROR ((EXIT_FAILURE, 0,
-             _("INTERNAL ERROR: CHAR_RQUOTE found.")));
+             "INTERNAL ERROR: CHAR_RQUOTE found."));
         }
       else if (IS_LQUOTE(ch))             /* QUOTED STRING */
         {
@@ -1139,7 +1161,7 @@ next_token (token_data *td, read_type expansion, boolean in_string)
               ch = next_char ();
               if (ch == CHAR_EOF)
                 MP4HERROR ((EXIT_FAILURE, 0,
-                   _("INTERNAL ERROR: EOF in string")));
+                   "INTERNAL ERROR: EOF in string"));
 
               if (IS_BGROUP(ch) || IS_EGROUP(ch))
                 continue;
@@ -1182,8 +1204,8 @@ next_token (token_data *td, read_type expansion, boolean in_string)
 
             default:
               MP4HERROR ((warning_status, 0,
-                _("INTERNAL ERROR: Unknown expansion type")));
-              abort ();
+                "INTERNAL ERROR: Unknown expansion type"));
+              exit (1);
           }
         }
       else if (ch == '\\')
@@ -1240,8 +1262,8 @@ next_token (token_data *td, read_type expansion, boolean in_string)
 
             default:
               MP4HERROR ((warning_status, 0,
-                _("INTERNAL ERROR: Unknown expansion type")));
-              abort ();
+                "INTERNAL ERROR: Unknown expansion type"));
+              exit (1);
           }
         }
       else /* EVERYTHING ELSE */
@@ -1301,8 +1323,8 @@ read_file_verbatim (struct obstack *obs)
   else
     {
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: Input stack botch in read_file_verbatim ()")));
-      abort ();
+        "INTERNAL ERROR: Input stack botch in read_file_verbatim ()"));
+      exit (1);
     }
   push_string_finish (READ_BODY);
 }
@@ -1367,7 +1389,7 @@ print_token (const char *s, token_type t, token_data *td)
 
     default:
       MP4HERROR ((warning_status, 0,
-        _("INTERNAL ERROR: unknown token in print_token")));
+        "INTERNAL ERROR: unknown token in print_token"));
       break;
     }
   return 0;

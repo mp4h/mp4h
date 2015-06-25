@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -36,9 +36,6 @@
 #define MODULES_UNINITIALISED -4444
 
 #include "ltdl.h"
-
-#define DEBUG_MODULES
-#undef DEBUG_MODULES
 
 /* 
  * This file implements dynamic modules in GNU m4.  A module is a
@@ -100,11 +97,11 @@ static char *add_suffix_searchdir __P ((const char *, const char *));
 
 /* 
  * Initialisation.  Currently the module search path in path.c is
- * initialised from MP4HMODPATH.  Only absolute path names are accepted to
+ * initialised from MP4HLIB.  Only absolute path names are accepted to
  * prevent the path search of the dlopen library from finding wrong
  * files.
  */
-static void
+void
 module_init (void)
 {
   static int errors = MODULES_UNINITIALISED;
@@ -115,18 +112,21 @@ module_init (void)
 
   errors = lt_dlinit();
 
-  /* If the user set MP4HMODPATH, then use that as the start of libltdls
+  if (errors == 0)
+    errors = lt_dladdsearchdir(".");
+
+  /* If the user set MP4HLIB, then use that as the start of libltdls
    * module search path, else fall back on the default.
    */
   if (errors == 0)
     {
-      char *path = getenv("MP4HMODPATH");
+      char *path = getenv("MP4HLIB");
       if (path != NULL)
 	errors = lt_dladdsearchdir(path);
     }
     
   if (errors == 0)
-    errors = lt_dladdsearchdir(PKGLIBDIR);
+    errors = lt_dladdsearchdir(MP4HLIBDIR);
 
   if (errors != 0)
     {
@@ -136,9 +136,8 @@ module_init (void)
 		_("ERROR: failed to initialise modules: %s"), dlerror));
     }
 
-#ifdef DEBUG_MODULES
-  DEBUG_MESSAGE("Module system initialised.");
-#endif /* DEBUG_MODULES */
+  if (debug_level & DEBUG_TRACE_MODULES)
+    DEBUG_MESSAGE("Module system initialised.");
 }
 
 /* 
@@ -155,18 +154,26 @@ add_suffix_searchdir (const char *oldpath, const char *dir)
   char *new_search_path, *sp, *next, *path;
   int num, len, lendir, offset;
 
+  if (*dir == '/')
+    return xstrdup(dir);
+
   lendir = strlen (dir);
 
   /*   First count paths   */
   cp = oldpath;
-  num = 0;
+  num = 1;
   while (cp)
     {
-      ++num;
-      cp = strchr (cp, LT_PATHSEP_CHAR);
+      if (*cp == LT_PATHSEP_CHAR)
+        {
+          ++num;
+          cp++;
+        }
+      else
+        cp = strchr (cp, LT_PATHSEP_CHAR);
     }
 
-  new_search_path = xmalloc (strlen (oldpath) + num * (lendir + 2) + 1);
+  new_search_path = xmalloc (strlen (oldpath) + num * (lendir + 1) + 2);
   /*   And copies directories  */
   path = xstrdup (oldpath);
   sp = path;
@@ -184,18 +191,18 @@ add_suffix_searchdir (const char *oldpath, const char *dir)
               sp = next + 1;
               continue;
             }
-          len = strlen (sp);
+          len = next - sp;
           *next = '\0';
           ++next;
         }
       else
-        len = next - sp;
+        len = strlen (sp);
       sprintf(new_search_path+offset, "%s/%s%c", sp, dir, LT_PATHSEP_CHAR);
       offset += len + lendir + 2;
       sp = next;
     }
   /*   Remove trailing colon  */
-  *(new_search_path+strlen (new_search_path) - 1) = '\0';
+  *(new_search_path+strlen (oldpath) + num * (lendir + 1)) = '\0';
   xfree ((voidstar) path);
   return new_search_path;
 }
@@ -222,15 +229,25 @@ library_load (const char *libname, struct obstack *obs)
       dir = xmalloc (cp - libname + 1);
       strncpy (dir, libname, cp - libname);
       dir[cp - libname] = '\0';
-      save_path = xstrdup(lt_dlgetsearchpath ());
-      new_search_path = add_suffix_searchdir (save_path, dir);
-      lt_dlsetsearchpath (new_search_path);
-      xfree ((voidstar) new_search_path);
+      save_path = lt_dlgetsearchpath ();
+      if (NULL == save_path)
+        lt_dlsetsearchpath (dir);
+      else
+        {
+          save_path = xstrdup(save_path);
+          new_search_path = add_suffix_searchdir (save_path, dir);
+          lt_dlsetsearchpath (new_search_path);
+          xfree ((voidstar) new_search_path);
+        }
       xfree ((voidstar) dir);
     }
 
   /* Dynamically load the named module. */
   library = lt_dlopenext(lib_name);
+  if (library == NULL)
+    if (debug_level & DEBUG_TRACE_MODULES)
+      DEBUG_MESSAGE2("Error when looking into library `%s': %s",
+                      libname, lt_dlerror());
 
   if (save_path)
     {
@@ -243,12 +260,33 @@ library_load (const char *libname, struct obstack *obs)
       for (list = modules; list != NULL; list = list->next)
 	if (list->handle == library)
 	  {
-#ifdef DEBUG_MODULES
-	    DEBUG_MESSAGE1("library %s handle already seen", libname);
-#endif /* DEBUG_MODULES */
+            if (debug_level & DEBUG_TRACE_MODULES)
+	      DEBUG_MESSAGE1("library `%s' handle already seen", libname);
 	    lt_dlclose(library); /* close the duplicate copy */
 	    return;
 	  }
+    }
+
+  if (library != NULL)
+    {
+      if (debug_level & DEBUG_TRACE_MODULES)
+        {
+          const lt_dlinfo *libinfo = lt_dlgetinfo(library);
+          DEBUG_MESSAGE2("library `%s': loaded ok (=%s)",
+                    libname, libinfo->filename);
+        }
+    }
+  else
+    {
+      /* Couldn't load the library; diagnose and exit. */
+      const char *dlerror = lt_dlerror();
+      if (dlerror == NULL)
+	MP4HERROR ((EXIT_FAILURE, 0,
+		  _("ERROR: cannot find library: `%s'"), libname));
+      else
+	MP4HERROR ((EXIT_FAILURE, 0,
+		  _("ERROR: cannot find library: `%s': %s"),
+		  libname, dlerror));
     }
 }
 
@@ -264,8 +302,6 @@ module_load (const char *modname, struct obstack *obs)
   char *cp, *new_search_path;
   builtin *bp;
 
-  module_init();
-
   /*  If it contains a slash, leading dir is appended to search path.  */
   cp = strrchr(modname, '/');
   if (cp && cp != modname)
@@ -274,15 +310,25 @@ module_load (const char *modname, struct obstack *obs)
       dir = xmalloc (cp - modname + 1);
       strncpy (dir, modname, cp - modname);
       dir[cp - modname] = '\0';
-      save_path = xstrdup(lt_dlgetsearchpath ());
-      new_search_path = add_suffix_searchdir (save_path, dir);
-      lt_dlsetsearchpath (new_search_path);
-      xfree ((voidstar) new_search_path);
+      save_path = lt_dlgetsearchpath ();
+      if (NULL == save_path)
+        lt_dlsetsearchpath (dir);
+      else
+        {
+          save_path = xstrdup(save_path);
+          new_search_path = add_suffix_searchdir (save_path, dir);
+          lt_dlsetsearchpath (new_search_path);
+          xfree ((voidstar) new_search_path);
+        }
       xfree ((voidstar) dir);
     }
 
   /* Dynamically load the named module. */
   module = lt_dlopenext(mod_name);
+  if (NULL == module)
+    if (debug_level & DEBUG_TRACE_MODULES)
+      DEBUG_MESSAGE2("Error when looking into module `%s': %s",
+                      modname, lt_dlerror());
 
   if (save_path)
     {
@@ -295,9 +341,8 @@ module_load (const char *modname, struct obstack *obs)
       for (list = modules; list != NULL; list = list->next)
 	if (list->handle == module)
 	  {
-#ifdef DEBUG_MODULES
-	    DEBUG_MESSAGE1("module %s handle already seen", modname);
-#endif /* DEBUG_MODULES */
+            if (debug_level & DEBUG_TRACE_MODULES)
+	      DEBUG_MESSAGE1("module `%s' handle already seen", modname);
 	    lt_dlclose(module); /* close the duplicate copy */
 	    return;
 	  }
@@ -310,9 +355,8 @@ module_load (const char *modname, struct obstack *obs)
       bp = (builtin*)lt_dlsym(module, "mp4h_macro_table");
       if (bp == NULL)
 	{
-#ifdef DEBUG_MODULES
-	  DEBUG_MESSAGE1("module %s: no symbol mp4h_macro_table", modname);
-#endif /* DEBUG_MODULES */
+          if (debug_level & DEBUG_TRACE_MODULES)
+	    DEBUG_MESSAGE1("module `%s': no symbol mp4h_macro_table", modname);
 	  lt_dlclose(module);
 	  module = NULL;
 	}
@@ -329,10 +373,8 @@ module_load (const char *modname, struct obstack *obs)
 	{
 	  (*init_func)(obs);
 	}
-#ifdef DEBUG_MODULES
-      else
-	DEBUG_MESSAGE1("module %s: no symbol mp4h_init_module", modname);
-#endif /* DEBUG_MODULES */
+      else if (debug_level & DEBUG_TRACE_MODULES)
+	DEBUG_MESSAGE1("module `%s': no symbol mp4h_init_module", modname);
     }
 
 
@@ -342,9 +384,12 @@ module_load (const char *modname, struct obstack *obs)
    */
   if (module != NULL)
     {
-#ifdef DEBUG_MODULES
-      DEBUG_MESSAGE1("module %s: loaded ok", modname);
-#endif /* DEBUG_MODULES */
+      if (debug_level & DEBUG_TRACE_MODULES)
+        {
+          const lt_dlinfo *modinfo = lt_dlgetinfo(module);
+          DEBUG_MESSAGE2("module %s: loaded ok (=%s)",
+                        modname, modinfo->filename);
+        }
 
       list = xmalloc (sizeof (struct module_list));
       list->next = modules;
@@ -385,18 +430,16 @@ module_unload_all(void)
 	{
 	  (*finish_func)();
 
-#ifdef DEBUG_MODULES
-	  DEBUG_MESSAGE1("module %s finish hook called", modules->modname);
-#endif /* DEBUG_MODULES */
+          if (debug_level & DEBUG_TRACE_MODULES)
+	    DEBUG_MESSAGE1("module `%s' finish hook called", modules->modname);
 	}
 
       errors = lt_dlclose (modules->handle);
       if (errors != 0)
 	break;
 
-#ifdef DEBUG_MODULES
-      DEBUG_MESSAGE1("module %s unloaded", modules->modname);
-#endif /* DEBUG_MODULES */
+      if (debug_level & DEBUG_TRACE_MODULES)
+        DEBUG_MESSAGE1("module `%s' unloaded", modules->modname);
 
       next = modules->next;
       xfree ((voidstar) modules);

@@ -1,0 +1,7 @@
+
+<load library="libjs" module="javascript:njs">
+
+<javascript>
+print("ok");
+for (i=10; i>0; i--) print(i);
+</javascript>

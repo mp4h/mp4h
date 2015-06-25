@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -93,8 +93,8 @@ numeric_arg (token_data *macro, const char *arg, boolean warn, int *valuep)
     {
       if (warn)
         MP4HERROR ((warning_status, 0,
-          _("Warning:%s:%d: Non-numeric argument to built-in `%s'"),
-               CURRENT_FILE_LINE, TOKEN_DATA_TEXT (macro)));
+          _("Warning:%s:%d: Argument `%s' non-numeric in the <%s> tag"),
+               CURRENT_FILE_LINE, arg, TOKEN_DATA_TEXT (macro)));
       return FALSE;
     }
   return TRUE;

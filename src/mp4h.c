@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -32,10 +32,6 @@
 #include <error.h>
 
 #include <getopt.h>
-
-#define _SRC_VERSION_C_AS_HEADER_
-#include "version.c"
-#undef _SRC_VERSION_C_AS_HEADER_
 
 /* Enable sync output for /lib/cpp (-s).  */
 int sync_output = 0;
@@ -78,8 +74,8 @@ const char *frozen_file_to_write = NULL;
 /* True when -F flag is passed.  */
 int frozen_dump = 0;
 
-/* The name this program was run with. */
-const char *program_name;
+/* The name this program was run with (needed by ../lib/error.c). */
+const char *program_name = PACKAGE_NAME;
 
 /* If nonzero, display usage information and exit.  */
 static int show_help = 0;
@@ -113,10 +109,10 @@ usage (int status)
 {
   if (status != EXIT_SUCCESS)
     fprintf (stderr, _("Try `%s --help' for more information.\n"),
-             program_name);
+             PACKAGE_NAME);
   else
     {
-      printf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
+      printf (_("Usage: %s [OPTION]... [FILE]...\n"), PACKAGE_NAME);
       fputs (_("\
 Mandatory or optional arguments to long options are mandatory or optional\n\
 for short options too.\n\
@@ -189,6 +185,7 @@ FLAGS is any of:\n\
   f   say current input file name\n\
   l   say current input line number\n\
   p   show results of path searches\n\
+  m   show results of module operations\n\
   i   show changes in input files\n\
   V   shorthand for all of the above flags\n"),
              stdout);
@@ -249,8 +246,6 @@ main (int argc, char *const *argv)
   FILE *fp;
   char *filename;
   int caseless = CASELESS_DEFAULT;
-
-  program_name = argv[0];
 
   debug_init ();
   include_init ();
@@ -383,8 +378,7 @@ main (int argc, char *const *argv)
 
   if (show_version)
     {
-      printf ("%s %s", program_name, mp4h_version.v_long);
-      fputs("\n", stdout);
+      printf ("%s (%s)\n", PACKAGE_STRING, PACKAGE_DATE);
       exit (EXIT_SUCCESS);
     }
 
@@ -401,6 +395,9 @@ main (int argc, char *const *argv)
   caseless_init (caseless);
 #ifdef HAVE_LOCALE_H
   locale_init (LC_ALL, NULL);
+#endif
+#ifdef WITH_MODULES
+  module_init ();
 #endif
   pcre_init ();
 
@@ -445,8 +442,8 @@ main (int argc, char *const *argv)
 
         default:
           MP4HERROR ((warning_status, 0,
-            _("INTERNAL ERROR: Bad code in deferred arguments")));
-          abort ();
+            "INTERNAL ERROR: Bad code in deferred arguments"));
+          exit (1);
         }
 
       next = defines->next;

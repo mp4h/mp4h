@@ -1,5 +1,5 @@
 /* mp4h -- A macro processor for HTML documents
-   Copyright 2000-2001, Denis Barbier
+   Copyright 2000-2003, Denis Barbier
    All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
@@ -142,9 +142,9 @@ produce_frozen_state (const char *name)
               bp = find_builtin_by_addr (SYMBOL_FUNC (sym));
               if (bp == NULL)
                 {
-                  MP4HERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Built-in not found in builtin table!")));
-                  abort ();
+                  MP4HERROR ((warning_status, 0, "\
+INTERNAL ERROR: Built-in not found in builtin table!"));
+                  exit (1);
                 }
               fprintf (file, "F%d,%d\n",
                        (int) strlen (SYMBOL_NAME (sym)),
@@ -155,9 +155,9 @@ INTERNAL ERROR: Built-in not found in builtin table!")));
               break;
 
             default:
-              MP4HERROR ((warning_status, 0, _("\
-INTERNAL ERROR: Bad token data type in freeze_one_symbol ()")));
-              abort ();
+              MP4HERROR ((warning_status, 0, "\
+INTERNAL ERROR: Bad token data type in freeze_one_symbol ()"));
+              exit (1);
               break;
             }
         }
